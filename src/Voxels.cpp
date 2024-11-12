@@ -1,13 +1,13 @@
 ﻿#include "Voxels.h"
 
 #include "raylib.h"
-
 #include "imgui.h"
 #include "rlImGui.h"
 
+#include "editor/Editor.h"
+
 int main()
 {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 450, "raylib [core] example - basic window");
     rlImGuiSetup(true);
 
@@ -18,9 +18,18 @@ int main()
         // start ImGui Conent
         rlImGuiBegin();
 
-        // show ImGui Content
-        bool open = true;
-        ImGui::ShowDemoWindow(&open);
+#ifdef IMGUI_HAS_VIEWPORT
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->GetWorkPos());
+        ImGui::SetNextWindowSize(viewport->GetWorkSize());
+        ImGui::SetNextWindowViewport(viewport->ID);
+#else 
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+#endif
+
+        Editor::Draw();
+
         rlImGuiEnd();
 
         EndDrawing();

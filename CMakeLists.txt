@@ -13,18 +13,24 @@ project ("Voxels")
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
-find_package(fmt CONFIG REQUIRED)
-find_package(raylib CONFIG REQUIRED)
+include(FetchContent)
+FetchContent_Declare(
+	raylib-sdl
+	GIT_REPOSITORY https://github.com/raysan5/raylib.git
+)
+set(PLATFORM SDL)
+FetchContent_MakeAvailable(raylib-sdl)
+unset(PLATFORM)
 
-file (GLOB Voxels_SRC
+file (GLOB_RECURSE Voxels_SRC
 	"src/*.cpp"
 )
 
 # Add source to this project's executable.
 add_executable (Voxels ${Voxels_SRC})
 
-
 target_link_libraries(Voxels PRIVATE raylib)
+target_include_directories(Voxels PRIVATE "${PROJECT_SOURCE_DIR}/raylib/raylib/include")
 
 # Add Raylib ImGui
 target_include_directories(Voxels PRIVATE "external/rlImGui")
@@ -42,7 +48,6 @@ target_sources(Voxels PRIVATE
 	"external/imgui/imgui_tables.cpp"
 	"external/imgui/imgui_widgets.cpp"
 )
-
 
 set_property(TARGET Voxels PROPERTY CXX_STANDARD 20)
 
