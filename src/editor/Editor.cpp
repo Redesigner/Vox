@@ -1,9 +1,26 @@
 #include "Editor.h"
 
 #include "imgui.h"
+#include "raylib.h"
+#include "rlImGui.h"
+#include "tinyfiledialogs.h"
+
+const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
 void Editor::Draw()
 {
+    // start ImGui Conent
+    rlImGuiBegin();
+
+#ifdef IMGUI_HAS_VIEWPORT
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->GetWorkPos());
+    ImGui::SetNextWindowSize(viewport->GetWorkSize());
+    ImGui::SetNextWindowViewport(viewport->ID);
+#else 
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+#endif
     bool windowOpen = true;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -15,6 +32,13 @@ void Editor::Draw()
     ImGui::End();
     ImGui::PopStyleColor();
     ImGui::PopStyleVar(2);
+
+    rlImGuiEnd();
+}
+
+void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
+{
+    onGLTFOpened = function;
 }
 
 void Editor::DrawToolbar()
@@ -51,8 +75,23 @@ void Editor::DrawImportToolbar()
     {
         if (ImGui::MenuItem("Model (gltf)"))
         {
+            openGLTF();
         }
         ImGui::EndMenu();
     }
     ImGui::PopStyleVar();
+}
+
+void Editor::openGLTF()
+{
+
+    char* fileNameRaw = tinyfd_openFileDialog(NULL, NULL, 2, gltfFilter, "GLTF (*.gltf, *.glb)", false);
+    if (fileNameRaw)
+    {
+        onGLTFOpened(fileNameRaw);
+    }
+    else
+    {
+        TraceLog(LOG_INFO, "Dialog closed without selecting file.");
+    }
 }

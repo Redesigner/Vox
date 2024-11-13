@@ -13,6 +13,8 @@ project ("Voxels")
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
+
+# Build raylib with sdl
 include(FetchContent)
 FetchContent_Declare(
 	raylib-sdl
@@ -22,14 +24,18 @@ set(PLATFORM SDL)
 FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
 
+find_package(tinyfiledialogs CONFIG REQUIRED)
+
+# Add source to this project's executable.
 file (GLOB_RECURSE Voxels_SRC
 	"src/*.cpp"
 )
 
-# Add source to this project's executable.
 add_executable (Voxels ${Voxels_SRC})
 
 target_link_libraries(Voxels PRIVATE raylib)
+target_link_libraries(Voxels PRIVATE tinyfiledialogs::tinyfiledialogs)
+
 target_include_directories(Voxels PRIVATE "${PROJECT_SOURCE_DIR}/raylib/raylib/include")
 
 # Add Raylib ImGui

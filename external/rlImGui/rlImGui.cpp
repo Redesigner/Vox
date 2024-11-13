@@ -103,8 +103,9 @@ static void ImGuiNewFrame(float deltaTime)
 {
     ImGuiIO& io = ImGui::GetIO();
 
-
-    Vector2 resolutionScale = GetWindowScaleDPI();
+    // GetWindowScaleDPI is not implemented in raylib-sdl, so don't call it here to avoid error messages
+    // Vector2 resolutionScale = GetWindowScaleDPI();
+    Vector2 resolutionScale = Vector2(1.0f, 1.0f);
 
 #ifndef PLATFORM_DRM
     if (IsWindowFullscreen())
@@ -440,7 +441,8 @@ void rlImGuiReloadFonts(void)
 void rlImGuiBegin(void)
 {
     ImGui::SetCurrentContext(GlobalContext);
-    rlImGuiBeginDelta(GetFrameTime());
+    // rlImGuiBeginDelta(GetFrameTime());
+    rlImGuiBeginDelta(fmaxf(GetFrameTime(), 0.001f));
 }
 
 void rlImGuiBeginDelta(float deltaTime)
