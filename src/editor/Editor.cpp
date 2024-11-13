@@ -7,7 +7,7 @@
 
 const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-void Editor::Draw()
+void Editor::Draw(RenderTexture2D* viewportRenderTexture)
 {
     // start ImGui Conent
     rlImGuiBegin();
@@ -27,6 +27,11 @@ void Editor::Draw()
     ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
     ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
 
+    ImVec2 dimensions = ImGui::GetContentRegionAvail();
+    viewportDimensions = Vector2(dimensions.x, dimensions.y);
+
+    rlImGuiImageRenderTextureFit(viewportRenderTexture, true);
+
 	DrawToolbar();
 
     ImGui::End();
@@ -39,6 +44,11 @@ void Editor::Draw()
 void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
 {
     onGLTFOpened = function;
+}
+
+Vector2 Editor::GetViewportDimensions() const
+{
+    return viewportDimensions;
 }
 
 void Editor::DrawToolbar()
