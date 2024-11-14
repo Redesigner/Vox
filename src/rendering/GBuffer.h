@@ -1,5 +1,7 @@
 #pragma once
 
+struct Shader;
+
 class GBuffer
 {
 public:
@@ -7,6 +9,12 @@ public:
     ~GBuffer();
 
     void EnableFramebuffer();
+
+    void ActivateTextures(Shader& shader) const;
+
+    void CopyToFramebuffer();
+
+    void Bind();
 
 private:
 

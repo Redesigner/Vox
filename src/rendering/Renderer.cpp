@@ -17,12 +17,13 @@ Renderer::Renderer()
     deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition"); // set this for camera?
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
+
     rlEnableShader(deferredShader.id);
-
-    rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), 0);
-    rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), 1);
-    rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), 2);
-
+    {
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), 0);
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), 1);
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), 2);
+    }
     rlDisableShader();
 
     camera = { 0 };
@@ -33,7 +34,11 @@ Renderer::Renderer()
     camera.projection = CAMERA_PERSPECTIVE;
 
     viewportTexture = RenderTexture2D();
-    testModel = Model();
+    testModel = LoadModel("assets/models/mushroom.glb");
+    for (int i = 0; i < testModel.materialCount; ++i)
+    {
+        testModel.materials[i].shader = gBufferShader;
+    }
 }
 
 Renderer::~Renderer()
@@ -51,44 +56,23 @@ Renderer::~Renderer()
 
 void Renderer::Render(Editor* editor)
 {
-    UpdateViewportDimensions(editor);
+    // UpdateViewportDimensions(editor);
 
     UpdateCamera(&camera, CAMERA_ORBITAL);
 
-    gBuffer->EnableFramebuffer();
-    rlClearScreenBuffers();
-    rlDisableColorBlend();
-
-    BeginTextureMode(viewportTexture);
-    {
-        rlEnableShader(gBufferShader.id);
-        ClearBackground(DARKGRAY);
-        BeginMode3D(camera);
-        {
-            if (IsModelValid(testModel))
-            {
-                DrawModel(testModel, Vector3(0.0f, 0.0f, 0.0f), 1.0f, WHITE);
-            }
-        }
-        rlDisableShader();
-        EndMode3D();
-        rlEnableColorBlend();
-        rlDisableFramebuffer();
-        rlClearScreenBuffers();
-    }
-    EndTextureMode();
-
     BeginDrawing();
     {
+        RenderGBuffer();
+
         ClearBackground(BLACK);
-        editor->Draw(&viewportTexture);
+        RenderDeferred();
+        // editor->Draw(&viewportTexture);
+        EndDrawing();
     }
-    EndDrawing();
 }
 
 void Renderer::LoadTestModel(std::string path)
 {
-
     if (IsModelValid(testModel))
     {
         UnloadModel(testModel);
@@ -120,4 +104,48 @@ void Renderer::UpdateViewportDimensions(Editor* editor)
     {
         viewportTexture = LoadRenderTexture(editorViewportSize.x, editorViewportSize.y);
     }
+}
+
+void Renderer::RenderGBuffer()
+{
+    ClearBackground(RAYWHITE);
+    gBuffer->EnableFramebuffer();
+    rlClearScreenBuffers();
+
+    rlDisableColorBlend();
+
+    rlEnableShader(gBufferShader.id);
+    {
+        BeginMode3D(camera);
+        {
+            if (IsModelValid(testModel))
+            {
+                DrawModel(testModel, Vector3(0.0f, 0.0f, 0.0f), 1.0f, WHITE);
+            }
+            EndMode3D();
+        }
+        rlDisableShader();
+    }
+    rlEnableColorBlend();
+    rlDisableFramebuffer();
+    rlClearScreenBuffers();
+}
+
+void Renderer::RenderDeferred()
+{
+    BeginMode3D(camera);
+    {
+        rlDisableColorBlend();
+        rlEnableShader(deferredShader.id);
+        {
+            gBuffer->ActivateTextures(deferredShader);
+            rlLoadDrawQuad();
+            rlDisableShader();
+        }
+        rlEnableColorBlend();
+        EndMode3D();
+    }
+
+    gBuffer->CopyToFramebuffer();
+    rlDisableFramebuffer();
 }
