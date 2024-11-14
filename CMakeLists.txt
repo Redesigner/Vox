@@ -33,10 +33,11 @@ file (GLOB_RECURSE Voxels_SRC
 
 add_executable (Voxels ${Voxels_SRC})
 
+# Include source directory to allow absolute paths
+target_include_directories(Voxels PRIVATE "src/")
+
 target_link_libraries(Voxels PRIVATE raylib)
 target_link_libraries(Voxels PRIVATE tinyfiledialogs::tinyfiledialogs)
-
-target_include_directories(Voxels PRIVATE "${PROJECT_SOURCE_DIR}/raylib/raylib/include")
 
 # Add Raylib ImGui
 target_include_directories(Voxels PRIVATE "external/rlImGui")
