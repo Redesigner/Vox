@@ -6,6 +6,8 @@ public:
     GBuffer(int width, int height);
     ~GBuffer();
 
+    void EnableFramebuffer();
+
 private:
 
     unsigned int framebuffer;
