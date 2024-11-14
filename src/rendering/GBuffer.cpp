@@ -16,14 +16,14 @@ GBuffer::GBuffer(int width, int height)
 
 	rlEnableFramebuffer(framebuffer);
 
-	positionTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	normalTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
+	positionTexture =	rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
+	normalTexture =		rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
 	albedoSpecTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
 
 	rlActiveDrawBuffers(3);
 
-	rlFramebufferAttach(framebuffer, positionTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(framebuffer, normalTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
+	rlFramebufferAttach(framebuffer, positionTexture,	RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
+	rlFramebufferAttach(framebuffer, normalTexture,		RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(framebuffer, albedoSpecTexture, RL_ATTACHMENT_COLOR_CHANNEL2, RL_ATTACHMENT_TEXTURE2D, 0);
 
 	depthRenderbuffer = rlLoadTextureDepth(width, height, true);
@@ -48,4 +48,33 @@ GBuffer::~GBuffer()
 void GBuffer::EnableFramebuffer()
 {
 	rlEnableFramebuffer(framebuffer);
+}
+
+void GBuffer::ActivateTextures(Shader& shader) const
+{
+	int posSlot = 0;
+	rlActiveTextureSlot(0);
+	rlEnableTexture(positionTexture);
+	rlSetUniform(GetShaderLocation(shader, "gPosition"), &posSlot, SHADER_UNIFORM_INT, 1);
+
+	rlActiveTextureSlot(1);
+	rlEnableTexture(normalTexture);
+	rlSetUniform(GetShaderLocation(shader, "gNormal"), &posSlot, SHADER_UNIFORM_INT, 1);
+
+	rlActiveTextureSlot(2);
+	rlEnableTexture(albedoSpecTexture);
+	rlSetUniform(GetShaderLocation(shader, "gAlbedoSpec"), &posSlot, SHADER_UNIFORM_INT, 1);
+}
+
+void GBuffer::CopyToFramebuffer()
+{
+	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
+	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+	rlBlitFramebuffer(0, 0, width, height, 0, 0, width, height, 0x00000100);
+}
+
+void GBuffer::Bind()
+{
+	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
+	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 }

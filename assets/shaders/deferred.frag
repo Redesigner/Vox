@@ -50,5 +50,5 @@ void main() {
         ambient += diffuse + specular;
     }
 
-    finalColor = vec4(ambient, 1.0);
+    finalColor = vec4(fragPosition, 1.0);
 }

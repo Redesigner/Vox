@@ -21,6 +21,10 @@ public:
 private:
 	void UpdateViewportDimensions(Editor* editor);
 
+	void RenderGBuffer();
+
+	void RenderDeferred();
+
 	std::unique_ptr<GBuffer> gBuffer;
 
 	Shader gBufferShader;
