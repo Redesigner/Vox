@@ -20,9 +20,17 @@ Renderer::Renderer()
 
     rlEnableShader(deferredShader.id);
     {
+        int position = 0;
         rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), 0);
+        rlSetUniform(GetShaderLocation(deferredShader, "gPosition"), &position, SHADER_UNIFORM_INT, 1);
+
+        position = 1;
         rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), 1);
+        rlSetUniform(GetShaderLocation(deferredShader, "gNormal"), &position, SHADER_UNIFORM_INT, 1);
+
+        position = 2;
         rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), 2);
+        rlSetUniform(GetShaderLocation(deferredShader, "gAlbedoSpec"), &position, SHADER_UNIFORM_INT, 1);
     }
     rlDisableShader();
 
@@ -138,7 +146,7 @@ void Renderer::RenderDeferred()
         rlDisableColorBlend();
         rlEnableShader(deferredShader.id);
         {
-            gBuffer->ActivateTextures(deferredShader);
+            gBuffer->ActivateTextures();
             rlLoadDrawQuad();
             rlDisableShader();
         }

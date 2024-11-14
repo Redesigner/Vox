@@ -10,7 +10,7 @@ public:
 
     void EnableFramebuffer();
 
-    void ActivateTextures(Shader& shader) const;
+    void ActivateTextures() const;
 
     void CopyToFramebuffer();
 
