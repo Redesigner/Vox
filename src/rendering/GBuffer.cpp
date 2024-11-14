@@ -50,20 +50,16 @@ void GBuffer::EnableFramebuffer()
 	rlEnableFramebuffer(framebuffer);
 }
 
-void GBuffer::ActivateTextures(Shader& shader) const
+void GBuffer::ActivateTextures() const
 {
-	int posSlot = 0;
 	rlActiveTextureSlot(0);
 	rlEnableTexture(positionTexture);
-	rlSetUniform(GetShaderLocation(shader, "gPosition"), &posSlot, SHADER_UNIFORM_INT, 1);
 
 	rlActiveTextureSlot(1);
 	rlEnableTexture(normalTexture);
-	rlSetUniform(GetShaderLocation(shader, "gNormal"), &posSlot, SHADER_UNIFORM_INT, 1);
 
 	rlActiveTextureSlot(2);
 	rlEnableTexture(albedoSpecTexture);
-	rlSetUniform(GetShaderLocation(shader, "gAlbedoSpec"), &posSlot, SHADER_UNIFORM_INT, 1);
 }
 
 void GBuffer::CopyToFramebuffer()
