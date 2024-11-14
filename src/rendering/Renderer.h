@@ -23,6 +23,9 @@ private:
 
 	std::unique_ptr<GBuffer> gBuffer;
 
+	Shader gBufferShader;
+	Shader deferredShader;
+
 	Camera3D camera;
 	RenderTexture2D viewportTexture;
 	Model testModel;

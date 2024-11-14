@@ -12,8 +12,8 @@ Renderer::Renderer()
     ChangeDirectory("../../../");
 
     TraceLog(LOG_INFO, GetWorkingDirectory());
-    Shader gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
-    Shader deferredShader = LoadShader("assets/shaders/deferred.vert", "assets/shaders/deferred.frag");
+    gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+    deferredShader = LoadShader("assets/shaders/deferred.vert", "assets/shaders/deferred.frag");
     deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition"); // set this for camera?
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
@@ -32,7 +32,8 @@ Renderer::Renderer()
     camera.fovy = 45.0f;                            // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
 
-    RenderTexture2D viewportTexture = RenderTexture2D();
+    viewportTexture = RenderTexture2D();
+    testModel = Model();
 }
 
 Renderer::~Renderer()
@@ -53,27 +54,35 @@ void Renderer::Render(Editor* editor)
     UpdateViewportDimensions(editor);
 
     UpdateCamera(&camera, CAMERA_ORBITAL);
-    // if using editor handle resizing
-    {
 
-        BeginTextureMode(viewportTexture);
+    gBuffer->EnableFramebuffer();
+    rlClearScreenBuffers();
+    rlDisableColorBlend();
+
+    BeginTextureMode(viewportTexture);
+    {
+        rlEnableShader(gBufferShader.id);
         ClearBackground(DARKGRAY);
         BeginMode3D(camera);
-        if (IsModelValid(testModel))
         {
-            DrawModel(testModel, Vector3(0.0f, 0.0f, 0.0f), 1.0f, WHITE);
+            if (IsModelValid(testModel))
+            {
+                DrawModel(testModel, Vector3(0.0f, 0.0f, 0.0f), 1.0f, WHITE);
+            }
         }
+        rlDisableShader();
         EndMode3D();
-        EndTextureMode();
+        rlEnableColorBlend();
+        rlDisableFramebuffer();
+        rlClearScreenBuffers();
     }
-    // else just draw directly to the screen
+    EndTextureMode();
 
     BeginDrawing();
-    ClearBackground(BLACK);
-
-
-    editor->Draw(&viewportTexture);
-
+    {
+        ClearBackground(BLACK);
+        editor->Draw(&viewportTexture);
+    }
     EndDrawing();
 }
 
@@ -85,6 +94,10 @@ void Renderer::LoadTestModel(std::string path)
         UnloadModel(testModel);
     }
     testModel = LoadModel(path.c_str());
+    for (int i = 0; i < testModel.materialCount; ++i)
+    {
+        testModel.materials[i].shader = gBufferShader;
+    }
 }
 
 void Renderer::UpdateViewportDimensions(Editor* editor)
