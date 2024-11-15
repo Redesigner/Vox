@@ -41,6 +41,9 @@ Renderer::Renderer()
     camera.fovy = 45.0f;                            // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
 
+    lightUniformLocations = LightUniformLocations(deferredShader);
+    testLight = Light(1, 1, Vector3(-2.0f, 1.0f, -2.0f), Vector3(), Vector4(255.0f));
+
     viewportTexture = RenderTexture2D();
     testModel = LoadModel("assets/models/mushroom.glb");
     for (int i = 0; i < testModel.materialCount; ++i)
@@ -146,6 +149,7 @@ void Renderer::RenderDeferred()
         rlDisableColorBlend();
         rlEnableShader(deferredShader.id);
         {
+            testLight.UpdateLightValues(deferredShader, lightUniformLocations);
             gBuffer->ActivateTextures();
             rlLoadDrawQuad();
             rlDisableShader();
