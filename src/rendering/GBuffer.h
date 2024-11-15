@@ -1,5 +1,7 @@
 #pragma once
 
+#include "raylib.h"
+
 struct Shader;
 
 class GBuffer
@@ -12,9 +14,7 @@ public:
 
     void ActivateTextures() const;
 
-    void CopyToFramebuffer();
-
-    void Bind();
+    void CopyToFramebuffer(const RenderTexture2D& target);
 
 private:
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Renderer.h"
 
 #include "raylib.h"
@@ -71,7 +73,7 @@ Renderer::~Renderer()
 
 void Renderer::Render(Editor* editor)
 {
-    // UpdateViewportDimensions(editor);
+    UpdateViewportDimensions(editor);
 
     UpdateCamera(&camera, CAMERA_ORBITAL);
 
@@ -81,7 +83,7 @@ void Renderer::Render(Editor* editor)
 
         ClearBackground(RAYWHITE);
         RenderDeferred();
-        // editor->Draw(&viewportTexture);
+        editor->Draw(&viewportTexture);
         EndDrawing();
     }
 }
@@ -174,6 +176,8 @@ void Renderer::RenderDeferred()
         EndMode3D();
     }
 
-    gBuffer->CopyToFramebuffer();
+    rlBindFramebuffer(RL_READ_FRAMEBUFFER, 0);
+    rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
+    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
     rlDisableFramebuffer();
 }

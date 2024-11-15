@@ -62,15 +62,9 @@ void GBuffer::ActivateTextures() const
 	rlEnableTexture(albedoSpecTexture);
 }
 
-void GBuffer::CopyToFramebuffer()
+void GBuffer::CopyToFramebuffer(const RenderTexture2D& target)
 {
 	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
-	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, target.id);
 	rlBlitFramebuffer(0, 0, width, height, 0, 0, width, height, 0x00000100);
-}
-
-void GBuffer::Bind()
-{
-	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
-	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
 }
