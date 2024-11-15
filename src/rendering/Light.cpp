@@ -6,11 +6,12 @@
 #include "raylib.h"
 
 Light::Light()
+    :enabled(false), type(0), position(), target(), color()
 {
 }
 
-Light::Light(int enabled, int type, Vector3 position, Vector3 target, Vector4 color)
-    :enabled(enabled), type(type), position(position), target(target), color(color)
+Light::Light(int enabled, int type, Vector3 position, Vector3 target, Vector4 color, float distance)
+    :enabled(enabled), type(type), position(position), target(target), color(color), strength(distance)
 {
 }
 
@@ -32,10 +33,18 @@ void Light::UpdateLightValues(Shader& shader, LightUniformLocations& uniformLoca
     float colorPacked[4] = { (float)color.x / (float)255, (float)color.y / (float)255,
                         (float)color.z / (float)255, (float)color.w / (float)255 };
     SetShaderValue(shader, uniformLocations.color, colorPacked, SHADER_UNIFORM_VEC4);
+
+    SetShaderValue(shader, uniformLocations.strength, &strength, SHADER_UNIFORM_FLOAT);
 }
 
 LightUniformLocations::LightUniformLocations()
 {
+    enabled = -1;
+    type = -1;
+    position = -1;
+    target = -1;
+    color = -1;
+    strength = -1;
 }
 
 LightUniformLocations::LightUniformLocations(Shader& shader)
@@ -46,4 +55,5 @@ LightUniformLocations::LightUniformLocations(Shader& shader)
     position = GetShaderLocation(shader, TextFormat("lights[%i].position", lightsCount));
     target = GetShaderLocation(shader, TextFormat("lights[%i].target", lightsCount));
     color = GetShaderLocation(shader, TextFormat("lights[%i].color", lightsCount));
+    strength = GetShaderLocation(shader, TextFormat("lights[%i].strength", lightsCount));
 }
