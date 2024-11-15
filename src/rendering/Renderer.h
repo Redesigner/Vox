@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include "rendering/Light.h"
+
 class Editor;
 class GBuffer;
 
@@ -29,6 +31,9 @@ private:
 
 	Shader gBufferShader;
 	Shader deferredShader;
+
+	LightUniformLocations lightUniformLocations;
+	Light testLight;
 
 	Camera3D camera;
 	RenderTexture2D viewportTexture;
