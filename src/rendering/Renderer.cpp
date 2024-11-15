@@ -164,6 +164,10 @@ void Renderer::RenderDeferred()
 {
     BeginMode3D(camera);
     {
+        rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
+        rlSetFramebufferWidth(viewportTexture.texture.width);
+        rlSetFramebufferHeight(viewportTexture.texture.height);
+
         rlDisableColorBlend();
         rlEnableShader(deferredShader.id);
         {
@@ -180,4 +184,6 @@ void Renderer::RenderDeferred()
     rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
     rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
     rlDisableFramebuffer();
+
+    rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
 }
