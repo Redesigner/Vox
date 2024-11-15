@@ -13,8 +13,12 @@ Renderer::Renderer()
 
     TraceLog(LOG_INFO, GetWorkingDirectory());
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+    materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
+    gBufferShader.locs[SHADER_LOC_COLOR_DIFFUSE] = materialColorLocation;
+
     deferredShader = LoadShader("assets/shaders/deferred.vert", "assets/shaders/deferred.frag");
     deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition"); // set this for camera?
+
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
 
@@ -131,7 +135,19 @@ void Renderer::RenderGBuffer()
         {
             if (IsModelValid(testModel))
             {
-                DrawModel(testModel, Vector3(0.0f, 0.0f, 0.0f), 1.0f, WHITE);
+                for (int i = 0; i < testModel.meshCount; ++i)
+                {
+                    const Color albedo = testModel.materials[testModel.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
+                    Vector3 materialAlbedo = Vector3(
+                        albedo.r / 255.0f,
+                        albedo.g / 255.0f,
+                        albedo.b / 255.0f
+                    );
+                    rlEnableShader(gBufferShader.id);
+                    rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
+                    rlDisableShader();
+                    DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
+                }
             }
             EndMode3D();
         }
