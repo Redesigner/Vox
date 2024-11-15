@@ -14,19 +14,20 @@ struct LightUniformLocations
     int position;
     int target;
     int color;
-    int attenuation;
+    int strength;
 };
 
 struct Light
 {
     Light();
-    Light(int enabled, int type, Vector3 position, Vector3 target, Vector4 color);
+    Light(int enabled, int type, Vector3 position, Vector3 target, Vector4 color, float distance);
 
     int enabled;
     int type;
     Vector3 position;
     Vector3 target;
     Vector4 color;
+    float strength;
 
     void UpdateLightValues(Shader& shader, LightUniformLocations& uniformLocations);
 };

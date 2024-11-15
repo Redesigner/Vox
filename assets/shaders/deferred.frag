@@ -14,6 +14,7 @@ struct Light {
     vec3 position;
     vec3 target; // Unused in this demo.
     vec4 color;
+    float strength;
 };
 
 const int NR_LIGHTS = 4;
