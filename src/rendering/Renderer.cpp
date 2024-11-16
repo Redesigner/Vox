@@ -111,9 +111,13 @@ void Renderer::Render(Editor* editor)
         RenderGBuffer();
 
         RenderDeferred();
-        RenderSky();
+        // RenderSky();
+        deferredFramebuffer->BindRead();
 
-        CopyViewportToTexture(viewportTexture);
+        // Copy into texture to be rendered with imgui
+        rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
+        rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000);
+        rlDisableFramebuffer();
 
         // Make sure that our viewport size matches the window size when drawing with imgui
         rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
