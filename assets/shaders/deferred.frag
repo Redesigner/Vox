@@ -52,5 +52,4 @@ void main() {
     }
 
     finalColor = vec4(ambient, 1.0);
-    // finalColor = vec4(gl_FragDepth, 0, 0, 1);
 }

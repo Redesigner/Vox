@@ -42,17 +42,17 @@ Renderer::Renderer()
     }
     rlDisableShader();
 
-    rlEnableShader(skyShader.id);
-    {
-        int position = 0;
-        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
-        // rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
+    //rlEnableShader(skyShader.id);
+    //{
+    //    int position = 0;
+    //    rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
+    //    // rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
 
-        position = 1;
-        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
-        // rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
-        rlDisableShader();
-    }
+    //    position = 1;
+    //    rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
+    //    // rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
+    //    rlDisableShader();
+    //}
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 6.0f, 6.0f);    // Camera position
@@ -214,7 +214,6 @@ void Renderer::RenderDeferred()
     {
         testLight.UpdateLightValues(deferredShader, lightUniformLocations);
         gBuffer->ActivateTextures();
-        deferredFramebuffer->ActivateTextures();
         rlLoadDrawQuad();
         rlDisableShader();
     }
