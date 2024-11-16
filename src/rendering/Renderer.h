@@ -8,6 +8,7 @@
 #include "rendering/Light.h"
 
 class Editor;
+class Framebuffer;
 class GBuffer;
 
 class Renderer
@@ -27,10 +28,16 @@ private:
 
 	void RenderDeferred();
 
+	void RenderSky();
+
+	void CopyViewportToTexture(RenderTexture2D& texture);
+
 	std::unique_ptr<GBuffer> gBuffer;
+	std::unique_ptr<Framebuffer> deferredFramebuffer;
 
 	Shader gBufferShader;
 	Shader deferredShader;
+	Shader skyShader;
 
 	LightUniformLocations lightUniformLocations;
 	Light testLight;

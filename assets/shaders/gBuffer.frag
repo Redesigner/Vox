@@ -15,7 +15,6 @@ uniform sampler2D specularTexture;
 void main() {
     gPosition = fragPosition;
     gNormal = normalize(fragNormal);
-    // gAlbedoSpec.rgb = texture(diffuseTexture, fragTexCoord).rgb;
     gAlbedoSpec.rgb = materialAlbedo;
     gAlbedoSpec.a = texture(specularTexture, fragTexCoord).r;
 }
