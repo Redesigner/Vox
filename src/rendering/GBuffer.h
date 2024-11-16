@@ -11,6 +11,8 @@ public:
     ~GBuffer();
 
     void EnableFramebuffer();
+    void BindDraw();
+    void BindRead();
 
     void ActivateTextures() const;
 

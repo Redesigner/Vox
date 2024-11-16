@@ -50,6 +50,16 @@ void GBuffer::EnableFramebuffer()
 	rlEnableFramebuffer(framebuffer);
 }
 
+void GBuffer::BindDraw()
+{
+	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, framebuffer);
+}
+
+void GBuffer::BindRead()
+{
+	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
+}
+
 void GBuffer::ActivateTextures() const
 {
 	rlActiveTextureSlot(0);

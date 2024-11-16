@@ -7,22 +7,24 @@
 
 #include "editor/Editor.h"
 #include "rendering/GBuffer.h"
+#include "rendering/Framebuffer.h"
 
 Renderer::Renderer()
 {
     // This is realtive to the build location -- I'll have to fix this later
     ChangeDirectory("../../../");
 
-    TraceLog(LOG_INFO, GetWorkingDirectory());
+    TraceLog(LOG_INFO, TextFormat("Set current working directory to '%s'", GetWorkingDirectory()));
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
     materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
-    gBufferShader.locs[SHADER_LOC_COLOR_DIFFUSE] = materialColorLocation;
 
     deferredShader = LoadShader("assets/shaders/deferred.vert", "assets/shaders/deferred.frag");
     deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition"); // set this for camera?
 
+    skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
+    deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
 
     rlEnableShader(deferredShader.id);
     {
@@ -39,6 +41,18 @@ Renderer::Renderer()
         rlSetUniform(GetShaderLocation(deferredShader, "gAlbedoSpec"), &position, SHADER_UNIFORM_INT, 1);
     }
     rlDisableShader();
+
+    rlEnableShader(skyShader.id);
+    {
+        int position = 0;
+        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
+        // rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
+
+        position = 1;
+        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
+        // rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
+        rlDisableShader();
+    }
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 6.0f, 6.0f);    // Camera position
@@ -69,6 +83,21 @@ Renderer::~Renderer()
     {
         UnloadModel(testModel);
     }
+
+    // Unload shaders
+    // @TODO: do this in a shader C++ wrapper
+    if (IsShaderValid(gBufferShader))
+    {
+        UnloadShader(gBufferShader);
+    }
+    if (IsShaderValid(deferredShader))
+    {
+        UnloadShader(deferredShader);
+    }
+    if (IsShaderValid(skyShader))
+    {
+        UnloadShader(skyShader);
+    }
 }
 
 void Renderer::Render(Editor* editor)
@@ -81,8 +110,13 @@ void Renderer::Render(Editor* editor)
     {
         RenderGBuffer();
 
-        ClearBackground(RAYWHITE);
         RenderDeferred();
+        RenderSky();
+
+        CopyViewportToTexture(viewportTexture);
+
+        // Make sure that our viewport size matches the window size when drawing with imgui
+        rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
         editor->Draw(&viewportTexture);
         EndDrawing();
     }
@@ -115,6 +149,8 @@ void Renderer::UpdateViewportDimensions(Editor* editor)
             // @TODO: add resize method?
             gBuffer.reset();
             gBuffer = std::make_unique<GBuffer>(editorViewportSize.x, editorViewportSize.y);
+            deferredFramebuffer.reset();
+            deferredFramebuffer = std::make_unique<Framebuffer>(editorViewportSize.x, editorViewportSize.y);
         }
     }
     else
@@ -156,34 +192,51 @@ void Renderer::RenderGBuffer()
         rlDisableShader();
     }
     rlEnableColorBlend();
-    rlDisableFramebuffer();
-    rlClearScreenBuffers();
 }
 
 void Renderer::RenderDeferred()
 {
-    BeginMode3D(camera);
+    // rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
+    
+    rlSetFramebufferWidth(viewportTexture.texture.width);
+    rlSetFramebufferHeight(viewportTexture.texture.height);
+
+    gBuffer->BindRead();
+    deferredFramebuffer->BindDraw();
+
+    rlDisableColorBlend();
+    rlDisableDepthMask();
+    rlEnableShader(deferredShader.id);
     {
-        rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
-        rlSetFramebufferWidth(viewportTexture.texture.width);
-        rlSetFramebufferHeight(viewportTexture.texture.height);
-
-        rlDisableColorBlend();
-        rlEnableShader(deferredShader.id);
-        {
-            testLight.UpdateLightValues(deferredShader, lightUniformLocations);
-            gBuffer->ActivateTextures();
-            rlLoadDrawQuad();
-            rlDisableShader();
-        }
-        rlEnableColorBlend();
-        EndMode3D();
+        testLight.UpdateLightValues(deferredShader, lightUniformLocations);
+        gBuffer->ActivateTextures();
+        deferredFramebuffer->ActivateTextures();
+        rlLoadDrawQuad();
+        rlDisableShader();
     }
+    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
+    rlEnableColorBlend();
+    rlEnableDepthMask();
+}
 
+void Renderer::RenderSky()
+{
+    rlDisableDepthMask();
+    rlEnableShader(skyShader.id);
+    {
+        deferredFramebuffer->BindRead();
+        rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+        rlLoadDrawQuad();
+        rlDisableFramebuffer();
+        rlDisableShader();
+    }
+    rlEnableDepthMask();
+}
+
+void Renderer::CopyViewportToTexture(RenderTexture2D& texture)
+{
     rlBindFramebuffer(RL_READ_FRAMEBUFFER, 0);
     rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
     rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
     rlDisableFramebuffer();
-
-    rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
 }
