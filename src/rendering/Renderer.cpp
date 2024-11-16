@@ -23,8 +23,8 @@ Renderer::Renderer()
 
     skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
 
-    gBuffer = std::make_unique<GBuffer>(800, 450);
-    deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
+    gBuffer = std::make_unique<GBuffer>(800, 431);
+    deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
 
     rlEnableShader(deferredShader.id);
     {
@@ -50,11 +50,11 @@ Renderer::Renderer()
     {
         int position = 0;
         rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
+        rlSetUniform(GetShaderLocation(skyShader, "color"), &position, SHADER_UNIFORM_INT, 1);
 
         position = 1;
         rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
+        rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
         rlDisableShader();
     }
 
@@ -112,13 +112,16 @@ void Renderer::Render(Editor* editor)
 
     BeginDrawing();
     {
+        rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
+        rlSetFramebufferWidth(viewportTexture.texture.width);
+        rlSetFramebufferHeight(viewportTexture.texture.height);
         RenderGBuffer();
 
         RenderDeferred();
         RenderSky();
-        deferredFramebuffer->BindRead();
 
         // Copy into texture to be rendered with imgui
+        deferredFramebuffer->BindRead();
         rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
         rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000);
         rlDisableFramebuffer();
@@ -159,6 +162,7 @@ void Renderer::UpdateViewportDimensions(Editor* editor)
             gBuffer = std::make_unique<GBuffer>(editorViewportSize.x, editorViewportSize.y);
             deferredFramebuffer.reset();
             deferredFramebuffer = std::make_unique<Framebuffer>(editorViewportSize.x, editorViewportSize.y);
+            rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         }
     }
     else
@@ -204,11 +208,6 @@ void Renderer::RenderGBuffer()
 
 void Renderer::RenderDeferred()
 {
-    // rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
-    
-    rlSetFramebufferWidth(viewportTexture.texture.width);
-    rlSetFramebufferHeight(viewportTexture.texture.height);
-
     gBuffer->BindRead();
     deferredFramebuffer->BindDraw();
 
@@ -221,7 +220,7 @@ void Renderer::RenderDeferred()
         rlLoadDrawQuad();
         rlDisableShader();
     }
-    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
+    // rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
     rlEnableColorBlend();
     rlEnableDepthMask();
 }
