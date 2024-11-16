@@ -22,9 +22,7 @@ private:
 
     unsigned int framebuffer;
 
-    unsigned int positionTexture;
-    unsigned int normalTexture;
-    unsigned int albedoSpecTexture;
+    unsigned int positionTexture, normalTexture, albedoSpecTexture, depthTexture;
 
     unsigned int depthRenderbuffer;
 

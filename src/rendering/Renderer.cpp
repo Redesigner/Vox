@@ -29,30 +29,34 @@ Renderer::Renderer()
     rlEnableShader(deferredShader.id);
     {
         int position = 0;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), 0);
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), position);
         rlSetUniform(GetShaderLocation(deferredShader, "gPosition"), &position, SHADER_UNIFORM_INT, 1);
 
         position = 1;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), 1);
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), position);
         rlSetUniform(GetShaderLocation(deferredShader, "gNormal"), &position, SHADER_UNIFORM_INT, 1);
 
         position = 2;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), 2);
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), position);
         rlSetUniform(GetShaderLocation(deferredShader, "gAlbedoSpec"), &position, SHADER_UNIFORM_INT, 1);
+
+        position = 3;
+        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gDepth"), position);
+        rlSetUniform(GetShaderLocation(deferredShader, "gDepth"), &position, SHADER_UNIFORM_INT, 1);
     }
     rlDisableShader();
 
-    //rlEnableShader(skyShader.id);
-    //{
-    //    int position = 0;
-    //    rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
-    //    // rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
+    rlEnableShader(skyShader.id);
+    {
+        int position = 0;
+        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
+        rlSetUniform(GetShaderLocation(deferredShader, "color"), &position, SHADER_UNIFORM_INT, 1);
 
-    //    position = 1;
-    //    rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
-    //    // rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
-    //    rlDisableShader();
-    //}
+        position = 1;
+        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
+        rlSetUniform(GetShaderLocation(deferredShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
+        rlDisableShader();
+    }
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 6.0f, 6.0f);    // Camera position
@@ -111,7 +115,7 @@ void Renderer::Render(Editor* editor)
         RenderGBuffer();
 
         RenderDeferred();
-        // RenderSky();
+        RenderSky();
         deferredFramebuffer->BindRead();
 
         // Copy into texture to be rendered with imgui
@@ -225,10 +229,13 @@ void Renderer::RenderDeferred()
 void Renderer::RenderSky()
 {
     rlDisableDepthMask();
+    deferredFramebuffer->BindRead();
+    deferredFramebuffer->BindDraw();
+
     rlEnableShader(skyShader.id);
     {
-        deferredFramebuffer->BindRead();
-        rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, 0);
+        deferredFramebuffer->ActivateTextures();
+
         rlLoadDrawQuad();
         rlDisableFramebuffer();
         rlDisableShader();
