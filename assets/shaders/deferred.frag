@@ -1,12 +1,13 @@
 #version 330 core
 out vec4 finalColor;
-
+out float depth;
 in vec2 texCoord;
 in vec2 texCoord2;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D gDepth;
 
 struct Light {
     int enabled;
@@ -52,4 +53,5 @@ void main() {
     }
 
     finalColor = vec4(ambient, 1.0);
+    depth = texture(gDepth, texCoord).r;
 }

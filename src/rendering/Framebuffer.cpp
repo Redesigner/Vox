@@ -17,11 +17,10 @@ Framebuffer::Framebuffer(int width, int height)
 	rlEnableFramebuffer(framebuffer);
 
 	colorTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	rlActiveDrawBuffers(1);
+	depthTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32, 1);
+	rlActiveDrawBuffers(2);
 	rlFramebufferAttach(framebuffer, colorTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-
-	depthRenderbuffer = rlLoadTextureDepth(width, height, true);
-	rlFramebufferAttach(framebuffer, depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
+	rlFramebufferAttach(framebuffer, depthTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 
 	if (!rlFramebufferComplete(framebuffer))
 	{
@@ -34,7 +33,7 @@ Framebuffer::~Framebuffer()
 	TraceLog(LOG_INFO, "Destroying GBuffer");
 	rlUnloadFramebuffer(framebuffer);
 	rlUnloadTexture(colorTexture);
-	rlUnloadTexture(depthRenderbuffer);
+	rlUnloadTexture(depthTexture);
 }
 
 void Framebuffer::EnableFramebuffer()
@@ -56,4 +55,6 @@ void Framebuffer::ActivateTextures() const
 {
 	rlActiveTextureSlot(0);
 	rlEnableTexture(colorTexture);
+	rlActiveTextureSlot(1);
+	rlEnableTexture(depthTexture);
 }

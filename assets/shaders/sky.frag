@@ -10,9 +10,9 @@ const vec3 skyColor = vec3(0.5, 0.5, 1.0);
 
 void main()
 {
-	// float depth = texture(depth, texCoord).r;
-	float depth = gl_FragDepth;
-	if (depth >= 1.0)
+	float depth = texture(depth, texCoord).r;
+	// float depth = gl_FragDepth;
+	if (depth <= 0.0)
 	{
 		finalColor = vec4(skyColor, 1.0);
 	}
@@ -20,6 +20,4 @@ void main()
 	{
 		vec4(texture(color, texCoord).rgb, 1.0);
 	}
-
-	finalColor = vec4(depth, 0, 0, 1.0);
 }
