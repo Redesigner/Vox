@@ -3,6 +3,8 @@
 #include "Renderer.h"
 
 #include "raylib.h"
+#include "raymath.h"
+#include "rcamera.h"
 #include "rlgl.h"
 
 #include "editor/Editor.h"
@@ -59,7 +61,7 @@ Renderer::Renderer()
     }
 
     camera = { 0 };
-    camera.position = Vector3(6.0f, 6.0f, 6.0f);    // Camera position
+    camera.position = Vector3(6.0f, 2.0f, 6.0f);    // Camera position
     camera.target = Vector3(0.0f, 2.0f, 0.0f);      // Camera looking at point
     camera.up = Vector3(0.0f, 1.0f, 0.0f);          // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                            // Camera field-of-view Y
@@ -108,7 +110,7 @@ void Renderer::Render(Editor* editor)
 {
     UpdateViewportDimensions(editor);
 
-    UpdateCamera(&camera, CAMERA_ORBITAL);
+    UpdateCamera(&camera, CAMERA_THIRD_PERSON);    
 
     BeginDrawing();
     {
@@ -239,8 +241,14 @@ void Renderer::RenderSky()
 
     rlEnableShader(skyShader.id);
     {
+        float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
+        Matrix cameraRotation = MatrixLookAt(Vector3(0.0f), camera.target - camera.position, camera.up);
+        float cameraYScale = tan(DEG2RAD * camera.fovy);
+        Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
+        Matrix matrix = MatrixInvert(cameraRotation * projection);
+        // Matrix matrix = MatrixInvert(MatrixTranslate(camera.position.x, camera.position.y, camera.position.z) * GetCameraMatrix(camera));
+        rlSetUniformMatrix(rlGetLocationUniform(skyShader.id, "cameraWorldSpace"), matrix);
         deferredFramebuffer->ActivateTextures();
-
         rlLoadDrawQuad();
         rlDisableFramebuffer();
         rlDisableShader();
