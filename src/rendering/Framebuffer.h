@@ -14,5 +14,5 @@ public:
 
 private:
 	int width, height;
-	unsigned int framebuffer, colorTexture, depthTexture;
+	unsigned int framebuffer, colorTexture, depthTexture, depthRenderbuffer;
 };

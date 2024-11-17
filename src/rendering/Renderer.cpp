@@ -123,11 +123,13 @@ void Renderer::Render(Editor* editor)
         // Copy into texture to be rendered with imgui
         deferredFramebuffer->BindRead();
         rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
-        rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000);
+        rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
         rlDisableFramebuffer();
 
         // Make sure that our viewport size matches the window size when drawing with imgui
         rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
+        rlSetFramebufferWidth(GetScreenWidth());
+        rlSetFramebufferHeight(GetScreenHeight());
         editor->Draw(&viewportTexture);
         EndDrawing();
     }
@@ -211,6 +213,8 @@ void Renderer::RenderDeferred()
     gBuffer->BindRead();
     deferredFramebuffer->BindDraw();
 
+    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
+
     rlDisableColorBlend();
     rlDisableDepthMask();
     rlEnableShader(deferredShader.id);
@@ -230,6 +234,8 @@ void Renderer::RenderSky()
     rlDisableDepthMask();
     deferredFramebuffer->BindRead();
     deferredFramebuffer->BindDraw();
+
+    rlEnableDepthTest();
 
     rlEnableShader(skyShader.id);
     {
