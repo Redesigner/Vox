@@ -22,6 +22,9 @@ Framebuffer::Framebuffer(int width, int height)
 	rlFramebufferAttach(framebuffer, colorTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
 	rlFramebufferAttach(framebuffer, depthTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
 
+	depthRenderbuffer = rlLoadTextureDepth(width, height, true);
+	rlFramebufferAttach(framebuffer, depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
+
 	if (!rlFramebufferComplete(framebuffer))
 	{
 		TraceLog(LOG_ERROR, "Failed to create framebuffer.");
@@ -34,6 +37,7 @@ Framebuffer::~Framebuffer()
 	rlUnloadFramebuffer(framebuffer);
 	rlUnloadTexture(colorTexture);
 	rlUnloadTexture(depthTexture);
+	rlUnloadTexture(depthRenderbuffer);
 }
 
 void Framebuffer::EnableFramebuffer()
