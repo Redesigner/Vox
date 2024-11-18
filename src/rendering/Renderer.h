@@ -7,6 +7,7 @@
 
 #include "rendering/Light.h"
 
+class DeferredShader;
 class Editor;
 class Framebuffer;
 class GBuffer;
@@ -36,7 +37,7 @@ private:
 	std::unique_ptr<Framebuffer> deferredFramebuffer;
 
 	Shader gBufferShader;
-	Shader deferredShader;
+	std::unique_ptr<DeferredShader> deferredShader;
 	Shader skyShader;
 
 	LightUniformLocations lightUniformLocations;

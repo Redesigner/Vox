@@ -53,5 +53,6 @@ void main() {
     }
 
     finalColor = vec4(ambient, 1.0);
+    // finalColor = vec4(lights[0].position, 1.0);
     depth = texture(gDepth, texCoord).r;
 }

@@ -19,10 +19,13 @@ include(FetchContent)
 FetchContent_Declare(
 	raylib-sdl
 	GIT_REPOSITORY https://github.com/raysan5/raylib.git
+	GIT_TAG 5.5
 )
 set(PLATFORM SDL)
+set(PLATFORM_DESKTOP_SDL3)
 FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
+unset(PLATFORM_DESKTOP_SDL3)
 
 find_package(tinyfiledialogs CONFIG REQUIRED)
 
