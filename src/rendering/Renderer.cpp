@@ -10,6 +10,7 @@
 #include "editor/Editor.h"
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
+#include "rendering/shaders/DeferredShader.h"
 
 Renderer::Renderer()
 {
@@ -20,33 +21,12 @@ Renderer::Renderer()
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
     materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
 
-    deferredShader = LoadShader("assets/shaders/deferred.vert", "assets/shaders/deferred.frag");
-    deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition"); // set this for camera?
+    deferredShader = std::make_unique<DeferredShader>();
 
     skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
 
     gBuffer = std::make_unique<GBuffer>(800, 431);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
-
-    rlEnableShader(deferredShader.id);
-    {
-        int position = 0;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gPosition"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "gPosition"), &position, SHADER_UNIFORM_INT, 1);
-
-        position = 1;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gNormal"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "gNormal"), &position, SHADER_UNIFORM_INT, 1);
-
-        position = 2;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gAlbedoSpec"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "gAlbedoSpec"), &position, SHADER_UNIFORM_INT, 1);
-
-        position = 3;
-        rlSetUniformSampler(rlGetLocationUniform(deferredShader.id, "gDepth"), position);
-        rlSetUniform(GetShaderLocation(deferredShader, "gDepth"), &position, SHADER_UNIFORM_INT, 1);
-    }
-    rlDisableShader();
 
     rlEnableShader(skyShader.id);
     {
@@ -67,7 +47,7 @@ Renderer::Renderer()
     camera.fovy = 45.0f;                            // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
 
-    lightUniformLocations = LightUniformLocations(deferredShader);
+    lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, Vector3(4.0f, 2.4f, 0.0f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
     viewportTexture = RenderTexture2D();
@@ -95,10 +75,6 @@ Renderer::~Renderer()
     if (IsShaderValid(gBufferShader))
     {
         UnloadShader(gBufferShader);
-    }
-    if (IsShaderValid(deferredShader))
-    {
-        UnloadShader(deferredShader);
     }
     if (IsShaderValid(skyShader))
     {
@@ -222,9 +198,9 @@ void Renderer::RenderDeferred()
 
     rlDisableColorBlend();
     rlDisableDepthMask();
-    rlEnableShader(deferredShader.id);
+    deferredShader->Enable();
     {
-        testLight.UpdateLightValues(deferredShader, lightUniformLocations);
+        testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
         gBuffer->ActivateTextures();
         rlLoadDrawQuad();
         rlDisableShader();

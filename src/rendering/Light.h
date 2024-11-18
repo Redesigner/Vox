@@ -2,12 +2,12 @@
 
 #include "raylib.h"
 
-class Shader;
+class DeferredShader;
 
 struct LightUniformLocations
 {
     LightUniformLocations();
-    LightUniformLocations(Shader& shader);
+    LightUniformLocations(DeferredShader* shader);
 
     int enabled;
     int type;
@@ -29,5 +29,5 @@ struct Light
     Vector4 color;
     float strength;
 
-    void UpdateLightValues(Shader& shader, LightUniformLocations& uniformLocations);
+    void UpdateLightValues(DeferredShader* shader, LightUniformLocations& uniformLocations);
 };
