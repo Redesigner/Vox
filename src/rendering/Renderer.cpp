@@ -68,7 +68,7 @@ Renderer::Renderer()
     camera.projection = CAMERA_PERSPECTIVE;
 
     lightUniformLocations = LightUniformLocations(deferredShader);
-    testLight = Light(1, 1, Vector3(-2.0f, 2.0f, -2.0f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
+    testLight = Light(1, 1, Vector3(4.0f, 2.4f, 0.0f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
     viewportTexture = RenderTexture2D();
     testModel = LoadModel("assets/models/mushroom.glb");
@@ -110,7 +110,10 @@ void Renderer::Render(Editor* editor)
 {
     UpdateViewportDimensions(editor);
 
-    UpdateCamera(&camera, CAMERA_THIRD_PERSON);    
+    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+    {
+        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
+    }
 
     BeginDrawing();
     {
