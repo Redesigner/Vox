@@ -29,6 +29,8 @@ Renderer::Renderer()
     gBuffer = std::make_unique<GBuffer>(800, 431);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
 
+    defaultMaterial = LoadMaterialDefault();
+
     rlEnableShader(skyShader.id);
     {
         int position = 0;
@@ -40,11 +42,16 @@ Renderer::Renderer()
         rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
         rlDisableShader();
     }
+    defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
+    defaultMaterial.shader = gBufferShader;
 
     VoxelGrid voxelGrid = VoxelGrid(8, 8, 8);
-    voxelGrid.GetVoxel(1, 2, 1).filled = true;
+    voxelGrid.GetVoxel(3, 2, 1).filled = true;
+    voxelGrid.GetVoxel(2, 0, 0).filled = true;
     voxelGrid.GetVoxel(0, 0, 0).filled = true;
+    voxelGrid.GetVoxel(1, 1, 1).filled = true;
     voxelMesh = voxelGrid.GenerateMesh();
+    UploadMesh(&voxelMesh, true);
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 2.0f, 6.0f);    // Camera position
@@ -188,8 +195,16 @@ void Renderer::RenderGBuffer()
                     DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
                 }
             }
-
-            DrawMesh(voxelMesh, testModel.materials[0], MatrixIdentity());
+            Color albedo = WHITE;
+            Vector3 materialAlbedo = Vector3(
+                albedo.r / 255.0f,
+                albedo.g / 255.0f,
+                albedo.b / 255.0f
+            );
+            rlEnableShader(gBufferShader.id);
+            rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
+            rlDisableShader();
+            DrawMesh(voxelMesh, defaultMaterial, MatrixIdentity());
             EndMode3D();
         }
         rlDisableShader();
