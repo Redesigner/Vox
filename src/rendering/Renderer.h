@@ -47,4 +47,5 @@ private:
 	Camera3D camera;
 	RenderTexture2D viewportTexture;
 	Model testModel;
+	Mesh voxelMesh;
 };
