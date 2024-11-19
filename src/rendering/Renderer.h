@@ -46,6 +46,7 @@ private:
 
 	Camera3D camera;
 	RenderTexture2D viewportTexture;
+	Material defaultMaterial;
 	Model testModel;
 	Mesh voxelMesh;
 };

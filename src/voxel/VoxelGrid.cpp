@@ -124,7 +124,7 @@ void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z)
 	float yf = static_cast<float>(y);
 	float zf = static_cast<float>(z);
 
-	int currentIndex = vertices.size() + 1;
+	int currentIndex = vertices.size();
 	vertices.emplace_back(xf,			yf + 1.0f,	zf);
 	vertices.emplace_back(xf + 1.0f,	yf + 1.0f,	zf);
 	vertices.emplace_back(xf,			yf + 1.0f,	zf + 1.0f);
@@ -140,12 +140,12 @@ void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(up);
 	normals.emplace_back(up);
 
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex);
-	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex + 2);
-	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex + 3);
-	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
 }
 
 void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
@@ -154,7 +154,7 @@ void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
 	float yf = static_cast<float>(y);
 	float zf = static_cast<float>(z);
 
-	int currentIndex = vertices.size() + 1;
+	int currentIndex = vertices.size();
 	vertices.emplace_back(xf,			yf,	zf);
 	vertices.emplace_back(xf + 1.0f,	yf,	zf);
 	vertices.emplace_back(xf,			yf,	zf + 1.0f);
@@ -165,10 +165,10 @@ void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
 	texCoords.emplace_back(bottomLeft);
 	texCoords.emplace_back(bottomRight);
 
-	normals.emplace_back(up);
-	normals.emplace_back(up);
-	normals.emplace_back(up);
-	normals.emplace_back(up);
+	normals.emplace_back(down);
+	normals.emplace_back(down);
+	normals.emplace_back(down);
+	normals.emplace_back(down);
 
 	indices.emplace_back(currentIndex);
 	indices.emplace_back(currentIndex + 1);
@@ -180,16 +180,120 @@ void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
 
 void VoxelGrid::AddFrontFace(unsigned int x, unsigned int y, unsigned int z)
 {
+	float xf = static_cast<float>(x);
+	float yf = static_cast<float>(y);
+	float zf = static_cast<float>(z);
+
+	int currentIndex = vertices.size();
+	vertices.emplace_back(xf, yf, zf + 1.0f);
+	vertices.emplace_back(xf + 1.0f, yf, zf + 1.0f);
+	vertices.emplace_back(xf, yf + 1.0f, zf + 1.0f);
+	vertices.emplace_back(xf + 1.0f, yf + 1.0f, zf + 1.0f);
+
+	texCoords.emplace_back(topLeft);
+	texCoords.emplace_back(topRight);
+	texCoords.emplace_back(bottomLeft);
+	texCoords.emplace_back(bottomRight);
+
+	normals.emplace_back(forward);
+	normals.emplace_back(forward);
+	normals.emplace_back(forward);
+	normals.emplace_back(forward);
+
+	indices.emplace_back(currentIndex);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex + 3);
+	indices.emplace_back(currentIndex + 2);
 }
 
 void VoxelGrid::AddBackFace(unsigned int x, unsigned int y, unsigned int z)
 {
+	float xf = static_cast<float>(x);
+	float yf = static_cast<float>(y);
+	float zf = static_cast<float>(z);
+
+	int currentIndex = vertices.size();
+	vertices.emplace_back(xf, yf, zf);
+	vertices.emplace_back(xf + 1.0f, yf, zf);
+	vertices.emplace_back(xf, yf + 1.0f, zf);
+	vertices.emplace_back(xf + 1.0f, yf + 1.0f, zf);
+
+	texCoords.emplace_back(topLeft);
+	texCoords.emplace_back(topRight);
+	texCoords.emplace_back(bottomLeft);
+	texCoords.emplace_back(bottomRight);
+
+	normals.emplace_back(back);
+	normals.emplace_back(back);
+	normals.emplace_back(back);
+	normals.emplace_back(back);
+
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex);
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 3);
+	indices.emplace_back(currentIndex + 1);
 }
 
 void VoxelGrid::AddLeftFace(unsigned int x, unsigned int y, unsigned int z)
 {
+	float xf = static_cast<float>(x);
+	float yf = static_cast<float>(y);
+	float zf = static_cast<float>(z);
+
+	int currentIndex = vertices.size();
+	vertices.emplace_back(xf, yf, zf);
+	vertices.emplace_back(xf, yf + 1.0f, zf);
+	vertices.emplace_back(xf, yf, zf + 1.0f);
+	vertices.emplace_back(xf, yf + 1.0f, zf + 1.0f);
+
+	texCoords.emplace_back(topLeft);
+	texCoords.emplace_back(topRight);
+	texCoords.emplace_back(bottomLeft);
+	texCoords.emplace_back(bottomRight);
+
+	normals.emplace_back(left);
+	normals.emplace_back(left);
+	normals.emplace_back(left);
+	normals.emplace_back(left);
+
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex);
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 3);
+	indices.emplace_back(currentIndex + 1);
 }
 
 void VoxelGrid::AddRightFace(unsigned int x, unsigned int y, unsigned int z)
 {
+	float xf = static_cast<float>(x);
+	float yf = static_cast<float>(y);
+	float zf = static_cast<float>(z);
+
+	int currentIndex = vertices.size();
+	vertices.emplace_back(xf + 1.0f, yf, zf);
+	vertices.emplace_back(xf + 1.0f, yf + 1.0f, zf);
+	vertices.emplace_back(xf + 1.0f, yf, zf + 1.0f);
+	vertices.emplace_back(xf + 1.0f, yf + 1.0f, zf + 1.0f);
+
+	texCoords.emplace_back(topLeft);
+	texCoords.emplace_back(topRight);
+	texCoords.emplace_back(bottomLeft);
+	texCoords.emplace_back(bottomRight);
+
+	normals.emplace_back(right);
+	normals.emplace_back(right);
+	normals.emplace_back(right);
+	normals.emplace_back(right);
+
+	indices.emplace_back(currentIndex);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex + 2);
+	indices.emplace_back(currentIndex + 1);
+	indices.emplace_back(currentIndex + 3);
+	indices.emplace_back(currentIndex + 2);
 }
