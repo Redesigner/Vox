@@ -14,7 +14,7 @@ public:
     void BindDraw();
     void BindRead();
 
-    void ActivateTextures() const;
+    void ActivateTextures(unsigned int offset = 0) const;
 
     void CopyToFramebuffer(const RenderTexture2D& target);
 

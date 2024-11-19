@@ -29,7 +29,7 @@ void main() {
     vec3 fragPosition = texture(gPosition, texCoord).rgb;
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedoSpec, texCoord).rgb;
-    float specular = texture(gAlbedoSpec, texCoord).a;
+    float matSpecular = texture(gAlbedoSpec, texCoord).a;
 
     vec3 ambient = albedo * vec3(0.1f);
     vec3 viewDirection = normalize(viewPosition - fragPosition);
@@ -37,12 +37,21 @@ void main() {
     for(int i = 0; i < NR_LIGHTS; ++i)
     {
         if(lights[i].enabled == 0) continue;
-        vec3 lightDirection = lights[i].position - fragPosition;
+        vec3 lightDirection;
+        switch(lights[i].type)
+        {
+            case 0:
+                lightDirection = lights[i].position - fragPosition;
+            break;
+            case 1:
+                lightDirection = -normalize(lights[i].position);
+            break;
+        }
         vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo * lights[i].color.xyz;
 
         vec3 halfwayDirection = normalize(lightDirection + viewDirection);
         float spec = pow(max(dot(normal, halfwayDirection), 0.0), 32.0);
-        vec3 specular = specular * spec * lights[i].color.xyz;
+        vec3 specular = matSpecular * spec * lights[i].color.xyz;
 
         // Attenuation
         float distance = length(lights[i].position - fragPosition);
@@ -54,5 +63,6 @@ void main() {
 
     finalColor = vec4(ambient, 1.0);
     // finalColor = vec4(lights[0].position, 1.0);
+    // finalColor = vec4(matSpecular, 0.0, 0.0, 1.0);
     depth = texture(gDepth, texCoord).r;
 }
