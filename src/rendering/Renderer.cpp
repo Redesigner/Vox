@@ -11,6 +11,7 @@
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
 #include "rendering/shaders/DeferredShader.h"
+#include "voxel/VoxelGrid.h"
 
 Renderer::Renderer()
 {
@@ -39,6 +40,11 @@ Renderer::Renderer()
         rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
         rlDisableShader();
     }
+
+    VoxelGrid voxelGrid = VoxelGrid(8, 8, 8);
+    voxelGrid.GetVoxel(1, 2, 1).filled = true;
+    voxelGrid.GetVoxel(0, 0, 0).filled = true;
+    voxelMesh = voxelGrid.GenerateMesh();
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 2.0f, 6.0f);    // Camera position
@@ -182,6 +188,8 @@ void Renderer::RenderGBuffer()
                     DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
                 }
             }
+
+            DrawMesh(voxelMesh, testModel.materials[0], MatrixIdentity());
             EndMode3D();
         }
         rlDisableShader();
