@@ -62,18 +62,18 @@ void GBuffer::BindRead()
 	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
 }
 
-void GBuffer::ActivateTextures() const
+void GBuffer::ActivateTextures(unsigned int offset) const
 {
-	rlActiveTextureSlot(0);
+	rlActiveTextureSlot(0 + offset);
 	rlEnableTexture(positionTexture);
 
-	rlActiveTextureSlot(1);
+	rlActiveTextureSlot(1 + offset);
 	rlEnableTexture(normalTexture);
 
-	rlActiveTextureSlot(2);
+	rlActiveTextureSlot(2 + offset);
 	rlEnableTexture(albedoSpecTexture);
 
-	rlActiveTextureSlot(3);
+	rlActiveTextureSlot(3 + offset);
 	rlEnableTexture(depthTexture);
 }
 

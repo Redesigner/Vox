@@ -61,7 +61,7 @@ Renderer::Renderer()
     camera.projection = CAMERA_PERSPECTIVE;
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
-    testLight = Light(1, 1, Vector3(4.0f, 2.4f, 0.0f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
+    testLight = Light(1, 0, Vector3(4.0f, 2.4f, 0.0f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
     viewportTexture = RenderTexture2D();
     testModel = LoadModel("assets/models/mushroom.glb");
@@ -170,15 +170,14 @@ void Renderer::UpdateViewportDimensions(Editor* editor)
 void Renderer::RenderGBuffer()
 {
     ClearBackground(BLACK);
-    gBuffer->EnableFramebuffer();
-    rlClearScreenBuffers();
-
-    rlDisableColorBlend();
-
     rlEnableShader(gBufferShader.id);
     {
         BeginMode3D(camera);
         {
+            gBuffer->EnableFramebuffer();
+            rlClearScreenBuffers();
+            rlDisableColorBlend();
+
             if (IsModelValid(testModel))
             {
                 for (int i = 0; i < testModel.meshCount; ++i)
@@ -224,7 +223,7 @@ void Renderer::RenderDeferred()
     deferredShader->Enable();
     {
         testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
-        gBuffer->ActivateTextures();
+        gBuffer->ActivateTextures(1);
         rlLoadDrawQuad();
         rlDisableShader();
     }
