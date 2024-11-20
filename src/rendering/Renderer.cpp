@@ -59,7 +59,7 @@ Renderer::Renderer()
     camera.projection = CAMERA_PERSPECTIVE;
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
-    testLight = Light(1, 0, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
+    testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
     viewportTexture = RenderTexture2D();
     testModel = LoadModel("assets/models/mushroom.glb");
