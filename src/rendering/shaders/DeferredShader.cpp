@@ -9,7 +9,8 @@ DeferredShader::DeferredShader()
 
 	uniformLocations.position = rlGetLocationUniform(deferredShader.id, "gPosition");
 	uniformLocations.normal = rlGetLocationUniform(deferredShader.id, "gNormal");
-	uniformLocations.albedoSpec = rlGetLocationUniform(deferredShader.id, "gAlbedoSpec");
+	uniformLocations.albedo = rlGetLocationUniform(deferredShader.id, "gAlbedo");
+	uniformLocations.metallicRoughness = rlGetLocationUniform(deferredShader.id, "gMetallicRoughness");
 	uniformLocations.depth = rlGetLocationUniform(deferredShader.id, "depth");
 
 	rlEnableShader(deferredShader.id);
@@ -23,10 +24,14 @@ DeferredShader::DeferredShader()
 		rlSetUniform(uniformLocations.normal, &shaderLocation, SHADER_UNIFORM_INT, 1);
 
 		shaderLocation = 2;
-		rlSetUniformSampler(uniformLocations.albedoSpec, shaderLocation);
-		rlSetUniform(uniformLocations.albedoSpec, &shaderLocation, SHADER_UNIFORM_INT, 1);
+		rlSetUniformSampler(uniformLocations.albedo, shaderLocation);
+		rlSetUniform(uniformLocations.albedo, &shaderLocation, SHADER_UNIFORM_INT, 1);
 
 		shaderLocation = 3;
+		rlSetUniformSampler(uniformLocations.metallicRoughness, shaderLocation);
+		rlSetUniform(uniformLocations.metallicRoughness, &shaderLocation, SHADER_UNIFORM_INT, 1);
+
+		shaderLocation = 4;
 		rlSetUniformSampler(uniformLocations.depth, shaderLocation);
 		rlSetUniform(uniformLocations.depth, &shaderLocation, SHADER_UNIFORM_INT, 1);
 

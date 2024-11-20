@@ -10,7 +10,8 @@ class DeferredShader
 	{
 		int position;
 		int normal;
-		int albedoSpec;
+		int albedo;
+		int metallicRoughness;
 		int depth;
 	};
 
