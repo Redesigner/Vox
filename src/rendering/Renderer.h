@@ -42,7 +42,7 @@ private:
 
 	LightUniformLocations lightUniformLocations;
 	Light testLight;
-	int materialColorLocation = 0;
+	int materialColorLocation, materialRoughnessLocation = 0;
 
 	Camera3D camera;
 	RenderTexture2D viewportTexture;
