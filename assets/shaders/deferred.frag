@@ -48,21 +48,22 @@ float geometric(vec3 normal, vec3 viewDirection, float alpha)
     return normalDot / ((normalDot * (1.0 - k)) + k);
 }
 
-vec3 fresnel(vec3 normal, vec3 lightDirection, vec3 color)
+float fresnel(vec3 viewDirection, vec3 halfway)
 {
-    float normalDot = dot(normal, lightDirection);
-    return color + (1.0 - color) * pow(1.0 - normalDot, 5);
+    const float f0 = 0.7;
+    float vh = dot(viewDirection, halfway);
+    return f0 + (1.0 - f0) * pow(2, (-5.55473 * vh - 6.98316) * vh);
 }
 
-vec3 cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float roughness, vec3 color)
+float cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float roughness)
 {
     vec3 halfwayDirection = normalize(lightDirection + viewDirection);
     float alpha = roughness * roughness;
     float D = normalDistribution(normal, halfwayDirection, alpha);
     float G = geometric(normal, viewDirection, alpha);
-    vec3 F = fresnel(normal, lightDirection, color);
-    return (D * G * F * extinction(lightDirection, normal)) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
-    // return vec3(D, G, F.r);
+    float F = fresnel(viewDirection, halfwayDirection);
+    return (D * G * F) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
+    // return vec3(D, G, F);
 }
 
 void main() {
@@ -70,7 +71,7 @@ void main() {
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedo, texCoord).rgb;
     // float roughness = texture(gMetallicRoughness, texCoord).g;
-    float roughness = 0.5;
+    float roughness = 0.1;
     float metallic = texture(gMetallicRoughness, texCoord).r;
 
     vec3 ambient = albedo * vec3(0.1f);
@@ -100,7 +101,7 @@ void main() {
         }
         vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo * lights[i].color.xyz;
 
-        vec3 specular = cookTorrance(normal, lightDirection, viewDirection, roughness, lights[i].color.rgb);
+        vec3 specular = cookTorrance(normal, lightDirection, viewDirection, roughness) * lights[i].color.rgb;
         diffuse *= attenuation;
         specular *= attenuation;
         ambient += diffuse + specular;
