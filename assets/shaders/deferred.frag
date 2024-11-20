@@ -10,6 +10,8 @@ uniform sampler2D gAlbedo;
 uniform sampler2D gMetallicRoughness;
 uniform sampler2D gDepth;
 
+uniform vec3 viewPosition;
+
 struct Light {
     int enabled;
     int type; // Unused in this demo.
@@ -21,79 +23,90 @@ struct Light {
 
 const int NR_LIGHTS = 4;
 uniform Light lights[NR_LIGHTS];
-uniform vec3 viewPosition;
 
 const float QUADRATIC = 0.032;
 const float LINEAR = 0.09;
 const float PI = 3.14159265;
 
-float normalDistribution(vec3 normal, vec3 halfway, float roughness) 
+float extinction(vec3 normalA, vec3 normalB)
 {
-    float roughnessSquared = roughness * roughness;
-    float nH = dot(normal, halfway);
-    float denominator = (nH * nH * (roughnessSquared - 1) ) + 1;
-    return (roughnessSquared) / (PI * denominator * denominator);
+    return ceil(max(dot(normalA, normalB), 0.0));
 }
 
-float geometric(vec3 normal, vec3 viewDirection, float roughness)
+float normalDistribution(vec3 normal, vec3 halfway, float alpha) 
+{
+    float alphaSquared = alpha * alpha;
+    float nH = dot(normal, halfway);
+    float denominator = (nH * nH * (alphaSquared - 1) ) + 1;
+    return (alphaSquared) / (PI * denominator * denominator);
+}
+
+float geometric(vec3 normal, vec3 viewDirection, float alpha)
 {
     float normalDot = dot(normal, viewDirection);
-    float k = ((roughness + 1) * (roughness + 1)) / 8.0;
+    float k = ((alpha + 1) * (alpha + 1)) / 8.0;
     return normalDot / ((normalDot * (1.0 - k)) + k);
 }
 
-vec3 fresnel(vec3 normal, vec3 lightDirecion, vec3 color)
+vec3 fresnel(vec3 normal, vec3 lightDirection, vec3 color)
 {
-    float normalDot = dot(normal, lightDirecion);
+    float normalDot = dot(normal, lightDirection);
     return color + (1.0 - color) * pow(1.0 - normalDot, 5);
 }
 
-vec3 cookTorrance(vec3 normal, vec3 halfwayDirection, vec3 lightDirection, vec3 viewDirection, float roughness, vec3 color)
+vec3 cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float roughness, vec3 color)
 {
-    return 
-    (normalDistribution(normal, halfwayDirection, roughness)
-    * geometric(normal, viewDirection, roughness)
-    * fresnel(normal, lightDirection, color))
-    / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
+    vec3 halfwayDirection = normalize(lightDirection + viewDirection);
+    float alpha = roughness * roughness;
+    float D = normalDistribution(normal, halfwayDirection, alpha);
+    float G = geometric(normal, viewDirection, alpha);
+    vec3 F = fresnel(normal, lightDirection, color);
+    return (D * G * F * extinction(lightDirection, normal)) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
+    // return vec3(D, G, F.r);
 }
 
 void main() {
     vec3 fragPosition = texture(gPosition, texCoord).rgb;
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedo, texCoord).rgb;
-    float roughness = texture(gMetallicRoughness, texCoord).g;
+    // float roughness = texture(gMetallicRoughness, texCoord).g;
+    float roughness = 0.5;
     float metallic = texture(gMetallicRoughness, texCoord).r;
 
     vec3 ambient = albedo * vec3(0.1f);
     vec3 viewDirection = normalize(viewPosition - fragPosition);
+    // vec3 viewDirection = normalize(viewPosition);
+
 
     for(int i = 0; i < NR_LIGHTS; ++i)
     {
         if(lights[i].enabled == 0) continue;
         vec3 lightDirection;
+
+        float attenuation = 1.0;
+
         switch(lights[i].type)
         {
+            // Point light
             case 0:
-                lightDirection = lights[i].position - fragPosition;
+                lightDirection = normalize(lights[i].position - fragPosition);
             break;
+            // Directional light
             case 1:
+                float distance = length(lights[i].position - fragPosition);
+                attenuation = 1.0 / (1.0 + LINEAR * distance + QUADRATIC * distance * distance);
                 lightDirection = normalize(lights[i].position);
             break;
         }
         vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo * lights[i].color.xyz;
 
-        vec3 halfwayDirection = normalize(lightDirection + viewDirection);
-        vec3 lightContribution = cookTorrance(normal, halfwayDirection, lightDirection, viewDirection, roughness, lights[i].color.rgb);
-
-        // Attenuation
-        float distance = length(lights[i].position - fragPosition);
-        float attenuation = 1.0 / (1.0 + LINEAR * distance + QUADRATIC * distance * distance);
-        lightContribution *= attenuation;
-        ambient += lightContribution;
+        vec3 specular = cookTorrance(normal, lightDirection, viewDirection, roughness, lights[i].color.rgb);
+        diffuse *= attenuation;
+        specular *= attenuation;
+        ambient += diffuse + specular;
+        // ambient = specular;
     }
 
     finalColor = vec4(ambient, 1.0);
-    // finalColor = vec4(lights[0].position, 1.0);
-    // finalColor = vec4(matSpecular, 0.0, 0.0, 1.0);
     depth = texture(gDepth, texCoord).r;
 }

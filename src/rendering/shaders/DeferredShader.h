@@ -13,6 +13,7 @@ class DeferredShader
 		int albedo;
 		int metallicRoughness;
 		int depth;
+		int viewPosition;
 	};
 
 public:
@@ -27,6 +28,7 @@ public:
 	void SetUniformFloat(int uniformLocation, float value);
 	void SetUniformVec3(int uniformLocation, Vector3 value);
 	void SetUniformColor(int uniformLocation, Vector4 color);
+	void SetCameraPosition(Vector3 position);
 
 private:
 	Shader deferredShader;
