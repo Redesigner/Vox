@@ -7,11 +7,12 @@ DeferredShader::DeferredShader()
 	deferredShader = LoadShader(vertLocation.c_str(), fragLocation.c_str());
 	deferredShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(deferredShader, "viewPosition");
 
-	uniformLocations.position = rlGetLocationUniform(deferredShader.id, "gPosition");
-	uniformLocations.normal = rlGetLocationUniform(deferredShader.id, "gNormal");
-	uniformLocations.albedo = rlGetLocationUniform(deferredShader.id, "gAlbedo");
-	uniformLocations.metallicRoughness = rlGetLocationUniform(deferredShader.id, "gMetallicRoughness");
-	uniformLocations.depth = rlGetLocationUniform(deferredShader.id, "depth");
+	uniformLocations.position =				rlGetLocationUniform(deferredShader.id, "gPosition");
+	uniformLocations.normal =				rlGetLocationUniform(deferredShader.id, "gNormal");
+	uniformLocations.albedo =				rlGetLocationUniform(deferredShader.id, "gAlbedo");
+	uniformLocations.metallicRoughness =	rlGetLocationUniform(deferredShader.id, "gMetallicRoughness");
+	uniformLocations.depth =				rlGetLocationUniform(deferredShader.id, "depth");
+	uniformLocations.viewPosition =			rlGetLocationUniform(deferredShader.id, "viewPosition");
 
 	rlEnableShader(deferredShader.id);
 	{
@@ -87,4 +88,10 @@ void DeferredShader::SetUniformColor(int uniformLocation, Vector4 color)
 		static_cast<float>(color.w) / 255.0f
 	};
 	rlSetUniform(uniformLocation, &colorPacked, RL_SHADER_UNIFORM_VEC4, 1);
+}
+
+void DeferredShader::SetCameraPosition(Vector3 position)
+{
+	float cameraPos[3] = { position.x, position.y, position.z };
+	rlSetUniform(uniformLocations.viewPosition, &cameraPos, SHADER_UNIFORM_VEC3, 1);
 }

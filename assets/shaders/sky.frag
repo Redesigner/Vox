@@ -7,7 +7,7 @@ in vec4 vertexWS;
 uniform sampler2D color;
 
 const vec3 groundColor = vec3(0.3, 0.3, 0.3);
-const vec3 sunPos = normalize(vec3(1.0, 0.6, 0.0));
+const vec3 sunPos = normalize(vec3(1.0, 1.0, 0.0));
 
 const float Br = 0.0005;
 const float Bm = 0.0003;
