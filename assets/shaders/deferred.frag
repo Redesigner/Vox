@@ -91,11 +91,12 @@ void main() {
             // Point light
             case 0:
                 lightDirection = normalize(lights[i].position - fragPosition);
-            break;
-            // Directional light
-            case 1:
                 float distance = length(lights[i].position - fragPosition);
                 attenuation = 1.0 / (1.0 + LINEAR * distance + QUADRATIC * distance * distance);
+            break;
+
+            // Directional light
+            case 1:
                 lightDirection = normalize(lights[i].position);
             break;
         }
@@ -105,7 +106,6 @@ void main() {
         diffuse *= attenuation;
         specular *= attenuation;
         ambient += diffuse + specular;
-        // ambient = specular;
     }
 
     finalColor = vec4(ambient, 1.0);
