@@ -2,6 +2,8 @@
 
 #include "raylib.h"
 #include "rlgl.h"
+#include <fmt/core.h>
+#include <string>
 
 GBuffer::GBuffer(int width, int height)
 	:width(width), height(height)
@@ -20,6 +22,8 @@ GBuffer::GBuffer(int width, int height)
 	normalTexture =		rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
 	albedoSpecTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, 1);
 	depthTexture =		rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32, 1);
+
+	TraceLog(LOG_INFO, fmt::format("Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoSpecTexture, depthTexture).c_str());
 
 	rlActiveDrawBuffers(4);
 

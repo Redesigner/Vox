@@ -223,7 +223,7 @@ void Renderer::RenderDeferred()
     deferredShader->Enable();
     {
         testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
-        gBuffer->ActivateTextures(1);
+        gBuffer->ActivateTextures(0);
         rlLoadDrawQuad();
         rlDisableShader();
     }

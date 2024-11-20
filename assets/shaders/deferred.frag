@@ -44,7 +44,7 @@ void main() {
                 lightDirection = lights[i].position - fragPosition;
             break;
             case 1:
-                lightDirection = -normalize(lights[i].position);
+                lightDirection = normalize(lights[i].position);
             break;
         }
         vec3 diffuse = max(dot(normal, lightDirection), 0.0) * albedo * lights[i].color.xyz;
