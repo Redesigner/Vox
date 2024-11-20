@@ -28,6 +28,7 @@ unset(PLATFORM)
 unset(PLATFORM_DESKTOP_SDL3)
 
 find_package(tinyfiledialogs CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 # Add source to this project's executable.
 file (GLOB_RECURSE Voxels_SRC
@@ -41,6 +42,7 @@ target_include_directories(Voxels PRIVATE "src/")
 
 target_link_libraries(Voxels PRIVATE raylib)
 target_link_libraries(Voxels PRIVATE tinyfiledialogs::tinyfiledialogs)
+target_link_libraries(Voxels PRIVATE fmt::fmt)
 
 # Add Raylib ImGui
 target_include_directories(Voxels PRIVATE "external/rlImGui")
