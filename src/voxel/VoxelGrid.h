@@ -57,7 +57,7 @@ private:
 	std::vector<Vector3> vertices;
 	std::vector<Vector2> texCoords;
 	std::vector<Vector3> normals;
-	std::vector<unsigned char> materialIds;
+	std::vector<unsigned int> materialIds;
 	std::vector<unsigned short> indices;
 
 	std::vector<Voxel> voxels;

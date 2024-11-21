@@ -50,7 +50,7 @@ Renderer::Renderer()
 
     testVoxelGrid = std::make_unique<VoxelGrid>(8, 8, 8);
     testVoxelGrid->GetVoxel(4, 4, 0).filled = true;
-    testVoxelGrid->GetVoxel(4, 4, 0).materialId = 2;
+    testVoxelGrid->GetVoxel(4, 4, 0).materialId = 1;
     testVoxelGrid->GetVoxel(5, 4, 0).filled = true;
     testVoxelGrid->GenerateMesh();
 

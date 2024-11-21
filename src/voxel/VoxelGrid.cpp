@@ -132,7 +132,8 @@ void VoxelGrid::GenerateMesh()
 
 	// TextureId
 	vbos.textureId = rlLoadVertexBuffer(&materialIds[0], sizeof(unsigned int) * materialIds.size(), dynamic);
-	rlSetVertexAttribute(3, 1, RL_UNSIGNED_BYTE, 0, 0, 0);
+	// rlSetVertexAttribute(3, 1, GL_UNSIGNED_INT, 0, 0, 0);
+	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, 0, 0);
 	rlEnableVertexAttribute(3);
 	materialIds.clear();
 
