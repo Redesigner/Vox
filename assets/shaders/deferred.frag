@@ -62,8 +62,9 @@ float cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float r
     float D = normalDistribution(normal, halfwayDirection, alpha);
     float G = geometric(normal, viewDirection, alpha);
     float F = fresnel(viewDirection, halfwayDirection);
-    return (D * G * F) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
+    // return (D * G * F) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
     // return vec3(D, G, F);
+    return D * G * F;
 }
 
 void main() {

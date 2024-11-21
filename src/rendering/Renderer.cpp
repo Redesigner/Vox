@@ -8,9 +8,11 @@
 #include "rlgl.h"
 
 #include "editor/Editor.h"
+#include "rendering/ArrayTexture.h"
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
 #include "rendering/shaders/DeferredShader.h"
+#include "rendering/shaders/VoxelShader.h"
 #include "voxel/VoxelGrid.h"
 
 Renderer::Renderer()
@@ -22,9 +24,9 @@ Renderer::Renderer()
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
     materialRoughnessLocation = GetShaderLocation(gBufferShader, "materialRoughness");
     materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
+    voxelShader = std::make_unique<VoxelShader>();
 
     deferredShader = std::make_unique<DeferredShader>();
-
     skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
 
     gBuffer = std::make_unique<GBuffer>(800, 431);
@@ -50,6 +52,10 @@ Renderer::Renderer()
     voxelGrid.GetVoxel(4, 4, 0).filled = true;
     voxelMesh = voxelGrid.GenerateMesh();
     UploadMesh(&voxelMesh, true);
+
+    voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
+    voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
+    voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
 
     camera = { 0 };
     camera.position = Vector3(6.0f, 2.0f, 6.0f);    // Camera position
@@ -220,7 +226,7 @@ void Renderer::RenderDeferred()
     rlDisableDepthMask();
     deferredShader->Enable();
     {
-        // deferredShader->SetCameraPosition(camera.position);
+        // shader->SetCameraPosition(camera.position);
         testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
         gBuffer->ActivateTextures(0);
         deferredShader->SetCameraPosition(camera.position);
@@ -230,6 +236,10 @@ void Renderer::RenderDeferred()
     // rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
     rlEnableColorBlend();
     rlEnableDepthMask();
+}
+
+void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
+{
 }
 
 void Renderer::RenderSky()
