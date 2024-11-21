@@ -50,5 +50,5 @@ void VoxelShader::SetViewMatrix(const Matrix& view)
 
 void VoxelShader::SetProjectionMatrix(const Matrix& projection)
 {
-	rlSetUniformMatrix(uniformLocations.viewMatrix, projection);
+	rlSetUniformMatrix(uniformLocations.projectionMatrix, projection);
 }

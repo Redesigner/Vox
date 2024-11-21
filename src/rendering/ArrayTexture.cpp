@@ -48,7 +48,7 @@ void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 	}
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureId);
-	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, index, 0, width, height, 1, GL_RGBA8, GL_UNSIGNED_BYTE, image.data);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, index, width, height, 1, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 
 	// Unload the image, now that it's on the GPU
 	UnloadImage(image);
