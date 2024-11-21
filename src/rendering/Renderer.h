@@ -41,12 +41,14 @@ private:
 	std::unique_ptr<GBuffer> gBuffer;
 	std::unique_ptr<Framebuffer> deferredFramebuffer;
 
+	std::unique_ptr<VoxelGrid> testVoxelGrid;
 	std::unique_ptr<ArrayTexture> voxelTextures;
 
 	Shader gBufferShader;
 	std::unique_ptr<VoxelShader> voxelShader;
 	std::unique_ptr<DeferredShader> deferredShader;
 	Shader skyShader;
+
 
 	LightUniformLocations lightUniformLocations;
 	Light testLight;
@@ -56,5 +58,4 @@ private:
 	RenderTexture2D viewportTexture;
 	Material defaultMaterial;
 	Model testModel;
-	Mesh voxelMesh;
 };

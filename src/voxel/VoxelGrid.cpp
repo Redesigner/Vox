@@ -1,5 +1,7 @@
 #include "VoxelGrid.h"
 
+#include "rlgl.h"
+
 #include <stdexcept>
 
 const Vector3 VoxelGrid::up = Vector3(0.0f, 1.0f, 0.0f);
@@ -18,6 +20,13 @@ VoxelGrid::VoxelGrid(unsigned int width, unsigned int height, unsigned int depth
 	:width(width), height(height), depth(depth)
 {
 	voxels = std::vector<Voxel>(width * height * depth);
+
+	vaoId = rlLoadVertexArray();
+}
+
+VoxelGrid::~VoxelGrid()
+{
+	UnloadVertexObjects();
 }
 
 Voxel& VoxelGrid::GetVoxel(unsigned int x, unsigned int y, unsigned int z)
@@ -74,51 +83,118 @@ void VoxelGrid::SetVoxel(Voxel voxel, unsigned int x, unsigned int y, unsigned i
 	voxels[static_cast<size_t>(x + (width * y) + (width * height * z))] = voxel;
 }
 
-Mesh VoxelGrid::GenerateMesh()
+void VoxelGrid::GenerateMesh()
 {
+	indices.clear();
+	UnloadVertexObjects();
+
 	for (int x = 0; x < width; ++x)
 	{
 		for (int y = 0; y < height; ++y)
 		{
 			for (int z = 0; z < depth; ++z)
 			{
-				if (voxels[static_cast<size_t>(x + (width * y) + (width * height * z))].filled)
+				const Voxel& voxel = voxels[static_cast<size_t>(x + (width * y) + (width * height * z))];
+				if (voxel.filled)
 				{
-					AddCube(x, y, z);
+					AddCube(x, y, z, voxel.materialId);
 				}
 			}
 		}
 	}
+	
+	// layout location values / indices here come from gBufferVoxel.vert
+	// all vector sizes should be the same
+	bool dynamic = false;
+	vaoId = rlLoadVertexArray();
 
-	Mesh mesh{ 0 };
-	mesh.vertices = reinterpret_cast<float*>(&vertices[0]);
-	mesh.vertexCount = vertices.size();
+	// Position
+	vbos.position = rlLoadVertexBuffer(&vertices[0], sizeof(Vector3) * vertices.size(), dynamic);
+	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
+	rlEnableVertexAttribute(0);
 	vertices.clear();
 
-	mesh.texcoords = reinterpret_cast<float*>(&texCoords[0]);
+	// TexCoord
+	vbos.texCoord = rlLoadVertexBuffer(&texCoords[0], sizeof(Vector2) * texCoords.size(), dynamic);
+	rlSetVertexAttribute(0, 2, RL_FLOAT, 0, 0, 0);
+	rlEnableVertexAttribute(1);
 	texCoords.clear();
 
-	mesh.normals = reinterpret_cast<float*>(&normals[0]);
+	// Normal
+	vbos.normal = rlLoadVertexBuffer(&normals[0], sizeof(Vector3) * normals.size(), dynamic);
+	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
+	rlEnableVertexAttribute(2);
 	normals.clear();
 
-	mesh.indices = &indices[0];
-	mesh.triangleCount = indices.size() / 3;
-	indices.clear();
+	// TextureId
+	vbos.textureId = rlLoadVertexBuffer(&materialIds[0], sizeof(unsigned short) * materialIds.size(), dynamic);
+	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
+	rlEnableVertexAttribute(3);
+	materialIds.clear();
 
-	return mesh;
+	// Indices
+	vbos.index = rlLoadVertexBufferElement(&indices[0], sizeof(unsigned short) * indices.size(), dynamic);
+	indexCount = indices.size();
+
+	rlDisableVertexArray();
 }
 
-void VoxelGrid::AddCube(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::EnableVertexArray()
 {
-	AddTopFace(x, y, z);
-	AddBottomFace(x, y, z);
-	AddFrontFace(x, y, z);
-	AddBackFace(x, y, z);
-	AddLeftFace(x, y, z);
-	AddRightFace(x, y, z);
+	rlEnableVertexArray(vaoId);
 }
 
-void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z)
+unsigned int VoxelGrid::GetVertexCount() const
+{
+	return indexCount;
+}
+
+unsigned short* VoxelGrid::GetIndices()
+{
+	return &indices[0];
+}
+
+void VoxelGrid::UnloadVertexObjects()
+{
+	if (vbos.position)
+	{
+		rlUnloadVertexBuffer(vbos.position);
+		vbos.position = 0;
+	}
+	if (vbos.texCoord)
+	{
+		rlUnloadVertexBuffer(vbos.texCoord);
+		vbos.texCoord = 0;
+	}
+	if (vbos.normal)
+	{
+		rlUnloadVertexBuffer(vbos.normal);
+		vbos.normal = 0;
+	}
+	if (vbos.position)
+	{
+		rlUnloadVertexBuffer(vbos.textureId);
+		vbos.textureId = 0;
+	}
+
+	if (vaoId)
+	{
+		rlUnloadVertexArray(vaoId);
+		vaoId = 0;
+	}
+}
+
+void VoxelGrid::AddCube(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
+{
+	AddTopFace(x, y, z, materialId);
+	AddBottomFace(x, y, z, materialId);
+	AddFrontFace(x, y, z, materialId);
+	AddBackFace(x, y, z, materialId);
+	AddLeftFace(x, y, z, materialId);
+	AddRightFace(x, y, z, materialId);
+}
+
+void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -140,6 +216,11 @@ void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(up);
 	normals.emplace_back(up);
 
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+
 	indices.emplace_back(currentIndex + 2);
 	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex);
@@ -148,7 +229,7 @@ void VoxelGrid::AddTopFace(unsigned int x, unsigned int y, unsigned int z)
 	indices.emplace_back(currentIndex + 1);
 }
 
-void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -170,6 +251,11 @@ void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(down);
 	normals.emplace_back(down);
 
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+
 	indices.emplace_back(currentIndex);
 	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex + 2);
@@ -178,7 +264,7 @@ void VoxelGrid::AddBottomFace(unsigned int x, unsigned int y, unsigned int z)
 	indices.emplace_back(currentIndex + 2);
 }
 
-void VoxelGrid::AddFrontFace(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::AddFrontFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -200,6 +286,11 @@ void VoxelGrid::AddFrontFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(forward);
 	normals.emplace_back(forward);
 
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+
 	indices.emplace_back(currentIndex);
 	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex + 2);
@@ -208,7 +299,7 @@ void VoxelGrid::AddFrontFace(unsigned int x, unsigned int y, unsigned int z)
 	indices.emplace_back(currentIndex + 2);
 }
 
-void VoxelGrid::AddBackFace(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::AddBackFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -230,6 +321,11 @@ void VoxelGrid::AddBackFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(back);
 	normals.emplace_back(back);
 
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+
 	indices.emplace_back(currentIndex + 2);
 	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex);
@@ -238,7 +334,7 @@ void VoxelGrid::AddBackFace(unsigned int x, unsigned int y, unsigned int z)
 	indices.emplace_back(currentIndex + 1);
 }
 
-void VoxelGrid::AddLeftFace(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::AddLeftFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -260,6 +356,11 @@ void VoxelGrid::AddLeftFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(left);
 	normals.emplace_back(left);
 
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+
 	indices.emplace_back(currentIndex + 2);
 	indices.emplace_back(currentIndex + 1);
 	indices.emplace_back(currentIndex);
@@ -268,7 +369,7 @@ void VoxelGrid::AddLeftFace(unsigned int x, unsigned int y, unsigned int z)
 	indices.emplace_back(currentIndex + 1);
 }
 
-void VoxelGrid::AddRightFace(unsigned int x, unsigned int y, unsigned int z)
+void VoxelGrid::AddRightFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId)
 {
 	float xf = static_cast<float>(x);
 	float yf = static_cast<float>(y);
@@ -289,6 +390,11 @@ void VoxelGrid::AddRightFace(unsigned int x, unsigned int y, unsigned int z)
 	normals.emplace_back(right);
 	normals.emplace_back(right);
 	normals.emplace_back(right);
+
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
+	materialIds.emplace_back(materialId);
 
 	indices.emplace_back(currentIndex);
 	indices.emplace_back(currentIndex + 1);

@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include "raylib.h"
+
 class ArrayTexture;
 
 class VoxelShader : public VoxShader
@@ -20,6 +22,9 @@ public:
 	~VoxelShader();
 
 	void SetArrayTexture(ArrayTexture* arrayTexture);
+	void SetModelMatrix(const Matrix& model);
+	void SetViewMatrix(const Matrix& view);
+	void SetProjectionMatrix(const Matrix& projection);
 
 private:
 	const std::string vertLocation = "assets/shaders/gBufferVoxel.vert";
