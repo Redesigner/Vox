@@ -37,3 +37,18 @@ void VoxelShader::SetArrayTexture(ArrayTexture* arrayTexture)
 	rlSetUniformSampler(uniformLocations.colorTextures, position);
 	rlSetUniform(uniformLocations.colorTextures, &position, SHADER_UNIFORM_INT, 1);
 }
+
+void VoxelShader::SetModelMatrix(const Matrix& model)
+{
+	rlSetUniformMatrix(uniformLocations.modelMatrix, model);
+}
+
+void VoxelShader::SetViewMatrix(const Matrix& view)
+{
+	rlSetUniformMatrix(uniformLocations.viewMatrix, view);
+}
+
+void VoxelShader::SetProjectionMatrix(const Matrix& projection)
+{
+	rlSetUniformMatrix(uniformLocations.viewMatrix, projection);
+}

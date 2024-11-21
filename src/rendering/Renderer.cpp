@@ -48,10 +48,11 @@ Renderer::Renderer()
     defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
     defaultMaterial.shader = gBufferShader;
 
-    VoxelGrid voxelGrid = VoxelGrid(8, 8, 8);
-    voxelGrid.GetVoxel(4, 4, 0).filled = true;
-    voxelMesh = voxelGrid.GenerateMesh();
-    UploadMesh(&voxelMesh, true);
+    testVoxelGrid = std::make_unique<VoxelGrid>(8, 8, 8);
+    testVoxelGrid->GetVoxel(4, 4, 0).filled = true;
+    testVoxelGrid->GetVoxel(4, 4, 0).materialId = 1;
+    testVoxelGrid->GetVoxel(5, 4, 0).filled = true;
+    testVoxelGrid->GenerateMesh();
 
     voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
     voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
@@ -113,8 +114,9 @@ void Renderer::Render(Editor* editor)
         rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         rlSetFramebufferWidth(viewportTexture.texture.width);
         rlSetFramebufferHeight(viewportTexture.texture.height);
-        RenderGBuffer();
 
+        RenderGBuffer();
+        RenderVoxelGrid(testVoxelGrid.get());
         RenderDeferred();
         RenderSky();
 
@@ -207,7 +209,6 @@ void Renderer::RenderGBuffer()
             rlEnableShader(gBufferShader.id);
             rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
             rlDisableShader();
-            DrawMesh(voxelMesh, defaultMaterial, MatrixIdentity());
             EndMode3D();
         }
         rlDisableShader();
@@ -240,6 +241,13 @@ void Renderer::RenderDeferred()
 
 void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 {
+    voxelShader->Enable();
+    voxelShader->SetModelMatrix(MatrixIdentity());
+    voxelShader->SetViewMatrix(GetCameraViewMatrix(&camera));
+    voxelShader->SetProjectionMatrix(GetCameraProjectionMatrix(&camera, tan(DEG2RAD * camera.fovy)));
+    voxelGrid->EnableVertexArray();
+    rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), voxelGrid->GetIndices());
+    rlDisableVertexArray();
 }
 
 void Renderer::RenderSky()

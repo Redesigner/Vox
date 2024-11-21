@@ -7,25 +7,38 @@
 
 class VoxelGrid
 {
+	struct Vbos
+	{
+		unsigned int position, texCoord, normal, textureId, index;
+	};
+
 public:
 	VoxelGrid(unsigned int width, unsigned int height, unsigned int depth);
+	~VoxelGrid();
 
 	Voxel& GetVoxel(unsigned int x, unsigned int y, unsigned int z);
 	const Voxel& GetVoxel(unsigned int x, unsigned int y, unsigned int z) const;
 
 	void SetVoxel(Voxel voxel, unsigned int x, unsigned int y, unsigned int z);
 
-	Mesh GenerateMesh();
+	void GenerateMesh();
+
+	void EnableVertexArray();
+
+	unsigned int GetVertexCount() const;
+	unsigned short* GetIndices();
 
 private:
-	void AddCube(unsigned int x, unsigned int y, unsigned int z);
+	void UnloadVertexObjects();
 
-	void AddTopFace(unsigned int x, unsigned int y, unsigned int z);
-	void AddBottomFace(unsigned int x, unsigned int y, unsigned int z);
-	void AddFrontFace(unsigned int x, unsigned int y, unsigned int z);
-	void AddBackFace(unsigned int x, unsigned int y, unsigned int z);
-	void AddLeftFace(unsigned int x, unsigned int y, unsigned int z);
-	void AddRightFace(unsigned int x, unsigned int y, unsigned int z);
+	void AddCube(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+
+	void AddTopFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+	void AddBottomFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+	void AddFrontFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+	void AddBackFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+	void AddLeftFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
+	void AddRightFace(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
 
 	unsigned int width, height, depth;
 
@@ -44,7 +57,13 @@ private:
 	std::vector<Vector3> vertices;
 	std::vector<Vector2> texCoords;
 	std::vector<Vector3> normals;
+	std::vector<unsigned short> materialIds;
 	std::vector<unsigned short> indices;
 
 	std::vector<Voxel> voxels;
+
+	unsigned int indexCount = 0;
+
+	unsigned int vaoId = 0;
+	Vbos vbos;
 };

@@ -62,9 +62,9 @@ float cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float r
     float D = normalDistribution(normal, halfwayDirection, alpha);
     float G = geometric(normal, viewDirection, alpha);
     float F = fresnel(viewDirection, halfwayDirection);
-    // return (D * G * F) / (4.0 * dot(normal, lightDirection) * dot(normal, viewDirection));
+    return (D * G * F) / (4.0 * dot(normal, viewDirection));
     // return vec3(D, G, F);
-    return D * G * F;
+    // return D * G * F;
 }
 
 void main() {
@@ -72,7 +72,7 @@ void main() {
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedo, texCoord).rgb;
     // float roughness = texture(gMetallicRoughness, texCoord).g;
-    float roughness = 0.1;
+    float roughness = 1.0;
     float metallic = texture(gMetallicRoughness, texCoord).r;
 
     vec3 ambient = albedo * vec3(0.1f);
