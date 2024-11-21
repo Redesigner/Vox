@@ -1,8 +1,10 @@
 #include "VoxelGrid.h"
 
 #include "rlgl.h"
+#include "external/glad.h"
 
 #include <stdexcept>
+
 
 const Vector3 VoxelGrid::up = Vector3(0.0f, 1.0f, 0.0f);
 const Vector3 VoxelGrid::down = Vector3(0.0f, -1.0f, 0.0f);
@@ -22,6 +24,7 @@ VoxelGrid::VoxelGrid(unsigned int width, unsigned int height, unsigned int depth
 	voxels = std::vector<Voxel>(width * height * depth);
 
 	vaoId = rlLoadVertexArray();
+	vbos = {};
 }
 
 VoxelGrid::~VoxelGrid()
@@ -107,6 +110,7 @@ void VoxelGrid::GenerateMesh()
 	// all vector sizes should be the same
 	bool dynamic = false;
 	vaoId = rlLoadVertexArray();
+	EnableVertexArray();
 
 	// Position
 	vbos.position = rlLoadVertexBuffer(&vertices[0], sizeof(Vector3) * vertices.size(), dynamic);
@@ -116,19 +120,19 @@ void VoxelGrid::GenerateMesh()
 
 	// TexCoord
 	vbos.texCoord = rlLoadVertexBuffer(&texCoords[0], sizeof(Vector2) * texCoords.size(), dynamic);
-	rlSetVertexAttribute(0, 2, RL_FLOAT, 0, 0, 0);
+	rlSetVertexAttribute(1, 2, RL_FLOAT, 0, 0, 0);
 	rlEnableVertexAttribute(1);
 	texCoords.clear();
 
 	// Normal
 	vbos.normal = rlLoadVertexBuffer(&normals[0], sizeof(Vector3) * normals.size(), dynamic);
-	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
+	rlSetVertexAttribute(2, 3, RL_FLOAT, 0, 0, 0);
 	rlEnableVertexAttribute(2);
 	normals.clear();
 
 	// TextureId
-	vbos.textureId = rlLoadVertexBuffer(&materialIds[0], sizeof(unsigned short) * materialIds.size(), dynamic);
-	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
+	vbos.textureId = rlLoadVertexBuffer(&materialIds[0], sizeof(unsigned int) * materialIds.size(), dynamic);
+	rlSetVertexAttribute(3, 1, RL_UNSIGNED_BYTE, 0, 0, 0);
 	rlEnableVertexAttribute(3);
 	materialIds.clear();
 
@@ -175,6 +179,11 @@ void VoxelGrid::UnloadVertexObjects()
 	{
 		rlUnloadVertexBuffer(vbos.textureId);
 		vbos.textureId = 0;
+	}
+	if (vbos.index)
+	{
+		rlUnloadVertexBuffer(vbos.index);
+		vbos.index = 0;
 	}
 
 	if (vaoId)
