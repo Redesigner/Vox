@@ -8,7 +8,7 @@ layout (location = 4) out float gDepth;
 in vec3 fragPosition;
 in vec2 fragTexCoord;
 in vec3 fragNormal;
-flat in int texId;
+flat in uint fragTextureId;
 
 uniform float materialRoughness;
 uniform float materialMetallic;
@@ -20,7 +20,7 @@ uniform sampler2D specularTexture;
 void main() {
     gPosition = fragPosition;
     gNormal = normalize(fragNormal);
-    gAlbedo = texture(colorTextures, vec3(fragTexCoord.xy, texId)).rgb;
+    gAlbedo = texture(colorTextures, vec3(fragTexCoord.xy, fragTextureId)).rgb;
     gMetallicRoughness = vec2(materialRoughness, materialMetallic);
     gDepth = gl_FragDepth;
 }
