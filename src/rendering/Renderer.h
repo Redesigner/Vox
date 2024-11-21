@@ -7,10 +7,13 @@
 
 #include "rendering/Light.h"
 
+class ArrayTexture;
 class DeferredShader;
 class Editor;
 class Framebuffer;
 class GBuffer;
+class VoxelGrid;
+class VoxelShader;
 
 class Renderer
 {
@@ -29,6 +32,8 @@ private:
 
 	void RenderDeferred();
 
+	void RenderVoxelGrid(VoxelGrid* voxelGrid);
+
 	void RenderSky();
 
 	void CopyViewportToTexture(RenderTexture2D& texture);
@@ -36,7 +41,10 @@ private:
 	std::unique_ptr<GBuffer> gBuffer;
 	std::unique_ptr<Framebuffer> deferredFramebuffer;
 
+	std::unique_ptr<ArrayTexture> voxelTextures;
+
 	Shader gBufferShader;
+	std::unique_ptr<VoxelShader> voxelShader;
 	std::unique_ptr<DeferredShader> deferredShader;
 	Shader skyShader;
 
