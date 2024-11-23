@@ -31,6 +31,7 @@ namespace Octree
 
 	private:
 		void AccumulatePacked(std::vector<char>& data) const;
+		void Unpack(const std::vector<char>& data, size_t& currentIndex);
 
 		static int GetIndex(int x, int y, int z);
 		void* GetAccessor(int x, int y, int z) const;
