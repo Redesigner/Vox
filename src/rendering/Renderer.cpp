@@ -49,26 +49,11 @@ Renderer::Renderer()
     defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
     defaultMaterial.shader = gBufferShader;
 
-    Voxel testVoxel;
-    testVoxel.materialId = 0;
-    testVoxel.filled = true;
-
-    std::unique_ptr<Octree::Node> octree = std::make_unique<Octree::Node>(16);
-    for (int x = -8; x < 8; x++)
-    {
-        for (int y = -8; y < 0; ++y)
-        {
-            for (int z = -8; z < 8; ++z)
-            {
-                octree->SetVoxel(x, y, z, &testVoxel);
-            }
-        }
-    }
-    testVoxel.materialId = 1;
-    octree->SetVoxel(6, 3, 7, &testVoxel);
-
-    // testVoxel = *octree->GetVoxel(0, 0, 0);
-
+    int dataSize = 0;
+    unsigned char* octreeRaw = LoadFileData("assets/voxels/test.vox", &dataSize);
+    std::vector<char> octreeData;
+    octreeData.insert(octreeData.begin(), octreeRaw, octreeRaw + dataSize);
+    std::shared_ptr<Octree::Node> octree = Octree::Node::FromPacked(octreeData);
     testVoxelGrid = VoxelGrid::FromOctree(octree.get());
     testVoxelGrid->x = -8;
     testVoxelGrid->y = -8;
