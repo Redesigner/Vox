@@ -41,7 +41,7 @@ private:
 	std::unique_ptr<GBuffer> gBuffer;
 	std::unique_ptr<Framebuffer> deferredFramebuffer;
 
-	std::unique_ptr<VoxelGrid> testVoxelGrid;
+	std::shared_ptr<VoxelGrid> testVoxelGrid;
 	std::unique_ptr<ArrayTexture> voxelTextures;
 
 	Shader gBufferShader;

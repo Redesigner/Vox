@@ -1,5 +1,7 @@
 #include "Octree.h"
 
+
+#include "raylib.h"
 #include "Voxel/Voxel.h"
 
 #include <cstring>
@@ -61,6 +63,11 @@ Octree::Node::~Node()
 	}
 }
 
+unsigned short Octree::Node::GetSize() const
+{
+	return size;
+}
+
 Voxel* Octree::Node::GetVoxel(int x, int y, int z)
 {
 	switch (state)
@@ -85,6 +92,7 @@ Voxel* Octree::Node::GetVoxel(int x, int y, int z)
 			return reinterpret_cast<Node*>(GetAccessor(x, y, z))->GetVoxel(subX, subY, subZ);
 		}
 	}
+	return nullptr;
 }
 
 void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
@@ -258,6 +266,13 @@ std::vector<char> Octree::Node::GetPacked() const
 std::shared_ptr<Octree::Node> Octree::Node::FromPacked(const std::vector<char>& data)
 {
 	unsigned short treeSize = *reinterpret_cast<const unsigned short*>(&data[0]);
+
+	if (treeSize < 2 || (treeSize & (treeSize - 1)) != 0)
+	{
+		TraceLog(LOG_ERROR, "Unpacking octree failed: size constant is not a power of 2.");
+		return nullptr;
+	}
+
 	std::shared_ptr<Octree::Node> root = std::make_shared<Octree::Node>(treeSize);
 	size_t currentIndex = sizeof(unsigned short);
 	root->Unpack(data, currentIndex);
@@ -320,8 +335,7 @@ void Octree::Node::AccumulatePacked(std::vector<char>& data) const
 
 void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
 {
-	const char& currentStateChar = data[currentIndex];
-	currentIndex++;
+	const char currentStateChar = data[currentIndex];
 
 	if (currentStateChar == 'E')
 	{
@@ -335,6 +349,12 @@ void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
 	{
 		state = Partial;
 	}
+	else
+	{
+		TraceLog(LOG_ERROR, "Failure unpacking octree. A node was malformed.");
+		return;
+	}
+	currentIndex++;
 
 	if (size == 2)
 	{
@@ -350,6 +370,7 @@ void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
 			{
 				subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 				std::memcpy(subNodes[0], &data[currentIndex], sizeof(Voxel));
+				currentIndex += sizeof(Voxel);
 				return;
 			}
 
@@ -378,6 +399,7 @@ void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
 		{
 			subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 			std::memcpy(subNodes[0], &data[currentIndex], sizeof(Voxel));
+			currentIndex += sizeof(Voxel);
 			return;
 		}
 
