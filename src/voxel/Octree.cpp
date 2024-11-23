@@ -16,7 +16,7 @@ Octree::Node::Node(unsigned int size, Voxel* voxel)
 	:size(size)
 {
 	// Allocate a voxel that we can copy our incoming voxel to
-	subNodes[0] = new Voxel;
+	subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 	std::memcpy(subNodes[0], voxel, sizeof(Voxel));
 	state = Full;
 }
@@ -77,10 +77,11 @@ Voxel* Octree::Node::GetVoxel(int x, int y, int z)
 				return reinterpret_cast<Voxel*>(GetAccessor(x, y, z));
 			}
 
-			int half = size / 2;
-			int subX = x + x < 0 ? half : -half;
-			int subY = y + y < 0 ? half : -half;
-			int subZ = y + z < 0 ? half : -half;
+			int half = size / 4;
+
+			int subX = x + (x < 0 ? half : -half);
+			int subY = y + (y < 0 ? half : -half);
+			int subZ = z + (z < 0 ? half : -half);
 			return reinterpret_cast<Node*>(GetAccessor(x, y, z))->GetVoxel(subX, subY, subZ);
 		}
 	}
@@ -95,14 +96,14 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 			case Empty:
 			{
 				// We don't have any nodes so allocate new voxels
-				subNodes[0] = new Voxel;
-				subNodes[1] = new Voxel;
-				subNodes[2] = new Voxel;
-				subNodes[3] = new Voxel;
-				subNodes[4] = new Voxel;
-				subNodes[5] = new Voxel;
-				subNodes[6] = new Voxel;
-				subNodes[7] = new Voxel;
+				subNodes[0] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[1] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[2] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[3] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[4] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[5] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[6] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[7] = reinterpret_cast<Node*>(new Voxel);
 
 				std::memcpy(GetAccessor(x, y, z), voxel, sizeof(Voxel));
 				state = Partial;
@@ -111,17 +112,17 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 
 			case Full:
 			{
-				// We only have one node, at index 0
-				delete subNodes[0];
+				// We only have one voxel, at index 0
+				delete reinterpret_cast<Voxel*>(subNodes[0]);
 
-				subNodes[0] = new Voxel;
-				subNodes[1] = new Voxel;
-				subNodes[2] = new Voxel;
-				subNodes[3] = new Voxel;
-				subNodes[4] = new Voxel;
-				subNodes[5] = new Voxel;
-				subNodes[6] = new Voxel;
-				subNodes[7] = new Voxel;
+				subNodes[0] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[1] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[2] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[3] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[4] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[5] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[6] = reinterpret_cast<Node*>(new Voxel);
+				subNodes[7] = reinterpret_cast<Node*>(new Voxel);
 
 				std::memcpy(GetAccessor(x, y, z), voxel, sizeof(Voxel));
 				state = Partial;
@@ -137,7 +138,8 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 				bool allSame = true;
 				for (int i = 0; i < 8; ++i)
 				{
-					if (reinterpret_cast<Voxel*>(subNodes[i]) != voxel)
+					Voxel* subVoxel = reinterpret_cast<Voxel*>(subNodes[i]);
+					if (*subVoxel != *voxel)
 					{
 						allSame = false;
 						break;
@@ -169,16 +171,17 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 			}
 
 			// Allocate subnodes
-			int half = size / 2;
+			int half = size / 4;
 			for (int i = 0; i < 8; ++i)
 			{
-				subNodes[i] = new Node(half);
+				subNodes[i] = new Node(size / 2);
 			}
-			int subX = x + x < 0 ? half : -half;
-			int subY = y + y < 0 ? half : -half;
-			int subZ = y + z < 0 ? half : -half;
+			int subX = x + (x < 0 ? half : -half);
+			int subY = y + (y < 0 ? half : -half);
+			int subZ = z + (z < 0 ? half : -half);
 
 			reinterpret_cast<Node*>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
+			state = Partial;
 			break;
 		}
 
@@ -193,29 +196,30 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 				return;
 			}
 
-			int half = size / 2;
+			int half = size / 4;
 
 			for (int i = 0; i < 8; ++i)
 			{
-				subNodes[i] = new Node(half, fullVoxel);
+				subNodes[i] = new Node(size / 2, fullVoxel);
 			}
 			delete fullVoxel;
 
-			int subX = x + x < 0 ? half : -half;
-			int subY = y + y < 0 ? half : -half;
-			int subZ = y + z < 0 ? half : -half;
+			int subX = x + (x < 0 ? half : -half);
+			int subY = y + (y < 0 ? half : -half);
+			int subZ = z + (z < 0 ? half : -half);
 
 			reinterpret_cast<Node*>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
+			state = Partial;
 			break;
 		}
 
 		case Partial:
 		{
-			int half = size / 2;
+			int half = size / 4;
 
-			int subX = x + x < 0 ? half : -half;
-			int subY = y + y < 0 ? half : -half;
-			int subZ = y + z < 0 ? half : -half;
+			int subX = x + (x < 0 ? half : -half);
+			int subY = y + (y < 0 ? half : -half);
+			int subZ = z + (z < 0 ? half : -half);
 
 			Node* assignedNode = reinterpret_cast<Node*>(GetAccessor(x, y, z));
 			assignedNode->SetVoxel(subX, subY, subZ, voxel);
@@ -307,7 +311,7 @@ void Octree::Node::CollapseSubnodes(Voxel* voxel)
 		delete reinterpret_cast<Node*>(subNodes[i]);
 	}
 
-	subNodes[0] = new Voxel;
+	subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 	std::memcpy(subNodes[0], voxel, sizeof(Voxel));
 	state = Full;
 }
