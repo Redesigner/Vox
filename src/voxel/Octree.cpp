@@ -245,6 +245,77 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 	}
 }
 
+std::vector<char> Octree::Node::GetPacked() const
+{
+	std::vector<char> result;
+	result.insert(result.begin(), &size, &size + 2);
+
+	AccumulatePacked(result);
+
+	return result;
+}
+
+std::shared_ptr<Octree::Node> Octree::Node::FromPacked(const std::vector<char>& data)
+{
+	unsigned short treeSize = *reinterpret_cast<const unsigned short*>(&data[0]);
+	std::shared_ptr<Octree::Node> root = std::make_shared<Octree::Node>(treeSize);
+	return root;
+}
+
+void Octree::Node::AccumulatePacked(std::vector<char>& data) const
+{
+	if (size == 2)
+	{
+		switch (state)
+		{
+			case Empty:
+			{
+				data.emplace_back('E');
+				return;
+			}
+			case Full:
+			{
+				data.emplace_back('F');
+				data.insert(data.end(), reinterpret_cast<char*>(subNodes[0]), reinterpret_cast<char*>(subNodes[0]) + sizeof(Voxel));
+				return;
+			}
+			case Partial:
+			{
+				data.emplace_back('P');
+				for (int i = 0; i < 8; ++i)
+				{
+					data.insert(data.end(), reinterpret_cast<char*>(subNodes[i]), reinterpret_cast<char*>(subNodes[i]) + sizeof(Voxel));
+				}
+				return;
+			}
+		}
+	}
+
+	switch (state)
+	{
+		case Empty:
+		{
+			data.emplace_back('E');
+			return;
+		}
+		case Full:
+		{
+			data.emplace_back('F');
+			data.insert(data.end(), reinterpret_cast<char*>(subNodes[0]), reinterpret_cast<char*>(subNodes[0]) + sizeof(Voxel));
+			return;
+		}
+		case Partial:
+		{
+			data.emplace_back('P');
+			for (int i = 0; i < 8; ++i)
+			{
+				subNodes[i]->AccumulatePacked(data);
+			}
+			return;
+		}
+	}
+}
+
 int Octree::Node::GetIndex(int x, int y, int z)
 {
 	if (x < 0)

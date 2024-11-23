@@ -40,9 +40,12 @@ int main()
         octree->SetVoxel(1, 1, 1, &testVoxel);
 
         testVoxel.materialId = 2;
-        octree->SetVoxel(0, 0, 0, &testVoxel);
+        // octree->SetVoxel(0, 0, 0, &testVoxel);
 
         testVoxel = *octree->GetVoxel(0, 0, 0);
+
+        std::vector<char> packedData = octree->GetPacked();
+        std::shared_ptr<Octree::Node> loadedTree = Octree::Node::FromPacked(packedData);
 
         while (!WindowShouldClose())
         {
