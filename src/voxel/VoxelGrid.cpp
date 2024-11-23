@@ -2,8 +2,9 @@
 
 #include "rlgl.h"
 #include "external/glad.h"
-
 #include <stdexcept>
+
+#include "voxel/Octree.h"
 
 
 const Vector3 VoxelGrid::up = Vector3(0.0f, 1.0f, 0.0f);
@@ -30,6 +31,30 @@ VoxelGrid::VoxelGrid(unsigned int width, unsigned int height, unsigned int depth
 VoxelGrid::~VoxelGrid()
 {
 	UnloadVertexObjects();
+}
+
+std::shared_ptr<VoxelGrid> VoxelGrid::FromOctree(Octree::Node* octree)
+{
+	unsigned int size = octree->GetSize();
+	unsigned int half = size / 2;
+
+	std::shared_ptr<VoxelGrid> voxelGrid = std::make_shared<VoxelGrid>(size, size, size);
+
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < size; ++y)
+		{
+			for (int z = 0; z < size; ++z)
+			{
+				Voxel* voxel = octree->GetVoxel(x - half, y - half, z - half);
+				if (voxel)
+				{
+					voxelGrid->GetVoxel(x, y, z) = *voxel;
+				}
+			}
+		}
+	}
+	return voxelGrid;
 }
 
 Voxel& VoxelGrid::GetVoxel(unsigned int x, unsigned int y, unsigned int z)

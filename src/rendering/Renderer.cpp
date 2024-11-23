@@ -13,6 +13,7 @@
 #include "rendering/Framebuffer.h"
 #include "rendering/shaders/DeferredShader.h"
 #include "rendering/shaders/VoxelShader.h"
+#include "voxel/Octree.h"
 #include "voxel/VoxelGrid.h"
 
 Renderer::Renderer()
@@ -48,10 +49,28 @@ Renderer::Renderer()
     defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
     defaultMaterial.shader = gBufferShader;
 
-    testVoxelGrid = std::make_unique<VoxelGrid>(8, 8, 8);
-    testVoxelGrid->GetVoxel(4, 4, 0).filled = true;
-    testVoxelGrid->GetVoxel(4, 4, 0).materialId = 1;
-    testVoxelGrid->GetVoxel(5, 4, 0).filled = true;
+    Voxel testVoxel;
+    testVoxel.materialId = 0;
+    testVoxel.filled = true;
+
+    std::unique_ptr<Octree::Node> octree = std::make_unique<Octree::Node>(32);
+    octree->SetVoxel(0, 0, 0, &testVoxel);
+    octree->SetVoxel(0, 0, 1, &testVoxel);
+    octree->SetVoxel(0, 1, 0, &testVoxel);
+    octree->SetVoxel(0, 1, 1, &testVoxel);
+    octree->SetVoxel(1, 0, 0, &testVoxel);
+    octree->SetVoxel(1, 0, 1, &testVoxel);
+    octree->SetVoxel(1, 1, 0, &testVoxel);
+    octree->SetVoxel(1, 1, 1, &testVoxel);
+    testVoxel.materialId = 1;
+    octree->SetVoxel(6, 3, 7, &testVoxel);
+
+    testVoxel = *octree->GetVoxel(0, 0, 0);
+
+    testVoxelGrid = VoxelGrid::FromOctree(octree.get());
+    testVoxelGrid->x = -16;
+    testVoxelGrid->y = -16;
+    testVoxelGrid->z = -16;
     testVoxelGrid->GenerateMesh();
 
     voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
@@ -244,7 +263,7 @@ void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlDisableColorBlend();
     rlEnableDepthTest();
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(MatrixIdentity());
+    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x, voxelGrid->y, voxelGrid->z));
     voxelShader->SetViewMatrix(GetCameraViewMatrix(&camera));
     float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
     voxelShader->SetProjectionMatrix(GetCameraProjectionMatrix(&camera, aspect));

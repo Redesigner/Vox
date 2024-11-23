@@ -3,7 +3,13 @@
 #include "voxel/Voxel.h"
 #include "raylib.h"
 
+#include <memory>
 #include <vector>
+
+namespace Octree
+{
+	class Node;
+}
 
 class VoxelGrid
 {
@@ -16,6 +22,8 @@ public:
 	VoxelGrid(unsigned int width, unsigned int height, unsigned int depth);
 	~VoxelGrid();
 
+	static std::shared_ptr<VoxelGrid> FromOctree(Octree::Node* octree);
+
 	Voxel& GetVoxel(unsigned int x, unsigned int y, unsigned int z);
 	const Voxel& GetVoxel(unsigned int x, unsigned int y, unsigned int z) const;
 
@@ -27,6 +35,8 @@ public:
 
 	unsigned int GetVertexCount() const;
 	unsigned short* GetIndices();
+
+	int x, y, z = 0;
 
 private:
 	void UnloadVertexObjects();
@@ -63,7 +73,6 @@ private:
 	std::vector<Voxel> voxels;
 
 	unsigned int indexCount = 0;
-
 	unsigned int vaoId = 0;
 	Vbos vbos;
 };
