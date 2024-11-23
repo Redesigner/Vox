@@ -248,7 +248,7 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 std::vector<char> Octree::Node::GetPacked() const
 {
 	std::vector<char> result;
-	result.insert(result.begin(), &size, &size + 2);
+	result.insert(result.begin(), reinterpret_cast<const char*>(&size), reinterpret_cast<const char*>(&size) + sizeof(short));
 
 	AccumulatePacked(result);
 
@@ -259,6 +259,8 @@ std::shared_ptr<Octree::Node> Octree::Node::FromPacked(const std::vector<char>& 
 {
 	unsigned short treeSize = *reinterpret_cast<const unsigned short*>(&data[0]);
 	std::shared_ptr<Octree::Node> root = std::make_shared<Octree::Node>(treeSize);
+	size_t currentIndex = sizeof(unsigned short);
+	root->Unpack(data, currentIndex);
 	return root;
 }
 
@@ -310,6 +312,81 @@ void Octree::Node::AccumulatePacked(std::vector<char>& data) const
 			for (int i = 0; i < 8; ++i)
 			{
 				subNodes[i]->AccumulatePacked(data);
+			}
+			return;
+		}
+	}
+}
+
+void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
+{
+	const char& currentStateChar = data[currentIndex];
+	currentIndex++;
+
+	if (currentStateChar == 'E')
+	{
+		state = Empty;
+	}
+	else if (currentStateChar == 'F')
+	{
+		state = Full;
+	}
+	else if (currentStateChar == 'P')
+	{
+		state = Partial;
+	}
+
+	if (size == 2)
+	{
+		switch (state)
+		{
+			case Empty:
+			{
+				subNodes[0] = nullptr;
+				return;
+			}
+
+			case Full:
+			{
+				subNodes[0] = reinterpret_cast<Node*>(new Voxel);
+				std::memcpy(subNodes[0], &data[currentIndex], sizeof(Voxel));
+				return;
+			}
+
+			case Partial:
+			{
+				for (int i = 0; i < 8; ++i)
+				{
+					subNodes[i] = reinterpret_cast<Node*>(new Voxel);
+					std::memcpy(subNodes[i], &data[currentIndex], sizeof(Voxel));
+					currentIndex += sizeof(Voxel);
+				}
+				return;
+			}
+		}
+	}
+
+	switch (state)
+	{
+		case Empty:
+		{
+			subNodes[0] = nullptr;
+			return;
+		}
+
+		case Full:
+		{
+			subNodes[0] = reinterpret_cast<Node*>(new Voxel);
+			std::memcpy(subNodes[0], &data[currentIndex], sizeof(Voxel));
+			return;
+		}
+
+		case Partial:
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				subNodes[i] = new Node(size / 2);
+				subNodes[i]->Unpack(data, currentIndex);
 			}
 			return;
 		}
