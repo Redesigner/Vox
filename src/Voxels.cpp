@@ -7,6 +7,8 @@
 
 #include "editor/Editor.h"
 #include "rendering/Renderer.h"
+#include "voxel/Octree.h"
+#include "voxel/Voxel.h"
 
 int main()
 {
@@ -23,6 +25,24 @@ int main()
             {
                 renderer->LoadTestModel(fileName);
             });
+
+        Voxel testVoxel;
+        testVoxel.materialId = 1;
+
+        std::unique_ptr<Octree::Node> octree = std::make_unique<Octree::Node>(16);
+        octree->SetVoxel(0, 0, 0, &testVoxel);
+        octree->SetVoxel(0, 0, 1, &testVoxel);
+        octree->SetVoxel(0, 1, 0, &testVoxel);
+        octree->SetVoxel(0, 1, 1, &testVoxel);
+        octree->SetVoxel(1, 0, 0, &testVoxel);
+        octree->SetVoxel(1, 0, 1, &testVoxel);
+        octree->SetVoxel(1, 1, 0, &testVoxel);
+        octree->SetVoxel(1, 1, 1, &testVoxel);
+
+        testVoxel.materialId = 2;
+        octree->SetVoxel(0, 0, 0, &testVoxel);
+
+        testVoxel = *octree->GetVoxel(0, 0, 0);
 
         while (!WindowShouldClose())
         {

@@ -29,7 +29,7 @@ namespace Octree
 
 		void CollapseSubnodes(Voxel* voxel);
 
-		std::array<void*, 8> subNodes;
+		std::array<Node*, 8> subNodes;
 
 		State state;
 		unsigned short size;
