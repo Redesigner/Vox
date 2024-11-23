@@ -53,24 +53,26 @@ Renderer::Renderer()
     testVoxel.materialId = 0;
     testVoxel.filled = true;
 
-    std::unique_ptr<Octree::Node> octree = std::make_unique<Octree::Node>(32);
-    octree->SetVoxel(0, 0, 0, &testVoxel);
-    octree->SetVoxel(0, 0, 1, &testVoxel);
-    octree->SetVoxel(0, 1, 0, &testVoxel);
-    octree->SetVoxel(0, 1, 1, &testVoxel);
-    octree->SetVoxel(1, 0, 0, &testVoxel);
-    octree->SetVoxel(1, 0, 1, &testVoxel);
-    octree->SetVoxel(1, 1, 0, &testVoxel);
-    octree->SetVoxel(1, 1, 1, &testVoxel);
+    std::unique_ptr<Octree::Node> octree = std::make_unique<Octree::Node>(16);
+    for (int x = -8; x < 8; x++)
+    {
+        for (int y = -8; y < 0; ++y)
+        {
+            for (int z = -8; z < 8; ++z)
+            {
+                octree->SetVoxel(x, y, z, &testVoxel);
+            }
+        }
+    }
     testVoxel.materialId = 1;
     octree->SetVoxel(6, 3, 7, &testVoxel);
 
-    testVoxel = *octree->GetVoxel(0, 0, 0);
+    // testVoxel = *octree->GetVoxel(0, 0, 0);
 
     testVoxelGrid = VoxelGrid::FromOctree(octree.get());
-    testVoxelGrid->x = -16;
-    testVoxelGrid->y = -16;
-    testVoxelGrid->z = -16;
+    testVoxelGrid->x = -8;
+    testVoxelGrid->y = -8;
+    testVoxelGrid->z = -8;
     testVoxelGrid->GenerateMesh();
 
     voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
@@ -263,7 +265,7 @@ void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlDisableColorBlend();
     rlEnableDepthTest();
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x, voxelGrid->y, voxelGrid->z));
+    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x, voxelGrid->y, voxelGrid->z) * MatrixScale(2.0f, 2.0f, 2.0f));
     voxelShader->SetViewMatrix(GetCameraViewMatrix(&camera));
     float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
     voxelShader->SetProjectionMatrix(GetCameraProjectionMatrix(&camera, aspect));
