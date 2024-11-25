@@ -20,7 +20,7 @@ const Vector2 VoxelGrid::bottomLeft = Vector2(0.0f, 0.0f);
 const Vector2 VoxelGrid::bottomRight = Vector2(0.0f, 1.0f);
 
 VoxelGrid::VoxelGrid(unsigned int width, unsigned int height, unsigned int depth)
-	:width(width), height(height), depth(depth)
+	:width(width), height(height), depth(depth), x(0), y(0), z(0)
 {
 	voxels = std::vector<Voxel>(width * height * depth);
 
@@ -163,7 +163,7 @@ void VoxelGrid::GenerateMesh()
 	materialIds.clear();
 
 	// Indices
-	vbos.index = rlLoadVertexBufferElement(&indices[0], sizeof(unsigned short) * indices.size(), dynamic);
+	vbos.index = rlLoadVertexBufferElement(&indices[0], sizeof(unsigned int) * indices.size(), dynamic);
 	indexCount = indices.size();
 
 	rlDisableVertexArray();
@@ -179,7 +179,7 @@ unsigned int VoxelGrid::GetVertexCount() const
 	return indexCount;
 }
 
-unsigned short* VoxelGrid::GetIndices()
+unsigned int* VoxelGrid::GetIndices()
 {
 	return &indices[0];
 }

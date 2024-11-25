@@ -8,6 +8,7 @@
 #include "rlgl.h"
 
 #include "editor/Editor.h"
+#include "external/glad.h"
 #include "rendering/ArrayTexture.h"
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
@@ -49,15 +50,27 @@ Renderer::Renderer()
     defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
     defaultMaterial.shader = gBufferShader;
 
-    int dataSize = 0;
-    unsigned char* octreeRaw = LoadFileData("assets/voxels/test.vox", &dataSize);
-    std::vector<char> octreeData;
-    octreeData.insert(octreeData.begin(), octreeRaw, octreeRaw + dataSize);
-    std::shared_ptr<Octree::Node> octree = Octree::Node::FromPacked(octreeData);
-    testVoxelGrid = VoxelGrid::FromOctree(octree.get());
-    testVoxelGrid->x = -8;
-    testVoxelGrid->y = -8;
-    testVoxelGrid->z = -8;
+    //int dataSize = 0;
+    //unsigned char* octreeRaw = LoadFileData("assets/voxels/test.vox", &dataSize);
+    //std::vector<char> octreeData;
+    //octreeData.insert(octreeData.begin(), octreeRaw, octreeRaw + dataSize);
+    //std::shared_ptr<Octree::Node> octree = Octree::Node::FromPacked(octreeData);
+    //testVoxelGrid = VoxelGrid::FromOctree(octree.get());
+    testVoxelGrid = std::make_shared<VoxelGrid>(32, 32, 32);
+    for (int x = 0; x < 32; ++x)
+    {
+        for (int y = 0; y < 16; ++y)
+        {
+            for (int z = 0; z < 32; ++z)
+            {
+                testVoxelGrid->GetVoxel(x, y, z).filled = true;
+            }
+        }
+    }
+
+    testVoxelGrid->x = -16;
+    testVoxelGrid->y = -16;
+    testVoxelGrid->z = -16;
     testVoxelGrid->GenerateMesh();
 
     voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
@@ -256,7 +269,8 @@ void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     voxelShader->SetProjectionMatrix(GetCameraProjectionMatrix(&camera, aspect));
     voxelGrid->EnableVertexArray();
     voxelShader->SetArrayTexture(voxelTextures.get());
-    rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), 0);
+    // rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), 0);
+    glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
     rlDrawRenderBatchActive();
     rlDisableVertexArray();
     rlDisableDepthTest();
