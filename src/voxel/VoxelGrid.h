@@ -34,7 +34,7 @@ public:
 	void EnableVertexArray();
 
 	unsigned int GetVertexCount() const;
-	unsigned short* GetIndices();
+	unsigned int* GetIndices();
 
 	int x, y, z = 0;
 
@@ -68,7 +68,7 @@ private:
 	std::vector<Vector2> texCoords;
 	std::vector<Vector3> normals;
 	std::vector<unsigned int> materialIds;
-	std::vector<unsigned short> indices;
+	std::vector<unsigned int> indices;
 
 	std::vector<Voxel> voxels;
 
