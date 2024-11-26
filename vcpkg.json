@@ -2,6 +2,7 @@
   "dependencies": [
     "sdl2",
     "tinyfiledialogs",
-    "fmt"
+    "fmt",
+    "joltphysics"
   ]
 }
