@@ -24,5 +24,5 @@ private:
 
 	static const char* gltfFilter[2];
 
-	Vector2 viewportDimensions = Vector2(0, 0);
+	Vector2 viewportDimensions = Vector2(0.0f, 0.0f);
 };
