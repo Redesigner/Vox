@@ -12,10 +12,10 @@ endif()
 project ("Voxels")
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+include(FetchContent)
 
 
 # Build raylib with sdl
-include(FetchContent)
 FetchContent_Declare(
 	raylib-sdl
 	GIT_REPOSITORY https://github.com/raysan5/raylib.git
@@ -27,9 +27,17 @@ FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
 unset(PLATFORM_DESKTOP_SDL3)
 
+# Build Jolt Physics
+FetchContent_Declare(
+        JoltPhysics
+        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+        GIT_TAG "v5.2.0"
+		SOURCE_SUBDIR "Build"
+)
+FetchContent_MakeAvailable(JoltPhysics)
+
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
-find_package(Jolt CONFIG REQUIRED)
 
 # Add source to this project's executable.
 file (GLOB_RECURSE Voxels_SRC
@@ -38,19 +46,25 @@ file (GLOB_RECURSE Voxels_SRC
 
 add_executable (Voxels ${Voxels_SRC})
 
+# Disable RTTI for compatibility with Jolt
+string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
 # Include source directory to allow absolute paths
 target_include_directories(Voxels PRIVATE "src/")
 
 target_link_libraries(Voxels PRIVATE raylib)
 target_link_libraries(Voxels PRIVATE tinyfiledialogs::tinyfiledialogs)
 target_link_libraries(Voxels PRIVATE fmt::fmt)
-target_link_libraries(Voxels PRIVATE Jolt::Jolt)
+target_link_libraries(Voxels PRIVATE Jolt)
 
 # Add Raylib ImGui
 target_include_directories(Voxels PRIVATE "external/rlImGui")
 target_sources(Voxels PRIVATE
 	"external/rlImGui/rlImGui.cpp"
 )
+
+# Add Jolt Physics
+target_include_directories(Voxels PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
 # Add ImGui
 target_include_directories(Voxels PRIVATE "external/imgui")
@@ -64,5 +78,5 @@ target_sources(Voxels PRIVATE
 )
 
 set_property(TARGET Voxels PROPERTY CXX_STANDARD 20)
-
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Voxels)
 # TODO: Add tests and install targets if needed.

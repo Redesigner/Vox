@@ -10,6 +10,8 @@ class BroadPhaseLayerImplementation final : public JPH::BroadPhaseLayerInterface
 
 	JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override;
 
+	const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override;
+
 
 	static const unsigned int numLayers = 4;
 	JPH::BroadPhaseLayer objectBroadPhaseMap[numLayers];
