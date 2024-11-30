@@ -1,5 +1,13 @@
 #include "BroadPhaseLayer.h"
 
+#include "physics/ObjectLayerTypes.h"
+
+const JPH::BroadPhaseLayer BroadPhaseLayerImplementation::objectBroadPhaseMap[BroadPhaseLayerImplementation::numLayers] =
+{
+	JPH::BroadPhaseLayer(0),
+	JPH::BroadPhaseLayer(1)
+};
+
 JPH::uint BroadPhaseLayerImplementation::GetNumBroadPhaseLayers() const
 {
 	return numLayers;

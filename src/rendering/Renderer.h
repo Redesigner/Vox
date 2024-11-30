@@ -25,6 +25,8 @@ public:
 
 	void LoadTestModel(std::string path);
 
+	void SetCapsulePosition(Vector3 position);
+
 private:
 	void UpdateViewportDimensions(Editor* editor);
 
@@ -58,4 +60,6 @@ private:
 	RenderTexture2D viewportTexture;
 	Material defaultMaterial;
 	Model testModel;
+
+	Vector3 playerPosition;
 };
