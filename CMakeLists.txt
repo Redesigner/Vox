@@ -1,4 +1,4 @@
-﻿# CMakeList.txt : CMake project for Voxels2, include source and define
+﻿# CMakeList.txt : CMake project for VoxelsRL, include source and define
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.19.0)
@@ -14,7 +14,6 @@ project ("Voxels")
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 include(FetchContent)
 
-
 # Build raylib with sdl
 FetchContent_Declare(
 	raylib-sdl
@@ -22,10 +21,8 @@ FetchContent_Declare(
 	GIT_TAG 5.5
 )
 set(PLATFORM SDL)
-set(PLATFORM_DESKTOP_SDL3)
 FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
-unset(PLATFORM_DESKTOP_SDL3)
 
 # Build Jolt Physics
 FetchContent_Declare(
@@ -35,6 +32,7 @@ FetchContent_Declare(
 		SOURCE_SUBDIR "Build"
 )
 FetchContent_MakeAvailable(JoltPhysics)
+set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
