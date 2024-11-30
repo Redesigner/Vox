@@ -167,6 +167,11 @@ void Renderer::LoadTestModel(std::string path)
     }
 }
 
+void Renderer::SetCapsulePosition(Vector3 position)
+{
+    playerPosition = position;
+}
+
 void Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
@@ -215,6 +220,13 @@ void Renderer::RenderGBuffer()
                     );
                     rlEnableShader(gBufferShader.id);
                     rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
+
+                    Vector3 startPosition = playerPosition;
+                    playerPosition.y += 0.5f;
+                    Vector3 endPosition = playerPosition;
+                    endPosition.y -= 0.5f;
+                    DrawCapsule(playerPosition, endPosition, 0.5f, 8, 8, RAYWHITE);
+
                     rlDisableShader();
                     DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
                 }

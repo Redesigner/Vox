@@ -8,10 +8,7 @@
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
-#include "physics/BroadPhaseLayer.h"
-#include "physics/ObjectBroadPhaseLayerFilter.h"
-#include "physics/ObjectLayerTypes.h"
-#include "physics/ObjectPairLayerFilter.h"
+#include "raylib.h"
 
 #include <thread>
 
@@ -22,7 +19,7 @@ PhysicsServer::PhysicsServer()
 	JPH::Factory::sInstance = new JPH::Factory();
 	JPH::RegisterTypes();
 
-	const JPH::uint cMaxPhysicsJobs = 8;
+	const JPH::uint cMaxPhysicsJobs = 64;
 	const JPH::uint cMaxPhysicsBarriers = 8;
 
 	jobSystem = std::make_unique<JPH::JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
@@ -33,12 +30,8 @@ PhysicsServer::PhysicsServer()
 	const JPH::uint cMaxBodyPairs = 1024;
 	const JPH::uint cMaxContactConstraints = 1024;
 
-	BroadPhaseLayerImplementation broadPhaseLayerInterface;
-	ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
-	ObjectLayerPairFilterImplementation	objectLayerPairFilter;
-
 	physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints,
-		broadPhaseLayerInterface, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
+		broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
 }
 
 PhysicsServer::~PhysicsServer()
@@ -64,14 +57,28 @@ void PhysicsServer::Step()
 
 JPH::BodyID PhysicsServer::CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position)
 {
-	JPH::BoxShape boxShape = JPH::BoxShape(size / 2.0f);
-	return CreateStaticShape(&boxShape, position);
+	JPH::BoxShapeSettings boxShapeSettings = JPH::BoxShapeSettings(size / 2.0f);
+	return CreateStaticShape(boxShapeSettings.Create().Get(), position);
 }
 
 JPH::BodyID PhysicsServer::CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position)
 {
-	JPH::CapsuleShape capsuleShape = JPH::CapsuleShape(radius, halfHeight);
-	return CreateDynamicShape(&capsuleShape, position);
+	JPH::CapsuleShapeSettings capsuleShapeSettings = JPH::CapsuleShapeSettings(halfHeight, radius);
+	JPH::BodyID capsuleId =  CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
+	// physicsSystem.GetBodyInterface().SetLinearVelocity(capsuleId, JPH::Vec3(0.0f, -0.01f, 0.0f));
+	return capsuleId;
+}
+
+JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const
+{
+	const JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
+	if (!bodyInterface.IsAdded(id))
+	{
+		TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get object position. The body ID was not added to the body interface."));
+		return JPH::Vec3(0.0f, 0.0f, 0.0f);
+	}
+
+	return bodyInterface.GetPosition(id);
 }
 
 JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)
