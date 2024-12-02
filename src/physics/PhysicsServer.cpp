@@ -32,6 +32,8 @@ PhysicsServer::PhysicsServer()
 
 	physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints,
 		broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
+
+	physicsSystem.SetContactListener(&contactListener);
 }
 
 PhysicsServer::~PhysicsServer()

@@ -8,6 +8,7 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 
 #include "physics/BroadPhaseLayer.h"
+#include "physics/ContactListener.h"
 #include "physics/ObjectBroadPhaseLayerFilter.h"
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
@@ -48,6 +49,8 @@ private:
 	BroadPhaseLayerImplementation broadPhaseLayerImplementation;
 	ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
 	ObjectLayerPairFilterImplementation	objectLayerPairFilter;
+
+	ContactListener contactListener;
 
 	static constexpr float fixedTimeStep = 1.0f / 60.0f;
 };
