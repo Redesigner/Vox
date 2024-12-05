@@ -28,7 +28,7 @@ void Editor::Draw(RenderTexture2D* viewportRenderTexture)
     ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
 
     ImVec2 dimensions = ImGui::GetContentRegionAvail();
-    viewportDimensions = Vector2(dimensions.x, dimensions.y);
+    viewportDimensions = Vector2(dimensions.x, dimensions.y + 1.0f);
 
     rlImGuiImageRenderTextureFit(viewportRenderTexture, true);
 

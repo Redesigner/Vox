@@ -42,7 +42,7 @@ int main()
             });
 
         JPH::BodyID boxId = physicsServer->CreateStaticBox(JPH::Vec3(32.0f, 16.0f, 32.0f), JPH::Vec3(0.0f, -8.0f, 0.0f));
-        JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(0.2f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
+        JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(0.5f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         while (!WindowShouldClose())
         {
