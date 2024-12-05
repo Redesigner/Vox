@@ -23,13 +23,15 @@ int main()
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<PhysicsServer> physicsServer = std::make_unique<PhysicsServer>();
 
+        renderer->SetDebugPhysicsServer(physicsServer);
+
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
                 renderer->LoadTestModel(fileName);
             });
 
 
-        bool runPhysics = true;
+        std::atomic<bool> runPhysics = true;
         std::thread physicsThread = std::thread([physicsServer, &runPhysics]
             {
                 while (runPhysics)
