@@ -64,7 +64,7 @@ void DebugRenderer::CreateTriangleVertexObjects()
 
 	glGenBuffers(1, &triangleVbos.color);
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.color);
-	glVertexAttribPointer(1, 3, GL_BYTE, false, 0, 0);
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 0, 0);
 	glEnableVertexAttribArray(1);
 }
 
