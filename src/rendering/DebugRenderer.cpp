@@ -62,10 +62,15 @@ void DebugRenderer::CreateTriangleVertexObjects()
 	glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
 
+	glGenBuffers(1, &triangleVbos.normal);
+	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.normal);
+	glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(1);
+
 	glGenBuffers(1, &triangleVbos.color);
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.color);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 0, 0);
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, false, 0, 0);
+	glEnableVertexAttribArray(2);
 }
 
 void DebugRenderer::BindLineVertexArray()
@@ -103,6 +108,7 @@ void DebugRenderer::DestroyLineVertexObjects()
 void DebugRenderer::DestroyTriangleVertexObjects()
 {
 	glDeleteBuffers(1, &triangleVbos.position);
+	glDeleteBuffers(1, &triangleVbos.normal);
 	glDeleteBuffers(1, &triangleVbos.color);
 	glDeleteVertexArrays(1, &triangleVao);
 }
@@ -124,11 +130,15 @@ void DebugRenderer::BufferTriangleData()
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.position);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(JPH::Vec3) * triangleVertices.size(), &triangleVertices[0], GL_DYNAMIC_DRAW);
 
+	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.normal);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(SimpleVec3) * triangleNormals.size(), &triangleNormals[0], GL_DYNAMIC_DRAW);
+
 	glBindBuffer(GL_ARRAY_BUFFER, triangleVbos.color);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(JPH::Color) * triangleColors.size(), &triangleColors[0], GL_DYNAMIC_DRAW);
 
 	triangleCount = triangleVertices.size();
 	triangleVertices.clear();
+	triangleNormals.clear();
 	triangleColors.clear();
 }
 
@@ -143,9 +153,21 @@ void DebugRenderer::DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::Colo
 
 void DebugRenderer::DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor, ECastShadow inCastShadow)
 {
+	JPH::Vec3 u = inV2 - inV1;
+	JPH::Vec3 v = inV3 - inV2;
+	u = u.Normalized();
+	v = v.Normalized();
+	JPH::Vec3 normal = u.Cross(v);
+	SimpleVec3 simpleNormal(normal.GetX(), normal.GetY(), normal.GetZ());
+	simpleNormal.Normalize();
+
 	triangleVertices.emplace_back(inV1);
 	triangleVertices.emplace_back(inV2);
 	triangleVertices.emplace_back(inV3);
+
+	triangleNormals.emplace_back(simpleNormal);
+	triangleNormals.emplace_back(simpleNormal);
+	triangleNormals.emplace_back(simpleNormal);
 
 	triangleColors.emplace_back(inColor);
 	triangleColors.emplace_back(inColor);

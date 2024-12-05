@@ -6,7 +6,7 @@
 #include "rlImGui.h"
 
 #include <thread>
-
+#include <chrono>
 #include "editor/Editor.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
@@ -30,14 +30,16 @@ int main()
                 renderer->LoadTestModel(fileName);
             });
 
-
+        using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
+        std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([physicsServer, &runPhysics]
+        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime]
             {
                 while (runPhysics)
                 {
+                    std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
                     physicsServer->Step();
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+                    std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });
 
