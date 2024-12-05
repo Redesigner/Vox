@@ -183,32 +183,6 @@ void Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServe
     debugPhysicsServer = physicsServer;
 }
 
-void Renderer::RenderDebugShapes()
-{
-    std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
-    if (!physicsServer)
-    {
-        return;
-    }
-
-    // Fill the debug renderer with our shapes
-    physicsServer->RenderDebugShapes();
-
-    Matrix view = GetCameraViewMatrix(&camera);
-    float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
-    Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
-    Matrix viewProjection = view * projection;
-
-    physicsServer->GetDebugRenderer()->BindAndBufferLines();
-    rlEnableShader(debugLineShader.id);
-    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
-    glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
-
-    physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
-    glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
-}
-
 void Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
@@ -257,13 +231,6 @@ void Renderer::RenderGBuffer()
                     );
                     rlEnableShader(gBufferShader.id);
                     rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
-
-                    Vector3 startPosition = playerPosition;
-                    playerPosition.y += 0.5f;
-                    Vector3 endPosition = playerPosition;
-                    endPosition.y -= 0.5f;
-                    DrawCapsule(playerPosition, endPosition, 0.5f, 8, 8, RAYWHITE);
-
                     rlDisableShader();
                     DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
                 }
@@ -323,6 +290,32 @@ void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlDrawRenderBatchActive();
     rlDisableVertexArray();
     rlDisableDepthTest();
+}
+
+void Renderer::RenderDebugShapes()
+{
+    std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
+    if (!physicsServer)
+    {
+        return;
+    }
+
+    // Fill the debug renderer with our shapes
+    physicsServer->RenderDebugShapes();
+
+    Matrix view = GetCameraViewMatrix(&camera);
+    float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
+    Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
+    Matrix viewProjection = view * projection;
+
+    physicsServer->GetDebugRenderer()->BindAndBufferLines();
+    rlEnableShader(debugLineShader.id);
+    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
+
+    physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
+    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 
 void Renderer::RenderSky()
