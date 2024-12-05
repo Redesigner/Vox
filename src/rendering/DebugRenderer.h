@@ -13,6 +13,18 @@ class DebugRenderer : public JPH::DebugRendererSimple
 		unsigned int position, color;
 	};
 
+	struct TriangleVbos
+	{
+		unsigned int position, normal, color;
+	};
+
+	struct SimpleVec3
+	{
+		float x, y, z;
+
+		void Normalize() { float magnitude = std::sqrtf(x * x + y * y + z * z); x /= magnitude; y /= magnitude; z /= magnitude; }
+	};
+
 public:
 	DebugRenderer();
 	~DebugRenderer();
@@ -55,10 +67,11 @@ private:
 	unsigned int lineCount = 0;
 
 	std::vector<JPH::RVec3> triangleVertices;
+	std::vector<SimpleVec3> triangleNormals;
 	std::vector<JPH::Color> triangleColors;
 	unsigned int triangleCount = 0;
 
 	Vbos lineVbos;
-	Vbos triangleVbos;
+	TriangleVbos triangleVbos;
 	unsigned int lineVao, triangleVao;
 };
