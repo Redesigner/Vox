@@ -10,10 +10,12 @@
 #include "editor/Editor.h"
 #include "external/glad.h"
 #include "rendering/ArrayTexture.h"
+#include "rendering/DebugRenderer.h"
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
 #include "rendering/shaders/DeferredShader.h"
 #include "rendering/shaders/VoxelShader.h"
+#include "physics/PhysicsServer.h"
 #include "voxel/Octree.h"
 #include "voxel/VoxelGrid.h"
 
@@ -30,6 +32,9 @@ Renderer::Renderer()
 
     deferredShader = std::make_unique<DeferredShader>();
     skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
+    debugLineShader = LoadShader("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
+
+    debugMatrixLocation = GetShaderLocation(debugLineShader, "viewProjection");
 
     gBuffer = std::make_unique<GBuffer>(800, 431);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
@@ -135,7 +140,7 @@ void Renderer::Render(Editor* editor)
         rlSetFramebufferHeight(viewportTexture.texture.height);
 
         RenderGBuffer();
-        RenderVoxelGrid(testVoxelGrid.get());
+        // RenderVoxelGrid(testVoxelGrid.get());
         RenderDeferred();
         RenderSky();
 
@@ -143,6 +148,7 @@ void Renderer::Render(Editor* editor)
         deferredFramebuffer->BindRead();
         rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
         rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
+        RenderDebugShapes();
         rlDisableFramebuffer();
 
         // Make sure that our viewport size matches the window size when drawing with imgui
@@ -170,6 +176,37 @@ void Renderer::LoadTestModel(std::string path)
 void Renderer::SetCapsulePosition(Vector3 position)
 {
     playerPosition = position;
+}
+
+void Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
+{
+    debugPhysicsServer = physicsServer;
+}
+
+void Renderer::RenderDebugShapes()
+{
+    std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
+    if (!physicsServer)
+    {
+        return;
+    }
+
+    // Fill the debug renderer with our shapes
+    physicsServer->RenderDebugShapes();
+
+    Matrix view = GetCameraViewMatrix(&camera);
+    float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
+    Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
+    Matrix viewProjection = view * projection;
+
+    physicsServer->GetDebugRenderer()->BindAndBufferLines();
+    rlEnableShader(debugLineShader.id);
+    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
+
+    physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
+    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 
 void Renderer::UpdateViewportDimensions(Editor* editor)

@@ -13,6 +13,8 @@
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
 
+class DebugRenderer;
+
 namespace JPH
 {
 	class JobSystem;
@@ -32,6 +34,10 @@ public:
 
 	JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
+	void RenderDebugShapes();
+
+	DebugRenderer* GetDebugRenderer() const;
+
 private:
 	JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
 	JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
@@ -43,6 +49,8 @@ private:
 	std::unique_ptr<JPH::JobSystem> jobSystem;
 
 	std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
+
+	std::unique_ptr<DebugRenderer> debugRenderer;
 
 	std::vector<JPH::BodyID> bodyIds;
 

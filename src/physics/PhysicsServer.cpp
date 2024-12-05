@@ -1,5 +1,7 @@
 #include "PhysicsServer.h"
 
+#include <thread>
+
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
@@ -7,10 +9,10 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Renderer/DebugRenderer.h>
 
 #include "raylib.h"
-
-#include <thread>
+#include "rendering/DebugRenderer.h"
 
 PhysicsServer::PhysicsServer()
 {
@@ -24,6 +26,7 @@ PhysicsServer::PhysicsServer()
 
 	jobSystem = std::make_unique<JPH::JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 	tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
+	debugRenderer = std::make_unique<DebugRenderer>();
 
 	const JPH::uint cMaxBodies = 1024;
 	const JPH::uint cNumBodyMutexes = 0;
@@ -34,6 +37,7 @@ PhysicsServer::PhysicsServer()
 		broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
 
 	physicsSystem.SetContactListener(&contactListener);
+	JPH::DebugRenderer::sInstance = debugRenderer.get();
 }
 
 PhysicsServer::~PhysicsServer()
@@ -81,6 +85,17 @@ JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const
 	}
 
 	return bodyInterface.GetPosition(id);
+}
+
+void PhysicsServer::RenderDebugShapes()
+{
+	JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
+	physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
+}
+
+DebugRenderer* PhysicsServer::GetDebugRenderer() const
+{
+	return debugRenderer.get();
 }
 
 JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)

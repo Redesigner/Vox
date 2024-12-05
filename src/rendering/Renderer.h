@@ -8,10 +8,12 @@
 #include "rendering/Light.h"
 
 class ArrayTexture;
+class DebugRenderer;
 class DeferredShader;
 class Editor;
 class Framebuffer;
 class GBuffer;
+class PhysicsServer;
 class VoxelGrid;
 class VoxelShader;
 
@@ -27,6 +29,9 @@ public:
 
 	void SetCapsulePosition(Vector3 position);
 
+	void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
+
+
 private:
 	void UpdateViewportDimensions(Editor* editor);
 
@@ -38,6 +43,8 @@ private:
 
 	void RenderSky();
 
+	void RenderDebugShapes();
+
 	void CopyViewportToTexture(RenderTexture2D& texture);
 
 	std::unique_ptr<GBuffer> gBuffer;
@@ -46,11 +53,14 @@ private:
 	std::shared_ptr<VoxelGrid> testVoxelGrid;
 	std::unique_ptr<ArrayTexture> voxelTextures;
 
+	std::weak_ptr<PhysicsServer> debugPhysicsServer;
+
 	Shader gBufferShader;
 	std::unique_ptr<VoxelShader> voxelShader;
 	std::unique_ptr<DeferredShader> deferredShader;
 	Shader skyShader;
-
+	Shader debugLineShader;
+	int debugMatrixLocation = 0;
 
 	LightUniformLocations lightUniformLocations;
 	Light testLight;
