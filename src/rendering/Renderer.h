@@ -41,6 +41,8 @@ namespace Vox
 
 		void RenderGBuffer();
 
+		void DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform);
+
 		void RenderDeferred();
 
 		void RenderVoxelGrid(VoxelGrid* voxelGrid);

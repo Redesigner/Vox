@@ -19,7 +19,7 @@ int main()
         SetTargetFPS(60);
         rlImGuiSetup(true);
 
-        std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>();
+        std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<PhysicsServer> physicsServer = std::make_unique<PhysicsServer>();
 

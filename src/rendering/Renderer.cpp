@@ -83,15 +83,11 @@ Vox::Renderer::Renderer()
     voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
     voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
 
-    camera = { 0 };
-    camera.position = Vector3(6.0f, 2.0f, 6.0f);    // Camera position
-    camera.target = Vector3(0.0f, 2.0f, 0.0f);      // Camera looking at point
-    camera.up = Vector3(0.0f, 1.0f, 0.0f);          // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                            // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;
-
     camera = std::make_unique<Vox::Camera>();
-    camera->SetPosition()
+    camera->SetPosition(6.0f, 2.0f, 6.0f);
+    camera->SetRotation(0.0f, 0.0f, 0.0f);
+    camera->SetFovY(45.0f);
+    camera->SetAspectRatio(800.0 / 431.0);
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
@@ -132,13 +128,12 @@ void Vox::Renderer::Render(Editor* editor)
 {
     UpdateViewportDimensions(editor);
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
-    {
-        UpdateCamera(&camera, CAMERA_THIRD_PERSON);
-    }
-
     BeginDrawing();
     {
+        Vector3 cameraRotation = camera->GetRotation();
+        cameraRotation.y += 0.01;
+        camera->SetRotation(cameraRotation);
+
         rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         rlSetFramebufferWidth(viewportTexture.texture.width);
         rlSetFramebufferHeight(viewportTexture.texture.height);
@@ -215,44 +210,42 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 void Vox::Renderer::RenderGBuffer()
 {
     ClearBackground(BLACK);
-    rlEnableShader(gBufferShader.id);
-    {
-        BeginMode3D(camera);
-        {
-            gBuffer->EnableFramebuffer();
-            rlClearScreenBuffers();
-            rlDisableColorBlend();
+    gBuffer->EnableFramebuffer();
+    rlClearScreenBuffers();
+    rlDisableColorBlend();
 
-            if (IsModelValid(testModel))
+    glUseProgram(gBufferShader.id);
+    {
+        // Set camera matrices
+        SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_VIEW], camera->GetViewMatrix());
+        SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_PROJECTION], camera->GetProjectionMatrix());
+
+        if (IsModelValid(testModel))
+        {
+            for (int i = 0; i < testModel.meshCount; ++i)
             {
-                for (int i = 0; i < testModel.meshCount; ++i)
-                {
-                    const Color albedo = testModel.materials[testModel.meshMaterial[i]].maps[MATERIAL_MAP_DIFFUSE].color;
-                    Vector3 materialAlbedo = Vector3(
-                        albedo.r / 255.0f,
-                        albedo.g / 255.0f,
-                        albedo.b / 255.0f
-                    );
-                    rlEnableShader(gBufferShader.id);
-                    rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
-                    rlDisableShader();
-                    DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
-                }
+
+                rlEnableShader(gBufferShader.id);
+                rlDisableShader();
+                // DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
+                DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[i], testModel.transform);
             }
-            Color albedo = WHITE;
-            Vector3 materialAlbedo = Vector3(
-                albedo.r / 255.0f,
-                albedo.g / 255.0f,
-                albedo.b / 255.0f
-            );
-            rlEnableShader(gBufferShader.id);
-            rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
-            rlDisableShader();
-            EndMode3D();
         }
-        rlDisableShader();
     }
     rlEnableColorBlend();
+}
+
+void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
+{
+    const Color albedo = material->maps[MATERIAL_MAP_DIFFUSE].color;
+    Vector3 materialAlbedo = Vector3(
+        albedo.r / 255.0f,
+        albedo.g / 255.0f,
+        albedo.b / 255.0f
+    );
+    rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
+    // The shader uniform location is automatically assigned when the shader is loaded by raylib
+    SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
 }
 
 void Vox::Renderer::RenderDeferred()
@@ -269,7 +262,7 @@ void Vox::Renderer::RenderDeferred()
         // shader->SetCameraPosition(camera.position);
         testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
         gBuffer->ActivateTextures(0);
-        deferredShader->SetCameraPosition(camera.position);
+        deferredShader->SetCameraPosition(camera->GetPosition());
         rlLoadDrawQuad();
         rlDisableShader();
     }
@@ -284,9 +277,8 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlEnableDepthTest();
     voxelShader->Enable();
     voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x, voxelGrid->y, voxelGrid->z) * MatrixScale(2.0f, 2.0f, 2.0f));
-    voxelShader->SetViewMatrix(GetCameraViewMatrix(&camera));
-    float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
-    voxelShader->SetProjectionMatrix(GetCameraProjectionMatrix(&camera, aspect));
+    voxelShader->SetViewMatrix(camera->GetViewMatrix());
+    voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
     voxelGrid->EnableVertexArray();
     voxelShader->SetArrayTexture(voxelTextures.get());
     // rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), 0);
@@ -307,18 +299,13 @@ void Vox::Renderer::RenderDebugShapes()
     // Fill the debug renderer with our shapes
     physicsServer->RenderDebugShapes();
 
-    Matrix view = GetCameraViewMatrix(&camera);
-    float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
-    Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
-    Matrix viewProjection = view * projection;
-
     physicsServer->GetDebugRenderer()->BindAndBufferLines();
     rlEnableShader(debugLineShader.id);
-    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    rlSetUniformMatrix(debugMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
 
     physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-    rlSetUniformMatrix(debugMatrixLocation, viewProjection);
+    rlSetUniformMatrix(debugMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 
@@ -333,11 +320,9 @@ void Vox::Renderer::RenderSky()
     rlEnableShader(skyShader.id);
     {
         float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
-        Matrix cameraRotation = MatrixLookAt(Vector3(0.0f), camera.target - camera.position, camera.up);
-        float cameraYScale = tan(DEG2RAD * camera.fovy);
-        Matrix projection = GetCameraProjectionMatrix(&camera, aspect);
+        Matrix cameraRotation = camera->GetRotationMatrix();;
+        Matrix projection = camera->GetProjectionMatrix();
         Matrix matrix = MatrixInvert(cameraRotation * projection);
-        // Matrix matrix = MatrixInvert(MatrixTranslate(camera.position.x, camera.position.y, camera.position.z) * GetCameraMatrix(camera));
         rlSetUniformMatrix(rlGetLocationUniform(skyShader.id, "cameraWorldSpace"), matrix);
         deferredFramebuffer->ActivateTextures();
         rlLoadDrawQuad();
