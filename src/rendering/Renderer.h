@@ -17,59 +17,65 @@ class PhysicsServer;
 class VoxelGrid;
 class VoxelShader;
 
-class Renderer
+namespace Vox
 {
-public:
-	Renderer();
-	~Renderer();
+	class Camera;
 
-	void Render(Editor* editor);
+	class Renderer
+	{
+	public:
+		Renderer();
+		~Renderer();
 
-	void LoadTestModel(std::string path);
+		void Render(Editor* editor);
 
-	void SetCapsulePosition(Vector3 position);
+		void LoadTestModel(std::string path);
 
-	void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
+		void SetCapsulePosition(Vector3 position);
+
+		void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
 
 
-private:
-	void UpdateViewportDimensions(Editor* editor);
+	private:
+		void UpdateViewportDimensions(Editor* editor);
 
-	void RenderGBuffer();
+		void RenderGBuffer();
 
-	void RenderDeferred();
+		void RenderDeferred();
 
-	void RenderVoxelGrid(VoxelGrid* voxelGrid);
+		void RenderVoxelGrid(VoxelGrid* voxelGrid);
 
-	void RenderSky();
+		void RenderSky();
 
-	void RenderDebugShapes();
+		void RenderDebugShapes();
 
-	void CopyViewportToTexture(RenderTexture2D& texture);
+		void CopyViewportToTexture(RenderTexture2D& texture);
 
-	std::unique_ptr<GBuffer> gBuffer;
-	std::unique_ptr<Framebuffer> deferredFramebuffer;
+		std::unique_ptr<GBuffer> gBuffer;
+		std::unique_ptr<Framebuffer> deferredFramebuffer;
 
-	std::shared_ptr<VoxelGrid> testVoxelGrid;
-	std::unique_ptr<ArrayTexture> voxelTextures;
+		std::shared_ptr<VoxelGrid> testVoxelGrid;
+		std::unique_ptr<ArrayTexture> voxelTextures;
 
-	std::weak_ptr<PhysicsServer> debugPhysicsServer;
+		std::weak_ptr<PhysicsServer> debugPhysicsServer;
 
-	Shader gBufferShader;
-	std::unique_ptr<VoxelShader> voxelShader;
-	std::unique_ptr<DeferredShader> deferredShader;
-	Shader skyShader;
-	Shader debugLineShader;
-	int debugMatrixLocation = 0;
+		Shader gBufferShader;
+		std::unique_ptr<VoxelShader> voxelShader;
+		std::unique_ptr<DeferredShader> deferredShader;
+		Shader skyShader;
+		Shader debugLineShader;
+		int debugMatrixLocation = 0;
 
-	LightUniformLocations lightUniformLocations;
-	Light testLight;
-	int materialColorLocation, materialRoughnessLocation = 0;
+		LightUniformLocations lightUniformLocations;
+		Light testLight;
+		int materialColorLocation, materialRoughnessLocation = 0;
 
-	Camera3D camera;
-	RenderTexture2D viewportTexture;
-	Material defaultMaterial;
-	Model testModel;
+		std::unique_ptr<Vox::Camera> camera;
 
-	Vector3 playerPosition;
-};
+		RenderTexture2D viewportTexture;
+		Material defaultMaterial;
+		Model testModel;
+
+		Vector3 playerPosition;
+	};
+}

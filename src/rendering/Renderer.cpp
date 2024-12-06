@@ -10,6 +10,7 @@
 #include "editor/Editor.h"
 #include "external/glad.h"
 #include "rendering/ArrayTexture.h"
+#include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
@@ -19,7 +20,7 @@
 #include "voxel/Octree.h"
 #include "voxel/VoxelGrid.h"
 
-Renderer::Renderer()
+Vox::Renderer::Renderer()
 {
     // This is realtive to the build location -- I'll have to fix this later
     ChangeDirectory("../../../");
@@ -89,6 +90,9 @@ Renderer::Renderer()
     camera.fovy = 45.0f;                            // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;
 
+    camera = std::make_unique<Vox::Camera>();
+    camera->SetPosition()
+
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
@@ -100,7 +104,7 @@ Renderer::Renderer()
     }
 }
 
-Renderer::~Renderer()
+Vox::Renderer::~Renderer()
 {
     if (IsRenderTextureValid(viewportTexture))
     {
@@ -124,7 +128,7 @@ Renderer::~Renderer()
     }
 }
 
-void Renderer::Render(Editor* editor)
+void Vox::Renderer::Render(Editor* editor)
 {
     UpdateViewportDimensions(editor);
 
@@ -160,7 +164,7 @@ void Renderer::Render(Editor* editor)
     }
 }
 
-void Renderer::LoadTestModel(std::string path)
+void Vox::Renderer::LoadTestModel(std::string path)
 {
     if (IsModelValid(testModel))
     {
@@ -173,17 +177,17 @@ void Renderer::LoadTestModel(std::string path)
     }
 }
 
-void Renderer::SetCapsulePosition(Vector3 position)
+void Vox::Renderer::SetCapsulePosition(Vector3 position)
 {
     playerPosition = position;
 }
 
-void Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
+void Vox::Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
 {
     debugPhysicsServer = physicsServer;
 }
 
-void Renderer::UpdateViewportDimensions(Editor* editor)
+void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
     Vector2 editorViewportSize = editor->GetViewportDimensions();
@@ -208,7 +212,7 @@ void Renderer::UpdateViewportDimensions(Editor* editor)
     }
 }
 
-void Renderer::RenderGBuffer()
+void Vox::Renderer::RenderGBuffer()
 {
     ClearBackground(BLACK);
     rlEnableShader(gBufferShader.id);
@@ -251,7 +255,7 @@ void Renderer::RenderGBuffer()
     rlEnableColorBlend();
 }
 
-void Renderer::RenderDeferred()
+void Vox::Renderer::RenderDeferred()
 {
     gBuffer->BindRead();
     deferredFramebuffer->BindDraw();
@@ -274,7 +278,7 @@ void Renderer::RenderDeferred()
     rlEnableDepthMask();
 }
 
-void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
+void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 {
     rlDisableColorBlend();
     rlEnableDepthTest();
@@ -292,7 +296,7 @@ void Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlDisableDepthTest();
 }
 
-void Renderer::RenderDebugShapes()
+void Vox::Renderer::RenderDebugShapes()
 {
     std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
     if (!physicsServer)
@@ -318,7 +322,7 @@ void Renderer::RenderDebugShapes()
     glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 
-void Renderer::RenderSky()
+void Vox::Renderer::RenderSky()
 {
     rlDisableDepthMask();
     deferredFramebuffer->BindRead();
@@ -343,7 +347,7 @@ void Renderer::RenderSky()
     rlEnableDepthMask();
 }
 
-void Renderer::CopyViewportToTexture(RenderTexture2D& texture)
+void Vox::Renderer::CopyViewportToTexture(RenderTexture2D& texture)
 {
     rlBindFramebuffer(RL_READ_FRAMEBUFFER, 0);
     rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
