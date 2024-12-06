@@ -224,11 +224,7 @@ void Vox::Renderer::RenderGBuffer()
         {
             for (int i = 0; i < testModel.meshCount; ++i)
             {
-
-                rlEnableShader(gBufferShader.id);
-                rlDisableShader();
-                // DrawMesh(testModel.meshes[i], testModel.materials[i], testModel.transform);
-                DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[i], testModel.transform);
+                DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[testModel.meshMaterial[i]], testModel.transform);
             }
         }
     }
@@ -243,9 +239,13 @@ void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix
         albedo.g / 255.0f,
         albedo.b / 255.0f
     );
-    rlSetUniform(materialColorLocation, &materialAlbedo, SHADER_UNIFORM_VEC3, 1);
+    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(&materialAlbedo));
     // The shader uniform location is automatically assigned when the shader is loaded by raylib
-    SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
+    // SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
+    rlSetUniformMatrix(gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
+
+    glBindVertexArray(mesh->vaoId);
+    glDrawElements(GL_TRIANGLES, mesh->triangleCount * 3, GL_UNSIGNED_SHORT, 0);
 }
 
 void Vox::Renderer::RenderDeferred()
