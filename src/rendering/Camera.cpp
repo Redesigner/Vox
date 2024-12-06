@@ -19,11 +19,22 @@ void Vox::Camera::SetPosition(Vector3 position)
 	}
 
 	this->position = position;
-	UpdateViewMatrix();
+	UpdatePositionMatrix();
 }
 
 void Vox::Camera::SetPosition(float x, float y, float z)
 {
+	SetPosition(Vector3(x, y, z));
+}
+
+Vector3 Vox::Camera::GetPosition() const
+{
+	return position;
+}
+
+Matrix Vox::Camera::GetPositionMatrix() const
+{
+	return positionMatrix;
 }
 
 void Vox::Camera::SetRotation(Vector3 rotation)
@@ -34,7 +45,22 @@ void Vox::Camera::SetRotation(Vector3 rotation)
 	}
 
 	this->rotation = rotation;
-	UpdateViewMatrix();
+	UpdateRotationMatrix();
+}
+
+void Vox::Camera::SetRotation(float pitch, float yaw, float roll)
+{
+	SetRotation(Vector3(pitch, yaw, roll));
+}
+
+Vector3 Vox::Camera::GetRotation() const
+{
+	return rotation;
+}
+
+Matrix Vox::Camera::GetRotationMatrix() const
+{
+	return rotationMatrix;
 }
 
 void Vox::Camera::SetFovY(double fovY)
@@ -74,19 +100,31 @@ Matrix Vox::Camera::GetViewProjectionMatrix() const
 	return viewProjectionMatrix;
 }
 
+void Vox::Camera::UpdatePositionMatrix()
+{
+	positionMatrix = MatrixTranslate(-position.x, -position.y, -position.z);
+	UpdateViewMatrix();
+}
+
+void Vox::Camera::UpdateRotationMatrix()
+{
+	rotationMatrix = MatrixRotateXYZ(rotation);
+	UpdateViewMatrix();
+}
+
 void Vox::Camera::UpdateViewMatrix()
 {
-	viewMatrix = MatrixTranslate(position.x, position.y, position.z) * MatrixRotateZYX(rotation);
-	UpdateViewProjecctionMatrix();
+	viewMatrix = positionMatrix * rotationMatrix;
+	UpdateViewProjectionMatrix();
 }
 
 void Vox::Camera::UpdateProjectionMatrix()
 {
 	projectionMatrix = MatrixPerspective(fovY, aspectRatio, CAMERA_CULL_DISTANCE_NEAR, CAMERA_CULL_DISTANCE_FAR);
-	UpdateViewProjecctionMatrix();
+	UpdateViewProjectionMatrix();
 }
 
-void Vox::Camera::UpdateViewProjecctionMatrix()
+void Vox::Camera::UpdateViewProjectionMatrix()
 {
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+	viewProjectionMatrix = viewMatrix * projectionMatrix;
 }

@@ -11,9 +11,13 @@ namespace Vox
 
 		void SetPosition(Vector3 position);
 		void SetPosition(float x, float y, float z);
+		Vector3 GetPosition() const;
+		Matrix GetPositionMatrix() const;
 
 		void SetRotation(Vector3 rotation);
 		void SetRotation(float pitch, float yaw, float roll);
+		Vector3 GetRotation() const;
+		Matrix GetRotationMatrix() const;
 
 		void SetFovY(double fovY);
 		void SetAspectRatio(double asepctRatio);
@@ -23,9 +27,11 @@ namespace Vox
 		Matrix GetViewProjectionMatrix() const;
 
 	private:
+		void UpdatePositionMatrix();
+		void UpdateRotationMatrix();
 		void UpdateViewMatrix();
 		void UpdateProjectionMatrix();
-		void UpdateViewProjecctionMatrix();
+		void UpdateViewProjectionMatrix();
 
 		Vector3 position;
 		Vector3 rotation;
@@ -33,6 +39,8 @@ namespace Vox
 		double fovY = 60.0;
 		double aspectRatio = 16.0 / 9.0;
 
+		Matrix positionMatrix;
+		Matrix rotationMatrix;
 		Matrix viewMatrix;
 		Matrix projectionMatrix;
 		Matrix viewProjectionMatrix;
