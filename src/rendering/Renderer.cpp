@@ -7,13 +7,15 @@
 #include "rcamera.h"
 #include "rlgl.h"
 
+#include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "external/glad.h"
 #include "rendering/ArrayTexture.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
-#include "rendering/GBuffer.h"
 #include "rendering/Framebuffer.h"
+#include "rendering/GBuffer.h"
 #include "rendering/shaders/DeferredShader.h"
 #include "rendering/shaders/VoxelShader.h"
 #include "physics/PhysicsServer.h"
@@ -89,6 +91,13 @@ Vox::Renderer::Renderer()
     camera->SetFovY(45.0f);
     camera->SetAspectRatio(800.0 / 431.0);
 
+    Camera* movedCamera = camera.get();
+    ServiceLocator::GetInputService()->RegisterCallback(SDL_SCANCODE_W, [movedCamera](bool wasPressed) {
+        Vector3 cameraPosition = movedCamera->GetPosition();
+        cameraPosition.y += 1.0f;
+        movedCamera->SetPosition(cameraPosition);
+        });
+
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
@@ -130,9 +139,7 @@ void Vox::Renderer::Render(Editor* editor)
 
     BeginDrawing();
     {
-        Vector3 cameraRotation = camera->GetRotation();
-        cameraRotation.y += 0.01;
-        camera->SetRotation(cameraRotation);
+        camera->SetAspectRatio(viewportTexture.texture.height == 0 ? 1 : viewportTexture.texture.width / viewportTexture.texture.height);
 
         rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         rlSetFramebufferWidth(viewportTexture.texture.width);

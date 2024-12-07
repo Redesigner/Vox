@@ -7,6 +7,9 @@
 
 #include <thread>
 #include <chrono>
+
+#include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
@@ -16,6 +19,8 @@ int main()
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 450, "Voxels");
     {
+        Vox::ServiceLocator::InitServices();
+
         SetTargetFPS(60);
         rlImGuiSetup(true);
 
@@ -48,6 +53,7 @@ int main()
 
         while (!WindowShouldClose())
         {
+            Vox::ServiceLocator::GetInputService()->PollEvents();
             JPH::Vec3 playerPhysicsPosition = physicsServer->GetObjectPosition(playerCapsuleId);
             Vector3 playerPosition = Vector3(playerPhysicsPosition.GetX(), playerPhysicsPosition.GetY(), playerPhysicsPosition.GetZ());
             renderer->SetCapsulePosition(playerPosition);
@@ -57,6 +63,7 @@ int main()
         physicsThread.join();
     }
 
+    Vox::ServiceLocator::DeleteServices();
     CloseWindow();
 
     return 0;
