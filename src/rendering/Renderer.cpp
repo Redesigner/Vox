@@ -135,6 +135,7 @@ Vox::Renderer::~Renderer()
 
 void Vox::Renderer::Render(Editor* editor)
 {
+    SwapScreenBuffer();
     UpdateViewportDimensions(editor);
 
     BeginDrawing();

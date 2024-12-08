@@ -1,9 +1,12 @@
 #include "InputService.h"
 
+#include "raylib.h"
+#include "rlgl.h"
 #include <SDL2/SDL_events.h>
 
 Vox::InputService::InputService()
 {
+	windowClosed = false;
 }
 
 Vox::InputService::~InputService()
@@ -50,10 +53,21 @@ void Vox::InputService::UnregisterCallback(SDL_Scancode scancode, KeyboardEventC
 	}
 }
 
+bool Vox::InputService::ShouldCloseWindow() const
+{
+	return windowClosed;
+}
+
 void Vox::InputService::HandleEvent(SDL_Event* event)
 {
 	switch (event->type)
 	{
+		case SDL_WINDOWEVENT:
+		{
+			HandleWindowEvent(event->window);
+			return;
+		}
+
 		case SDL_KEYDOWN:
 		{
 			SDL_Scancode pressedKeyCode = event->key.keysym.scancode;
@@ -68,6 +82,40 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			return;
 		}
 
+		default:
+		{
+			return;
+		}
+	}
+}
+
+void Vox::InputService::HandleWindowEvent(SDL_WindowEvent& windowEvent)
+{
+	switch (windowEvent.event)
+	{
+		case SDL_WINDOWEVENT_RESIZED:
+		{
+			SetWindowSize(windowEvent.data1, windowEvent.data2);
+			rlViewport(0, 0, windowEvent.data1, windowEvent.data2);
+
+			rlMatrixMode(RL_PROJECTION);        // Switch to projection matrix
+			rlLoadIdentity();                   // Reset current matrix (projection)
+
+			// Set orthographic projection to current framebuffer size
+			// NOTE: Configured top-left corner as (0, 0)
+			rlOrtho(0, windowEvent.data1, windowEvent.data2, 0, 0.0f, 1.0f);
+
+			rlMatrixMode(RL_MODELVIEW);         // Switch back to modelview matrix
+			rlLoadIdentity();                   // Reset current matrix (modelview)
+			return;
+		}
+
+		case SDL_WINDOWEVENT_CLOSE:
+		{
+			windowClosed = true;
+			return;
+		}
+		
 		default:
 		{
 			return;
