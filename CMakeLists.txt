@@ -21,6 +21,7 @@ FetchContent_Declare(
 	GIT_TAG 5.5
 )
 set(PLATFORM SDL)
+add_compile_definitions(SUPPORT_CUSTOM_FRAME_CONTROL 1)
 FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
 
