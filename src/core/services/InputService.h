@@ -35,5 +35,7 @@ namespace Vox
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
 
 		bool windowClosed = false;
+
+		bool keyPressed[SDL_NUM_SCANCODES]{ false };
 	};
 }

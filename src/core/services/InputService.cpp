@@ -71,14 +71,24 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 		case SDL_KEYDOWN:
 		{
 			SDL_Scancode pressedKeyCode = event->key.keysym.scancode;
-			ExecuteCallbacks(pressedKeyCode, true);
+			if (!keyPressed[pressedKeyCode])
+			{
+				keyPressed[pressedKeyCode] = true;
+				TraceLog(LOG_INFO, TextFormat("Key %i pressed", pressedKeyCode));
+				ExecuteCallbacks(pressedKeyCode, true);
+			}
 			return;
 		}
 
 		case SDL_KEYUP:
 		{
 			SDL_Scancode pressedKeyCode = event->key.keysym.scancode;
-			ExecuteCallbacks(pressedKeyCode, false);
+			if (keyPressed[pressedKeyCode])
+			{
+				keyPressed[pressedKeyCode] = false;
+				TraceLog(LOG_INFO, TextFormat("Key %i released", pressedKeyCode));
+				ExecuteCallbacks(pressedKeyCode, false);
+			}
 			return;
 		}
 

@@ -93,9 +93,21 @@ Vox::Renderer::Renderer()
 
     Camera* movedCamera = camera.get();
     ServiceLocator::GetInputService()->RegisterCallback(SDL_SCANCODE_W, [movedCamera](bool wasPressed) {
-        Vector3 cameraPosition = movedCamera->GetPosition();
-        cameraPosition.y += 1.0f;
-        movedCamera->SetPosition(cameraPosition);
+            if (wasPressed)
+            {
+                Vector3 cameraPosition = movedCamera->GetPosition();
+                cameraPosition.z -= 1.0f;
+                movedCamera->SetPosition(cameraPosition);
+            }
+        });
+    
+    ServiceLocator::GetInputService()->RegisterCallback(SDL_SCANCODE_S, [movedCamera](bool wasPressed) {
+            if (wasPressed)
+            {
+                Vector3 cameraPosition = movedCamera->GetPosition();
+                cameraPosition.z += 1.0f;
+                movedCamera->SetPosition(cameraPosition);
+            }
         });
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
