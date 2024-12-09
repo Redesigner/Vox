@@ -5,10 +5,17 @@
 #include <variant>
 #include <vector>
 
+#include "raylib.h"
+
 #include <SDL2/SDL_events.h>
 
 namespace Vox
 {
+	struct KeyboardInputAxis2D
+	{
+		SDL_Scancode yPos, yNeg, xPos, xNeg;
+	};
+
 	using KeyboardEventCallback = std::function<void(bool)>;
 
 	class InputService
@@ -22,6 +29,8 @@ namespace Vox
 		void RegisterCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
 
 		void UnregisterCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
+
+		Vector2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
 
 		bool ShouldCloseWindow() const;
 

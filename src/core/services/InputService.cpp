@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "rlgl.h"
 #include <SDL2/SDL_events.h>
+#include <cmath>
 
 Vox::InputService::InputService()
 {
@@ -51,6 +52,19 @@ void Vox::InputService::UnregisterCallback(SDL_Scancode scancode, KeyboardEventC
 			return;
 		}
 	}
+}
+
+Vector2 Vox::InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
+{
+	Vector2 result = Vector2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
+	float lengthSquared = result.x * result.x + result.y * result.y;
+	if (lengthSquared > 1.0f)
+	{
+		float length = std::sqrtf(lengthSquared);
+		result.x /= length;
+		result.y /= length;
+	}
+	return result;
 }
 
 bool Vox::InputService::ShouldCloseWindow() const
