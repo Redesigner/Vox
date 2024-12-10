@@ -13,6 +13,7 @@
 #include "editor/Editor.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
+#include "physics/CharacterController.h"
 
 int main()
 {
@@ -27,6 +28,7 @@ int main()
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<PhysicsServer> physicsServer = std::make_unique<PhysicsServer>();
+        std::unique_ptr<Vox::CharacterController> characterController = std::make_unique<Vox::CharacterController>(physicsServer->GetPhysicsSystem());
 
         renderer->SetDebugPhysicsServer(physicsServer);
 

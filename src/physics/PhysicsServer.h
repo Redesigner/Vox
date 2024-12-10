@@ -13,7 +13,10 @@
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
 
-class DebugRenderer;
+namespace Vox
+{
+	class DebugRenderer;
+}
 
 namespace JPH
 {
@@ -36,7 +39,10 @@ public:
 
 	void RenderDebugShapes();
 
-	DebugRenderer* GetDebugRenderer() const;
+	Vox::DebugRenderer* GetDebugRenderer() const;
+
+	// Should this be publicly exposed?
+	JPH::PhysicsSystem* GetPhysicsSystem();
 
 private:
 	JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
@@ -50,7 +56,7 @@ private:
 
 	std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
 
-	std::unique_ptr<DebugRenderer> debugRenderer;
+	std::unique_ptr<Vox::DebugRenderer> debugRenderer;
 
 	std::vector<JPH::BodyID> bodyIds;
 
