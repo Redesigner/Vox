@@ -20,8 +20,9 @@ FetchContent_Declare(
 	GIT_REPOSITORY https://github.com/raysan5/raylib.git
 	GIT_TAG 5.5
 )
+# Compile raylib with custom frame control and SDL2, so we can use our own event based system instead
 set(PLATFORM SDL)
-add_compile_definitions(SUPPORT_CUSTOM_FRAME_CONTROL 1)
+add_compile_definitions(SUPPORT_CUSTOM_FRAME_CONTROL TRUE)
 FetchContent_MakeAvailable(raylib-sdl)
 unset(PLATFORM)
 

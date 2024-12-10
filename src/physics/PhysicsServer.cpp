@@ -26,7 +26,7 @@ PhysicsServer::PhysicsServer()
 
 	jobSystem = std::make_unique<JPH::JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 	tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
-	debugRenderer = std::make_unique<DebugRenderer>();
+	debugRenderer = std::make_unique<Vox::DebugRenderer>();
 
 	const JPH::uint cMaxBodies = 1024;
 	const JPH::uint cNumBodyMutexes = 0;
@@ -70,7 +70,7 @@ JPH::BodyID PhysicsServer::CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position)
 JPH::BodyID PhysicsServer::CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position)
 {
 	JPH::CapsuleShapeSettings capsuleShapeSettings = JPH::CapsuleShapeSettings(halfHeight, radius);
-	JPH::BodyID capsuleId =  CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
+	JPH::BodyID capsuleId = CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
 	// physicsSystem.GetBodyInterface().SetLinearVelocity(capsuleId, JPH::Vec3(0.0f, -0.01f, 0.0f));
 	return capsuleId;
 }
@@ -93,9 +93,14 @@ void PhysicsServer::RenderDebugShapes()
 	physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 }
 
-DebugRenderer* PhysicsServer::GetDebugRenderer() const
+Vox::DebugRenderer* PhysicsServer::GetDebugRenderer() const
 {
 	return debugRenderer.get();
+}
+
+JPH::PhysicsSystem* PhysicsServer::GetPhysicsSystem()
+{
+	return &physicsSystem;
 }
 
 JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)
