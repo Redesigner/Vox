@@ -13,13 +13,13 @@ class DeferredShader;
 class Editor;
 class Framebuffer;
 class GBuffer;
-class PhysicsServer;
 class VoxelGrid;
 class VoxelShader;
 
 namespace Vox
 {
 	class Camera;
+	class PhysicsServer;
 
 	class Renderer
 	{
@@ -59,7 +59,7 @@ namespace Vox
 		std::shared_ptr<VoxelGrid> testVoxelGrid;
 		std::unique_ptr<ArrayTexture> voxelTextures;
 
-		std::weak_ptr<PhysicsServer> debugPhysicsServer;
+		std::weak_ptr<Vox::PhysicsServer> debugPhysicsServer;
 
 		Shader gBufferShader;
 		std::unique_ptr<VoxelShader> voxelShader;

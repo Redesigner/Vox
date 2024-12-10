@@ -13,58 +13,60 @@
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
 
-namespace Vox
-{
-	class DebugRenderer;
-}
-
 namespace JPH
 {
 	class JobSystem;
 }
-
-class PhysicsServer
+namespace Vox
 {
-public:
-	PhysicsServer();
-	~PhysicsServer();
+	class DebugRenderer;
 
-	void Step();
+	class PhysicsServer
+	{
+	public:
+		PhysicsServer();
+		~PhysicsServer();
 
-	JPH::BodyID CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position);
+		void Step();
 
-	JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
+		JPH::BodyID CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position);
 
-	JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
+		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
-	void RenderDebugShapes();
+		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
-	Vox::DebugRenderer* GetDebugRenderer() const;
+		void RenderDebugShapes();
 
-	// Should this be publicly exposed?
-	JPH::PhysicsSystem* GetPhysicsSystem();
+		Vox::DebugRenderer* GetDebugRenderer() const;
 
-private:
-	JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
-	JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
+		// Should this be publicly exposed?
+		JPH::PhysicsSystem* GetPhysicsSystem();
 
-	JPH::PhysicsSystem physicsSystem;
+		// Move these into private methods after restructuring
+		JPH::TempAllocator* GetAllocator() const;
 
-	JPH::uint stepCount = 0;
+	private:
+		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
+		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
 
-	std::unique_ptr<JPH::JobSystem> jobSystem;
+		JPH::PhysicsSystem physicsSystem;
 
-	std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
+		JPH::uint stepCount = 0;
 
-	std::unique_ptr<Vox::DebugRenderer> debugRenderer;
+		std::unique_ptr<JPH::JobSystem> jobSystem;
 
-	std::vector<JPH::BodyID> bodyIds;
+		std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
 
-	BroadPhaseLayerImplementation broadPhaseLayerImplementation;
-	ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
-	ObjectLayerPairFilterImplementation	objectLayerPairFilter;
+		std::unique_ptr<Vox::DebugRenderer> debugRenderer;
 
-	ContactListener contactListener;
+		std::vector<JPH::BodyID> bodyIds;
 
-	static constexpr float fixedTimeStep = 1.0f / 60.0f;
-};
+		BroadPhaseLayerImplementation broadPhaseLayerImplementation;
+		ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
+		ObjectLayerPairFilterImplementation	objectLayerPairFilter;
+
+		ContactListener contactListener;
+
+		static constexpr float fixedTimeStep = 1.0f / 60.0f;
+	};
+}

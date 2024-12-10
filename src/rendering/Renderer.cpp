@@ -310,7 +310,7 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 
 void Vox::Renderer::RenderDebugShapes()
 {
-    std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
+    std::shared_ptr<Vox::PhysicsServer> physicsServer = debugPhysicsServer.lock();
     if (!physicsServer)
     {
         return;
