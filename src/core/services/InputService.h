@@ -14,6 +14,7 @@ namespace Vox
 	struct KeyboardInputAxis2D
 	{
 		SDL_Scancode yPos, yNeg, xPos, xNeg;
+		KeyboardInputAxis2D(SDL_Scancode yPos, SDL_Scancode yNeg, SDL_Scancode xPos, SDL_Scancode xNeg);
 	};
 
 	using KeyboardEventCallback = std::function<void(bool)>;

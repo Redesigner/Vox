@@ -14,6 +14,7 @@
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
 #include "physics/CharacterController.h"
+#include "physics/TypeConversions.h"
 
 int main()
 {
@@ -26,10 +27,11 @@ int main()
         rlImGuiSetup(true);
 
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
+        Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<Vox::PhysicsServer> physicsServer = std::make_unique<Vox::PhysicsServer>();
-        std::unique_ptr<Vox::CharacterController> characterController = std::make_unique<Vox::CharacterController>(physicsServer->GetPhysicsSystem());
-        Vox::CharacterController* directController = characterController.get(); // Do not do this!
+
+        unsigned int characterControllerId = physicsServer->CreateCharacterController(0.5f, 2.0f);
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
@@ -41,12 +43,14 @@ int main()
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime, directController]
+        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime, localRenderer, characterControllerId]
             {
                 while (runPhysics)
                 {
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
-                    directController->Update(std::chrono::duration_cast<std::chrono::milliseconds>(frameTime).count() / 1000.0f, physicsServer.get());
+                    // this is not a good way to set this, but it's fine for a test, I think
+                    Vector3 cameraPositon = Vector3From(physicsServer->GetCharacterControllerPosition(characterControllerId));
+                    localRenderer->SetCameraPosition(cameraPositon);
                     physicsServer->Step();
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
@@ -58,12 +62,9 @@ int main()
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
         while (!inputService->ShouldCloseWindow())
         {
-            JPH::Vec3 characterPosition = characterController->GetPosition();
-            TraceLog(LOG_INFO, TextFormat("Character: (%f, %f, %f)", characterPosition.GetX(), characterPosition.GetY(), characterPosition.GetZ()));
             inputService->PollEvents();
             JPH::Vec3 playerPhysicsPosition = physicsServer->GetObjectPosition(playerCapsuleId);
             Vector3 playerPosition = Vector3(playerPhysicsPosition.GetX(), playerPhysicsPosition.GetY(), playerPhysicsPosition.GetZ());
-            renderer->SetCapsulePosition(playerPosition);
             renderer->Render(editor.get());
         }
         runPhysics = false;

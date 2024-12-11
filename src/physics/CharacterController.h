@@ -10,14 +10,16 @@ namespace JPH
 
 namespace Vox
 {
-	class PhysicsServer;
-
 	class CharacterController
 	{
+		friend class PhysicsServer;
+
 	public:
-		CharacterController(JPH::PhysicsSystem* physicsSystem);
+		CharacterController(float radius, float halfHeight, JPH::PhysicsSystem* physicsSystem);
 
 		JPH::Vec3 GetPosition() const;
+
+		JPH::Vec3 GetVelocity() const;
 
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 

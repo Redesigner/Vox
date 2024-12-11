@@ -161,3 +161,8 @@ void Vox::InputService::ExecuteCallbacks(SDL_Scancode scancode, bool pressed)
 		callback(pressed);
 	}
 }
+
+Vox::KeyboardInputAxis2D::KeyboardInputAxis2D(SDL_Scancode yPos, SDL_Scancode yNeg, SDL_Scancode xPos, SDL_Scancode xNeg)
+	:yPos(yPos), yNeg(yNeg), xPos(xPos), xNeg(xNeg)
+{
+}
