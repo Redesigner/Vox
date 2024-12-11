@@ -7,7 +7,6 @@
 #include "rcamera.h"
 #include "rlgl.h"
 
-#include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "external/glad.h"
@@ -92,23 +91,6 @@ Vox::Renderer::Renderer()
     camera->SetAspectRatio(800.0 / 431.0);
 
     Camera* movedCamera = camera.get();
-    ServiceLocator::GetInputService()->RegisterCallback(SDL_SCANCODE_W, [movedCamera](bool wasPressed) {
-            if (wasPressed)
-            {
-                Vector3 cameraPosition = movedCamera->GetPosition();
-                cameraPosition.z -= 1.0f;
-                movedCamera->SetPosition(cameraPosition);
-            }
-        });
-    
-    ServiceLocator::GetInputService()->RegisterCallback(SDL_SCANCODE_S, [movedCamera](bool wasPressed) {
-            if (wasPressed)
-            {
-                Vector3 cameraPosition = movedCamera->GetPosition();
-                cameraPosition.z += 1.0f;
-                movedCamera->SetPosition(cameraPosition);
-            }
-        });
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
@@ -153,6 +135,7 @@ void Vox::Renderer::Render(Editor* editor)
     BeginDrawing();
     {
         camera->SetAspectRatio(viewportTexture.texture.height == 0 ? 1 : viewportTexture.texture.width / viewportTexture.texture.height);
+        //camera->SetRotation(camera->GetRotation() + Vector3(0.0f, 0.01f, 0.0f));
 
         rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         rlSetFramebufferWidth(viewportTexture.texture.width);
@@ -192,14 +175,14 @@ void Vox::Renderer::LoadTestModel(std::string path)
     }
 }
 
-void Vox::Renderer::SetCapsulePosition(Vector3 position)
-{
-    playerPosition = position;
-}
-
 void Vox::Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
 {
     debugPhysicsServer = physicsServer;
+}
+
+void Vox::Renderer::SetCameraPosition(Vector3 position)
+{
+    camera->SetPosition(position);
 }
 
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)

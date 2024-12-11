@@ -8,6 +8,7 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 
 #include "physics/BroadPhaseLayer.h"
+#include "physics/CharacterController.h"
 #include "physics/ContactListener.h"
 #include "physics/ObjectBroadPhaseLayerFilter.h"
 #include "physics/ObjectLayerTypes.h"
@@ -27,11 +28,18 @@ namespace Vox
 		PhysicsServer();
 		~PhysicsServer();
 
+		using CharacterControllerId = unsigned int;
+
 		void Step();
 
 		JPH::BodyID CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position);
 
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
+
+		CharacterControllerId CreateCharacterController(float radius, float halfHeight);
+
+		JPH::Vec3 GetCharacterControllerVelocity(CharacterControllerId id) const;
+		JPH::Vec3 GetCharacterControllerPosition(CharacterControllerId id) const;
 
 		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
@@ -60,6 +68,8 @@ namespace Vox
 		std::unique_ptr<Vox::DebugRenderer> debugRenderer;
 
 		std::vector<JPH::BodyID> bodyIds;
+
+		std::vector<CharacterController> characterControllers;
 
 		BroadPhaseLayerImplementation broadPhaseLayerImplementation;
 		ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;

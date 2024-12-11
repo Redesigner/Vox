@@ -60,6 +60,10 @@ namespace Vox
 	void PhysicsServer::Step()
 	{
 		++stepCount;
+		for (CharacterController& characterController : characterControllers)
+		{
+			characterController.Update(fixedTimeStep, this);
+		}
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
 
@@ -75,6 +79,34 @@ namespace Vox
 		JPH::BodyID capsuleId = CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
 		// physicsSystem.GetBodyInterface().SetLinearVelocity(capsuleId, JPH::Vec3(0.0f, -0.01f, 0.0f));
 		return capsuleId;
+	}
+
+	unsigned int PhysicsServer::CreateCharacterController(float radius, float halfHeight)
+	{
+		characterControllers.emplace_back(radius, halfHeight, &physicsSystem);
+		return characterControllers.size() - 1;
+	}
+
+	JPH::Vec3 PhysicsServer::GetCharacterControllerVelocity(CharacterControllerId id) const
+	{
+		if (id >= characterControllers.size())
+		{
+			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller velocity. Character controller id was invalid.");
+			return JPH::Vec3::sZero();
+		}
+
+		return characterControllers[id].GetVelocity();
+	}
+
+	JPH::Vec3 PhysicsServer::GetCharacterControllerPosition(CharacterControllerId id) const
+	{
+		if (id >= characterControllers.size())
+		{
+			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller position. Character controller id was invalid.");
+			return JPH::Vec3::sZero();
+		}
+
+		return characterControllers[id].GetPosition();
 	}
 
 	JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const

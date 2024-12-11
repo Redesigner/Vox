@@ -31,10 +31,9 @@ namespace Vox
 
 		void LoadTestModel(std::string path);
 
-		void SetCapsulePosition(Vector3 position);
-
 		void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
 
+		void SetCameraPosition(Vector3 position);
 
 	private:
 		void UpdateViewportDimensions(Editor* editor);
@@ -77,7 +76,5 @@ namespace Vox
 		RenderTexture2D viewportTexture;
 		Material defaultMaterial;
 		Model testModel;
-
-		Vector3 playerPosition;
 	};
 }
