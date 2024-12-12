@@ -11,9 +11,12 @@
 
 namespace Vox
 {
-	CharacterController::CharacterController(float radius, float halfHeight, JPH::PhysicsSystem* physicsSystem)
+	CharacterController::CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem)
 	{
 		using namespace JPH;
+
+		radius = inRadius;
+		halfHeight = inHalfHeight;
 
 		CapsuleShapeSettings capsuleShapeSettings(halfHeight, radius);
 		ShapeSettings::ShapeResult capsuleShapeResult = capsuleShapeSettings.Create();
@@ -46,11 +49,33 @@ namespace Vox
 
 		JPH::PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
 		JPH::Vec3 currentVelocity = character->GetLinearVelocity();
-		JPH::Vec3 gravity = physicsSystem->GetGravity();
-		currentVelocity += gravity * deltaTime;
+		if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
+		{
+			if (currentVelocity.GetY() <= 0.0f)
+			{
+				currentVelocity.SetY(0.0f);
+			}
+		}
+		else
+		{
+			JPH::Vec3 gravity = physicsSystem->GetGravity();
+			currentVelocity += gravity * deltaTime;
+		}
+
 		Vector2 inputVelocity = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-		currentVelocity += JPH::Vec3(inputVelocity.x, 0.0f, inputVelocity.y) * -0.1f;
+		currentVelocity.SetX(inputVelocity.x * -1.0f);
+		currentVelocity.SetZ(inputVelocity.y * -1.0f);
 		character->SetLinearVelocity(currentVelocity);
 		character->Update(deltaTime, physicsSystem->GetGravity(), physicsSystem->GetDefaultBroadPhaseLayerFilter(Physics::CollisionLayer::Dynamic), physicsSystem->GetDefaultLayerFilter(Physics::CollisionLayer::Dynamic), {}, {}, *physicsServer->GetAllocator());
+	}
+
+	float CharacterController::GetRadius() const
+	{
+		return radius;
+	}
+
+	float CharacterController::GetHalfHeight() const
+	{
+		return halfHeight;
 	}
 }

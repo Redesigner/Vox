@@ -15,7 +15,7 @@ namespace Vox
 		friend class PhysicsServer;
 
 	public:
-		CharacterController(float radius, float halfHeight, JPH::PhysicsSystem* physicsSystem);
+		CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem);
 
 		JPH::Vec3 GetPosition() const;
 
@@ -23,7 +23,12 @@ namespace Vox
 
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 
+		float GetRadius() const;
+		float GetHalfHeight() const;
+
 	private:
+		float radius, halfHeight;
+
 		JPH::Ref<JPH::CharacterVirtual> character;
 		JPH::Ref<JPH::Shape> capsuleShape;
 	};

@@ -60,10 +60,8 @@ namespace Vox
 	void PhysicsServer::Step()
 	{
 		++stepCount;
-		for (CharacterController& characterController : characterControllers)
-		{
-			characterController.Update(fixedTimeStep, this);
-		}
+		StepCharacterControllers();
+		UpdateSpringArms();
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
 
@@ -109,6 +107,51 @@ namespace Vox
 		return characterControllers[id].GetPosition();
 	}
 
+	unsigned int PhysicsServer::CreateSpringArm(CharacterControllerId id)
+	{
+		SpringArm& newArm = springArms.emplace_back();
+		unsigned int resultId = springArms.size() - 1;
+		newArm.SetOrigin(id);
+		newArm.SetLength(2.0f);
+		return resultId;
+	}
+
+	unsigned int PhysicsServer::CreateSpringArm(JPH::BodyID bodyId)
+	{
+		SpringArm& newArm = springArms.emplace_back();
+		unsigned int resultId = springArms.size() - 1;
+		newArm.SetOrigin(bodyId);
+		return resultId;
+	}
+
+	void PhysicsServer::SetSpringArmEulerRotation(SpringArmId id, JPH::Vec3 rotation)
+	{
+		if (SpringArm* springArm = GetSpringArm(id))
+		{
+			springArm->SetEulerRotation(rotation);
+		}
+	}
+
+	JPH::Vec3 PhysicsServer::GetSpringArmEulerRotation(SpringArmId id) const
+	{
+		if (const SpringArm* springArm = GetSpringArm(id))
+		{
+			return springArm->GetEulerRotation();
+		}
+
+		return JPH::Vec3::sZero();
+	}
+
+	JPH::Vec3 PhysicsServer::GetSpringArmResult(SpringArmId id) const
+	{
+		if (const SpringArm* springArm = GetSpringArm(id))
+		{
+			return springArm->GetResultPosition();
+		}
+
+		return JPH::Vec3::sZero();
+	}
+
 	JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const
 	{
 		const JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
@@ -126,6 +169,10 @@ namespace Vox
 		JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
 		physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 		physicsSystem.DrawConstraints(debugRenderer.get());
+		for (CharacterController& characterController : characterControllers)
+		{
+			debugRenderer->DrawCapsule(JPH::Mat44::sTranslation(characterController.GetPosition()), characterController.GetHalfHeight(), characterController.GetRadius(), JPH::ColorArg::sRed);
+		}
 	}
 
 	Vox::DebugRenderer* PhysicsServer::GetDebugRenderer() const
@@ -143,6 +190,22 @@ namespace Vox
 		return tempAllocator.get();
 	}
 
+	void PhysicsServer::StepCharacterControllers()
+	{
+		for (CharacterController& characterController : characterControllers)
+		{
+			characterController.Update(fixedTimeStep, this);
+		}
+	}
+
+	void PhysicsServer::UpdateSpringArms()
+	{
+		for (SpringArm& springArm : springArms)
+		{
+			springArm.Update(this);
+		}
+	}
+
 	JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)
 	{
 		JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, Physics::CollisionLayer::Static);
@@ -157,5 +220,27 @@ namespace Vox
 		JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
 		bodyIds.push_back(bodyId);
 		return bodyId;
+	}
+
+	const SpringArm* PhysicsServer::GetSpringArm(SpringArmId id) const
+	{
+		if (id >= springArms.size())
+		{
+			TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get spring arm. The spring arm ID was not valid."));
+			return nullptr;
+		}
+
+		return &springArms[id];
+	}
+
+	SpringArm* PhysicsServer::GetSpringArm(SpringArmId id)
+	{
+		if (id >= springArms.size())
+		{
+			TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get spring arm. The spring arm ID was not valid."));
+			return nullptr;
+		}
+
+		return &springArms[id];
 	}
 }
