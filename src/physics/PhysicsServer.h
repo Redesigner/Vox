@@ -13,6 +13,7 @@
 #include "physics/ObjectBroadPhaseLayerFilter.h"
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
+#include "physics/SpringArm.h"
 
 namespace JPH
 {
@@ -29,6 +30,7 @@ namespace Vox
 		~PhysicsServer();
 
 		using CharacterControllerId = unsigned int;
+		using SpringArmId = unsigned int;
 
 		void Step();
 
@@ -37,9 +39,20 @@ namespace Vox
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
 		CharacterControllerId CreateCharacterController(float radius, float halfHeight);
-
 		JPH::Vec3 GetCharacterControllerVelocity(CharacterControllerId id) const;
 		JPH::Vec3 GetCharacterControllerPosition(CharacterControllerId id) const;
+
+
+		SpringArmId CreateSpringArm(CharacterControllerId id);
+
+		SpringArmId CreateSpringArm(JPH::BodyID bodyId);
+
+		void SetSpringArmEulerRotation(SpringArmId id, JPH::Vec3 rotation);
+
+		JPH::Vec3 GetSpringArmEulerRotation(SpringArmId id) const;
+
+		JPH::Vec3 GetSpringArmResult(SpringArmId id) const;
+
 
 		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
@@ -54,8 +67,15 @@ namespace Vox
 		JPH::TempAllocator* GetAllocator() const;
 
 	private:
+		void StepCharacterControllers();
+
+		void UpdateSpringArms();
+
 		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
 		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
+
+		const SpringArm* GetSpringArm(SpringArmId id) const;
+		SpringArm* GetSpringArm(SpringArmId id);
 
 		JPH::PhysicsSystem physicsSystem;
 
@@ -70,6 +90,8 @@ namespace Vox
 		std::vector<JPH::BodyID> bodyIds;
 
 		std::vector<CharacterController> characterControllers;
+
+		std::vector<SpringArm> springArms;
 
 		BroadPhaseLayerImplementation broadPhaseLayerImplementation;
 		ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
