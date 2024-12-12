@@ -23,7 +23,7 @@ void Vox::InputService::PollEvents()
 	}
 }
 
-void Vox::InputService::RegisterCallback(SDL_Scancode scancode, KeyboardEventCallback callback)
+void Vox::InputService::RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback)
 {
 	auto callbacks = keyboardEventMap.find(scancode);
 	if (callbacks == keyboardEventMap.end())
@@ -36,7 +36,7 @@ void Vox::InputService::RegisterCallback(SDL_Scancode scancode, KeyboardEventCal
 	callbacks->second.push_back(callback);
 }
 
-void Vox::InputService::UnregisterCallback(SDL_Scancode scancode, KeyboardEventCallback callback)
+void Vox::InputService::UnregisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback)
 {
 	auto callbacks = keyboardEventMap.find(scancode);
 	if (callbacks == keyboardEventMap.end())
@@ -49,6 +49,23 @@ void Vox::InputService::UnregisterCallback(SDL_Scancode scancode, KeyboardEventC
 		if (callbacks->second[i].target<void(bool)>() == callback.target<void(bool)>())
 		{
 			callbacks->second.erase(callbacks->second.begin() + i);
+			return;
+		}
+	}
+}
+
+void Vox::InputService::RegisterMouseMotionCallback(MouseMotionEventCallback callback)
+{
+	mouseMotionEventCallbacks.push_back(callback);
+}
+
+void Vox::InputService::UnregisterMouseMotionCallback(MouseMotionEventCallback callback)
+{
+	for (int i = 0; i < mouseMotionEventCallbacks.size(); ++i)
+	{
+		if (mouseMotionEventCallbacks[i].target<void(bool)>() == callback.target<void(bool)>())
+		{
+			mouseMotionEventCallbacks.erase(mouseMotionEventCallbacks.begin() + i);
 			return;
 		}
 	}
@@ -106,6 +123,12 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			return;
 		}
 
+		case SDL_MOUSEMOTION:
+		{
+			HandleMouseMotionEvent(event->motion);
+			return;
+		}
+
 		default:
 		{
 			return;
@@ -144,6 +167,14 @@ void Vox::InputService::HandleWindowEvent(SDL_WindowEvent& windowEvent)
 		{
 			return;
 		}
+	}
+}
+
+void Vox::InputService::HandleMouseMotionEvent(SDL_MouseMotionEvent& mouseEvent)
+{
+	for (MouseMotionEventCallback& callback : mouseMotionEventCallbacks)
+	{
+		callback(mouseEvent.xrel, mouseEvent.yrel);
 	}
 }
 

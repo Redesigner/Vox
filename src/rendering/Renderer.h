@@ -35,6 +35,8 @@ namespace Vox
 
 		void SetCameraPosition(Vector3 position);
 
+		void SetCameraRotation(Vector3 rotation);
+
 	private:
 		void UpdateViewportDimensions(Editor* editor);
 

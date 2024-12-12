@@ -107,12 +107,24 @@ namespace Vox
 		return characterControllers[id].GetPosition();
 	}
 
+	JPH::Quat PhysicsServer::GetCharacterControllerRotation(CharacterControllerId id) const
+	{
+		if (id >= characterControllers.size())
+		{
+			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller rotation. Character controller id was invalid.");
+			return JPH::Quat::sIdentity();
+		}
+
+		return characterControllers[id].GetRotation();
+	}
+
 	unsigned int PhysicsServer::CreateSpringArm(CharacterControllerId id)
 	{
 		SpringArm& newArm = springArms.emplace_back();
 		unsigned int resultId = springArms.size() - 1;
 		newArm.SetOrigin(id);
-		newArm.SetLength(2.0f);
+		newArm.SetLength(4.0f);
+		newArm.SetOffset({ 0.0f, 1.0f, 0.0f });
 		return resultId;
 	}
 
