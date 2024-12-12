@@ -21,9 +21,12 @@ namespace Vox
 
 		JPH::Vec3 GetVelocity() const;
 
+		JPH::Quat GetRotation() const;
+
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 
 		float GetRadius() const;
+
 		float GetHalfHeight() const;
 
 	private:

@@ -51,7 +51,10 @@ int main()
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
                     // this is not a good way to set this, but it's fine for a test, I think
                     Vector3 cameraPositon = Vector3From(physicsServer->GetSpringArmResult(springArmId));
+                    Vector3 cameraRotation = Vector3From(physicsServer->GetSpringArmEulerRotation(springArmId));
+                    cameraRotation *= -1.0f;
                     localRenderer->SetCameraPosition(cameraPositon);
+                    localRenderer->SetCameraRotation(cameraRotation);
                     physicsServer->Step();
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }

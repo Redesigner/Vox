@@ -20,8 +20,12 @@ namespace Vox
 	class SpringArm
 	{
 	public:
+		SpringArm();
+
 		void SetOrigin(JPH::BodyID bodyId);
 		void SetOrigin(unsigned int characterControllerId);
+
+		void SetOffset(JPH::Vec3 offset);
 
 		void SetEulerRotation(JPH::Vec3 rotation);
 		JPH::Vec3 GetEulerRotation() const;
@@ -37,7 +41,7 @@ namespace Vox
 		JPH::BodyID originBody;
 		unsigned int originCharacterId;
 
-		JPH::Vec3 springVector;
+		JPH::Vec3 springOffset;
 
 		JPH::Vec3 eulerRotation;
 

@@ -1,14 +1,40 @@
 #include "SpringArm.h"
 
+#include <cmath>
+
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 
+#include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
 
 namespace Vox
 {
+	SpringArm::SpringArm()
+	{
+		eulerRotation = JPH::Vec3::sZero();
+		originCharacterId = 0;
+		originBody = JPH::BodyID();
+		resultPosition = JPH::Vec3::sZero();
+		springLength = 0.0f;
+		springOffset = JPH::Vec3::sZero();
+
+		ServiceLocator::GetInputService()->RegisterMouseMotionCallback([this](int xMotion, int yMotion)
+			{
+				float xRot = eulerRotation.GetX();
+				xRot += static_cast<float>(yMotion) / 500.0f;
+				xRot = std::clamp(xRot, -3.1f, 3.1f);
+				eulerRotation.SetX(xRot);
+
+				float yRot = eulerRotation.GetY();
+				yRot += static_cast<float>(xMotion) / 500.0f;
+				eulerRotation.SetY(yRot);
+			});
+	}
+
 	void SpringArm::SetOrigin(JPH::BodyID bodyId)
 	{
 		originType = OriginType::Body;
@@ -21,11 +47,14 @@ namespace Vox
 		originCharacterId = characterControllerId;
 	}
 
+	void SpringArm::SetOffset(JPH::Vec3 offset)
+	{
+		springOffset = offset;
+	}
+
 	void SpringArm::SetEulerRotation(JPH::Vec3 rotation)
 	{
 		eulerRotation = rotation;
-		JPH::Mat44 rotationMatrix = JPH::Mat44::sRotation(JPH::Quat::sEulerAngles(rotation));
-		springVector = rotationMatrix * JPH::Vec3::sAxisZ() * springLength;
 	}
 
 	JPH::Vec3 SpringArm::GetEulerRotation() const
@@ -36,8 +65,6 @@ namespace Vox
 	void SpringArm::SetLength(float length)
 	{
 		springLength = length;
-		JPH::Mat44 rotationMatrix = JPH::Mat44::sRotation(JPH::Quat::sEulerAngles(eulerRotation));
-		springVector = rotationMatrix * JPH::Vec3::sAxisZ() * springLength;
 	}
 
 	void SpringArm::Update(PhysicsServer* physicsServer)
@@ -48,19 +75,26 @@ namespace Vox
 		PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
 		AllHitCollisionCollector<RayCastBodyCollector> collector;
 		Vec3 origin{};
+		Vec3 originRotation{};
 		switch (originType)
 		{
 			case OriginType::Body:
 			{
 				origin = physicsSystem->GetBodyInterface().GetPosition(originBody);
+				originRotation = physicsSystem->GetBodyInterface().GetRotation(originBody).GetEulerAngles();
 				break;
 			}
 
 			case OriginType::Character:
 			{
 				origin = physicsServer->GetCharacterControllerPosition(originCharacterId);
+				originRotation = physicsServer->GetCharacterControllerRotation(originCharacterId).GetEulerAngles();
 			}
 		}
+		origin += springOffset;
+
+		Mat44 rotationMatrix = Mat44::sRotation(Quat::sEulerAngles(eulerRotation));
+		Vec3 springVector = rotationMatrix * Vec3::sAxisZ() * springLength;
 
 		RayCast springRayCast = RayCast(origin, springVector);
 		physicsSystem->GetBroadPhaseQuery().CastRay(springRayCast, collector);

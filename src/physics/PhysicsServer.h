@@ -38,9 +38,16 @@ namespace Vox
 
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
+
+		// Character Controller functions
+		// @TODO: move these over to a custom reference class
 		CharacterControllerId CreateCharacterController(float radius, float halfHeight);
+
 		JPH::Vec3 GetCharacterControllerVelocity(CharacterControllerId id) const;
+
 		JPH::Vec3 GetCharacterControllerPosition(CharacterControllerId id) const;
+
+		JPH::Quat GetCharacterControllerRotation(CharacterControllerId id) const;
 
 
 		SpringArmId CreateSpringArm(CharacterControllerId id);
@@ -72,10 +79,12 @@ namespace Vox
 		void UpdateSpringArms();
 
 		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
+
 		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
 
 		const SpringArm* GetSpringArm(SpringArmId id) const;
 		SpringArm* GetSpringArm(SpringArmId id);
+
 
 		JPH::PhysicsSystem physicsSystem;
 

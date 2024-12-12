@@ -44,6 +44,11 @@ namespace Vox
 		return character->GetLinearVelocity();
 	}
 
+	JPH::Quat CharacterController::GetRotation() const
+	{
+		return character->GetRotation();
+	}
+
 	void CharacterController::Update(float deltaTime, PhysicsServer* physicsServer)
 	{
 
