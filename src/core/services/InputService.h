@@ -43,6 +43,8 @@ namespace Vox
 
 		bool ShouldCloseWindow() const;
 
+		void ToggleCursorLock();
+
 	private:
 		void HandleEvent(SDL_Event* event);
 
@@ -56,6 +58,8 @@ namespace Vox
 		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
 
 		bool windowClosed = false;
+
+		bool cursorLocked = false;
 
 		bool keyPressed[SDL_NUM_SCANCODES]{ false };
 	};
