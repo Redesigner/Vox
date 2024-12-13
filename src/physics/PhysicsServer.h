@@ -60,6 +60,8 @@ namespace Vox
 
 		JPH::Vec3 GetSpringArmResult(SpringArmId id) const;
 
+		JPH::Vec3 GetSpringArmOrigin(SpringArmId id) const;
+
 
 		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
@@ -77,6 +79,8 @@ namespace Vox
 		void StepCharacterControllers();
 
 		void UpdateSpringArms();
+
+		void UpdatePositionFrame();
 
 		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
 

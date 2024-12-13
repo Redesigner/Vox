@@ -47,6 +47,11 @@ namespace Vox
 		originCharacterId = characterControllerId;
 	}
 
+	JPH::Vec3 SpringArm::GetOrigin() const
+	{
+		return origin;
+	}
+
 	void SpringArm::SetOffset(JPH::Vec3 offset)
 	{
 		springOffset = offset;
@@ -74,7 +79,6 @@ namespace Vox
 		// DO raycast and update resultposition
 		PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
 		AllHitCollisionCollector<RayCastBodyCollector> collector;
-		Vec3 origin{};
 		Vec3 originRotation{};
 		switch (originType)
 		{
