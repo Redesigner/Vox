@@ -24,6 +24,7 @@ namespace Vox
 
 		void SetOrigin(JPH::BodyID bodyId);
 		void SetOrigin(unsigned int characterControllerId);
+		JPH::Vec3 GetOrigin() const;
 
 		void SetOffset(JPH::Vec3 offset);
 
@@ -44,6 +45,8 @@ namespace Vox
 		JPH::Vec3 springOffset;
 
 		JPH::Vec3 eulerRotation;
+
+		JPH::Vec3 origin;
 
 		float springLength;
 

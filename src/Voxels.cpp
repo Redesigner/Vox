@@ -44,7 +44,7 @@ int main()
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime, localRenderer, springArmId]
+        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime, localRenderer, springArmId, characterControllerId]
             {
                 while (runPhysics)
                 {
@@ -54,7 +54,7 @@ int main()
                     Vector3 cameraRotation = Vector3From(physicsServer->GetSpringArmEulerRotation(springArmId));
                     cameraRotation *= -1.0f;
                     localRenderer->SetCameraPosition(cameraPositon);
-                    localRenderer->SetCameraRotation(cameraRotation);
+                    localRenderer->SetCameraTarget(Vector3From(physicsServer->GetSpringArmOrigin(springArmId)));
                     physicsServer->Step();
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }

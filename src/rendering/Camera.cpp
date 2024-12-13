@@ -100,6 +100,14 @@ Matrix Vox::Camera::GetViewProjectionMatrix() const
 	return viewProjectionMatrix;
 }
 
+void Vox::Camera::SetTarget(Vector3 targetPosition)
+{
+	useLookAt = true;
+	target = targetPosition;
+	rotationMatrix = MatrixLookAt({}, targetPosition - position, Vector3UnitY);
+	UpdateViewMatrix();
+}
+
 void Vox::Camera::UpdatePositionMatrix()
 {
 	positionMatrix = MatrixTranslate(-position.x, -position.y, -position.z);
@@ -108,13 +116,14 @@ void Vox::Camera::UpdatePositionMatrix()
 
 void Vox::Camera::UpdateRotationMatrix()
 {
+	useLookAt = false;
 	rotationMatrix = MatrixRotateXYZ(rotation);
 	UpdateViewMatrix();
 }
 
 void Vox::Camera::UpdateViewMatrix()
 {
-	viewMatrix = positionMatrix * rotationMatrix;
+	viewMatrix = useLookAt ? MatrixLookAt(position, target, Vector3UnitY) : positionMatrix * rotationMatrix;
 	UpdateViewProjectionMatrix();
 }
 

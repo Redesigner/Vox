@@ -26,6 +26,8 @@ namespace Vox
 		Matrix GetProjectionMatrix() const;
 		Matrix GetViewProjectionMatrix() const;
 
+		void SetTarget(Vector3 targetPosition);
+
 	private:
 		void UpdatePositionMatrix();
 		void UpdateRotationMatrix();
@@ -35,6 +37,9 @@ namespace Vox
 
 		Vector3 position;
 		Vector3 rotation;
+		Vector3 target;
+
+		bool useLookAt = false;
 
 		double fovY = 60.0;
 		double aspectRatio = 16.0 / 9.0;

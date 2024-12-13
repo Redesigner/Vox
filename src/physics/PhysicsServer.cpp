@@ -164,6 +164,16 @@ namespace Vox
 		return JPH::Vec3::sZero();
 	}
 
+	JPH::Vec3 PhysicsServer::GetSpringArmOrigin(SpringArmId id) const
+	{
+		if (const SpringArm* springArm = GetSpringArm(id))
+		{
+			return springArm->GetOrigin();
+		}
+
+		return JPH::Vec3::sZero();
+	}
+
 	JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const
 	{
 		const JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
