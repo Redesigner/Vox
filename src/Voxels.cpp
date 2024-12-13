@@ -21,10 +21,10 @@ int main()
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 450, "Voxels");
     {
-        Vox::ServiceLocator::InitServices();
-
         SetTargetFPS(60);
         rlImGuiSetup(true);
+
+        Vox::ServiceLocator::InitServices();
 
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test

@@ -26,7 +26,7 @@ namespace Vox
 			{
 				float xRot = eulerRotation.GetX();
 				xRot += static_cast<float>(yMotion) / 500.0f;
-				xRot = std::clamp(xRot, -3.1f, 3.1f);
+				xRot = std::clamp(xRot, -1.5f, 1.5f);
 				eulerRotation.SetX(xRot);
 
 				float yRot = eulerRotation.GetY();

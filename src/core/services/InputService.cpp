@@ -7,7 +7,11 @@
 
 Vox::InputService::InputService()
 {
+	ToggleCursorLock();
 	windowClosed = false;
+
+	RegisterKeyboardCallback(SDL_SCANCODE_ESCAPE, [this](bool pressed) { windowClosed = true; });
+	RegisterKeyboardCallback(SDL_SCANCODE_TAB, [this](bool pressed) { if (pressed) ToggleCursorLock(); });
 }
 
 Vox::InputService::~InputService()
@@ -87,6 +91,22 @@ Vector2 Vox::InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) con
 bool Vox::InputService::ShouldCloseWindow() const
 {
 	return windowClosed;
+}
+
+void Vox::InputService::ToggleCursorLock()
+{
+	if (!cursorLocked)
+	{
+		SDL_ShowCursor(SDL_DISABLE);
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+		cursorLocked = true;
+	}
+	else
+	{
+		SDL_ShowCursor(SDL_ENABLE);
+		SDL_SetRelativeMouseMode(SDL_FALSE);
+		cursorLocked = false;
+	}
 }
 
 void Vox::InputService::HandleEvent(SDL_Event* event)
