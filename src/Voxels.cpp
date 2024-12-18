@@ -29,6 +29,8 @@ int main()
 
         Vox::ServiceLocator::InitServices();
 
+        Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) { if (pressed) ToggleBorderlessWindowed(); });
+
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
@@ -39,20 +41,21 @@ int main()
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
-        Octree::CollisionNode collisionTest = Octree::CollisionNode(16);
+        Octree::CollisionNode collisionTest = Octree::CollisionNode(32);
         Octree::PhysicsVoxel testVoxel = Octree::PhysicsVoxel();
         testVoxel.solid = true;
-        for (int x = -8; x < 8; ++x)
+        for (int x = -16; x < 16; ++x)
         {
-            for (int y = -8; y < 0; ++y)
+            for (int y = -16; y < 0; ++y)
             {
-                for (int z = -8; z < 8; ++z)
+                for (int z = -16; z < 16; ++z)
                 {
                     collisionTest.SetVoxel(x, y, z, &testVoxel);
                 }
             }
         }
-        collisionTest.SetVoxel(0, 2, 0, &testVoxel);
+        collisionTest.SetVoxel(5, 2, 0, &testVoxel);
+        collisionTest.SetVoxel(2, 1, 0, &testVoxel);
 
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
@@ -73,7 +76,13 @@ int main()
                     cameraRotation *= -1.0f;
                     localRenderer->SetCameraPosition(cameraPositon);
                     localRenderer->SetCameraTarget(Vector3From(physicsServer->GetSpringArmOrigin(springArmId)));
+                    // localRenderer->SetCameraRotation(cameraRotation);
                     physicsServer->Step();
+                    if (threadStartTime + frameTime < std::chrono::steady_clock::now())
+                    {
+                        TraceLog(LOG_WARNING, "Physics thread lagging...");
+                        TraceLog(LOG_INFO, TextFormat("Physics thread took %i ms.", std::chrono::duration_cast<std::chrono::milliseconds > (std::chrono::steady_clock::now() - threadStartTime).count()));
+                    }
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });

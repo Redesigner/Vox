@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <stdexcept>
 
 namespace Octree
 {
@@ -76,6 +77,20 @@ namespace Octree
 
 	PhysicsVoxel* CollisionNode::GetVoxel(int x, int y, int z)
 	{
+		int halfSize = size / 2;
+		if (x < -halfSize || x >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+		if (y < -halfSize || y >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+		if (z < -halfSize || z >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+
 		switch (state)
 		{
 		case Empty:
@@ -103,6 +118,20 @@ namespace Octree
 
 	void CollisionNode::SetVoxel(int x, int y, int z, PhysicsVoxel* voxel)
 	{
+		int halfSize = size / 2;
+		if (x < -halfSize || x >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+		if (y < -halfSize || y >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+		if (z < -halfSize || z >= halfSize)
+		{
+			throw std::out_of_range("Accessed voxel outside of range.");
+		}
+
 		if (size == 2)
 		{
 			switch (state)
@@ -263,13 +292,11 @@ namespace Octree
 	{
 		using namespace JPH;
 		Ref<StaticCompoundShapeSettings> shapeSettings = new StaticCompoundShapeSettings;
-		BoxShapeSettings cubeShapeSettings;
-
-		for (const Cube& cube : GetCubes())
+		std::vector<Cube> cubes = GetCubes();
+		for (const Cube& cube : cubes)
 		{
 			float cubeHalfExtent = static_cast<float>(cube.size / 2.0f);
-			cubeShapeSettings.mHalfExtent = Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent);
-			shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), cubeShapeSettings.Create().Get());
+			shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
 		}
 
 		return shapeSettings;
