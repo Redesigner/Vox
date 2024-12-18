@@ -18,6 +18,7 @@
 namespace JPH
 {
 	class JobSystem;
+	class StaticCompoundShapeSettings;
 }
 namespace Vox
 {
@@ -37,6 +38,8 @@ namespace Vox
 		JPH::BodyID CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position);
 
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
+
+		JPH::BodyID CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings);
 
 
 		// Character Controller functions

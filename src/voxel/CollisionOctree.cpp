@@ -2,7 +2,7 @@
 
 
 #include "raylib.h"
-#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 
 #include <cassert>
@@ -259,9 +259,20 @@ namespace Octree
 		}
 	}
 
-	std::shared_ptr<JPH::StaticCompoundShapeSettings> CollisionNode::MakeCompoundShape() const
+	JPH::Ref<JPH::StaticCompoundShapeSettings> CollisionNode::MakeCompoundShape() const
 	{
-		return std::shared_ptr<JPH::StaticCompoundShapeSettings>();
+		using namespace JPH;
+		Ref<StaticCompoundShapeSettings> shapeSettings = new StaticCompoundShapeSettings;
+		BoxShapeSettings cubeShapeSettings;
+
+		for (const Cube& cube : GetCubes())
+		{
+			float cubeHalfExtent = static_cast<float>(cube.size / 2.0f);
+			cubeShapeSettings.mHalfExtent = Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent);
+			shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), cubeShapeSettings.Create().Get());
+		}
+
+		return shapeSettings;
 	}
 
 	std::vector<Cube> CollisionNode::GetCubes() const

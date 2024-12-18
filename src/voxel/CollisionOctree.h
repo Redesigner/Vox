@@ -4,6 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include <Jolt/Jolt.h>
+#include <Jolt/Core/Reference.h>
+
 namespace JPH
 {
 	class StaticCompoundShapeSettings;
@@ -48,7 +51,7 @@ namespace Octree
 
 		void SetVoxel(int x, int y, int z, PhysicsVoxel* voxel);
 
-		std::shared_ptr<JPH::StaticCompoundShapeSettings> MakeCompoundShape() const;
+		JPH::Ref<JPH::StaticCompoundShapeSettings> MakeCompoundShape() const;
 
 		std::vector<Cube> GetCubes() const;
 

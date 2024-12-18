@@ -4,6 +4,8 @@
 #include "raymath.h"
 #include "rlgl.h"
 #include "rlImGui.h"
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 
 #include <thread>
 #include <chrono>
@@ -52,8 +54,6 @@ int main()
         }
         collisionTest.SetVoxel(0, 2, 0, &testVoxel);
 
-        std::vector<Octree::Cube> cubes = collisionTest.GetCubes();
-
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
                 renderer->LoadTestModel(fileName);
@@ -78,7 +78,8 @@ int main()
                 }
             });
 
-        JPH::BodyID boxId = physicsServer->CreateStaticBox(JPH::Vec3(32.0f, 16.0f, 32.0f), JPH::Vec3(0.0f, -8.0f, 0.0f));
+        // JPH::BodyID boxId = physicsServer->CreateStaticBox(JPH::Vec3(32.0f, 16.0f, 32.0f), JPH::Vec3(0.0f, -8.0f, 0.0f));
+        physicsServer->CreateCompoundShape(collisionTest.MakeCompoundShape());
         JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(1.0f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();

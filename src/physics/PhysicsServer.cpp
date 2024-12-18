@@ -2,13 +2,14 @@
 
 #include <thread>
 
-#include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
+#include <Jolt/RegisterTypes.h>
 #include <Jolt/Renderer/DebugRenderer.h>
 
 #include "raylib.h"
@@ -241,6 +242,14 @@ namespace Vox
 		JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Physics::CollisionLayer::Dynamic);
 		JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
 		bodyIds.push_back(bodyId);
+		return bodyId;
+	}
+
+	JPH::BodyID PhysicsServer::CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings)
+	{
+		using namespace JPH;
+		JPH::BodyCreationSettings bodyCreationSettings(settings, Vec3::sZero(), Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
+		BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
 		return bodyId;
 	}
 
