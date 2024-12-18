@@ -4,12 +4,14 @@
 #include "raylib.h"
 #include "Voxel/Voxel.h"
 
+#include <cassert>
 #include <cstring>
 #include <cmath>
 
 Octree::Node::Node(unsigned int size)
 	:size(size)
 {
+	assert((size & (size - 1)) == 0, "Octree node size must be a power of 2");
 	subNodes[0] = nullptr;
 	state = Empty;
 }
@@ -17,6 +19,7 @@ Octree::Node::Node(unsigned int size)
 Octree::Node::Node(unsigned int size, Voxel* voxel)
 	:size(size)
 {
+	assert((size & (size - 1)) == 0, "Octree node size must be a power of 2");
 	// Allocate a voxel that we can copy our incoming voxel to
 	subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 	std::memcpy(subNodes[0], voxel, sizeof(Voxel));
