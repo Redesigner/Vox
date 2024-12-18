@@ -125,7 +125,7 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			if (!keyPressed[pressedKeyCode])
 			{
 				keyPressed[pressedKeyCode] = true;
-				TraceLog(LOG_INFO, TextFormat("Key %i pressed", pressedKeyCode));
+				// TraceLog(LOG_INFO, TextFormat("Key %i pressed", pressedKeyCode));
 				ExecuteCallbacks(pressedKeyCode, true);
 			}
 			return;
@@ -137,7 +137,7 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			if (keyPressed[pressedKeyCode])
 			{
 				keyPressed[pressedKeyCode] = false;
-				TraceLog(LOG_INFO, TextFormat("Key %i released", pressedKeyCode));
+				// TraceLog(LOG_INFO, TextFormat("Key %i released", pressedKeyCode));
 				ExecuteCallbacks(pressedKeyCode, false);
 			}
 			return;

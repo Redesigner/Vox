@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <fmt/format.h>
 #include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
@@ -78,7 +79,6 @@ namespace Vox
 
 		// DO raycast and update resultposition
 		PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
-		AllHitCollisionCollector<RayCastBodyCollector> collector;
 		Vec3 originRotation{};
 		switch (originType)
 		{
@@ -100,11 +100,14 @@ namespace Vox
 		Mat44 rotationMatrix = Mat44::sRotation(Quat::sEulerAngles(eulerRotation));
 		Vec3 springVector = rotationMatrix * Vec3::sAxisZ() * springLength;
 
-		RayCast springRayCast = RayCast(origin, springVector);
-		physicsSystem->GetBroadPhaseQuery().CastRay(springRayCast, collector);
+		RRayCast springRayCast = RRayCast(origin, springVector);
+		RayCastResult springRayCastResult = RayCastResult();
+		physicsSystem->GetNarrowPhaseQuery().CastRay(springRayCast, springRayCastResult);
 		
-		Vec3 calculatedSpringDistance = collector.mHits.empty() ? springVector : springVector * collector.mHits[0].mFraction;
+		Vec3 calculatedSpringDistance = springVector * springRayCastResult.mFraction;
 		resultPosition = origin + calculatedSpringDistance;
+		//fmt::print("Raycast origin: {}, {}, {} Result: {}, {}, {}\n", origin.GetX(), origin.GetY(), origin.GetZ(), resultPosition.GetX(), resultPosition.GetY(), resultPosition.GetZ());
+		//fmt::print("Raycast length: {}\n", calculatedSpringDistance.Length());
 	}
 
 	JPH::Vec3 SpringArm::GetResultPosition() const

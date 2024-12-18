@@ -5,7 +5,7 @@
 #include "raylib.h"
 
 #include "core/services/InputService.h"
-#include "core/services//ServiceLocator.h"
+#include "core/services/ServiceLocator.h"
 #include "physics/ObjectLayerTypes.h"
 #include "physics/PhysicsServer.h"
 
@@ -32,6 +32,17 @@ namespace Vox
 		settings->mSupportingVolume = Plane(Vec3::sAxisY(), -radius); // Accept contacts that touch the lower sphere of the capsule
 		character = new CharacterVirtual(settings, RVec3(2.0f, 15.0f, 0.0f), Quat::sIdentity(), 0, physicsSystem);
 		// character->SetListener(this);
+
+		Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool wasPressed)
+			{
+				if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
+				{
+					Vec3 velocity = character->GetLinearVelocity();
+					velocity.SetY(velocity.GetY() + 10.0f);
+					character->SetLinearVelocity(velocity);
+				}
+			}
+		);
 	}
 
 	JPH::Vec3 CharacterController::GetPosition() const
@@ -68,8 +79,8 @@ namespace Vox
 		}
 
 		Vector2 inputVelocity = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-		currentVelocity.SetX(inputVelocity.x * -1.0f);
-		currentVelocity.SetZ(inputVelocity.y * -1.0f);
+		currentVelocity.SetX(inputVelocity.x * -2.0f);
+		currentVelocity.SetZ(inputVelocity.y * -2.0f);
 		character->SetLinearVelocity(currentVelocity);
 		character->Update(deltaTime, physicsSystem->GetGravity(), physicsSystem->GetDefaultBroadPhaseLayerFilter(Physics::CollisionLayer::Dynamic), physicsSystem->GetDefaultLayerFilter(Physics::CollisionLayer::Dynamic), {}, {}, *physicsServer->GetAllocator());
 	}
