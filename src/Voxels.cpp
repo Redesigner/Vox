@@ -15,6 +15,7 @@
 #include "physics/PhysicsServer.h"
 #include "physics/CharacterController.h"
 #include "physics/TypeConversions.h"
+#include "voxel/CollisionOctree.h"
 
 int main()
 {
@@ -35,6 +36,23 @@ int main()
         unsigned int springArmId = physicsServer->CreateSpringArm(characterControllerId);
 
         renderer->SetDebugPhysicsServer(physicsServer);
+
+        Octree::CollisionNode collisionTest = Octree::CollisionNode(16);
+        Octree::PhysicsVoxel testVoxel = Octree::PhysicsVoxel();
+        testVoxel.solid = true;
+        for (int x = -8; x < 8; ++x)
+        {
+            for (int y = -8; y < 0; ++y)
+            {
+                for (int z = -8; z < 8; ++z)
+                {
+                    collisionTest.SetVoxel(x, y, z, &testVoxel);
+                }
+            }
+        }
+        collisionTest.SetVoxel(0, 2, 0, &testVoxel);
+
+        std::vector<Octree::Cube> cubes = collisionTest.GetCubes();
 
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
