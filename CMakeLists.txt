@@ -9,7 +9,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("Voxels")
+project ("Vox")
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 include(FetchContent)
@@ -40,35 +40,35 @@ find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
 # Add source to this project's executable.
-file (GLOB_RECURSE Voxels_SRC
+file (GLOB_RECURSE Vox_SRC
 	"src/*.cpp"
 )
 
-add_executable (Voxels ${Voxels_SRC})
+add_executable (Vox ${Vox_SRC})
 
 # Disable RTTI for compatibility with Jolt
 string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
 # Include source directory to allow absolute paths
-target_include_directories(Voxels PRIVATE "src/")
+target_include_directories(Vox PRIVATE "src/")
 
-target_link_libraries(Voxels PRIVATE raylib)
-target_link_libraries(Voxels PRIVATE tinyfiledialogs::tinyfiledialogs)
-target_link_libraries(Voxels PRIVATE fmt::fmt)
-target_link_libraries(Voxels PRIVATE Jolt)
+target_link_libraries(Vox PRIVATE raylib)
+target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)
+target_link_libraries(Vox PRIVATE fmt::fmt)
+target_link_libraries(Vox PRIVATE Jolt)
 
 # Add Raylib ImGui
-target_include_directories(Voxels PRIVATE "external/rlImGui")
-target_sources(Voxels PRIVATE
+target_include_directories(Vox PRIVATE "external/rlImGui")
+target_sources(Vox PRIVATE
 	"external/rlImGui/rlImGui.cpp"
 )
 
 # Add Jolt Physics
-target_include_directories(Voxels PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
+target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
 # Add ImGui
-target_include_directories(Voxels PRIVATE "external/imgui")
-target_sources(Voxels PRIVATE
+target_include_directories(Vox PRIVATE "external/imgui")
+target_sources(Vox PRIVATE
 	"external/imgui/imgui.h"
 	"external/imgui/imgui.cpp"
 	"external/imgui/imgui_demo.cpp"
@@ -77,6 +77,6 @@ target_sources(Voxels PRIVATE
 	"external/imgui/imgui_widgets.cpp"
 )
 
-set_property(TARGET Voxels PROPERTY CXX_STANDARD 20)
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Voxels)
+set_property(TARGET Vox PROPERTY CXX_STANDARD 20)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Vox)
 # TODO: Add tests and install targets if needed.

@@ -83,6 +83,8 @@ namespace Vox
 		// Move these into private methods after restructuring
 		JPH::TempAllocator* GetAllocator() const;
 
+		void SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer);
+
 	private:
 		void StepCharacterControllers();
 
@@ -104,7 +106,7 @@ namespace Vox
 
 		std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
 
-		std::unique_ptr<Vox::DebugRenderer> debugRenderer;
+		std::shared_ptr<Vox::DebugRenderer> debugRenderer;
 
 		std::vector<JPH::BodyID> bodyIds;
 

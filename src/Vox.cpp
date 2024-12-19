@@ -1,4 +1,4 @@
-﻿#include "Voxels.h"
+﻿#include "Vox.h"
 
 #include "raylib.h"
 #include "raymath.h"
@@ -13,10 +13,11 @@
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
-#include "rendering/Renderer.h"
-#include "physics/PhysicsServer.h"
 #include "physics/CharacterController.h"
+#include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
+#include "rendering/DebugRenderer.h"
+#include "rendering/Renderer.h"
 #include "voxel/CollisionOctree.h"
 
 int main()
@@ -35,6 +36,9 @@ int main()
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<Vox::PhysicsServer> physicsServer = std::make_unique<Vox::PhysicsServer>();
+        std::shared_ptr<Vox::DebugRenderer> debugRenderer = std::make_shared<Vox::DebugRenderer>();
+
+        physicsServer->SetDebugRenderer(debugRenderer);
 
         unsigned int characterControllerId = physicsServer->CreateCharacterController(0.5f, 1.0f);
         unsigned int springArmId = physicsServer->CreateSpringArm(characterControllerId);
