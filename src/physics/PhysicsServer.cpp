@@ -32,7 +32,6 @@ namespace Vox
 
 		jobSystem = std::make_unique<JPH::JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 		tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
-		debugRenderer = std::make_unique<Vox::DebugRenderer>();
 
 		const JPH::uint cMaxBodies = 1024;
 		const JPH::uint cNumBodyMutexes = 0;
@@ -225,6 +224,11 @@ namespace Vox
 	JPH::TempAllocator* PhysicsServer::GetAllocator() const
 	{
 		return tempAllocator.get();
+	}
+
+	void PhysicsServer::SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer)
+	{
+		this->debugRenderer = debugRenderer;
 	}
 
 	void PhysicsServer::StepCharacterControllers()
