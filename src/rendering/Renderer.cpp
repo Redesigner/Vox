@@ -130,9 +130,9 @@ Vox::Renderer::~Renderer()
 
 void Vox::Renderer::Render(Editor* editor)
 {
+    // @TODO fix whatever is happening with vsync here
     SwapScreenBuffer();
     UpdateViewportDimensions(editor);
-
     BeginDrawing();
     {
         camera->SetAspectRatio(viewportTexture.texture.height == 0 ? 1 : viewportTexture.texture.width / viewportTexture.texture.height);
@@ -159,6 +159,7 @@ void Vox::Renderer::Render(Editor* editor)
         rlSetFramebufferWidth(GetScreenWidth());
         rlSetFramebufferHeight(GetScreenHeight());
         editor->Draw(&viewportTexture);
+        
         EndDrawing();
     }
 }
@@ -202,22 +203,24 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
     Vector2 editorViewportSize = editor->GetViewportDimensions();
     if (IsRenderTextureValid(viewportTexture))
     {
-        if (viewportTexture.texture.width != static_cast<int>(editorViewportSize.x) || viewportTexture.texture.height != static_cast<int>(editorViewportSize.y))
+        int viewportWidth = static_cast<int>(editorViewportSize.x);
+        int viewportHeight = static_cast<int>(editorViewportSize.y);
+        if (viewportTexture.texture.width != viewportWidth || viewportTexture.texture.height != viewportHeight)
         {
             UnloadRenderTexture(viewportTexture);
             viewportTexture = LoadRenderTexture(editorViewportSize.x, editorViewportSize.y);
 
             // @TODO: add resize method?
             gBuffer.reset();
-            gBuffer = std::make_unique<GBuffer>(editorViewportSize.x, editorViewportSize.y);
+            gBuffer = std::make_unique<GBuffer>(viewportWidth, viewportHeight);
             deferredFramebuffer.reset();
-            deferredFramebuffer = std::make_unique<Framebuffer>(editorViewportSize.x, editorViewportSize.y);
+            deferredFramebuffer = std::make_unique<Framebuffer>(viewportWidth, viewportHeight);
             rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
         }
     }
     else
     {
-        viewportTexture = LoadRenderTexture(editorViewportSize.x, editorViewportSize.y);
+        viewportTexture = LoadRenderTexture(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
     }
 }
 
