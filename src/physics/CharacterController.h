@@ -23,6 +23,8 @@ namespace Vox
 
 		JPH::Quat GetRotation() const;
 
+		void SetYaw(float yaw);
+
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 
 		float GetRadius() const;
@@ -31,6 +33,8 @@ namespace Vox
 
 	private:
 		float radius, halfHeight;
+
+		float yaw;
 
 		JPH::Ref<JPH::CharacterVirtual> character;
 		JPH::Ref<JPH::Shape> capsuleShape;

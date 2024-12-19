@@ -78,6 +78,9 @@ int main()
                     localRenderer->SetCameraTarget(Vector3From(physicsServer->GetSpringArmOrigin(springArmId)));
                     // localRenderer->SetCameraRotation(cameraRotation);
                     physicsServer->Step();
+
+                    physicsServer->SetCharacterControllerYaw(characterControllerId, cameraRotation.y);
+
                     if (threadStartTime + frameTime < std::chrono::steady_clock::now())
                     {
                         TraceLog(LOG_WARNING, "Physics thread lagging...");

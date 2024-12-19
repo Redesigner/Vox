@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include <fmt/format.h>
-#include <Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Physics/PhysicsSystem.h>
@@ -16,6 +15,8 @@ namespace Vox
 {
 	SpringArm::SpringArm()
 	{
+		origin = JPH::Vec3::sZero();
+		originType = OriginType::CharacterOrigin;
 		eulerRotation = JPH::Vec3::sZero();
 		originCharacterId = 0;
 		originBody = JPH::BodyID();
@@ -38,13 +39,13 @@ namespace Vox
 
 	void SpringArm::SetOrigin(JPH::BodyID bodyId)
 	{
-		originType = OriginType::Body;
+		originType = OriginType::BodyOrigin;
 		originBody = bodyId;
 	}
 
 	void SpringArm::SetOrigin(unsigned int characterControllerId)
 	{
-		originType = OriginType::Character;
+		originType = OriginType::CharacterOrigin;
 		originCharacterId = characterControllerId;
 	}
 
@@ -82,14 +83,14 @@ namespace Vox
 		Vec3 originRotation{};
 		switch (originType)
 		{
-			case OriginType::Body:
+			case OriginType::BodyOrigin:
 			{
 				origin = physicsSystem->GetBodyInterface().GetPosition(originBody);
 				originRotation = physicsSystem->GetBodyInterface().GetRotation(originBody).GetEulerAngles();
 				break;
 			}
 
-			case OriginType::Character:
+			case OriginType::CharacterOrigin:
 			{
 				origin = physicsServer->GetCharacterControllerPosition(originCharacterId);
 				originRotation = physicsServer->GetCharacterControllerRotation(originCharacterId).GetEulerAngles();
