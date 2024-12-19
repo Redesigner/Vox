@@ -13,8 +13,8 @@ namespace Vox
 
 	enum OriginType : char
 	{
-		Body,
-		Character
+		BodyOrigin,
+		CharacterOrigin
 	};
 
 	class SpringArm

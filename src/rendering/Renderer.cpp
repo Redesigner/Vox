@@ -74,6 +74,8 @@ Vox::Renderer::Renderer()
             }
         }
     }
+    testVoxelGrid->GetVoxel(21, 18, 16).filled  = true;
+    testVoxelGrid->GetVoxel(18, 17, 16).filled  = true;
 
     testVoxelGrid->x = -16;
     testVoxelGrid->y = -16;
@@ -87,9 +89,8 @@ Vox::Renderer::Renderer()
     camera = std::make_unique<Vox::Camera>();
     camera->SetPosition(6.0f, 2.0f, 6.0f);
     camera->SetRotation(0.0f, 0.0f, 0.0f);
-    camera->SetFovY(45.0f);
     camera->SetAspectRatio(800.0 / 431.0);
-
+    camera->SetFovY(45.0f);
     Camera* movedCamera = camera.get();
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
@@ -289,7 +290,7 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     rlDisableColorBlend();
     rlEnableDepthTest();
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x, voxelGrid->y, voxelGrid->z) * MatrixScale(2.0f, 2.0f, 2.0f));
+    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
     voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
     voxelGrid->EnableVertexArray();

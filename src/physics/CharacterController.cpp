@@ -60,6 +60,11 @@ namespace Vox
 		return character->GetRotation();
 	}
 
+	void CharacterController::SetYaw(float yaw)
+	{
+		this->yaw = yaw;
+	}
+
 	void CharacterController::Update(float deltaTime, PhysicsServer* physicsServer)
 	{
 
@@ -78,9 +83,11 @@ namespace Vox
 			currentVelocity += gravity * deltaTime;
 		}
 
-		Vector2 inputVelocity = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-		currentVelocity.SetX(inputVelocity.x * -2.0f);
-		currentVelocity.SetZ(inputVelocity.y * -2.0f);
+		Vector2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
+		float cos = std::cosf(yaw);
+		float sin = std::sinf(yaw);
+		currentVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
+		currentVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * - 4.0f);
 		character->SetLinearVelocity(currentVelocity);
 		character->Update(deltaTime, physicsSystem->GetGravity(), physicsSystem->GetDefaultBroadPhaseLayerFilter(Physics::CollisionLayer::Dynamic), physicsSystem->GetDefaultLayerFilter(Physics::CollisionLayer::Dynamic), {}, {}, *physicsServer->GetAllocator());
 	}

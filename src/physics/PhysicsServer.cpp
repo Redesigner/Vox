@@ -3,9 +3,11 @@
 #include <thread>
 
 #include <Jolt/Core/Factory.h>
-#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Collision/CastResult.h>
+#include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
@@ -13,6 +15,7 @@
 #include <Jolt/Renderer/DebugRenderer.h>
 
 #include "raylib.h"
+
 #include "rendering/DebugRenderer.h"
 
 namespace Vox
@@ -117,6 +120,17 @@ namespace Vox
 		}
 
 		return characterControllers[id].GetRotation();
+	}
+
+	void PhysicsServer::SetCharacterControllerYaw(CharacterControllerId id, float yaw)
+	{
+		if (id >= characterControllers.size())
+		{
+			TraceLog(LOG_ERROR, "[Physics] Failed to set character controller yaw. Character controller id was invalid.");
+			return;
+		}
+
+		characterControllers[id].SetYaw(yaw);
 	}
 
 	unsigned int PhysicsServer::CreateSpringArm(CharacterControllerId id)
@@ -250,7 +264,34 @@ namespace Vox
 		using namespace JPH;
 		JPH::BodyCreationSettings bodyCreationSettings(settings, Vec3::sZero(), Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
 		BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
+		// physicsSystem.
 		return bodyId;
+	}
+
+	bool PhysicsServer::RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut)
+	{
+		using namespace JPH;
+		RRayCast rayCast = RRayCast(origin, direction);
+		RayCastResult rayCastResult = RayCastResult();
+		resultOut.origin = origin;
+		if (physicsSystem.GetNarrowPhaseQuery().CastRay(rayCast, rayCastResult))
+		{
+			resultOut.hitBody = rayCastResult.mBodyID;
+			resultOut.impactPoint = origin + direction * rayCastResult.mFraction;
+
+			BodyLockRead lock = BodyLockRead(physicsSystem.GetBodyLockInterfaceNoLock(), rayCastResult.mBodyID);
+			if (lock.Succeeded())
+			{
+				const Body& hitBody = lock.GetBody();
+				resultOut.impactNormal = hitBody.GetWorldSpaceSurfaceNormal(rayCastResult.mSubShapeID2, resultOut.impactPoint);
+			}
+			else
+			{
+				TraceLog(LOG_WARNING, "Failed to return raycast result. The ray hit a body, but the body was locked. Make sure you aren't trying to read while the physics is updating.");
+			}
+			return true;
+		}
+		return false;
 	}
 
 	const SpringArm* PhysicsServer::GetSpringArm(SpringArmId id) const

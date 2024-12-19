@@ -13,6 +13,7 @@
 #include "physics/ObjectBroadPhaseLayerFilter.h"
 #include "physics/ObjectLayerTypes.h"
 #include "physics/ObjectPairLayerFilter.h"
+#include "physics/RaycastResultNormal.h"
 #include "physics/SpringArm.h"
 
 namespace JPH
@@ -41,6 +42,8 @@ namespace Vox
 
 		JPH::BodyID CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings);
 
+		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut);
+
 
 		// Character Controller functions
 		// @TODO: move these over to a custom reference class
@@ -51,6 +54,8 @@ namespace Vox
 		JPH::Vec3 GetCharacterControllerPosition(CharacterControllerId id) const;
 
 		JPH::Quat GetCharacterControllerRotation(CharacterControllerId id) const;
+
+		void SetCharacterControllerYaw(CharacterControllerId id, float yaw);
 
 
 		SpringArmId CreateSpringArm(CharacterControllerId id);
@@ -82,8 +87,6 @@ namespace Vox
 		void StepCharacterControllers();
 
 		void UpdateSpringArms();
-
-		void UpdatePositionFrame();
 
 		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
 
