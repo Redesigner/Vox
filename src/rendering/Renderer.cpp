@@ -30,13 +30,16 @@ Vox::Renderer::Renderer()
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
     materialRoughnessLocation = GetShaderLocation(gBufferShader, "materialRoughness");
     materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
-    voxelShader = std::make_unique<VoxelShader>();
 
+    voxelShader = std::make_unique<VoxelShader>();
     deferredShader = std::make_unique<DeferredShader>();
+
     skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
+    debugTriangleShader = LoadShader("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
     debugLineShader = LoadShader("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
 
-    debugMatrixLocation = GetShaderLocation(debugLineShader, "viewProjection");
+    debugTriangleMatrixLocation = GetShaderLocation(debugTriangleShader, "viewProjection");
+    debugLineMatrixLocation = GetShaderLocation(debugLineShader, "viewProjection");
 
     gBuffer = std::make_unique<GBuffer>(800, 431);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
@@ -122,9 +125,20 @@ Vox::Renderer::~Renderer()
     {
         UnloadShader(gBufferShader);
     }
+
     if (IsShaderValid(skyShader))
     {
         UnloadShader(skyShader);
+    }
+
+    if (IsShaderValid(debugLineShader))
+    {
+        UnloadShader(debugLineShader);
+    }
+
+    if (IsShaderValid(debugTriangleShader))
+    {
+        UnloadShader(debugTriangleShader);
     }
 }
 
@@ -316,13 +330,14 @@ void Vox::Renderer::RenderDebugShapes()
     // Fill the debug renderer with our shapes
     physicsServer->RenderDebugShapes();
 
-    physicsServer->GetDebugRenderer()->BindAndBufferLines();
     rlEnableShader(debugLineShader.id);
-    rlSetUniformMatrix(debugMatrixLocation, camera->GetViewProjectionMatrix());
+    physicsServer->GetDebugRenderer()->BindAndBufferLines();
+    rlSetUniformMatrix(debugLineMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
 
+    rlEnableShader(debugTriangleShader.id);
     physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-    rlSetUniformMatrix(debugMatrixLocation, camera->GetViewProjectionMatrix());
+    rlSetUniformMatrix(debugTriangleMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 

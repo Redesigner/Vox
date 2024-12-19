@@ -64,12 +64,13 @@ namespace Vox
 
 		std::weak_ptr<Vox::PhysicsServer> debugPhysicsServer;
 
-		Shader gBufferShader;
 		std::unique_ptr<VoxelShader> voxelShader;
 		std::unique_ptr<DeferredShader> deferredShader;
+		Shader gBufferShader;
 		Shader skyShader;
-		Shader debugLineShader;
-		int debugMatrixLocation = 0;
+		Shader debugLineShader, debugTriangleShader;
+
+		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;

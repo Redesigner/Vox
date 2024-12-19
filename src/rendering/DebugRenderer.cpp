@@ -46,12 +46,25 @@ namespace Vox
 		return triangleCount;
 	}
 
+	void DebugRenderer::DrawPersistentLine(JPH::Vec3 point1, JPH::Vec3 point2, JPH::ColorArg color, float duration)
+	{
+		persistentLines.emplace_back(point1, point2, color, duration);
+	}
+
 	void DebugRenderer::CreateLineVertexObjects()
 	{
 		glGenVertexArrays(1, &lineVao);
 		glBindVertexArray(lineVao);
+
 		glGenBuffers(1, &lineVbos.position);
+		glBindBuffer(GL_ARRAY_BUFFER, lineVbos.position);
+		glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+		glEnableVertexAttribArray(0);
+
 		glGenBuffers(1, &lineVbos.color);
+		glBindBuffer(GL_ARRAY_BUFFER, lineVbos.color);
+		glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, 0, 0);
+		glEnableVertexAttribArray(1);
 	}
 
 	void DebugRenderer::CreateTriangleVertexObjects()
@@ -82,12 +95,25 @@ namespace Vox
 
 	void DebugRenderer::BufferLineData()
 	{
-		if (lineVertices.empty())
+		// remove expired persistent lines
+		std::erase_if(persistentLines, [](PersistentLine persistentLine) { return persistentLine.expirationTime <= std::chrono::steady_clock::now(); });
+
+		if (lineVertices.empty() && persistentLines.empty())
 		{
 			return;
 		}
 
 		BindLineVertexArray();
+
+
+		for (const PersistentLine& persistentLine : persistentLines)
+		{
+			lineVertices.push_back(persistentLine.pointA);
+			lineVertices.push_back(persistentLine.pointB);
+
+			lineColors.push_back(persistentLine.color);
+			lineColors.push_back(persistentLine.color);
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, lineVbos.position);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(JPH::Vec3) * lineVertices.size(), &lineVertices[0], GL_DYNAMIC_DRAW);
@@ -178,5 +204,11 @@ namespace Vox
 
 	void DebugRenderer::DrawText3D(JPH::RVec3Arg inPosition, const JPH::string_view & inString, JPH::ColorArg inColor, float inHeight)
 	{
+	}
+
+	DebugRenderer::PersistentLine::PersistentLine(JPH::Vec3 pointA, JPH::Vec3 pointB, JPH::ColorArg color, float duration)
+		:pointA(pointA), pointB(pointB), color(color)
+	{
+		expirationTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(duration * 1000));
 	}
 }

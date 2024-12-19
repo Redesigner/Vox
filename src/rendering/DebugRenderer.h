@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Jolt/Jolt.h>
-
 #include <Jolt/Renderer/DebugRendererSimple.h>
 
+#include <chrono>
 #include <vector>
 
 namespace Vox
@@ -27,6 +27,15 @@ namespace Vox
 			void Normalize() { float magnitude = std::sqrtf(x * x + y * y + z * z); x /= magnitude; y /= magnitude; z /= magnitude; }
 		};
 
+		struct PersistentLine
+		{
+			PersistentLine(JPH::Vec3 pointA, JPH::Vec3 pointB, JPH::ColorArg color, float duration);
+
+			std::chrono::steady_clock::time_point expirationTime;
+			JPH::Vec3 pointA, pointB;
+			JPH::ColorArg color;
+		};
+
 	public:
 		DebugRenderer();
 		~DebugRenderer();
@@ -38,6 +47,8 @@ namespace Vox
 		unsigned int GetLineVertexCount() const;
 
 		unsigned int GetTriangleVertexCount() const;
+
+		void DrawPersistentLine(JPH::Vec3 point1, JPH::Vec3 point2, JPH::ColorArg color, float duration);
 
 	private:
 		void CreateLineVertexObjects();
@@ -71,6 +82,7 @@ namespace Vox
 		std::vector<JPH::RVec3> triangleVertices;
 		std::vector<SimpleVec3> triangleNormals;
 		std::vector<JPH::Color> triangleColors;
+		std::vector<PersistentLine> persistentLines;
 		unsigned int triangleCount = 0;
 
 		Vbos lineVbos;
