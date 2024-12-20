@@ -75,6 +75,23 @@ void Vox::InputService::UnregisterMouseMotionCallback(MouseMotionEventCallback c
 	}
 }
 
+void Vox::InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
+{
+	mouseClickEventCallbacks.push_back(callback);
+}
+
+void Vox::InputService::UnregisterMouseClickCallback(MouseClickEventCallback callback)
+{
+	for (int i = 0; i < mouseClickEventCallbacks.size(); ++i)
+	{
+		if (mouseClickEventCallbacks[i].target<void(bool)>() == callback.target<void(bool)>())
+		{
+			mouseClickEventCallbacks.erase(mouseClickEventCallbacks.begin() + i);
+			return;
+		}
+	}
+}
+
 Vector2 Vox::InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
 {
 	Vector2 result = Vector2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
@@ -149,6 +166,12 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			return;
 		}
 
+		case SDL_MOUSEBUTTONDOWN:
+		{
+			HandleMouseButtonEvent(event->button);
+			return;
+		}
+
 		default:
 		{
 			return;
@@ -195,6 +218,18 @@ void Vox::InputService::HandleMouseMotionEvent(SDL_MouseMotionEvent& mouseEvent)
 	for (MouseMotionEventCallback& callback : mouseMotionEventCallbacks)
 	{
 		callback(mouseEvent.xrel, mouseEvent.yrel);
+	}
+}
+
+void Vox::InputService::HandleMouseButtonEvent(SDL_MouseButtonEvent& mouseEvent)
+{
+	if (mouseEvent.button == SDL_BUTTON_LEFT)
+	{
+		TraceLog(LOG_INFO, TextFormat("[InputService] Mouse clicked at position (%i, %i)", mouseEvent.x, mouseEvent.y));
+		for (MouseClickEventCallback& callback : mouseClickEventCallbacks)
+		{
+			callback(mouseEvent.x, mouseEvent.y);
+		}
 	}
 }
 
