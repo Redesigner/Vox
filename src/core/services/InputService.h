@@ -19,6 +19,7 @@ namespace Vox
 
 	using KeyboardEventCallback = std::function<void(bool)>;
 	using MouseMotionEventCallback = std::function<void(int, int)>;
+	using MouseClickEventCallback = std::function<void(int, int)>;
 
 	class InputService
 	{
@@ -39,6 +40,11 @@ namespace Vox
 		void UnregisterMouseMotionCallback(MouseMotionEventCallback callback);
 
 
+		void RegisterMouseClickCallback(MouseClickEventCallback callback);
+
+		void UnregisterMouseClickCallback(MouseClickEventCallback callback);
+
+
 		Vector2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
 
 		bool ShouldCloseWindow() const;
@@ -52,10 +58,13 @@ namespace Vox
 
 		void HandleMouseMotionEvent(SDL_MouseMotionEvent& mouseEvent);
 
+		void HandleMouseButtonEvent(SDL_MouseButtonEvent& mouseEvent);
+
 		void ExecuteCallbacks(SDL_Scancode scancode, bool pressed);
 
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
 		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
+		std::vector<MouseClickEventCallback> mouseClickEventCallbacks;
 
 		bool windowClosed = false;
 
