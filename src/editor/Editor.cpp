@@ -5,6 +5,8 @@
 #include "rlImGui.h"
 #include "tinyfiledialogs.h"
 
+#include "core/math/Math.h"
+
 const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
 void Editor::Draw(RenderTexture2D* viewportRenderTexture)
@@ -28,9 +30,11 @@ void Editor::Draw(RenderTexture2D* viewportRenderTexture)
     ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
 
     ImVec2 dimensions = ImGui::GetContentRegionAvail();
-    viewportDimensions = Vector2(dimensions.x, dimensions.y + 1.0f);
+    ImVec2 bottomRight = ImGui::GetContentRegionMax();
+    viewportDimensions = Vector2(dimensions.x , dimensions.y);
+    viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
 
-    rlImGuiImageRenderTextureFit(viewportRenderTexture, true);
+    rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
 
 	DrawToolbar();
 
@@ -49,6 +53,24 @@ void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
 Vector2 Editor::GetViewportDimensions() const
 {
     return viewportDimensions;
+}
+
+Editor::Box Editor::GetViewportBox() const
+{
+    return viewportBox;
+}
+
+bool Editor::GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const
+{
+    if ((clickY < viewportBox.top || clickY > viewportBox.bottom) ||
+        (clickX < viewportBox.left || clickX > viewportBox.right))
+    {
+        return false;
+    }
+
+    xOut = Vox::RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
+    yOut = Vox::RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
+    return true;
 }
 
 void Editor::DrawToolbar()
@@ -104,4 +126,14 @@ void Editor::openGLTF()
     {
         TraceLog(LOG_INFO, "Dialog closed without selecting file.");
     }
+}
+
+Editor::Box::Box()
+    :left(0), top(0), right(0), bottom(0)
+{
+}
+
+Editor::Box::Box(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom)
+    :left(left), top(top), right(right), bottom(bottom)
+{
 }

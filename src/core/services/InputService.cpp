@@ -215,6 +215,11 @@ void Vox::InputService::HandleWindowEvent(SDL_WindowEvent& windowEvent)
 
 void Vox::InputService::HandleMouseMotionEvent(SDL_MouseMotionEvent& mouseEvent)
 {
+	if (!cursorLocked)
+	{
+		return;
+	}
+
 	for (MouseMotionEventCallback& callback : mouseMotionEventCallbacks)
 	{
 		callback(mouseEvent.xrel, mouseEvent.yrel);

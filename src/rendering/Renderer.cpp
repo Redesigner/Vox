@@ -211,6 +211,11 @@ void Vox::Renderer::SetCameraTarget(Vector3 target)
     camera->SetTarget(target);
 }
 
+Vox::Camera* Vox::Renderer::GetCurrentCamera() const
+{
+    return camera.get();
+}
+
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport

@@ -19,12 +19,15 @@ namespace Vox
 		Vector3 GetRotation() const;
 		Matrix GetRotationMatrix() const;
 
+		Vector3 GetForwardVector() const;
+
 		void SetFovY(double fovY);
 		void SetAspectRatio(double asepctRatio);
 
 		Matrix GetViewMatrix() const;
 		Matrix GetProjectionMatrix() const;
 		Matrix GetViewProjectionMatrix() const;
+		Matrix GetInverseMatrix() const;
 
 		void SetTarget(Vector3 targetPosition);
 
