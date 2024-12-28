@@ -16,6 +16,7 @@
 #include "physics/CharacterController.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
+#include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
 #include "voxel/CollisionOctree.h"
@@ -99,6 +100,26 @@ int main()
         JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(1.0f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
+        Editor* localEditor = editor.get();
+        Vox::Camera* camera = renderer->GetCurrentCamera();
+        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, camera](int x, int y) {
+            float xViewport, yViewport;
+            if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
+            {
+                TraceLog(LOG_INFO, TextFormat("Clicked at (%f, %f)", xViewport, yViewport));
+                Vector3 rayStartViewport = Vector3(xViewport, yViewport, -1.0f);
+                Vector3 rayEndViewport = Vector3(xViewport, yViewport, 1.0f);
+                JPH::Vec3 rayStart = Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
+                JPH::Vec3 rayEnd = Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
+
+                TraceLog(LOG_INFO, TextFormat("Ray starts at (%f, %f, %f)", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ()));
+                TraceLog(LOG_INFO, TextFormat("Ray ends at (%f, %f, %f)", rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ()));
+                Vector3 cameraPosition = camera->GetPosition();
+                TraceLog(LOG_INFO, TextFormat("Camera at (%f, %f, %f)", cameraPosition.x, cameraPosition.y, cameraPosition.z));
+                debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sBlue, 5.0f);
+            }
+            });
+
         while (!inputService->ShouldCloseWindow())
         {
             inputService->PollEvents();

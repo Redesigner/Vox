@@ -39,6 +39,8 @@ namespace Vox
 
 		void SetCameraTarget(Vector3 target);
 
+		Camera* GetCurrentCamera() const;
+
 	private:
 		void UpdateViewportDimensions(Editor* editor);
 

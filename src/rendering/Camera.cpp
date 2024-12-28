@@ -63,6 +63,11 @@ Matrix Vox::Camera::GetRotationMatrix() const
 	return rotationMatrix;
 }
 
+Vector3 Vox::Camera::GetForwardVector() const
+{
+	return Vector3Normalize(target - position);
+}
+
 void Vox::Camera::SetFovY(double fovY)
 {
 	if (this->fovY == fovY)
@@ -98,6 +103,11 @@ Matrix Vox::Camera::GetProjectionMatrix() const
 Matrix Vox::Camera::GetViewProjectionMatrix() const
 {
 	return viewProjectionMatrix;
+}
+
+Matrix Vox::Camera::GetInverseMatrix() const
+{
+	return MatrixInvert(viewProjectionMatrix);
 }
 
 void Vox::Camera::SetTarget(Vector3 targetPosition)
