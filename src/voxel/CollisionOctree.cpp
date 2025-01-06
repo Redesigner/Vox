@@ -155,8 +155,13 @@ namespace Octree
 
 			case Full:
 			{
+				PhysicsVoxel* currentVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
+				if (*currentVoxel == *voxel)
+				{
+					return;
+				}
 				// We only have one voxel, at index 0
-				delete reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
+				delete currentVoxel;
 
 				subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
 				subNodes[1] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
@@ -296,7 +301,14 @@ namespace Octree
 		for (const Cube& cube : cubes)
 		{
 			float cubeHalfExtent = static_cast<float>(cube.size / 2.0f);
-			shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
+			if (cube.size == 1)
+			{
+				shapeSettings->AddShape(Vec3(cube.x + cubeHalfExtent, cube.y + cubeHalfExtent, cube.z + cubeHalfExtent), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
+			}
+			else
+			{
+				shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
+			}
 		}
 
 		return shapeSettings;

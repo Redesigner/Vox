@@ -60,8 +60,25 @@ int main()
                 }
             }
         }
+
+        for (int x = 14; x < 16; ++x)
+        {
+            for (int y = 0; y < 2; ++y)
+            {
+                for (int z = 14; z < 16; ++z)
+                {
+                    collisionTest.SetVoxel(x, y, z, &testVoxel);
+                }
+            }
+        }
         collisionTest.SetVoxel(5, 2, 0, &testVoxel);
         collisionTest.SetVoxel(2, 1, 0, &testVoxel);
+        collisionTest.SetVoxel(15, 2, 15, &testVoxel);
+
+        collisionTest.SetVoxel(-16, 0, -16, &testVoxel);
+        collisionTest.SetVoxel(15, 0, -16, &testVoxel);
+        collisionTest.SetVoxel(-16, 0, 15, &testVoxel);
+        collisionTest.SetVoxel(15, 0, 15, &testVoxel);
 
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
@@ -117,14 +134,14 @@ int main()
                 {
                     debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
                     const unsigned int gridSize = 1;
-                    const JPH::Vec3 voxelEstimate = raycastResult.impactPoint + raycastResult.impactNormal / static_cast<float>(2 * gridSize);
+                    const JPH::Vec3 voxelEstimate = raycastResult.impactPoint - raycastResult.impactNormal / static_cast<float>(2 * gridSize);
                     JPH::Vec3 voxelPosition = JPH::Vec3(
                         Vox::FloorMultiple(voxelEstimate.GetX(), gridSize),
                         Vox::FloorMultiple(voxelEstimate.GetY(), gridSize),
                         Vox::FloorMultiple(voxelEstimate.GetZ(), gridSize)
                     );
-                    debugRenderer->DrawPersistentLine(voxelPosition, voxelPosition + JPH::Vec3(gridSize, 0.0f, gridSize), JPH::Color::sRed, 5.0f);
-                    debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, 0.0f, gridSize), voxelPosition + JPH::Vec3(gridSize, 0.0f, 0.0f), JPH::Color::sRed, 5.0f);
+                    debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize, 0.0f), voxelPosition + JPH::Vec3(gridSize, gridSize, gridSize), JPH::Color::sRed, 5.0f);
+                    debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize, gridSize), voxelPosition + JPH::Vec3(gridSize, gridSize, 0.0f), JPH::Color::sRed, 5.0f);
                     TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));   
                     TraceLog(LOG_INFO, TextFormat("Clicked voxel at (%f, %f, %f)", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ()));   
                 }

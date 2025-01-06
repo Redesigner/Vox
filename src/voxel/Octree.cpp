@@ -123,8 +123,13 @@ void Octree::Node::SetVoxel(int x, int y, int z, Voxel* voxel)
 
 			case Full:
 			{
+				Voxel* currentVoxel = reinterpret_cast<Voxel*>(subNodes[0]);
+				if (*currentVoxel == *voxel)
+				{
+					return;
+				}
 				// We only have one voxel, at index 0
-				delete reinterpret_cast<Voxel*>(subNodes[0]);
+				delete currentVoxel;
 
 				subNodes[0] = reinterpret_cast<Node*>(new Voxel);
 				subNodes[1] = reinterpret_cast<Node*>(new Voxel);
