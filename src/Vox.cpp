@@ -10,6 +10,7 @@
 #include <thread>
 #include <chrono>
 
+#include "core/math/Math.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -102,21 +103,31 @@ int main()
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();
         Vox::Camera* camera = renderer->GetCurrentCamera();
-        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, camera](int x, int y) {
+        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, physicsServer, camera](int x, int y) {
             float xViewport, yViewport;
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
-                TraceLog(LOG_INFO, TextFormat("Clicked at (%f, %f)", xViewport, yViewport));
                 Vector3 rayStartViewport = Vector3(xViewport, yViewport, -1.0f);
                 Vector3 rayEndViewport = Vector3(xViewport, yViewport, 1.0f);
                 JPH::Vec3 rayStart = Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
                 JPH::Vec3 rayEnd = Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
 
-                TraceLog(LOG_INFO, TextFormat("Ray starts at (%f, %f, %f)", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ()));
-                TraceLog(LOG_INFO, TextFormat("Ray ends at (%f, %f, %f)", rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ()));
-                Vector3 cameraPosition = camera->GetPosition();
-                TraceLog(LOG_INFO, TextFormat("Camera at (%f, %f, %f)", cameraPosition.x, cameraPosition.y, cameraPosition.z));
-                debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sBlue, 5.0f);
+                Vox::RayCastResultNormal raycastResult;
+                if (physicsServer->RayCast(rayStart, rayEnd - rayStart, raycastResult))
+                {
+                    debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
+                    const unsigned int gridSize = 1;
+                    const JPH::Vec3 voxelEstimate = raycastResult.impactPoint + raycastResult.impactNormal / static_cast<float>(2 * gridSize);
+                    JPH::Vec3 voxelPosition = JPH::Vec3(
+                        Vox::FloorMultiple(voxelEstimate.GetX(), gridSize),
+                        Vox::FloorMultiple(voxelEstimate.GetY(), gridSize),
+                        Vox::FloorMultiple(voxelEstimate.GetZ(), gridSize)
+                    );
+                    debugRenderer->DrawPersistentLine(voxelPosition, voxelPosition + JPH::Vec3(gridSize, 0.0f, gridSize), JPH::Color::sRed, 5.0f);
+                    debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, 0.0f, gridSize), voxelPosition + JPH::Vec3(gridSize, 0.0f, 0.0f), JPH::Color::sRed, 5.0f);
+                    TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));   
+                    TraceLog(LOG_INFO, TextFormat("Clicked voxel at (%f, %f, %f)", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ()));   
+                }
             }
             });
 
