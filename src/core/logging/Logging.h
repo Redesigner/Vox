@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#define VoxLog(level, category, string,...) (Vox::Logger::Log(level, category, string, __VA_ARGS__))
+#define VoxLog(level, category, string,...) (Vox::Logger::Log(level, category, string, ##__VA_ARGS__))
 
 namespace Vox
 {
@@ -44,7 +44,7 @@ namespace Vox
 		template <typename... T>
 		static void Log(LogLevel level, LogCategory category, fmt::format_string<T...> fmt, T&&... args)
 		{
-			std::string entry = '[' + GetCategoryTag(category) + "] " + fmt::format(fmt, args);
+			std::string entry = '[' + GetCategoryTag(category) + "] " + fmt::format(fmt, args...);
 			entries.emplace_back(entry, level, category);
 		}
 

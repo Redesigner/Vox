@@ -7,6 +7,8 @@ namespace Vox
 	{
 	}
 
+	std::vector<LogEntry> Logger::entries = std::vector<LogEntry>();
+
 	std::string Logger::GetCategoryTag(LogCategory category)
 	{
 		switch (category)

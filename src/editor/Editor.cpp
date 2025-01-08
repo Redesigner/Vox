@@ -118,13 +118,16 @@ void Editor::DrawImportToolbar()
 
 void Editor::DrawDebugConsole()
 {
-    if (ImGui::BeginChild("Debug Console"))
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+    if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY))
     {
         for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
         {
             ImGui::Text(entry.entry.c_str());
         }
     }
+    ImGui::PopStyleColor();
+    ImGui::EndChild();
 }
 
 void Editor::openGLTF()
