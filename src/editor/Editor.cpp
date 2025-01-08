@@ -5,6 +5,7 @@
 #include "rlImGui.h"
 #include "tinyfiledialogs.h"
 
+#include "core/logging/Logging.h"
 #include "core/math/Math.h"
 
 const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
@@ -37,6 +38,7 @@ void Editor::Draw(RenderTexture2D* viewportRenderTexture)
     rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
 
 	DrawToolbar();
+    DrawDebugConsole();
 
     ImGui::End();
     ImGui::PopStyleColor();
@@ -112,6 +114,17 @@ void Editor::DrawImportToolbar()
         ImGui::EndMenu();
     }
     ImGui::PopStyleVar();
+}
+
+void Editor::DrawDebugConsole()
+{
+    if (ImGui::BeginChild("Debug Console"))
+    {
+        for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
+        {
+            ImGui::Text(entry.entry.c_str());
+        }
+    }
 }
 
 void Editor::openGLTF()
