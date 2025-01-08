@@ -10,6 +10,7 @@
 #include <thread>
 #include <chrono>
 
+#include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
@@ -44,6 +45,8 @@ int main()
 
         unsigned int characterControllerId = physicsServer->CreateCharacterController(0.5f, 1.0f);
         unsigned int springArmId = physicsServer->CreateSpringArm(characterControllerId);
+
+        VoxLog(Vox::LogLevel::Display, Vox::LogCategory::Game, "Test log!");
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
