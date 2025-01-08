@@ -118,8 +118,10 @@ void Editor::DrawImportToolbar()
 
 void Editor::DrawDebugConsole()
 {
+    const float consoleHeight = 100.0f;
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
-    if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY))
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight);
+    if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, consoleHeight), ImGuiChildFlags_Borders))
     {
         for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
         {
