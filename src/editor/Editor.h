@@ -27,6 +27,7 @@ private:
 	void DrawToolbar();
 	void DrawFileToolbar();
 	void DrawImportToolbar();
+	void DrawDebugConsole();
 
 	void openGLTF();
 
