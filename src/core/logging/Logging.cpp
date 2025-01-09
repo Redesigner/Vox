@@ -32,6 +32,19 @@ namespace Vox
 		}
 	}
 
+	Color Logger::GetLevelColor(LogLevel level)
+	{
+		switch (level)
+		{
+		case Error:
+			return Color(220.0f, 15.0f, 15.0f);
+		case Warning:
+			return Color(244.0f, 238.0f, 68.0f);
+		default:
+			return Color(255.0f, 255.0f, 255.0f);
+		}
+	}
+
 	std::vector<LogEntry>& Logger::GetEntries()
 	{
 		return entries;

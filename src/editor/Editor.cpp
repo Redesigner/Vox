@@ -118,15 +118,17 @@ void Editor::DrawImportToolbar()
 
 void Editor::DrawDebugConsole()
 {
-    const float consoleHeight = 100.0f;
+    const float consoleHeight = ImGui::GetTextLineHeightWithSpacing() * 8;
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
-    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight);
+    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight - 5.0f);
     if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, consoleHeight), ImGuiChildFlags_Borders))
     {
         for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
         {
-            ImGui::Text(entry.entry.c_str());
+            Color entryColor = Vox::Logger::GetLevelColor(entry.level);
+            ImGui::TextColored(ImVec4(entryColor.r / 255.0f, entryColor.g/ 255.0f, entryColor.b / 255.0f, 1.0f), entry.entry.c_str());
         }
+        ImGui::SetScrollHereY(1.0f);
     }
     ImGui::PopStyleColor();
     ImGui::EndChild();
