@@ -1,5 +1,7 @@
 #include "ArrayTexture.h"
 
+#include "core/logging/Logging.h"
+
 #include "external/glad.h"
 #include "raylib.h"
 #include "rlgl.h"
@@ -28,7 +30,7 @@ void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 {
 	if (index >= layerCount)
 	{
-		TraceLog(LOG_ERROR, "ArrayTexture: attempted to loadtexture outside of ArrayTexture range.");
+		VoxLog(Error, Rendering, "ArrayTexture: attempted to loadtexture outside of ArrayTexture range.");
 		return;
 	}
 
@@ -36,13 +38,13 @@ void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 	Image image = LoadImage(textureName.c_str());
 	if (!IsImageValid(image))
 	{
-		TraceLog(LOG_WARNING, "ArrayTexture failed to load.");
+		VoxLog(Warning, Rendering, "ArrayTexture failed to load.");
 		return;
 	}
 
 	if (image.width != width || image.height != height)
 	{
-		TraceLog(LOG_WARNING, "ArrayTexture: loaded image dimensions did not match the ArrayTexture dimensions.");
+		VoxLog(Warning, Rendering, "ArrayTexture: loaded image dimensions did not match the ArrayTexture dimensions.");
 		UnloadImage(image);
 		return;
 	}

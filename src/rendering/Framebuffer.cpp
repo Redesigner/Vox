@@ -1,17 +1,19 @@
 #include "FrameBuffer.h"
 
+#include "core/logging/Logging.h"
+
 #include "raylib.h"
 #include "rlgl.h"
 
 Framebuffer::Framebuffer(int width, int height)
 	:width(width), height(height)
 {
-	TraceLog(LOG_INFO, "Allocating custom FrameBuffer.");
+	VoxLog(Display, Rendering, "Allocating custom FrameBuffer.");
 
 	framebuffer = rlLoadFramebuffer();
 	if (!framebuffer)
 	{
-		TraceLog(LOG_WARNING, "Failed to create framebuffer");
+		VoxLog(Warning, Rendering, "Failed to create framebuffer");
 	}
 
 	rlEnableFramebuffer(framebuffer);
@@ -27,13 +29,13 @@ Framebuffer::Framebuffer(int width, int height)
 
 	if (!rlFramebufferComplete(framebuffer))
 	{
-		TraceLog(LOG_ERROR, "Failed to create framebuffer.");
+		VoxLog(Warning, Rendering, "Failed to create framebuffer.");
 	}
 }
 
 Framebuffer::~Framebuffer()
 {
-	TraceLog(LOG_INFO, "Destroying GBuffer");
+	VoxLog(Display, Rendering, "Destroying GBuffer");
 	rlUnloadFramebuffer(framebuffer);
 	rlUnloadTexture(colorTexture);
 	rlUnloadTexture(depthTexture);

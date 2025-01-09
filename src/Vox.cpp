@@ -46,7 +46,7 @@ int main()
         unsigned int characterControllerId = physicsServer->CreateCharacterController(0.5f, 1.0f);
         unsigned int springArmId = physicsServer->CreateSpringArm(characterControllerId);
 
-        VoxLog(Vox::LogLevel::Display, Vox::LogCategory::Game, "Test log!");
+        VoxLog(Display, Game, "Test log!");
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
@@ -109,8 +109,8 @@ int main()
 
                     if (threadStartTime + frameTime < std::chrono::steady_clock::now())
                     {
-                        TraceLog(LOG_WARNING, "Physics thread lagging...");
-                        TraceLog(LOG_INFO, TextFormat("Physics thread took %i ms.", std::chrono::duration_cast<std::chrono::milliseconds > (std::chrono::steady_clock::now() - threadStartTime).count()));
+                        VoxLog(Warning, Physics, "Physics thread lagging...");
+                        VoxLog(Display, Physics, "Physics thread took {} ms.", std::chrono::duration_cast<std::chrono::milliseconds > (std::chrono::steady_clock::now() - threadStartTime).count());
                     }
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
@@ -146,7 +146,7 @@ int main()
                     debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, 0.0f), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, gridSize), JPH::Color::sRed, 5.0f);
                     debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, gridSize), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, 0.0f), JPH::Color::sRed, 5.0f);
                     // TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));  
-                    VoxLog(Vox::LogLevel::Display, Vox::LogCategory::Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());   
+                    VoxLog(Display, Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());   
                 }
             }
             });

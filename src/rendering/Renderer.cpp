@@ -7,6 +7,7 @@
 #include "rcamera.h"
 #include "rlgl.h"
 
+#include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "external/glad.h"
@@ -26,7 +27,7 @@ Vox::Renderer::Renderer()
     // This is realtive to the build location -- I'll have to fix this later
     ChangeDirectory("../../../");
 
-    TraceLog(LOG_INFO, TextFormat("Set current working directory to '%s'", GetWorkingDirectory()));
+    VoxLog(Display, Rendering, "Set current working directory to {}", GetWorkingDirectory());
     gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
     materialRoughnessLocation = GetShaderLocation(gBufferShader, "materialRoughness");
     materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");

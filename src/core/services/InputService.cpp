@@ -1,9 +1,11 @@
 #include "InputService.h"
 
+#include "core/logging/Logging.h"
 #include "raylib.h"
 #include "rlgl.h"
-#include <SDL2/SDL_events.h>
+
 #include <cmath>
+#include <SDL2/SDL_events.h>
 
 Vox::InputService::InputService()
 {
@@ -230,7 +232,7 @@ void Vox::InputService::HandleMouseButtonEvent(SDL_MouseButtonEvent& mouseEvent)
 {
 	if (mouseEvent.button == SDL_BUTTON_LEFT)
 	{
-		TraceLog(LOG_INFO, TextFormat("[InputService] Mouse clicked at position (%i, %i)", mouseEvent.x, mouseEvent.y));
+		VoxLog(Display, Input, "Mouse clicked at position({}, {})", mouseEvent.x, mouseEvent.y);
 		for (MouseClickEventCallback& callback : mouseClickEventCallbacks)
 		{
 			callback(mouseEvent.x, mouseEvent.y);

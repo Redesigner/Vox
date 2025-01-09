@@ -14,21 +14,19 @@ namespace Vox
 		switch (category)
 		{
 		case Physics:
-		{
 			return "Physics";
-		}
+
 		case Game:
-		{
 			return "Game";
-		}
+
 		case Rendering:
-		{
 			return "Rendering";
-		}
+
+		case Input:
+			return "Input";
+
 		default:
-		{
 			return "Unknown";
-		}
 		}
 	}
 

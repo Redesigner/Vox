@@ -5,15 +5,17 @@
 #include <fmt/core.h>
 #include <string>
 
+#include "core/logging/Logging.h"
+
 GBuffer::GBuffer(int width, int height)
 	:width(width), height(height)
 {
-	TraceLog(LOG_INFO, "Allocating GBuffer");
+	VoxLog(Display, Rendering, "Allocating GBuffer");
 
 	framebuffer = rlLoadFramebuffer();
 	if (!framebuffer)
 	{
-		TraceLog(LOG_WARNING, "Failed to create framebuffer");
+		VoxLog(Warning, Rendering, "Failed to create framebuffer");
 	}
 
 	rlEnableFramebuffer(framebuffer);
@@ -24,7 +26,7 @@ GBuffer::GBuffer(int width, int height)
 	metallicRoughnessTexture =	rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R8G8B8, 1);
 	depthTexture =				rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32, 1);
 
-	TraceLog(LOG_INFO, fmt::format("Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture).c_str());
+	VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);
 
 	rlActiveDrawBuffers(5);
 
@@ -39,13 +41,13 @@ GBuffer::GBuffer(int width, int height)
 
 	if (!rlFramebufferComplete(framebuffer))
 	{
-		TraceLog(LOG_ERROR, "Failed to create framebuffer.");
+		VoxLog(Error, Rendering, "Failed to create framebuffer.");
 	}
 }
 
 GBuffer::~GBuffer()
 {
-	TraceLog(LOG_INFO, "Destroying GBuffer");
+	VoxLog(Display, Rendering, "Destroying GBuffer");
 	rlUnloadFramebuffer(framebuffer);
 	rlUnloadTexture(positionTexture);
 	rlUnloadTexture(normalTexture);

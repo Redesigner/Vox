@@ -8,6 +8,8 @@
 #include <cstring>
 #include <cmath>
 
+#include "core/logging/Logging.h"
+
 Octree::Node::Node(unsigned int size)
 	:size(size)
 {
@@ -277,7 +279,7 @@ std::shared_ptr<Octree::Node> Octree::Node::FromPacked(const std::vector<char>& 
 
 	if (treeSize < 2 || (treeSize & (treeSize - 1)) != 0)
 	{
-		TraceLog(LOG_ERROR, "Unpacking octree failed: size constant is not a power of 2.");
+		VoxLog(Error, Game, "Unpacking octree failed: size constant is not a power of 2.");
 		return nullptr;
 	}
 
@@ -359,7 +361,7 @@ void Octree::Node::Unpack(const std::vector<char>& data, size_t& currentIndex)
 	}
 	else
 	{
-		TraceLog(LOG_ERROR, "Failure unpacking octree. A node was malformed.");
+		VoxLog(Error, Game, "Failure unpacking octree. A node was malformed.");
 		return;
 	}
 	currentIndex++;

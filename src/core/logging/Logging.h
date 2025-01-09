@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#define VoxLog(level, category, string,...) (Vox::Logger::Log(level, category, string, ##__VA_ARGS__))
+#define VoxLog(level, category, string,...) Vox::Logger::Log(Vox::LogLevel::level, Vox::LogCategory::category, string, ##__VA_ARGS__)
 
 namespace Vox
 {
@@ -22,7 +22,8 @@ namespace Vox
 	{
 		Physics,
 		Rendering,
-		Game
+		Game,
+		Input
 	};
 
 	struct LogEntry
