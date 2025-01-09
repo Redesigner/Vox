@@ -119,7 +119,7 @@ void Editor::DrawImportToolbar()
 void Editor::DrawDebugConsole()
 {
     const float consoleHeight = ImGui::GetTextLineHeightWithSpacing() * 8;
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight - 5.0f);
     if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, consoleHeight), ImGuiChildFlags_Borders))
     {
