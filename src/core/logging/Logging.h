@@ -23,7 +23,8 @@ namespace Vox
 		Physics,
 		Rendering,
 		Game,
-		Input
+		Input,
+		FileSystem
 	};
 
 	struct LogEntry
@@ -51,7 +52,7 @@ namespace Vox
 		{
 			std::string formatted = fmt::vformat(fmt, fmt::make_format_args(args...));
 			std::string entry = '[' + GetCategoryTag(category) + "] " + formatted;
-			Color displayColor = GetLevelColor(level);
+			glm::vec3 displayColor = GetLevelColor(level);
 			printf("\033[38;2;%u;%u;%um%s\033[0m\n", displayColor.r, displayColor.g, displayColor.b, entry.c_str());
 			entries.emplace_back(entry, level, category);
 		}

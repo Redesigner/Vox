@@ -8,7 +8,7 @@ namespace Vox
 {
 	VoxelShader::VoxelShader()
 	{
-		shader = LoadShader(vertLocation.c_str(), fragLocation.c_str());
+		shader = Load(vertLocation, fragLocation);
 		uniformLocations.viewPosition = GetUniformLocation("viewPosition");
 
 		uniformLocations.modelMatrix = GetUniformLocation("matModel");
