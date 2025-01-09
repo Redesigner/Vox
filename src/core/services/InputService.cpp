@@ -1,13 +1,13 @@
 #include "InputService.h"
 
 #include "core/logging/Logging.h"
-#include "raylib.h"
-#include "rlgl.h"
 
 #include <cmath>
-#include <SDL2/SDL_events.h>
+#include <GL/glew.h>
+#include <SDL3/SDL_events.h>
 
-Vox::InputService::InputService()
+Vox::InputService::InputService(SDL_Window* window)
+	:mainWindow(window)
 {
 	ToggleCursorLock();
 	windowClosed = false;
@@ -94,9 +94,9 @@ void Vox::InputService::UnregisterMouseClickCallback(MouseClickEventCallback cal
 	}
 }
 
-Vector2 Vox::InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
+glm::vec2 Vox::InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
 {
-	Vector2 result = Vector2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
+	glm::vec2 result = glm::vec2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
 	float lengthSquared = result.x * result.x + result.y * result.y;
 	if (lengthSquared > 1.0f)
 	{
@@ -116,14 +116,14 @@ void Vox::InputService::ToggleCursorLock()
 {
 	if (!cursorLocked)
 	{
-		SDL_ShowCursor(SDL_DISABLE);
-		SDL_SetRelativeMouseMode(SDL_TRUE);
+		SDL_HideCursor();
+		SDL_SetWindowRelativeMouseMode(mainWindow, true);
 		cursorLocked = true;
 	}
 	else
 	{
-		SDL_ShowCursor(SDL_ENABLE);
-		SDL_SetRelativeMouseMode(SDL_FALSE);
+		SDL_ShowCursor();
+		SDL_SetWindowRelativeMouseMode(mainWindow, false);
 		cursorLocked = false;
 	}
 }
@@ -132,15 +132,16 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 {
 	switch (event->type)
 	{
-		case SDL_WINDOWEVENT:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			HandleWindowEvent(event->window);
 			return;
 		}
 
-		case SDL_KEYDOWN:
+		case SDL_EVENT_KEY_DOWN:
 		{
-			SDL_Scancode pressedKeyCode = event->key.keysym.scancode;
+			SDL_Scancode pressedKeyCode = event->key.scancode;
 			if (!keyPressed[pressedKeyCode])
 			{
 				keyPressed[pressedKeyCode] = true;
@@ -150,9 +151,9 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			return;
 		}
 
-		case SDL_KEYUP:
+		case SDL_EVENT_KEY_UP:
 		{
-			SDL_Scancode pressedKeyCode = event->key.keysym.scancode;
+			SDL_Scancode pressedKeyCode = event->key.scancode;
 			if (keyPressed[pressedKeyCode])
 			{
 				keyPressed[pressedKeyCode] = false;
@@ -162,13 +163,13 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 			return;
 		}
 
-		case SDL_MOUSEMOTION:
+		case SDL_EVENT_MOUSE_MOTION:
 		{
 			HandleMouseMotionEvent(event->motion);
 			return;
 		}
 
-		case SDL_MOUSEBUTTONDOWN:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
 			HandleMouseButtonEvent(event->button);
 			return;
@@ -183,26 +184,17 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 
 void Vox::InputService::HandleWindowEvent(SDL_WindowEvent& windowEvent)
 {
-	switch (windowEvent.event)
+	switch (windowEvent.type)
 	{
-		case SDL_WINDOWEVENT_RESIZED:
+		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			SetWindowSize(windowEvent.data1, windowEvent.data2);
-			rlViewport(0, 0, windowEvent.data1, windowEvent.data2);
-
-			rlMatrixMode(RL_PROJECTION);        // Switch to projection matrix
-			rlLoadIdentity();                   // Reset current matrix (projection)
-
-			// Set orthographic projection to current framebuffer size
-			// NOTE: Configured top-left corner as (0, 0)
-			rlOrtho(0, windowEvent.data1, windowEvent.data2, 0, 0.0f, 1.0f);
-
-			rlMatrixMode(RL_MODELVIEW);         // Switch back to modelview matrix
-			rlLoadIdentity();                   // Reset current matrix (modelview)
+			SDL_SetWindowSize(SDL_GetWindowFromID(windowEvent.windowID), windowEvent.data1, windowEvent.data2);
+			
+			glViewport(0, 0, windowEvent.data1, windowEvent.data2);
 			return;
 		}
 
-		case SDL_WINDOWEVENT_CLOSE:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		{
 			windowClosed = true;
 			return;

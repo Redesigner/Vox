@@ -14,18 +14,6 @@ project ("Vox")
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 include(FetchContent)
 
-# Build raylib with sdl
-FetchContent_Declare(
-	raylib-sdl
-	GIT_REPOSITORY https://github.com/raysan5/raylib.git
-	GIT_TAG 5.5
-)
-# Compile raylib with custom frame control and SDL2, so we can use our own event based system instead
-set(PLATFORM SDL)
-add_compile_definitions(SUPPORT_CUSTOM_FRAME_CONTROL TRUE)
-FetchContent_MakeAvailable(raylib-sdl)
-unset(PLATFORM)
-
 # Build Jolt Physics
 FetchContent_Declare(
         JoltPhysics
@@ -36,6 +24,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(JoltPhysics)
 set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
+find_package(SDL3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(GLEW CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
@@ -52,7 +43,9 @@ string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 # Include source directory to allow absolute paths
 target_include_directories(Vox PRIVATE "src/")
 
-target_link_libraries(Vox PRIVATE raylib)
+target_link_libraries(Vox PRIVATE SDL3::SDL3)
+target_link_libraries(Vox PRIVATE glm::glm)
+target_link_libraries(Vox PRIVATE GLEW::GLEW)
 target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)
 target_link_libraries(Vox PRIVATE fmt::fmt)
 target_link_libraries(Vox PRIVATE Jolt)

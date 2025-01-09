@@ -1,9 +1,9 @@
 #pragma once
 
-#include "raylib.h"
-
 #include <memory>
 #include <string>
+
+#include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
 
@@ -33,11 +33,11 @@ namespace Vox
 
 		void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
 
-		void SetCameraPosition(Vector3 position);
+		void SetCameraPosition(glm::vec3 position);
 
-		void SetCameraRotation(Vector3 rotation);
+		void SetCameraRotation(glm::vec3 rotation);
 
-		void SetCameraTarget(Vector3 target);
+		void SetCameraTarget(glm::vec3 target);
 
 		Camera* GetCurrentCamera() const;
 
@@ -46,7 +46,7 @@ namespace Vox
 
 		void RenderGBuffer();
 
-		void DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform);
+		// void DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform);
 
 		void RenderDeferred();
 

@@ -1,14 +1,13 @@
 ﻿#include "Vox.h"
 
-#include "raylib.h"
-#include "raymath.h"
-#include "rlgl.h"
-#include "rlImGui.h"
+#include <chrono>
+#include <thread>
+
+#include <glm/vec3.hpp>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
-
-#include <thread>
-#include <chrono>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -25,15 +24,13 @@
 
 int main()
 {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 450, "Voxels");
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Window* window = SDL_CreateWindow("Vox", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
     {
-        SetTargetFPS(60);
-        rlImGuiSetup(true);
-
         Vox::ServiceLocator::InitServices();
 
-        Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) { if (pressed) ToggleBorderlessWindowed(); });
+        Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
@@ -97,8 +94,8 @@ int main()
                 {
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
                     // this is not a good way to set this, but it's fine for a test, I think
-                    Vector3 cameraPositon = Vector3From(physicsServer->GetSpringArmResult(springArmId));
-                    Vector3 cameraRotation = Vector3From(physicsServer->GetSpringArmEulerRotation(springArmId));
+                    glm::vec3 cameraPositon = Vector3From(physicsServer->GetSpringArmResult(springArmId));
+                    glm::vec3 cameraRotation = Vector3From(physicsServer->GetSpringArmEulerRotation(springArmId));
                     cameraRotation *= -1.0f;
                     localRenderer->SetCameraPosition(cameraPositon);
                     localRenderer->SetCameraTarget(Vector3From(physicsServer->GetSpringArmOrigin(springArmId)));
@@ -127,8 +124,8 @@ int main()
             float xViewport, yViewport;
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
-                Vector3 rayStartViewport = Vector3(xViewport, yViewport, -1.0f);
-                Vector3 rayEndViewport = Vector3(xViewport, yViewport, 1.0f);
+                glm::vec3 rayStartViewport = glm::vec3(xViewport, yViewport, -1.0f);
+                glm::vec3 rayEndViewport = glm::vec3(xViewport, yViewport, 1.0f);
                 JPH::Vec3 rayStart = Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
                 JPH::Vec3 rayEnd = Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
 
@@ -155,7 +152,7 @@ int main()
         {
             inputService->PollEvents();
             JPH::Vec3 playerPhysicsPosition = physicsServer->GetObjectPosition(playerCapsuleId);
-            Vector3 playerPosition = Vector3(playerPhysicsPosition.GetX(), playerPhysicsPosition.GetY(), playerPhysicsPosition.GetZ());
+            glm::vec3 playerPosition = glm::vec3(playerPhysicsPosition.GetX(), playerPhysicsPosition.GetY(), playerPhysicsPosition.GetZ());
             renderer->Render(editor.get());
         }
         runPhysics = false;
@@ -163,7 +160,9 @@ int main()
     }
 
     Vox::ServiceLocator::DeleteServices();
-    CloseWindow();
+    SDL_GL_DestroyContext(context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
