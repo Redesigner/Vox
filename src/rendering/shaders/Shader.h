@@ -1,5 +1,8 @@
 #pragma once
 
+#include <optional>
+#include <string>
+
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -9,6 +12,8 @@ namespace Vox
 	class Shader
 	{
 	public:
+		bool Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
+
 		void Enable();
 		void Disable();
 
@@ -21,5 +26,9 @@ namespace Vox
 
 	protected:
 		unsigned int shader;
+
+	private:
+		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType);
+
 	};
 }
