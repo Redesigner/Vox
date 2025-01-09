@@ -1,13 +1,13 @@
 #pragma once
 
 #include <functional>
-#include <unordered_map>
+#include <memory>
 #include <variant>
 #include <vector>
+#include <unordered_map>
 
-#include "raylib.h"
-
-#include <SDL2/SDL_events.h>
+#include <glm/vec2.hpp>
+#include <SDL3/SDL_events.h>
 
 namespace Vox
 {
@@ -24,7 +24,7 @@ namespace Vox
 	class InputService
 	{
 	public:
-		InputService();
+		InputService(SDL_Window* window);
 		~InputService();
 
 		void PollEvents();
@@ -45,7 +45,7 @@ namespace Vox
 		void UnregisterMouseClickCallback(MouseClickEventCallback callback);
 
 
-		Vector2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
+		glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
 
 		bool ShouldCloseWindow() const;
 
@@ -70,6 +70,8 @@ namespace Vox
 
 		bool cursorLocked = false;
 
-		bool keyPressed[SDL_NUM_SCANCODES]{ false };
+		bool keyPressed[SDL_SCANCODE_COUNT]{ false };
+
+		SDL_Window* mainWindow;
 	};
 }

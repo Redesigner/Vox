@@ -1,54 +1,50 @@
 #include "VoxelShader.h"
 
-#include "rlgl.h"
-#include "external/glad.h"
+#include <GL/glew.h>
 
 #include "rendering/ArrayTexture.h"
 
-VoxelShader::VoxelShader()
+namespace Vox
 {
-	shader = LoadShader(vertLocation.c_str(), fragLocation.c_str());
-	shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPosition");
-
-	uniformLocations.modelMatrix =			rlGetLocationUniform(shader.id, "matModel");
-	uniformLocations.viewMatrix =			rlGetLocationUniform(shader.id, "matView");
-	uniformLocations.projectionMatrix =		rlGetLocationUniform(shader.id, "matProjection");
-
-	uniformLocations.materialRoughness =	rlGetLocationUniform(shader.id, "materialRoughness");
-	uniformLocations.materialMetallic =		rlGetLocationUniform(shader.id, "materialMetallic");
-	uniformLocations.colorTextures =		rlGetLocationUniform(shader.id, "colorTextures");
-}
-
-VoxelShader::~VoxelShader()
-{
-	if (IsShaderValid(shader))
+	VoxelShader::VoxelShader()
 	{
-		UnloadShader(shader);
+		shader = LoadShader(vertLocation.c_str(), fragLocation.c_str());
+		uniformLocations.viewPosition = GetUniformLocation("viewPosition");
+
+		uniformLocations.modelMatrix = GetUniformLocation("matModel");
+		uniformLocations.viewMatrix = GetUniformLocation("matView");
+		uniformLocations.projectionMatrix = GetUniformLocation("matProjection");
+
+		uniformLocations.materialRoughness = GetUniformLocation("materialRoughness");
+		uniformLocations.materialMetallic = GetUniformLocation("materialMetallic");
+		uniformLocations.colorTextures = GetUniformLocation("colorTextures");
 	}
-}
 
-void VoxelShader::SetArrayTexture(ArrayTexture* arrayTexture)
-{
-	rlActiveTextureSlot(0);
-	// Raylib doesn't support glBindTexture with arrays, so we need to call gl directly
-	glBindTexture(GL_TEXTURE_2D_ARRAY, arrayTexture->GetId());
+	VoxelShader::~VoxelShader()
+	{
+	}
 
-	int position = 0;
-	rlSetUniformSampler(uniformLocations.colorTextures, position);
-	rlSetUniform(uniformLocations.colorTextures, &position, SHADER_UNIFORM_INT, 1);
-}
+	void VoxelShader::SetArrayTexture(ArrayTexture* arrayTexture)
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, arrayTexture->GetId());
 
-void VoxelShader::SetModelMatrix(const Matrix& model)
-{
-	rlSetUniformMatrix(uniformLocations.modelMatrix, model);
-}
+		int position = 0;
+		glUniform1i(uniformLocations.colorTextures, position);
+	}
 
-void VoxelShader::SetViewMatrix(const Matrix& view)
-{
-	rlSetUniformMatrix(uniformLocations.viewMatrix, view);
-}
+	void VoxelShader::SetModelMatrix(const glm::mat4x4& model)
+	{
+		SetUniformMatrix(uniformLocations.modelMatrix, model);
+	}
 
-void VoxelShader::SetProjectionMatrix(const Matrix& projection)
-{
-	rlSetUniformMatrix(uniformLocations.projectionMatrix, projection);
+	void VoxelShader::SetViewMatrix(const glm::mat4x4& view)
+	{
+		SetUniformMatrix(uniformLocations.viewMatrix, view);
+	}
+
+	void VoxelShader::SetProjectionMatrix(const glm::mat4x4& projection)
+	{
+		SetUniformMatrix(uniformLocations.projectionMatrix, projection);
+	}
 }

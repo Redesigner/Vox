@@ -1,10 +1,10 @@
 #pragma once
 
-#include "raylib.h"
-
-#include <fmt/format.h>
 #include <string>
 #include <vector>
+
+#include <glm/vec3.hpp>
+#include <fmt/format.h>
 
 #define VoxLog(level, category, string,...) Vox::Logger::Log(Vox::LogLevel::level, Vox::LogCategory::category, string, ##__VA_ARGS__)
 
@@ -44,7 +44,7 @@ namespace Vox
 		static std::vector<LogEntry> entries;
 
 	public:
-		static Color GetLevelColor(LogLevel level);
+		static glm::vec3 GetLevelColor(LogLevel level);
 
 		template <typename... T>
 		static void Log(LogLevel level, LogCategory category, fmt::format_string<T...> fmt, T&&... args)

@@ -30,16 +30,16 @@ namespace Vox
 		}
 	}
 
-	Color Logger::GetLevelColor(LogLevel level)
+	glm::vec3 Logger::GetLevelColor(LogLevel level)
 	{
 		switch (level)
 		{
 		case Error:
-			return Color(220.0f, 15.0f, 15.0f);
+			return glm::vec3(220.0f, 15.0f, 15.0f);
 		case Warning:
-			return Color(250.0f, 245.0f, 45.0f);
+			return glm::vec3(250.0f, 245.0f, 45.0f);
 		default:
-			return Color(255.0f, 255.0f, 255.0f);
+			return glm::vec3(255.0f, 255.0f, 255.0f);
 		}
 	}
 

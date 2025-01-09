@@ -1,8 +1,6 @@
 #include "Editor.h"
 
 #include "imgui.h"
-#include "raylib.h"
-#include "rlImGui.h"
 #include "tinyfiledialogs.h"
 
 #include "core/logging/Logging.h"
@@ -12,9 +10,6 @@ const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
 void Editor::Draw(RenderTexture2D* viewportRenderTexture)
 {
-    // start ImGui Conent
-    rlImGuiBegin();
-
 #ifdef IMGUI_HAS_VIEWPORT
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->GetWorkPos());
@@ -125,8 +120,8 @@ void Editor::DrawDebugConsole()
     {
         for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
         {
-            Color entryColor = Vox::Logger::GetLevelColor(entry.level);
-            ImGui::TextColored(ImVec4(entryColor.r / 255.0f, entryColor.g/ 255.0f, entryColor.b / 255.0f, 1.0f), entry.entry.c_str());
+            glm::vec3 entryColor = Vox::Logger::GetLevelColor(entry.level);
+            ImGui::TextColored(ImVec4(entryColor.r / 255.0f, entryColor.g / 255.0f, entryColor.b / 255.0f, 1.0f), entry.entry.c_str());
         }
         ImGui::SetScrollHereY(1.0f);
     }

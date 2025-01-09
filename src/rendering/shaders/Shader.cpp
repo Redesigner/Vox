@@ -1,45 +1,46 @@
 #include "Shader.h"
 
-#include "rlgl.h"
+#include <GL/glew.h>
 
-void VoxShader::Enable()
+namespace Vox
 {
-	rlEnableShader(shader.id);
-}
+	void Shader::Enable()
+	{
+		glUseProgram(shader);
+	}
 
-void VoxShader::Disable()
-{
-	rlDisableShader();
-}
+	void Shader::Disable()
+	{
+		glUseProgram(0);
+	}
 
-int VoxShader::GetUniformLocation(const char* uniformName)
-{
-	return rlGetLocationUniform(shader.id, uniformName);
-}
+	int Shader::GetUniformLocation(const char* uniformName)
+	{
+		return glGetUniformLocation(shader, uniformName);
+	}
 
-void VoxShader::SetUniformInt(int uniformLocation, int value)
-{
-	rlSetUniform(uniformLocation, &value, RL_SHADER_UNIFORM_INT, 1);
-}
+	void Shader::SetUniformInt(int uniformLocation, int value)
+	{
+		glUniform1i(uniformLocation, value);
+	}
 
-void VoxShader::SetUniformFloat(int uniformLocation, float value)
-{
-	rlSetUniform(uniformLocation, &value, RL_SHADER_UNIFORM_FLOAT, 1);
-}
+	void Shader::SetUniformFloat(int uniformLocation, float value)
+	{
+		glUniform1f(uniformLocation, value);
+	}
 
-void VoxShader::SetUniformVec3(int uniformLocation, Vector3 value)
-{
-	float values[3] = { value.x, value.y, value.z };
-	rlSetUniform(uniformLocation, &values, RL_SHADER_UNIFORM_VEC3, 1);
-}
+	void Shader::SetUniformVec3(int uniformLocation, glm::vec3 value)
+	{
+		glUniform3f(uniformLocation, value.x, value.y, value.z);
+	}
 
-void VoxShader::SetUniformColor(int uniformLocation, Vector4 color)
-{
-	float colorPacked[4] = {
-		static_cast<float>(color.x) / 255.0f,
-		static_cast<float>(color.y) / 255.0f,
-		static_cast<float>(color.z) / 255.0f,
-		static_cast<float>(color.w) / 255.0f
-	};
-	rlSetUniform(uniformLocation, &colorPacked, RL_SHADER_UNIFORM_VEC4, 1);
+	void Shader::SetUniformColor(int uniformLocation, glm::vec4 color)
+	{
+		glUniform4f(uniformLocation, color.r, color.g, color.b, color.a);
+	}
+
+	void Shader::SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix)
+	{
+		glUniformMatrix4fv(uniformLocation, 1, false, &matrix[0][0]);
+	}
 }

@@ -4,31 +4,34 @@
 
 #include <string>
 
-#include "raylib.h"
+#include <glm/mat4x4.hpp>
 
 class ArrayTexture;
 
-class VoxelShader : public VoxShader
+namespace Vox
 {
-public:
-	struct UniformLocations
+	class VoxelShader : public Shader
 	{
-		int modelMatrix, viewMatrix, projectionMatrix;
-		int materialRoughness, materialMetallic;
-		int colorTextures;
+	public:
+		struct UniformLocations
+		{
+			int modelMatrix, viewMatrix, projectionMatrix, viewPosition;
+			int materialRoughness, materialMetallic;
+			int colorTextures;
+		};
+
+		VoxelShader();
+		~VoxelShader();
+
+		void SetArrayTexture(ArrayTexture* arrayTexture);
+		void SetModelMatrix(const glm::mat4x4& model);
+		void SetViewMatrix(const glm::mat4x4& view);
+		void SetProjectionMatrix(const glm::mat4x4& projection);
+
+	private:
+		const std::string vertLocation = "assets/shaders/gBufferVoxel.vert";
+		const std::string fragLocation = "assets/shaders/gBufferVoxel.frag";
+
+		UniformLocations uniformLocations;
 	};
-
-	VoxelShader();
-	~VoxelShader();
-
-	void SetArrayTexture(ArrayTexture* arrayTexture);
-	void SetModelMatrix(const Matrix& model);
-	void SetViewMatrix(const Matrix& view);
-	void SetProjectionMatrix(const Matrix& projection);
-
-private:
-	const std::string vertLocation = "assets/shaders/gBufferVoxel.vert";
-	const std::string fragLocation = "assets/shaders/gBufferVoxel.frag";
-
-	UniformLocations uniformLocations;
-};
+}
