@@ -10,6 +10,8 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "core/logging/Logging.h"
+
 namespace Octree
 {
 	CollisionNode::CollisionNode(unsigned int size)
@@ -337,7 +339,7 @@ namespace Octree
 
 		if (treeSize < 2 || (treeSize & (treeSize - 1)) != 0)
 		{
-			TraceLog(LOG_ERROR, "Unpacking octree failed: size constant is not a power of 2.");
+			VoxLog(Error, Game, "Unpacking octree failed: size constant is not a power of 2.");
 			return nullptr;
 		}
 
@@ -471,7 +473,7 @@ namespace Octree
 		}
 		else
 		{
-			TraceLog(LOG_ERROR, "Failure unpacking octree. A node was malformed.");
+			VoxLog(Error, Game, "Failure unpacking octree. A node was malformed.");
 			return;
 		}
 		currentIndex++;

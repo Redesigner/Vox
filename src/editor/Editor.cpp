@@ -144,7 +144,7 @@ void Editor::openGLTF()
     }
     else
     {
-        TraceLog(LOG_INFO, "Dialog closed without selecting file.");
+        VoxLog(Display, Input, "Dialog closed without selecting file.");
     }
 }
 

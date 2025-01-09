@@ -16,6 +16,7 @@
 
 #include "raylib.h"
 
+#include "core/logging/Logging.h"
 #include "rendering/DebugRenderer.h"
 
 namespace Vox
@@ -92,7 +93,7 @@ namespace Vox
 	{
 		if (id >= characterControllers.size())
 		{
-			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller velocity. Character controller id was invalid.");
+			VoxLog(Error, Physics, "Failed to get character controller velocity. Character controller id was invalid.");
 			return JPH::Vec3::sZero();
 		}
 
@@ -103,7 +104,7 @@ namespace Vox
 	{
 		if (id >= characterControllers.size())
 		{
-			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller position. Character controller id was invalid.");
+			VoxLog(Error, Physics, "Failed to get character controller position.Character controller id was invalid.");
 			return JPH::Vec3::sZero();
 		}
 
@@ -114,7 +115,7 @@ namespace Vox
 	{
 		if (id >= characterControllers.size())
 		{
-			TraceLog(LOG_ERROR, "[Physics] Failed to get character controller rotation. Character controller id was invalid.");
+			VoxLog(Error, Physics, "Failed to get character controller rotation. Character controller id was invalid.");
 			return JPH::Quat::sIdentity();
 		}
 
@@ -125,7 +126,7 @@ namespace Vox
 	{
 		if (id >= characterControllers.size())
 		{
-			TraceLog(LOG_ERROR, "[Physics] Failed to set character controller yaw. Character controller id was invalid.");
+			VoxLog(Error, Physics, "Failed to set character controller yaw. Character controller id was invalid.");
 			return;
 		}
 
@@ -193,7 +194,7 @@ namespace Vox
 		const JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
 		if (!bodyInterface.IsAdded(id))
 		{
-			TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get object position. The body ID was not added to the body interface."));
+			VoxLog(Warning, Physics, "Unable to get object position. The body ID was not added to the body interface.");
 			return JPH::Vec3(0.0f, 0.0f, 0.0f);
 		}
 
@@ -291,7 +292,7 @@ namespace Vox
 			}
 			else
 			{
-				TraceLog(LOG_WARNING, "Failed to return raycast result. The ray hit a body, but the body was locked. Make sure you aren't trying to read while the physics is updating.");
+				VoxLog(Warning, Physics, "Failed to return raycast result. The ray hit a body, but the body was locked. Make sure you aren't trying to read while the physics is updating.");
 			}
 			return true;
 		}
@@ -302,7 +303,7 @@ namespace Vox
 	{
 		if (id >= springArms.size())
 		{
-			TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get spring arm. The spring arm ID was not valid."));
+			VoxLog(Warning, Physics, "Unable to get spring arm. The spring arm ID was not valid.");
 			return nullptr;
 		}
 
@@ -313,7 +314,7 @@ namespace Vox
 	{
 		if (id >= springArms.size())
 		{
-			TraceLog(LOG_WARNING, TextFormat("[PhysicsServer] Unable to get spring arm. The spring arm ID was not valid."));
+			VoxLog(Warning, Physics, "Unable to get spring arm. The spring arm ID was not valid.");
 			return nullptr;
 		}
 
