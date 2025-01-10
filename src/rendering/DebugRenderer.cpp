@@ -1,6 +1,6 @@
 #include "DebugRenderer.h"
 
-#include "external/glad.h"
+#include <GL/glew.h>
 
 namespace Vox
 {

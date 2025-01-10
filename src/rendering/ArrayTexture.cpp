@@ -37,7 +37,7 @@ void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 	SDL_Surface* image = IMG_Load(textureName.c_str());
 	if (!image)
 	{
-		VoxLog(Warning, Rendering, "ArrayTexture failed to load. SDL: {}", SDL_GetError());
+		VoxLog(Warning, FileSystem, "ArrayTexture failed to load. SDL: {}", SDL_GetError());
 		return;
 	}
 
