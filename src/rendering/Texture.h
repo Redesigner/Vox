@@ -7,7 +7,7 @@ namespace Vox
 	class Texture
 	{
 	public:
-		Texture(std::string filename);
+		Texture();
 		~Texture();
 
 		bool Load(std::string filename);
@@ -19,5 +19,6 @@ namespace Vox
 	private:
 		unsigned int width, height;
 		unsigned int textureId;
+		bool loaded = false;
 	};
 }

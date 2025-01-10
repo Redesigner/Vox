@@ -2,15 +2,12 @@
 
 #include "Renderer.h"
 
-#include "raylib.h"
-#include "raymath.h"
-#include "rcamera.h"
-#include "rlgl.h"
+#include <GL/glew.h>
+#include <SDL3/SDL_filesystem.h>
 
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
-#include "external/glad.h"
 #include "rendering/ArrayTexture.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
@@ -25,41 +22,40 @@
 Vox::Renderer::Renderer()
 {
     // This is realtive to the build location -- I'll have to fix this later
-    ChangeDirectory("../../../");
+    // ChangeDirectory("../../../");
 
-    VoxLog(Display, Rendering, "Set current working directory to {}", GetWorkingDirectory());
-    gBufferShader = LoadShader("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
-    materialRoughnessLocation = GetShaderLocation(gBufferShader, "materialRoughness");
-    materialColorLocation = GetShaderLocation(gBufferShader, "materialAlbedo");
+    VoxLog(Display, Rendering, "Set current working directory to {}", SDL_GetBasePath());
+    gBufferShader.Load("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+    materialRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
+    materialColorLocation = gBufferShader.GetUniformLocation("materialAlbedo");
 
     voxelShader = std::make_unique<VoxelShader>();
     deferredShader = std::make_unique<DeferredShader>();
 
-    skyShader = LoadShader("assets/shaders/sky.vert", "assets/shaders/sky.frag");
-    debugTriangleShader = LoadShader("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
-    debugLineShader = LoadShader("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
+    skyShader.Load("assets/shaders/sky.vert", "assets/shaders/sky.frag");
+    debugTriangleShader.Load("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
+    debugLineShader.Load("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
 
-    debugTriangleMatrixLocation = GetShaderLocation(debugTriangleShader, "viewProjection");
-    debugLineMatrixLocation = GetShaderLocation(debugLineShader, "viewProjection");
+    debugTriangleMatrixLocation = debugTriangleShader.GetUniformLocation("viewProjection");
+    debugLineMatrixLocation = debugLineShader.GetUniformLocation("viewProjection");
 
     gBuffer = std::make_unique<GBuffer>(800, 431);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
 
-    defaultMaterial = LoadMaterialDefault();
+    skyShader.Enable();
+    skyShader.SetUniformInt(skyShader.GetUniformLocation("color"), 0);
+    //int position = 0;
+    //rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
+    //rlSetUniform(GetShaderLocation(skyShader, "color"), &position, SHADER_UNIFORM_INT, 1);
 
-    rlEnableShader(skyShader.id);
-    {
-        int position = 0;
-        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
-        rlSetUniform(GetShaderLocation(skyShader, "color"), &position, SHADER_UNIFORM_INT, 1);
+    skyShader.SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
+    //position = 1;
+    //rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
+    //rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
+    //rlDisableShader();
 
-        position = 1;
-        rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
-        rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
-        rlDisableShader();
-    }
-    defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
-    defaultMaterial.shader = gBufferShader;
+    //defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
+    //defaultMaterial.shader = gBufferShader;
 
     //int dataSize = 0;
     //unsigned char* octreeRaw = LoadFileData("assets/voxels/test.vox", &dataSize);
@@ -98,64 +94,25 @@ Vox::Renderer::Renderer()
     Camera* movedCamera = camera.get();
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
-    testLight = Light(1, 1, Vector3(4.5f, 4.5f, 0.5f), Vector3(), Vector4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
+    testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
 
-    viewportTexture = RenderTexture2D();
-    testModel = LoadModel("assets/models/mushroom.glb");
-    for (int i = 0; i < testModel.materialCount; ++i)
-    {
-        testModel.materials[i].shader = gBufferShader;
-    }
+    viewportTexture = Texture();
 }
 
 Vox::Renderer::~Renderer()
 {
-    if (IsRenderTextureValid(viewportTexture))
-    {
-        UnloadRenderTexture(viewportTexture);
-    }
-
-    if (IsModelValid(testModel))
-    {
-        UnloadModel(testModel);
-    }
-
-    // Unload shaders
-    // @TODO: do this in a shader C++ wrapper
-    if (IsShaderValid(gBufferShader))
-    {
-        UnloadShader(gBufferShader);
-    }
-
-    if (IsShaderValid(skyShader))
-    {
-        UnloadShader(skyShader);
-    }
-
-    if (IsShaderValid(debugLineShader))
-    {
-        UnloadShader(debugLineShader);
-    }
-
-    if (IsShaderValid(debugTriangleShader))
-    {
-        UnloadShader(debugTriangleShader);
-    }
 }
 
 void Vox::Renderer::Render(Editor* editor)
 {
     // @TODO fix whatever is happening with vsync here
-    SwapScreenBuffer();
     UpdateViewportDimensions(editor);
-    BeginDrawing();
-    {
-        camera->SetAspectRatio(viewportTexture.texture.height == 0 ? 1 : viewportTexture.texture.width / viewportTexture.texture.height);
+        camera->SetAspectRatio(viewportTexture.GetHeight() == 0 ? 1 : viewportTexture.GetWidth() / viewportTexture.GetHeight());
         //camera->SetRotation(camera->GetRotation() + Vector3(0.0f, 0.01f, 0.0f));
 
-        rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
-        rlSetFramebufferWidth(viewportTexture.texture.width);
-        rlSetFramebufferHeight(viewportTexture.texture.height);
+        glViewport(0, 0, viewportTexture.GetWidth(), viewportTexture.GetHeight());
+        //rlSetFramebufferWidth(viewportTexture.GetWidth());
+        //rlSetFramebufferHeight(viewportTexture.GetWidth());
 
         RenderGBuffer();
         // RenderVoxelGrid(testVoxelGrid.get());

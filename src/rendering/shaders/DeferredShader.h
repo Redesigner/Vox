@@ -2,31 +2,33 @@
 
 #include <string>
 
-#include "raylib.h"
+#include <glm/vec3.hpp>
 
 #include "rendering/shaders/Shader.h"
 
-class DeferredShader : public VoxShader
+namespace Vox
 {
-	struct UniformLocations
+	class DeferredShader : public Shader
 	{
-		int position;
-		int normal;
-		int albedo;
-		int metallicRoughness;
-		int depth;
-		int viewPosition;
-	};
+		struct UniformLocations
+		{
+			int position;
+			int normal;
+			int albedo;
+			int metallicRoughness;
+			int depth;
+			int viewPosition;
+		};
 
-public:
-	DeferredShader();
-	~DeferredShader();
+	public:
+		DeferredShader();
 
-	void SetCameraPosition(Vector3 position);
+		void SetCameraPosition(glm::vec3 position);
 
-private:
-	UniformLocations uniformLocations;
+	private:
+		UniformLocations uniformLocations;
 
-	const std::string vertLocation = "assets/shaders/deferred.vert";
-	const std::string fragLocation = "assets/shaders/deferred.frag";
+		const std::string vertLocation = "assets/shaders/deferred.vert";
+		const std::string fragLocation = "assets/shaders/deferred.frag";
+	}
 };

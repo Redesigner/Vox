@@ -1,10 +1,12 @@
 #pragma once
 
-#include "voxel/Voxel.h"
-#include "raylib.h"
-
 #include <memory>
 #include <vector>
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include "voxel/Voxel.h"
 
 namespace Octree
 {
@@ -31,14 +33,14 @@ public:
 
 	void GenerateMesh();
 
-	void EnableVertexArray();
-
 	unsigned int GetVertexCount() const;
 	unsigned int* GetIndices();
 
 	int x, y, z = 0;
 
 private:
+	void GenerateVertexObjects();
+
 	void UnloadVertexObjects();
 
 	void AddCube(unsigned int x, unsigned int y, unsigned int z, unsigned int materialId);
@@ -52,21 +54,21 @@ private:
 
 	unsigned int width, height, depth;
 
-	static const Vector3 up;
-	static const Vector3 down;
-	static const Vector3 forward;
-	static const Vector3 back;
-	static const Vector3 left;
-	static const Vector3 right;
+	static const glm::vec3 up;
+	static const glm::vec3 down;
+	static const glm::vec3 forward;
+	static const glm::vec3 back;
+	static const glm::vec3 left;
+	static const glm::vec3 right;
 
-	static const Vector2 topLeft;
-	static const Vector2 topRight;
-	static const Vector2 bottomLeft;
-	static const Vector2 bottomRight;
+	static const glm::vec2 topLeft;
+	static const glm::vec2 topRight;
+	static const glm::vec2 bottomLeft;
+	static const glm::vec2 bottomRight;
 
-	std::vector<Vector3> vertices;
-	std::vector<Vector2> texCoords;
-	std::vector<Vector3> normals;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec2> texCoords;
+	std::vector<glm::vec3> normals;
 	std::vector<unsigned int> materialIds;
 	std::vector<unsigned int> indices;
 
@@ -75,4 +77,6 @@ private:
 	unsigned int indexCount = 0;
 	unsigned int vaoId = 0;
 	Vbos vbos;
+
+	bool meshCreated = false;
 };

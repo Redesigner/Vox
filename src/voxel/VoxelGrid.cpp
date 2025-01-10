@@ -1,31 +1,33 @@
 #include "VoxelGrid.h"
 
-#include "rlgl.h"
-#include "external/glad.h"
 #include <stdexcept>
+
+#include <GL/glew.h>
 
 #include "voxel/Octree.h"
 
 
-const Vector3 VoxelGrid::up = Vector3(0.0f, 1.0f, 0.0f);
-const Vector3 VoxelGrid::down = Vector3(0.0f, -1.0f, 0.0f);
-const Vector3 VoxelGrid::forward = Vector3(0.0f, 0.0f, 1.0f);
-const Vector3 VoxelGrid::back = Vector3(0.0f, 0.0f, -1.0f);
-const Vector3 VoxelGrid::left = Vector3(-1.0f, 0.0f, 0.0f);
-const Vector3 VoxelGrid::right = Vector3(1.0f, 0.0f, 0.0f);
+const glm::vec3 VoxelGrid::up = glm::vec3(0.0f, 1.0f, 0.0f);
+const glm::vec3 VoxelGrid::down = glm::vec3(0.0f, -1.0f, 0.0f);
+const glm::vec3 VoxelGrid::forward = glm::vec3(0.0f, 0.0f, 1.0f);
+const glm::vec3 VoxelGrid::back = glm::vec3(0.0f, 0.0f, -1.0f);
+const glm::vec3 VoxelGrid::left = glm::vec3(-1.0f, 0.0f, 0.0f);
+const glm::vec3 VoxelGrid::right = glm::vec3(1.0f, 0.0f, 0.0f);
 
-const Vector2 VoxelGrid::topLeft = Vector2(0.0f, 1.0f);
-const Vector2 VoxelGrid::topRight = Vector2(1.0f, 1.0f);
-const Vector2 VoxelGrid::bottomLeft = Vector2(0.0f, 0.0f);
-const Vector2 VoxelGrid::bottomRight = Vector2(0.0f, 1.0f);
+const glm::vec2 VoxelGrid::topLeft = glm::vec2(0.0f, 1.0f);
+const glm::vec2 VoxelGrid::topRight = glm::vec2(1.0f, 1.0f);
+const glm::vec2 VoxelGrid::bottomLeft = glm::vec2(0.0f, 0.0f);
+const glm::vec2 VoxelGrid::bottomRight = glm::vec2(0.0f, 1.0f);
 
 VoxelGrid::VoxelGrid(unsigned int width, unsigned int height, unsigned int depth)
 	:width(width), height(height), depth(depth), x(0), y(0), z(0)
 {
 	voxels = std::vector<Voxel>(width * height * depth);
 
-	vaoId = rlLoadVertexArray();
+	vaoId = 0;
 	vbos = {};
+
+	GenerateVertexObjects();
 }
 
 VoxelGrid::~VoxelGrid()
@@ -114,7 +116,6 @@ void VoxelGrid::SetVoxel(Voxel voxel, unsigned int x, unsigned int y, unsigned i
 void VoxelGrid::GenerateMesh()
 {
 	indices.clear();
-	UnloadVertexObjects();
 
 	for (int x = 0; x < width; ++x)
 	{
@@ -134,44 +135,26 @@ void VoxelGrid::GenerateMesh()
 	// layout location values / indices here come from gBufferVoxel.vert
 	// all vector sizes should be the same
 	bool dynamic = false;
-	vaoId = rlLoadVertexArray();
-	EnableVertexArray();
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.position);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), &vertices[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
 
-	// Position
-	vbos.position = rlLoadVertexBuffer(&vertices[0], sizeof(Vector3) * vertices.size(), dynamic);
-	rlSetVertexAttribute(0, 3, RL_FLOAT, 0, 0, 0);
-	rlEnableVertexAttribute(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.texCoord);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * texCoords.size(), &texCoords[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.normal);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * normals.size(), &normals[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.textureId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(unsigned int) * materialIds.size(), &materialIds[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos.index);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+
 	vertices.clear();
-
-	// TexCoord
-	vbos.texCoord = rlLoadVertexBuffer(&texCoords[0], sizeof(Vector2) * texCoords.size(), dynamic);
-	rlSetVertexAttribute(1, 2, RL_FLOAT, 0, 0, 0);
-	rlEnableVertexAttribute(1);
 	texCoords.clear();
-
-	// Normal
-	vbos.normal = rlLoadVertexBuffer(&normals[0], sizeof(Vector3) * normals.size(), dynamic);
-	rlSetVertexAttribute(2, 3, RL_FLOAT, 0, 0, 0);
-	rlEnableVertexAttribute(2);
 	normals.clear();
-
-	// TextureId
-	vbos.textureId = rlLoadVertexBuffer(&materialIds[0], sizeof(unsigned int) * materialIds.size(), dynamic);
-	// rlSetVertexAttribute(3, 1, GL_UNSIGNED_INT, 0, 0, 0);
-	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, 0, 0);
-	rlEnableVertexAttribute(3);
 	materialIds.clear();
-
-	// Indices
-	vbos.index = rlLoadVertexBufferElement(&indices[0], sizeof(unsigned int) * indices.size(), dynamic);
 	indexCount = indices.size();
-
-	rlDisableVertexArray();
-}
-
-void VoxelGrid::EnableVertexArray()
-{
-	rlEnableVertexArray(vaoId);
 }
 
 unsigned int VoxelGrid::GetVertexCount() const
@@ -184,38 +167,46 @@ unsigned int* VoxelGrid::GetIndices()
 	return &indices[0];
 }
 
+void VoxelGrid::GenerateVertexObjects()
+{
+	glGenVertexArrays(1, &vaoId);
+	glBindVertexArray(vaoId);
+
+	unsigned int vboIds[5] = {};
+	glGenBuffers(5, vboIds);
+	vbos.position = vboIds[0];
+	vbos.texCoord = vboIds[1];
+	vbos.normal = vboIds[2];
+	vbos.textureId = vboIds[3];
+	vbos.index = vboIds[4];
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.position);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.texCoord);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.normal);
+	glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbos.textureId);
+	glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, 0, 0);
+	glEnableVertexAttribArray(3);
+
+	meshCreated = true;
+}
+
 void VoxelGrid::UnloadVertexObjects()
 {
-	if (vbos.position)
+	if (meshCreated)
 	{
-		rlUnloadVertexBuffer(vbos.position);
-		vbos.position = 0;
-	}
-	if (vbos.texCoord)
-	{
-		rlUnloadVertexBuffer(vbos.texCoord);
-		vbos.texCoord = 0;
-	}
-	if (vbos.normal)
-	{
-		rlUnloadVertexBuffer(vbos.normal);
-		vbos.normal = 0;
-	}
-	if (vbos.position)
-	{
-		rlUnloadVertexBuffer(vbos.textureId);
-		vbos.textureId = 0;
-	}
-	if (vbos.index)
-	{
-		rlUnloadVertexBuffer(vbos.index);
-		vbos.index = 0;
-	}
-
-	if (vaoId)
-	{
-		rlUnloadVertexArray(vaoId);
-		vaoId = 0;
+		meshCreated = false;
+		unsigned int bufferIds[5] = { vbos.position, vbos.texCoord, vbos.normal, vbos.textureId, vbos.index };
+		glDeleteBuffers(5, bufferIds);
+		glDeleteVertexArrays(1, &vaoId);
 	}
 }
 

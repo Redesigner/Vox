@@ -1,33 +1,37 @@
 #pragma once
 
-#include "raylib.h"
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
-class DeferredShader;
-
-struct LightUniformLocations
+namespace Vox
 {
-    LightUniformLocations();
-    LightUniformLocations(DeferredShader* shader);
+    class DeferredShader;
 
-    int enabled;
-    int type;
-    int position;
-    int target;
-    int color;
-    int strength;
-};
+    struct LightUniformLocations
+    {
+        LightUniformLocations();
+        LightUniformLocations(DeferredShader* shader);
 
-struct Light
-{
-    Light();
-    Light(int enabled, int type, Vector3 position, Vector3 target, Vector4 color, float distance);
+        int enabled;
+        int type;
+        int position;
+        int target;
+        int color;
+        int strength;
+    };
 
-    int enabled;
-    int type;
-    Vector3 position;
-    Vector3 target;
-    Vector4 color;
-    float strength;
+    struct Light
+    {
+        Light();
+        Light(int enabled, int type, glm::vec3 position, glm::vec3 target, glm::vec4 color, float distance);
 
-    void UpdateLightValues(DeferredShader* shader, LightUniformLocations& uniformLocations);
-};
+        int enabled;
+        int type;
+        glm::vec3 position;
+        glm::vec3 target;
+        glm::vec4 color;
+        float strength;
+
+        void UpdateLightValues(DeferredShader* shader, LightUniformLocations& uniformLocations);
+    };
+}
