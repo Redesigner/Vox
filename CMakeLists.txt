@@ -24,6 +24,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(JoltPhysics)
 set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
+# Build SDL Image
+list(APPEND CMAKE_PROGRAM_PATH "C:\\Program Files\\NASM")
+FetchContent_Declare(
+	SDLImage
+	GIT_REPOSITORY "https://github.com/libsdl-org/SDL_image"
+	GIT_TAG "preview-3.1.0"
+)
+set(SDLIMAGE_AVIF OFF)
+FETCHCONTENT_MAKEAVAILABLE(SDLImage)
+
 find_package(SDL3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
@@ -44,6 +54,7 @@ string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 target_include_directories(Vox PRIVATE "src/")
 
 target_link_libraries(Vox PRIVATE SDL3::SDL3)
+target_link_libraries(Vox PRIVATE SDL3_image::SDL3_image)
 target_link_libraries(Vox PRIVATE glm::glm)
 target_link_libraries(Vox PRIVATE GLEW::GLEW)
 target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)

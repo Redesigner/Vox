@@ -2,9 +2,8 @@
 
 #include "core/logging/Logging.h"
 
-#include "external/glad.h"
-#include "raylib.h"
-#include "rlgl.h"
+#include <GL/glew.h>
+#include <SDL3_image/SDL_image.h>
 
 // https://www.khronos.org/opengl/wiki/Array_Texture
 
@@ -35,25 +34,25 @@ void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 	}
 
 	// Load the image onto the cpu, so we can add it to the array
-	Image image = LoadImage(textureName.c_str());
-	if (!IsImageValid(image))
+	SDL_Surface* image = IMG_Load(textureName.c_str());
+	if (!image)
 	{
-		VoxLog(Warning, Rendering, "ArrayTexture failed to load.");
+		VoxLog(Warning, Rendering, "ArrayTexture failed to load. SDL: {}", SDL_GetError());
 		return;
 	}
 
-	if (image.width != width || image.height != height)
+	if (image->w != width || image->h != height)
 	{
 		VoxLog(Warning, Rendering, "ArrayTexture: loaded image dimensions did not match the ArrayTexture dimensions.");
-		UnloadImage(image);
+		SDL_DestroySurface(image);
 		return;
 	}
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureId);
-	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, index, width, height, 1, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+	glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, index, width, height, 1, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
 
 	// Unload the image, now that it's on the GPU
-	UnloadImage(image);
+	SDL_DestroySurface(image);
 }
 
 unsigned int ArrayTexture::GetId() const
