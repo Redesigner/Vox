@@ -7,14 +7,17 @@
 
 namespace Vox
 {
-	Texture::Texture(std::string filename)
+	Texture::Texture()
 		:width(0), height(0), textureId(0)
 	{
-		Load(filename);
 	}
 
 	Texture::~Texture()
 	{
+		if (loaded)
+		{
+			glDeleteTextures(0, &textureId);
+		}
 	}
 
 	bool Texture::Load(std::string filename)
@@ -29,6 +32,7 @@ namespace Vox
 		width = surface->w;
 		height = surface->h;
 
+		loaded = true;
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -7,6 +7,16 @@
 
 namespace Vox
 {
+	Shader::~Shader()
+	{
+		if (loaded)
+		{
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			glDeleteProgram(shader);
+		}
+	}
+
 	bool Shader::Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
 	{
 		shader = glCreateProgram();
@@ -17,6 +27,7 @@ namespace Vox
 			glDeleteProgram(shader);
 			return false;
 		}
+		vertexShader = vertexShaderId.value();
 
 		std::optional<unsigned int> fragmentShaderId = LoadShaderStage(fragmentShaderFilePath, GL_FRAGMENT_SHADER);
 		if (!fragmentShaderId)
@@ -24,9 +35,10 @@ namespace Vox
 			glDeleteProgram(shader);
 			return false;
 		}
+		fragmentShader = fragmentShaderId.value();
 
-		glAttachShader(shader, vertexShaderId.value());
-		glAttachShader(shader, fragmentShaderId.value());
+		glAttachShader(shader, vertexShader);
+		glAttachShader(shader, fragmentShader);
 		glLinkProgram(shader);
 
 		GLint isLinked = 0;
@@ -46,6 +58,7 @@ namespace Vox
 		}
 
 		VoxLog(Display, Rendering, "Shader created successfully.");
+		loaded = true;
 		return true;
 	}
 
@@ -62,6 +75,11 @@ namespace Vox
 	int Shader::GetUniformLocation(const char* uniformName)
 	{
 		return glGetUniformLocation(shader, uniformName);
+	}
+
+	int Shader::GetUniformLocation(const std::string& uniformName)
+	{
+		return glGetUniformLocation(shader, uniformName.c_str());
 	}
 
 	void Shader::SetUniformInt(int uniformLocation, int value)

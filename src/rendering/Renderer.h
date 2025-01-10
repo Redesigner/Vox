@@ -6,6 +6,8 @@
 #include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
+#include "rendering/shaders/Shader.h"
+#include "rendering/Texture.h"
 
 class ArrayTexture;
 class DebugRenderer;
@@ -20,7 +22,6 @@ namespace Vox
 {
 	class Camera;
 	class PhysicsServer;
-
 	class Renderer
 	{
 	public:
@@ -56,7 +57,7 @@ namespace Vox
 
 		void RenderDebugShapes();
 
-		void CopyViewportToTexture(RenderTexture2D& texture);
+		void CopyViewportToTexture(Texture& texture);
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<Framebuffer> deferredFramebuffer;
@@ -80,8 +81,8 @@ namespace Vox
 
 		std::unique_ptr<Vox::Camera> camera;
 
-		RenderTexture2D viewportTexture;
-		Material defaultMaterial;
-		Model testModel;
+		Texture viewportTexture;
+		// Material defaultMaterial;
+		// Model testModel;
 	};
 }
