@@ -38,7 +38,8 @@ namespace Vox
 
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-			VoxLog(Error, Rendering, "Failed to link shader: {}", infoLog);
+			std::string logString = std::string(infoLog.begin(), infoLog.end());
+			VoxLog(Error, Rendering, "Failed to link shader: {}", logString);
 
 			glDeleteProgram(shader);
 			return false;
@@ -119,7 +120,8 @@ namespace Vox
 
 			std::vector<GLchar> errorLog(maxLength);
 			glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
-			VoxLog(Error, Rendering, "Shader failed to compile: {}", errorLog);
+			std::string logString = std::string(errorLog.begin(), errorLog.end());
+			VoxLog(Error, Rendering, "Shader failed to compile: {}", logString);
 
 			glDeleteShader(shaderId);
 			return std::nullopt;

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "raylib.h"
-#include "tinyfiledialogs.h"
-
 #include <functional>
 #include <string>
+
+#include <glm/vec2.hpp>
+#include "tinyfiledialogs.h"
 
 class Editor
 {
@@ -19,7 +19,7 @@ public:
 	
 	void Draw(RenderTexture2D* viewportRenderTexture);
 	void BindOnGLTFOpened(std::function<void(std::string)> function);
-	Vector2 GetViewportDimensions() const;
+	glm::vec2 GetViewportDimensions() const;
 	Box GetViewportBox() const;
 	bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
@@ -35,6 +35,6 @@ private:
 
 	static const char* gltfFilter[2];
 
-	Vector2 viewportDimensions = Vector2(0.0f, 0.0f);
+	glm::vec2 viewportDimensions = glm::vec2(0.0f, 0.0f);
 	Box viewportBox;
 };

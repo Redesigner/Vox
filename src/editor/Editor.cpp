@@ -27,7 +27,7 @@ void Editor::Draw(RenderTexture2D* viewportRenderTexture)
 
     ImVec2 dimensions = ImGui::GetContentRegionAvail();
     ImVec2 bottomRight = ImGui::GetContentRegionMax();
-    viewportDimensions = Vector2(dimensions.x , dimensions.y);
+    viewportDimensions = glm::vec2(dimensions.x , dimensions.y);
     viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
 
     rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
@@ -47,7 +47,7 @@ void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
     onGLTFOpened = function;
 }
 
-Vector2 Editor::GetViewportDimensions() const
+glm::vec2 Editor::GetViewportDimensions() const
 {
     return viewportDimensions;
 }

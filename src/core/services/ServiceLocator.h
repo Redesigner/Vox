@@ -2,6 +2,8 @@
 
 #include <memory>
 
+class SDL_Window;
+
 namespace Vox
 {
 	class InputService;
@@ -9,7 +11,7 @@ namespace Vox
 	class ServiceLocator
 	{
 	public:
-		static void InitServices();
+		static void InitServices(SDL_Window* window);
 		static void DeleteServices();
 
 		static InputService* GetInputService();
