@@ -28,13 +28,13 @@ int main()
     SDL_Window* window = SDL_CreateWindow("Vox", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     {
-        Vox::ServiceLocator::InitServices();
+        Vox::ServiceLocator::InitServices(window);
 
         Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
         std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
-        std::unique_ptr<Editor> editor = std::make_unique<Editor>();
+        std::unique_ptr<Vox::Editor> editor = std::make_unique<Vox::Editor>();
         std::shared_ptr<Vox::PhysicsServer> physicsServer = std::make_unique<Vox::PhysicsServer>();
         std::shared_ptr<Vox::DebugRenderer> debugRenderer = std::make_shared<Vox::DebugRenderer>();
 
@@ -118,7 +118,7 @@ int main()
         JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(1.0f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
-        Editor* localEditor = editor.get();
+        Vox::Editor* localEditor = editor.get();
         Vox::Camera* camera = renderer->GetCurrentCamera();
         inputService->RegisterMouseClickCallback([localEditor, debugRenderer, physicsServer, camera](int x, int y) {
             float xViewport, yViewport;

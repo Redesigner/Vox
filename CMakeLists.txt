@@ -61,12 +61,6 @@ target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)
 target_link_libraries(Vox PRIVATE fmt::fmt)
 target_link_libraries(Vox PRIVATE Jolt)
 
-# Add Raylib ImGui
-target_include_directories(Vox PRIVATE "external/rlImGui")
-target_sources(Vox PRIVATE
-	"external/rlImGui/rlImGui.cpp"
-)
-
 # Add Jolt Physics
 target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
