@@ -1,34 +1,37 @@
 #pragma once
 
-#include "raylib.h"
-
-struct Shader;
-
-class GBuffer
+namespace Vox
 {
-public:
-    GBuffer(int width, int height);
-    ~GBuffer();
+    class Texture;
 
-    void EnableFramebuffer();
-    void BindDraw();
-    void BindRead();
+    struct Shader;
 
-    void ActivateTextures(unsigned int offset = 0) const;
+    class GBuffer
+    {
+    public:
+        GBuffer(int width, int height);
+        ~GBuffer();
 
-    void CopyToFramebuffer(const RenderTexture2D& target);
+        void EnableFramebuffer();
+        void BindDraw();
+        void BindRead();
 
-private:
+        void ActivateTextures(unsigned int offset = 0) const;
 
-    unsigned int framebuffer;
+        void CopyToFramebuffer(const Texture& target);
 
-    unsigned int positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture;
+    private:
 
-    unsigned int depthRenderbuffer;
+        unsigned int framebuffer;
 
-    unsigned int width;
-    unsigned int height;
+        unsigned int positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture;
 
-    GBuffer (const GBuffer&) = delete;
-    GBuffer& operator= (const GBuffer&) = delete;
-};
+        unsigned int depthRenderbuffer;
+
+        unsigned int width;
+        unsigned int height;
+
+        GBuffer(const GBuffer&) = delete;
+        GBuffer& operator= (const GBuffer&) = delete;
+    };
+}
