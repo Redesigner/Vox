@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 
 #include "core/logging/Logging.h"
+#include "rendering/Framebuffer.h"
 
 namespace Vox
 {
@@ -76,7 +77,7 @@ namespace Vox
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create framebuffer.");
+			VoxLog(Error, Rendering, "Failed to create gBuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
 	}
 

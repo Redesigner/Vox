@@ -121,7 +121,7 @@ void Vox::Renderer::Render(Editor* editor)
     glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
     RenderGBuffer();
-    // RenderVoxelGrid(testVoxelGrid.get());
+    RenderVoxelGrid(testVoxelGrid.get());
     RenderDeferred();
     RenderSky();
 
@@ -130,7 +130,8 @@ void Vox::Renderer::Render(Editor* editor)
     int width, height;
     SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
     // Make sure that our viewport size matches the window size when drawing with imgui
-    glViewport(0, 0, width, height);
+    // glViewport(0, 0, width, height);
+    glViewport(0, 0, 800, 450);
     //editor->Draw(viewportTexture.get());
     SDL_GL_SwapWindow(mainWindow);
 }
@@ -196,7 +197,8 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
     }
     else
     {
-        viewportTexture = std::make_unique<RenderTexture>(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
+        // viewportTexture = std::make_unique<RenderTexture>(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
+        viewportTexture = std::make_unique<RenderTexture>(800, 450);
     }
 }
 
@@ -263,13 +265,13 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 {
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
     voxelShader->Enable();
     voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
     voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
     glBindVertexArray(voxelGrid->GetVaoId());
     voxelShader->SetArrayTexture(voxelTextures.get());
-    // rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), 0);
     glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
 }
 

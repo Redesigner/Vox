@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 
 #include "core/logging/Logging.h"
+#include "rendering/Framebuffer.h"
 
 namespace Vox
 {
@@ -14,6 +15,8 @@ namespace Vox
 		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -24,7 +27,7 @@ namespace Vox
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create framebuffer.");
+			VoxLog(Error, Rendering, "Failed to create renderTexture: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
 	}
 

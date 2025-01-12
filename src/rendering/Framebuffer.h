@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Vox
 {
 	class Framebuffer
@@ -11,6 +13,8 @@ namespace Vox
 		void ActivateTextures() const;
 
 		unsigned int GetFramebufferId() const;
+
+		static std::string GetFramebufferStatusString(unsigned int framebufferStatus);
 
 	private:
 		int width, height;
