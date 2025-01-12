@@ -1,66 +1,74 @@
 #include "FrameBuffer.h"
 
+#include <GL/glew.h>
+
 #include "core/logging/Logging.h"
 
-#include "raylib.h"
-#include "rlgl.h"
-
-Framebuffer::Framebuffer(int width, int height)
-	:width(width), height(height)
+namespace Vox
 {
-	VoxLog(Display, Rendering, "Allocating custom FrameBuffer.");
-
-	framebuffer = rlLoadFramebuffer();
-	if (!framebuffer)
+	Framebuffer::Framebuffer(int width, int height)
+		:width(width), height(height)
 	{
-		VoxLog(Warning, Rendering, "Failed to create framebuffer");
+		VoxLog(Display, Rendering, "Allocating FrameBuffer.");
+
+		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+		unsigned int textureIds[3] = {};
+		glGenTextures(3, textureIds);
+
+		colorTexture = textureIds[0];
+		depthTexture = textureIds[1];
+		depthRenderbuffer = textureIds[2];
+
+		// Color buffer
+		glBindTexture(GL_TEXTURE_2D, colorTexture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+
+		// Depth buffer (for reading)
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R, width, height, 0, GL_R, GL_UNSIGNED_INT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depthTexture, 0);
+
+		// Alternate depth texture
+		glBindTexture(GL_TEXTURE_2D, depthRenderbuffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R, width, height, 0, GL_R, GL_UNSIGNED_INT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthRenderbuffer, 0);
+
+		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+		{
+			VoxLog(Error, Rendering, "Failed to create framebuffer.");
+		}
 	}
 
-	rlEnableFramebuffer(framebuffer);
-
-	colorTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32G32B32, 1);
-	depthTexture = rlLoadTexture(NULL, width, height, RL_PIXELFORMAT_UNCOMPRESSED_R32, 1);
-	rlActiveDrawBuffers(2);
-	rlFramebufferAttach(framebuffer, colorTexture, RL_ATTACHMENT_COLOR_CHANNEL0, RL_ATTACHMENT_TEXTURE2D, 0);
-	rlFramebufferAttach(framebuffer, depthTexture, RL_ATTACHMENT_COLOR_CHANNEL1, RL_ATTACHMENT_TEXTURE2D, 0);
-
-	depthRenderbuffer = rlLoadTextureDepth(width, height, true);
-	rlFramebufferAttach(framebuffer, depthRenderbuffer, RL_ATTACHMENT_DEPTH, RL_ATTACHMENT_RENDERBUFFER, 0);
-
-	if (!rlFramebufferComplete(framebuffer))
+	Framebuffer::~Framebuffer()
 	{
-		VoxLog(Warning, Rendering, "Failed to create framebuffer.");
+		VoxLog(Display, Rendering, "Destroying FrameBuffer");
+
+		unsigned int textureIds[3] = { colorTexture, depthTexture, depthRenderbuffer };
+		glDeleteTextures(6, textureIds);
+		glDeleteFramebuffers(1, &framebuffer);
 	}
-}
 
-Framebuffer::~Framebuffer()
-{
-	VoxLog(Display, Rendering, "Destroying GBuffer");
-	rlUnloadFramebuffer(framebuffer);
-	rlUnloadTexture(colorTexture);
-	rlUnloadTexture(depthTexture);
-	rlUnloadTexture(depthRenderbuffer);
-}
+	void Framebuffer::ActivateTextures() const
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, colorTexture);
 
-void Framebuffer::EnableFramebuffer()
-{
-	rlEnableFramebuffer(framebuffer);
-}
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+	}
 
-void Framebuffer::BindDraw()
-{
-	rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, framebuffer);
-}
-
-void Framebuffer::BindRead()
-{
-	rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
-}
-
-void Framebuffer::ActivateTextures() const
-{
-	rlActiveTextureSlot(0);
-	rlEnableTexture(colorTexture);
-	rlActiveTextureSlot(1);
-	rlEnableTexture(depthTexture);
+	unsigned int Framebuffer::GetFramebufferId() const
+	{
+		return framebuffer;
+	}
 }

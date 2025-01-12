@@ -33,6 +33,8 @@ public:
 
 	void GenerateMesh();
 
+	unsigned int GetVaoId() const;
+
 	unsigned int GetVertexCount() const;
 	unsigned int* GetIndices();
 

@@ -7,30 +7,33 @@
 
 #include "rendering/Light.h"
 #include "rendering/shaders/Shader.h"
-#include "rendering/Texture.h"
 
-class ArrayTexture;
-class DebugRenderer;
-class DeferredShader;
-class Editor;
-class Framebuffer;
-class GBuffer;
+class SDL_Window;
 class VoxelGrid;
-class VoxelShader;
 
 namespace Vox
 {
+	class ArrayTexture;
 	class Camera;
+	class DebugRenderer;
+	class DeferredShader;
+	class Editor;
+	class Framebuffer;
+	class FullscreenQuad;
+	class GBuffer;
 	class PhysicsServer;
+	class RenderTexture;
+	class VoxelShader;
+
 	class Renderer
 	{
 	public:
-		Renderer();
+		Renderer(SDL_Window* window);
 		~Renderer();
 
 		void Render(Editor* editor);
 
-		void LoadTestModel(std::string path);
+		// void LoadTestModel(std::string path);
 
 		void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
 
@@ -57,7 +60,7 @@ namespace Vox
 
 		void RenderDebugShapes();
 
-		void CopyViewportToTexture(Texture& texture);
+		void CopyViewportToTexture(RenderTexture& texture);
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<Framebuffer> deferredFramebuffer;
@@ -69,10 +72,13 @@ namespace Vox
 
 		std::unique_ptr<VoxelShader> voxelShader;
 		std::unique_ptr<DeferredShader> deferredShader;
-		Shader gBufferShader;
-		Shader skyShader;
-		Shader debugLineShader, debugTriangleShader;
 
+		Shader gBufferShader;
+		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
+
+		Shader skyShader;
+
+		Shader debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 
 		LightUniformLocations lightUniformLocations;
@@ -81,7 +87,11 @@ namespace Vox
 
 		std::unique_ptr<Vox::Camera> camera;
 
-		Texture viewportTexture;
+		SDL_Window* mainWindow;
+
+		std::unique_ptr<FullscreenQuad> quad;
+
+		std::unique_ptr<RenderTexture> viewportTexture;
 		// Material defaultMaterial;
 		// Model testModel;
 	};

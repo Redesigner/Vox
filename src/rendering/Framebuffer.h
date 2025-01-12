@@ -1,18 +1,19 @@
 #pragma once
 
-class Framebuffer
+namespace Vox
 {
-public:
-	Framebuffer(int width, int height);
-	~Framebuffer();
+	class Framebuffer
+	{
+	public:
+		Framebuffer(int width, int height);
+		~Framebuffer();
 
-	void EnableFramebuffer();
-	void BindDraw();
-	void BindRead();
-	
-	void ActivateTextures() const;
+		void ActivateTextures() const;
 
-private:
-	int width, height;
-	unsigned int framebuffer, colorTexture, depthTexture, depthRenderbuffer;
-};
+		unsigned int GetFramebufferId() const;
+
+	private:
+		int width, height;
+		unsigned int framebuffer, colorTexture, depthTexture, depthRenderbuffer;
+	};
+}

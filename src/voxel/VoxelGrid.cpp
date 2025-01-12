@@ -157,6 +157,11 @@ void VoxelGrid::GenerateMesh()
 	indexCount = indices.size();
 }
 
+unsigned int VoxelGrid::GetVaoId() const
+{
+	return vaoId;
+}
+
 unsigned int VoxelGrid::GetVertexCount() const
 {
 	return indexCount;
