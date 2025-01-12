@@ -7,7 +7,7 @@ layout (location = 3) in uint vertexTextureId;
 out vec3 fragPosition;
 out vec2 fragTexCoord;
 out vec3 fragNormal;
-out uint fragTextureId;
+flat out uint fragTextureId;
 
 uniform mat4 matModel;
 uniform mat4 matView;
