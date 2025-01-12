@@ -1,7 +1,9 @@
 #include "Editor.h"
 
-#include "imgui.h"
-#include "tinyfiledialogs.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_sdl3.h>
+#include <tinyfiledialogs.h>
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -13,34 +15,40 @@ namespace Vox
 
     void Editor::Draw(RenderTexture* viewportRenderTexture)
     {
+        ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
+        {
 #ifdef IMGUI_HAS_VIEWPORT
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-        ImGui::SetNextWindowSize(viewport->GetWorkSize());
-        ImGui::SetNextWindowViewport(viewport->ID);
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->GetWorkPos());
+            ImGui::SetNextWindowSize(viewport->GetWorkSize());
+            ImGui::SetNextWindowViewport(viewport->ID);
 #else 
-        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-        ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+            // ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+            // ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 #endif
-        bool windowOpen = true;
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
-        ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
+            bool windowOpen = true;
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
+            ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
 
-        ImVec2 dimensions = ImGui::GetContentRegionAvail();
-        ImVec2 bottomRight = ImGui::GetContentRegionMax();
-        viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
-        viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
-        ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
-        //rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
+            //ImVec2 dimensions = ImGui::GetContentRegionAvail();
+            //ImVec2 bottomRight = ImGui::GetContentRegionMax();
+            //viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
+            //viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
+            //ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
+            //rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
 
-        DrawToolbar();
-        DrawDebugConsole();
+            DrawToolbar();
+            DrawDebugConsole();
 
-        ImGui::End();
-        ImGui::PopStyleColor();
-        ImGui::PopStyleVar(2);
+            ImGui::End();
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
+        }
+        ImGui::Render();
     }
 
     void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)

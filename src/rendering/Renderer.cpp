@@ -131,7 +131,7 @@ void Vox::Renderer::Render(Editor* editor)
     SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
     // Make sure that our viewport size matches the window size when drawing with imgui
     glViewport(0, 0, width, height);
-    editor->Draw(viewportTexture.get());
+    //editor->Draw(viewportTexture.get());
 }
 
 //void Vox::Renderer::LoadTestModel(std::string path)

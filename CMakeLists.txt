@@ -65,10 +65,12 @@ target_link_libraries(Vox PRIVATE Jolt)
 target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
 # Add ImGui
-target_include_directories(Vox PRIVATE "external/imgui")
+target_include_directories(Vox PRIVATE "external")
 target_sources(Vox PRIVATE
 	"external/imgui/imgui.h"
 	"external/imgui/imgui.cpp"
+	"external/imgui/imgui_impl_opengl3.cpp"
+	"external/imgui/imgui_impl_sdl3.cpp"
 	"external/imgui/imgui_demo.cpp"
 	"external/imgui/imgui_draw.cpp"
 	"external/imgui/imgui_tables.cpp"

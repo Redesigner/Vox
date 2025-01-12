@@ -8,7 +8,7 @@
 #include "rendering/Light.h"
 #include "rendering/shaders/Shader.h"
 
-class SDL_Window;
+struct SDL_Window;
 class VoxelGrid;
 
 namespace Vox
