@@ -62,7 +62,7 @@ namespace Vox
 			return false;
 		}
 
-		VoxLog(Display, Rendering, "Shader created successfully.");
+		VoxLog(Display, Rendering, "ShaderProgram created successfully.");
 		loaded = true;
 		return true;
 	}
