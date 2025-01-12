@@ -1,14 +1,12 @@
 #include "CollisionOctree.h"
 
-
-#include "raylib.h"
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
-
 #include <cassert>
 #include <cstring>
 #include <cmath>
 #include <stdexcept>
+
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 
 #include "core/logging/Logging.h"
 

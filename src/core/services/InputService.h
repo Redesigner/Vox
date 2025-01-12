@@ -9,6 +9,8 @@
 #include <glm/vec2.hpp>
 #include <SDL3/SDL_events.h>
 
+struct SDL_Window;
+
 namespace Vox
 {
 	struct KeyboardInputAxis2D

@@ -1,9 +1,11 @@
 #include "Camera.h"
 
-#include "raymath.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
-const float CAMERA_CULL_DISTANCE_NEAR = 0.01f;
-const float CAMERA_CULL_DISTANCE_FAR = 1000.0f;
+const double CAMERA_CULL_DISTANCE_NEAR = 0.01;
+const double CAMERA_CULL_DISTANCE_FAR = 1000.0;
 
 Vox::Camera::Camera()
 {
@@ -11,7 +13,7 @@ Vox::Camera::Camera()
 	UpdateProjectionMatrix();
 }
 
-void Vox::Camera::SetPosition(Vector3 position)
+void Vox::Camera::SetPosition(glm::vec3 position)
 {
 	if (this->position == position)
 	{
@@ -24,20 +26,20 @@ void Vox::Camera::SetPosition(Vector3 position)
 
 void Vox::Camera::SetPosition(float x, float y, float z)
 {
-	SetPosition(Vector3(x, y, z));
+	SetPosition(glm::vec3(x, y, z));
 }
 
-Vector3 Vox::Camera::GetPosition() const
+glm::vec3 Vox::Camera::GetPosition() const
 {
 	return position;
 }
 
-Matrix Vox::Camera::GetPositionMatrix() const
+glm::mat4x4 Vox::Camera::GetPositionMatrix() const
 {
 	return positionMatrix;
 }
 
-void Vox::Camera::SetRotation(Vector3 rotation)
+void Vox::Camera::SetRotation(glm::vec3 rotation)
 {
 	if (this->rotation == rotation)
 	{
@@ -50,22 +52,22 @@ void Vox::Camera::SetRotation(Vector3 rotation)
 
 void Vox::Camera::SetRotation(float pitch, float yaw, float roll)
 {
-	SetRotation(Vector3(pitch, yaw, roll));
+	SetRotation(glm::vec3(pitch, yaw, roll));
 }
 
-Vector3 Vox::Camera::GetRotation() const
+glm::vec3 Vox::Camera::GetRotation() const
 {
 	return rotation;
 }
 
-Matrix Vox::Camera::GetRotationMatrix() const
+glm::mat4x4 Vox::Camera::GetRotationMatrix() const
 {
 	return rotationMatrix;
 }
 
-Vector3 Vox::Camera::GetForwardVector() const
+glm::vec3 Vox::Camera::GetForwardVector() const
 {
-	return Vector3Normalize(target - position);
+	return glm::normalize(target - position);
 }
 
 void Vox::Camera::SetFovY(double fovY)
@@ -90,56 +92,56 @@ void Vox::Camera::SetAspectRatio(double asepctRatio)
 	UpdateProjectionMatrix();
 }
 
-Matrix Vox::Camera::GetViewMatrix() const
+glm::mat4x4 Vox::Camera::GetViewMatrix() const
 {
 	return viewMatrix;
 }
 
-Matrix Vox::Camera::GetProjectionMatrix() const
+glm::mat4x4 Vox::Camera::GetProjectionMatrix() const
 {
 	return projectionMatrix;
 }
 
-Matrix Vox::Camera::GetViewProjectionMatrix() const
+glm::mat4x4 Vox::Camera::GetViewProjectionMatrix() const
 {
 	return viewProjectionMatrix;
 }
 
-Matrix Vox::Camera::GetInverseMatrix() const
+glm::mat4x4 Vox::Camera::GetInverseMatrix() const
 {
-	return MatrixInvert(viewProjectionMatrix);
+	return glm::inverse(viewProjectionMatrix);
 }
 
-void Vox::Camera::SetTarget(Vector3 targetPosition)
+void Vox::Camera::SetTarget(glm::vec3 targetPosition)
 {
 	useLookAt = true;
 	target = targetPosition;
-	rotationMatrix = MatrixLookAt({}, targetPosition - position, Vector3UnitY);
+	rotationMatrix = glm::lookAt({}, targetPosition - position, glm::vec3(0.0f, 1.0f, 0.0f));
 	UpdateViewMatrix();
 }
 
 void Vox::Camera::UpdatePositionMatrix()
 {
-	positionMatrix = MatrixTranslate(-position.x, -position.y, -position.z);
+	positionMatrix = glm::translate(glm::mat4x4(1.0f), { -position.x, -position.y, -position.z });
 	UpdateViewMatrix();
 }
 
 void Vox::Camera::UpdateRotationMatrix()
 {
 	useLookAt = false;
-	rotationMatrix = MatrixRotateXYZ(rotation);
+	rotationMatrix = glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 	UpdateViewMatrix();
 }
 
 void Vox::Camera::UpdateViewMatrix()
 {
-	viewMatrix = useLookAt ? MatrixLookAt(position, target, Vector3UnitY) : positionMatrix * rotationMatrix;
+	viewMatrix = useLookAt ? glm::lookAt(position, target, {0.0f, 1.0f, 0.0f}) : positionMatrix * rotationMatrix;
 	UpdateViewProjectionMatrix();
 }
 
 void Vox::Camera::UpdateProjectionMatrix()
 {
-	projectionMatrix = MatrixPerspective(fovY, aspectRatio, CAMERA_CULL_DISTANCE_NEAR, CAMERA_CULL_DISTANCE_FAR);
+	projectionMatrix = glm::perspective(fovY, aspectRatio, CAMERA_CULL_DISTANCE_NEAR, CAMERA_CULL_DISTANCE_FAR);
 	UpdateViewProjectionMatrix();
 }
 

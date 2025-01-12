@@ -8,6 +8,7 @@
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_video.h>
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -32,11 +33,11 @@ int main()
 
         Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
-        std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>();
-        Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
+        std::unique_ptr<Vox::Renderer> renderer = std::make_unique<Vox::Renderer>(window);
         std::unique_ptr<Vox::Editor> editor = std::make_unique<Vox::Editor>();
         std::shared_ptr<Vox::PhysicsServer> physicsServer = std::make_unique<Vox::PhysicsServer>();
         std::shared_ptr<Vox::DebugRenderer> debugRenderer = std::make_shared<Vox::DebugRenderer>();
+        Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
 
         physicsServer->SetDebugRenderer(debugRenderer);
 
@@ -82,7 +83,7 @@ int main()
 
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
-                renderer->LoadTestModel(fileName);
+                // renderer->LoadTestModel(fileName);
             });
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
@@ -126,8 +127,8 @@ int main()
             {
                 glm::vec3 rayStartViewport = glm::vec3(xViewport, yViewport, -1.0f);
                 glm::vec3 rayEndViewport = glm::vec3(xViewport, yViewport, 1.0f);
-                JPH::Vec3 rayStart = Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
-                JPH::Vec3 rayEnd = Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()));
+                JPH::Vec3 rayStart /*= Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()))*/;
+                JPH::Vec3 rayEnd /*= Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()))*/;
 
                 Vox::RayCastResultNormal raycastResult;
                 if (physicsServer->RayCast(rayStart, rayEnd - rayStart, raycastResult))

@@ -1,8 +1,9 @@
 #include "CharacterController.h"
 
+#include <glm/trigonometric.hpp>
+#include <glm/vec2.hpp>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/PhysicsSystem.h>
-#include "raylib.h"
 
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
@@ -22,7 +23,7 @@ namespace Vox
 		ShapeSettings::ShapeResult capsuleShapeResult = capsuleShapeSettings.Create();
 		capsuleShape = capsuleShapeResult.Get();
 		Ref<CharacterVirtualSettings> settings = new CharacterVirtualSettings();
-		settings->mMaxSlopeAngle = DEG2RAD * 50.0f;
+		settings->mMaxSlopeAngle =  glm::radians(50.0f);
 		settings->mMaxStrength = 5.0f;
 		settings->mShape = capsuleShape;
 		settings->mBackFaceMode = JPH::EBackFaceMode::IgnoreBackFaces;
@@ -83,7 +84,7 @@ namespace Vox
 			currentVelocity += gravity * deltaTime;
 		}
 
-		Vector2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
+		glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
 		float cos = std::cosf(yaw);
 		float sin = std::sinf(yaw);
 		currentVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);

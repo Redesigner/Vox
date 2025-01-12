@@ -1,10 +1,13 @@
 #include "InputService.h"
 
-#include "core/logging/Logging.h"
 
 #include <cmath>
+
 #include <GL/glew.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_video.h>
+
+#include "core/logging/Logging.h"
 
 Vox::InputService::InputService(SDL_Window* window)
 	:mainWindow(window)

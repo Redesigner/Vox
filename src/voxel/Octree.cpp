@@ -1,12 +1,10 @@
 #include "Octree.h"
 
-
-#include "raylib.h"
-#include "Voxel/Voxel.h"
-
 #include <cassert>
 #include <cstring>
 #include <cmath>
+
+#include "Voxel/Voxel.h"
 
 #include "core/logging/Logging.h"
 
