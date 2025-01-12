@@ -131,8 +131,14 @@ namespace Vox
 
 		char* shaderString = static_cast<char*>(shaderSource);
 
-		unsigned int shaderId = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(shaderId, 1, &shaderString, 0);
+		unsigned int shaderId = glCreateShader(shaderType);
+		if (shaderId == 0)
+		{
+			VoxLog(Error, Rendering, "Failed to create new shader.");
+			return std::nullopt;
+		}
+
+		glShaderSource(shaderId, 1, &shaderString, NULL);
 		glCompileShader(shaderId);
 
 		GLint shaderCompilationResult = GL_FALSE;
