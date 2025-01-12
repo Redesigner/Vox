@@ -45,7 +45,7 @@ namespace Vox
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create framebuffer.");
+			VoxLog(Error, Rendering, "Failed to create framebuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
 	}
 
@@ -70,5 +70,30 @@ namespace Vox
 	unsigned int Framebuffer::GetFramebufferId() const
 	{
 		return framebuffer;
+	}
+
+	std::string Framebuffer::GetFramebufferStatusString(unsigned int framebufferStatus)
+	{
+		switch (framebufferStatus)
+		{
+		case GL_FRAMEBUFFER_UNDEFINED:
+			return "GL_FRAMEBUFFER_UNDEFINED";
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+			return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+			return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			return "GL_FRAMEBUFFER_UNSUPPORTED";
+		case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+			return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+		case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+			return "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+		default:
+			return "UNKNOWN";
+		}
 	}
 }
