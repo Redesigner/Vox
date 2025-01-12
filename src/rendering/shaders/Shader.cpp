@@ -51,7 +51,12 @@ namespace Vox
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 			std::string logString = std::string(infoLog.begin(), infoLog.end());
-			VoxLog(Error, Rendering, "Failed to link shader: {}", logString);
+
+			size_t separatorLocation = vertexShaderFilePath.rfind('/') + 1;
+			std::string vertexShaderName = vertexShaderFilePath.substr(separatorLocation, vertexShaderFilePath.length() - separatorLocation);
+			separatorLocation = fragmentShaderFilePath.rfind('/') + 1;
+			std::string fragmentShaderName = fragmentShaderFilePath.substr(separatorLocation, fragmentShaderFilePath.length() - separatorLocation);
+			VoxLog(Error, Rendering, "Failed to link shader '{}' and '{}':\n{}", vertexShaderName, fragmentShaderName, logString);
 
 			glDeleteProgram(shader);
 			return false;
@@ -109,6 +114,7 @@ namespace Vox
 
 	std::optional<unsigned int> Shader::LoadShaderStage(std::string shaderFilePath, unsigned int shaderType)
 	{
+		shaderFilePath = "../../../" + shaderFilePath;
 		SDL_IOStream* shaderIO = SDL_IOFromFile(shaderFilePath.c_str(), "r");
 		if (!shaderIO)
 		{
@@ -136,6 +142,12 @@ namespace Vox
 			GLint maxLength = 0;
 			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
+			if (maxLength == 0)
+			{
+				size_t charPosition = shaderFilePath.rfind('/') + 1;
+				VoxLog(Error, Rendering, "Shader '{}' failed to compile. OpenGL returned no error message.", shaderFilePath.substr(charPosition, shaderFilePath.length() - charPosition));
+				return std::nullopt;
+			}
 			std::vector<GLchar> errorLog(maxLength);
 			glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
 			std::string logString = std::string(errorLog.begin(), errorLog.end());
@@ -145,6 +157,9 @@ namespace Vox
 			return std::nullopt;
 		}
 
+		size_t separatorPosition = shaderFilePath.rfind('/') + 1;
+		std::string shaderFileName = shaderFilePath.substr(separatorPosition, shaderFilePath.length() - separatorPosition);
+		VoxLog(Display, Rendering, "Shader '{}' compiled successfully.", shaderFileName);
 		return shaderId;
 	}
 }
