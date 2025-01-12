@@ -53,7 +53,7 @@ namespace Vox
 			std::string formatted = fmt::vformat(fmt, fmt::make_format_args(args...));
 			std::string entry = '[' + GetCategoryTag(category) + "] " + formatted;
 			glm::vec3 displayColor = GetLevelColor(level);
-			printf("\033[38;2;%f;%f;%fm%s\033[0m\n", displayColor.r, displayColor.g, displayColor.b, entry.c_str());
+			printf("\033[38;2;%u;%u;%um%s\033[0m\n", static_cast<int>(displayColor.r), static_cast<int>(displayColor.g), static_cast<int>(displayColor.b), entry.c_str());
 			entries.emplace_back(entry, level, category);
 		}
 
