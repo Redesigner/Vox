@@ -2,7 +2,7 @@
 
 #include <memory>
 
-class SDL_Window;
+struct SDL_Window;
 
 namespace Vox
 {

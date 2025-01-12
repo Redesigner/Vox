@@ -11,6 +11,6 @@ namespace Vox
 		unsigned int GetVaoId() const;
 
 	private:
-		unsigned int vaoId, vboPosition, vboTextureCoord;
+		unsigned int vaoId, vboPosition, vboTextureCoord = 0;
 	};
 }
