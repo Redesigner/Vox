@@ -3,7 +3,10 @@
 #include "Renderer.h"
 
 #include <GL/glew.h>
+#include <glm/mat4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_video.h>
 
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
@@ -12,20 +15,29 @@
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Framebuffer.h"
+#include "rendering/FullscreenQuad.h"
 #include "rendering/GBuffer.h"
+#include "rendering/RenderTexture.h"
 #include "rendering/shaders/DeferredShader.h"
 #include "rendering/shaders/VoxelShader.h"
 #include "physics/PhysicsServer.h"
 #include "voxel/Octree.h"
 #include "voxel/VoxelGrid.h"
 
-Vox::Renderer::Renderer()
+Vox::Renderer::Renderer(SDL_Window* window)
 {
+    mainWindow = window;
     // This is realtive to the build location -- I'll have to fix this later
     // ChangeDirectory("../../../");
 
     VoxLog(Display, Rendering, "Set current working directory to {}", SDL_GetBasePath());
+
+    quad = std::make_unique<FullscreenQuad>();
+
     gBufferShader.Load("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+    gBufferModelMatrixLocation = gBufferShader.GetUniformLocation("matModel");
+    gBufferViewMatrixLocation = gBufferShader.GetUniformLocation("matView");
+    gBufferProjectionMatrixLocation = gBufferShader.GetUniformLocation("matProjection");
     materialRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
     materialColorLocation = gBufferShader.GetUniformLocation("materialAlbedo");
 
@@ -95,8 +107,6 @@ Vox::Renderer::Renderer()
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
-
-    viewportTexture = Texture();
 }
 
 Vox::Renderer::~Renderer()
@@ -107,64 +117,52 @@ void Vox::Renderer::Render(Editor* editor)
 {
     // @TODO fix whatever is happening with vsync here
     UpdateViewportDimensions(editor);
-        camera->SetAspectRatio(viewportTexture.GetHeight() == 0 ? 1 : viewportTexture.GetWidth() / viewportTexture.GetHeight());
-        //camera->SetRotation(camera->GetRotation() + Vector3(0.0f, 0.01f, 0.0f));
+    camera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
+    glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
-        glViewport(0, 0, viewportTexture.GetWidth(), viewportTexture.GetHeight());
-        //rlSetFramebufferWidth(viewportTexture.GetWidth());
-        //rlSetFramebufferHeight(viewportTexture.GetWidth());
+    RenderGBuffer();
+    // RenderVoxelGrid(testVoxelGrid.get());
+    RenderDeferred();
+    RenderSky();
 
-        RenderGBuffer();
-        // RenderVoxelGrid(testVoxelGrid.get());
-        RenderDeferred();
-        RenderSky();
+    RenderDebugShapes();
 
-        // Copy into texture to be rendered with imgui
-        deferredFramebuffer->BindRead();
-        rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
-        rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
-        RenderDebugShapes();
-        rlDisableFramebuffer();
-
-        // Make sure that our viewport size matches the window size when drawing with imgui
-        rlViewport(0, 0, GetScreenWidth(), GetScreenHeight());
-        rlSetFramebufferWidth(GetScreenWidth());
-        rlSetFramebufferHeight(GetScreenHeight());
-        editor->Draw(&viewportTexture);
-        
-        EndDrawing();
-    }
+    int width, height;
+    SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
+    // Make sure that our viewport size matches the window size when drawing with imgui
+    glViewport(0, 0, width, height);
+    editor->Draw(viewportTexture.get());
 }
 
-void Vox::Renderer::LoadTestModel(std::string path)
-{
-    if (IsModelValid(testModel))
-    {
-        UnloadModel(testModel);
-    }
-    testModel = LoadModel(path.c_str());
-    for (int i = 0; i < testModel.materialCount; ++i)
-    {
-        testModel.materials[i].shader = gBufferShader;
-    }
-}
+//void Vox::Renderer::LoadTestModel(std::string path)
+//{
+//    if (IsModelValid(testModel))
+//    {
+//        UnloadModel(testModel);
+//    }
+//    testModel = LoadModel(path.c_str());
+//    for (int i = 0; i < testModel.materialCount; ++i)
+//    {
+//        testModel.materials[i].shader = gBufferShader;
+//    }
+//}
 
 void Vox::Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
 {
     debugPhysicsServer = physicsServer;
 }
 
-void Vox::Renderer::SetCameraPosition(Vector3 position)
+void Vox::Renderer::SetCameraPosition(glm::vec3 position)
 {
     camera->SetPosition(position);
 }
 
-void Vox::Renderer::SetCameraRotation(Vector3 rotation)
+void Vox::Renderer::SetCameraRotation(glm::vec3 rotation)
 {
     camera->SetRotation(rotation);
 }
 
-void Vox::Renderer::SetCameraTarget(Vector3 target)
+void Vox::Renderer::SetCameraTarget(glm::vec3 target)
 {
     camera->SetTarget(target);
 }
@@ -177,109 +175,101 @@ Vox::Camera* Vox::Renderer::GetCurrentCamera() const
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
-    Vector2 editorViewportSize = editor->GetViewportDimensions();
-    if (IsRenderTextureValid(viewportTexture))
+    glm::vec2 editorViewportSize = editor->GetViewportDimensions();
+    if (viewportTexture)
     {
         int viewportWidth = static_cast<int>(editorViewportSize.x);
         int viewportHeight = static_cast<int>(editorViewportSize.y);
-        if (viewportTexture.texture.width != viewportWidth || viewportTexture.texture.height != viewportHeight)
+        if (viewportTexture->GetWidth() != viewportWidth || viewportTexture->GetHeight() != viewportHeight)
         {
-            UnloadRenderTexture(viewportTexture);
-            viewportTexture = LoadRenderTexture(editorViewportSize.x, editorViewportSize.y);
+            viewportTexture.release();
+            viewportTexture = std::make_unique<RenderTexture>(viewportWidth, viewportHeight);
 
             // @TODO: add resize method?
             gBuffer.reset();
             gBuffer = std::make_unique<GBuffer>(viewportWidth, viewportHeight);
             deferredFramebuffer.reset();
             deferredFramebuffer = std::make_unique<Framebuffer>(viewportWidth, viewportHeight);
-            rlViewport(0, 0, viewportTexture.texture.width, viewportTexture.texture.height);
+            glViewport(0, 0, viewportWidth, viewportHeight);
         }
     }
     else
     {
-        viewportTexture = LoadRenderTexture(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
+        viewportTexture = std::make_unique<RenderTexture>(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
     }
 }
 
 void Vox::Renderer::RenderGBuffer()
 {
-    ClearBackground(BLACK);
-    gBuffer->EnableFramebuffer();
-    rlClearScreenBuffers();
-    rlDisableColorBlend();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
 
-    glUseProgram(gBufferShader.id);
+    gBufferShader.Enable();
     {
         // Set camera matrices
-        SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_VIEW], camera->GetViewMatrix());
-        SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_PROJECTION], camera->GetProjectionMatrix());
+        gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, camera->GetViewMatrix());
+        gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, camera->GetProjectionMatrix());
 
-        if (IsModelValid(testModel))
-        {
-            for (int i = 0; i < testModel.meshCount; ++i)
-            {
-                DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[testModel.meshMaterial[i]], testModel.transform);
-            }
-        }
+        //if (IsModelValid(testModel))
+        //{
+        //    for (int i = 0; i < testModel.meshCount; ++i)
+        //    {
+        //        DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[testModel.meshMaterial[i]], testModel.transform);
+        //    }
+        //}
     }
-    rlEnableColorBlend();
 }
 
-void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
-{
-    const Color albedo = material->maps[MATERIAL_MAP_DIFFUSE].color;
-    Vector3 materialAlbedo = Vector3(
-        albedo.r / 255.0f,
-        albedo.g / 255.0f,
-        albedo.b / 255.0f
-    );
-    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(&materialAlbedo));
-    // The shader uniform location is automatically assigned when the shader is loaded by raylib
-    // SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
-    rlSetUniformMatrix(gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
-
-    glBindVertexArray(mesh->vaoId);
-    glDrawElements(GL_TRIANGLES, mesh->triangleCount * 3, GL_UNSIGNED_SHORT, 0);
-}
+//void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
+//{
+//    const Color albedo = material->maps[MATERIAL_MAP_DIFFUSE].color;
+//    Vector3 materialAlbedo = Vector3(
+//        albedo.r / 255.0f,
+//        albedo.g / 255.0f,
+//        albedo.b / 255.0f
+//    );
+//    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(&materialAlbedo));
+//    // The shader uniform location is automatically assigned when the shader is loaded by raylib
+//    // SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
+//    rlSetUniformMatrix(gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
+//
+//    glBindVertexArray(mesh->vaoId);
+//    glDrawElements(GL_TRIANGLES, mesh->triangleCount * 3, GL_UNSIGNED_SHORT, 0);
+//}
 
 void Vox::Renderer::RenderDeferred()
 {
-    gBuffer->BindRead();
-    deferredFramebuffer->BindDraw();
+    glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, 0);
 
-    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
-
-    rlDisableColorBlend();
-    rlDisableDepthMask();
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     deferredShader->Enable();
-    {
-        // shader->SetCameraPosition(camera.position);
-        testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
-        gBuffer->ActivateTextures(0);
-        deferredShader->SetCameraPosition(camera->GetPosition());
-        rlLoadDrawQuad();
-        rlDisableShader();
-    }
+    // shader->SetCameraPosition(camera.position);
+    testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
+    gBuffer->ActivateTextures(0);
+    deferredShader->SetCameraPosition(camera->GetPosition());
+    glBindVertexArray(quad->GetVaoId());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
     // rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
-    rlEnableColorBlend();
-    rlEnableDepthMask();
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 {
-    rlDisableColorBlend();
-    rlEnableDepthTest();
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(MatrixTranslate(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
+    voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
     voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
-    voxelGrid->EnableVertexArray();
+    glBindVertexArray(voxelGrid->GetVaoId());
     voxelShader->SetArrayTexture(voxelTextures.get());
     // rlDrawVertexArrayElements(0, voxelGrid->GetVertexCount(), 0);
     glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
-    rlDrawRenderBatchActive();
-    rlDisableVertexArray();
-    rlDisableDepthTest();
 }
 
 void Vox::Renderer::RenderDebugShapes()
@@ -293,44 +283,38 @@ void Vox::Renderer::RenderDebugShapes()
     // Fill the debug renderer with our shapes
     physicsServer->RenderDebugShapes();
 
-    rlEnableShader(debugLineShader.id);
+    debugLineShader.Enable();
     physicsServer->GetDebugRenderer()->BindAndBufferLines();
-    rlSetUniformMatrix(debugLineMatrixLocation, camera->GetViewProjectionMatrix());
+    debugLineShader.SetUniformMatrix(debugLineMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
 
-    rlEnableShader(debugTriangleShader.id);
+    debugTriangleShader.Enable();
     physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-    rlSetUniformMatrix(debugTriangleMatrixLocation, camera->GetViewProjectionMatrix());
+    debugTriangleShader.SetUniformMatrix(debugTriangleMatrixLocation, camera->GetViewProjectionMatrix());
     glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
 }
 
 void Vox::Renderer::RenderSky()
 {
-    rlDisableDepthMask();
-    deferredFramebuffer->BindRead();
-    deferredFramebuffer->BindDraw();
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
-    rlEnableDepthTest();
+    skyShader.Enable();
 
-    rlEnableShader(skyShader.id);
-    {
-        float aspect = static_cast<float>(viewportTexture.texture.width) / static_cast<float>(viewportTexture.texture.height);
-        Matrix cameraRotation = camera->GetRotationMatrix();;
-        Matrix projection = camera->GetProjectionMatrix();
-        Matrix matrix = MatrixInvert(cameraRotation * projection);
-        rlSetUniformMatrix(rlGetLocationUniform(skyShader.id, "cameraWorldSpace"), matrix);
-        deferredFramebuffer->ActivateTextures();
-        rlLoadDrawQuad();
-        rlDisableFramebuffer();
-        rlDisableShader();
-    }
-    rlEnableDepthMask();
+    float aspect = static_cast<float>(viewportTexture->GetWidth()) / static_cast<float>(viewportTexture->GetHeight());
+    glm::mat4x4 cameraRotation = camera->GetRotationMatrix();;
+    glm::mat4x4 projection = camera->GetProjectionMatrix();
+    glm::mat4x4 matrix = glm::mat3(cameraRotation * projection);
+    skyShader.SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
+    deferredFramebuffer->ActivateTextures();
+    glBindVertexArray(quad->GetVaoId());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void Vox::Renderer::CopyViewportToTexture(RenderTexture2D& texture)
+void Vox::Renderer::CopyViewportToTexture(RenderTexture& texture)
 {
-    rlBindFramebuffer(RL_READ_FRAMEBUFFER, 0);
-    rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, viewportTexture.id);
-    rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00004000 | 0x00000100);
-    rlDisableFramebuffer();
+    glBlitNamedFramebuffer(0, texture.GetFramebufferId(),
+        0, 0, texture.GetWidth(), texture.GetHeight(),
+        0, 0, texture.GetWidth(), texture.GetHeight(),
+        GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, 0);
 }

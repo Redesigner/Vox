@@ -12,13 +12,11 @@ namespace Vox
         GBuffer(int width, int height);
         ~GBuffer();
 
-        void EnableFramebuffer();
-        void BindDraw();
-        void BindRead();
-
         void ActivateTextures(unsigned int offset = 0) const;
 
-        void CopyToFramebuffer(const Texture& target);
+        void CopyToFramebuffer(unsigned int targetFramebuffer);
+
+        unsigned int GetFramebufferId() const;
 
     private:
 

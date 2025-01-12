@@ -3,17 +3,20 @@
 #include <string>
 #include <vector>
 
-class ArrayTexture
+namespace Vox
 {
-public:
-	ArrayTexture(unsigned int width, unsigned int height, unsigned int layerCount, unsigned int mipLevels);
-	~ArrayTexture();
+	class ArrayTexture
+	{
+	public:
+		ArrayTexture(unsigned int width, unsigned int height, unsigned int layerCount, unsigned int mipLevels);
+		~ArrayTexture();
 
-	void LoadTexture(std::string textureName, unsigned int index);
+		void LoadTexture(std::string textureName, unsigned int index);
 
-	unsigned int GetId() const;
+		unsigned int GetId() const;
 
-private:
-	unsigned int textureId = 0;
-	unsigned int width, height, layerCount;
-};
+	private:
+		unsigned int textureId = 0;
+		unsigned int width, height, layerCount;
+	};
+}

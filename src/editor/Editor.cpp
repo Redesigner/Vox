@@ -5,13 +5,13 @@
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
-#include "rendering/Texture.h"
+#include "rendering/RenderTexture.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-    void Editor::Draw(Texture* viewportRenderTexture)
+    void Editor::Draw(RenderTexture* viewportRenderTexture)
     {
 #ifdef IMGUI_HAS_VIEWPORT
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -32,7 +32,7 @@ namespace Vox
         ImVec2 bottomRight = ImGui::GetContentRegionMax();
         viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
         viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
-        ImGui::Image(viewportRenderTexture->GetId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
+        ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
         //rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
 
         DrawToolbar();

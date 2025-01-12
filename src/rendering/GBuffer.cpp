@@ -14,20 +14,20 @@ namespace Vox
 	{
 		VoxLog(Display, Rendering, "Allocating GBuffer");
 
-		unsigned int fboId = 0;
-		glGenFramebuffers(1, &fboId);       // Create the framebuffer object
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);   // Unbind any framebuffer
+		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);   // Unbind any framebuffer
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		unsigned int textureIds[5] = {};
-		glGenTextures(5, textureIds);
+		unsigned int textureIds[6] = {};
+		glGenTextures(6, textureIds);
 
 		positionTexture = textureIds[0];
 		normalTexture = textureIds[1];
 		albedoTexture = textureIds[2];
 		metallicRoughnessTexture = textureIds[3];
 		depthTexture = textureIds[4];
+		depthRenderbuffer = textureIds[5];
 
 		// Position buffer
 		glBindTexture(GL_TEXTURE_2D, positionTexture);
@@ -73,7 +73,8 @@ namespace Vox
 
 		VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);
 
-		if (!rlFramebufferComplete(framebuffer))
+		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
 			VoxLog(Error, Rendering, "Failed to create framebuffer.");
 		}
@@ -82,50 +83,37 @@ namespace Vox
 	GBuffer::~GBuffer()
 	{
 		VoxLog(Display, Rendering, "Destroying GBuffer");
-		rlUnloadFramebuffer(framebuffer);
-		rlUnloadTexture(positionTexture);
-		rlUnloadTexture(normalTexture);
-		rlUnloadTexture(albedoTexture);
-		rlUnloadTexture(depthRenderbuffer);
-	}
 
-	void GBuffer::EnableFramebuffer()
-	{
-		rlEnableFramebuffer(framebuffer);
-	}
-
-	void GBuffer::BindDraw()
-	{
-		rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, framebuffer);
-	}
-
-	void GBuffer::BindRead()
-	{
-		rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
+		unsigned int textureIds[6] = { positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture, depthRenderbuffer };
+		glDeleteTextures(6, textureIds);
+		glDeleteFramebuffers(1, &framebuffer);
 	}
 
 	void GBuffer::ActivateTextures(unsigned int offset) const
 	{
-		rlActiveTextureSlot(0 + offset);
-		rlEnableTexture(positionTexture);
+		glActiveTexture(GL_TEXTURE0 + offset);
+		glBindTexture(GL_TEXTURE_2D, positionTexture);
 
-		rlActiveTextureSlot(1 + offset);
-		rlEnableTexture(normalTexture);
+		glActiveTexture(GL_TEXTURE1 + offset);
+		glBindTexture(GL_TEXTURE_2D, normalTexture);
 
-		rlActiveTextureSlot(2 + offset);
-		rlEnableTexture(albedoTexture);
+		glActiveTexture(GL_TEXTURE2 + offset);
+		glBindTexture(GL_TEXTURE_2D, albedoTexture);
 
-		rlActiveTextureSlot(3 + offset);
-		rlEnableTexture(metallicRoughnessTexture);
+		glActiveTexture(GL_TEXTURE3 + offset);
+		glBindTexture(GL_TEXTURE_2D, metallicRoughnessTexture);
 
-		rlActiveTextureSlot(4 + offset);
-		rlEnableTexture(depthTexture);
+		glActiveTexture(GL_TEXTURE4 + offset);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
 	}
 
-	void GBuffer::CopyToFramebuffer(const Texture& target)
+	void GBuffer::CopyToFramebuffer(unsigned int targetFramebuffer)
 	{
-		rlBindFramebuffer(RL_READ_FRAMEBUFFER, framebuffer);
-		rlBindFramebuffer(RL_DRAW_FRAMEBUFFER, target.id);
-		rlBlitFramebuffer(0, 0, width, height, 0, 0, width, height, 0x00000100);
+		glBlitNamedFramebuffer(framebuffer, targetFramebuffer, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_LINEAR);
+	}
+
+	unsigned int GBuffer::GetFramebufferId() const
+	{
+		return framebuffer;
 	}
 };
