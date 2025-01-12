@@ -132,6 +132,7 @@ void Vox::Renderer::Render(Editor* editor)
     // Make sure that our viewport size matches the window size when drawing with imgui
     glViewport(0, 0, width, height);
     //editor->Draw(viewportTexture.get());
+    SDL_GL_SwapWindow(mainWindow);
 }
 
 //void Vox::Renderer::LoadTestModel(std::string path)
@@ -241,7 +242,7 @@ void Vox::Renderer::RenderDeferred()
 {
     glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
         0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
-        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, 0);
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
