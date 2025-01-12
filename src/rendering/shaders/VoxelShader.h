@@ -6,10 +6,10 @@
 
 #include <glm/mat4x4.hpp>
 
-class ArrayTexture;
-
 namespace Vox
 {
+	class ArrayTexture;
+
 	class VoxelShader : public Shader
 	{
 	public:

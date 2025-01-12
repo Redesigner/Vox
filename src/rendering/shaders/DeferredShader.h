@@ -30,5 +30,5 @@ namespace Vox
 
 		const std::string vertLocation = "assets/shaders/deferred.vert";
 		const std::string fragLocation = "assets/shaders/deferred.frag";
-	}
-};
+	};
+}

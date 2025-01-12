@@ -14,8 +14,6 @@
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Renderer/DebugRenderer.h>
 
-#include "raylib.h"
-
 #include "core/logging/Logging.h"
 #include "rendering/DebugRenderer.h"
 
