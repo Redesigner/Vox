@@ -254,6 +254,8 @@ void Vox::Renderer::RenderDeferred()
     gBuffer->ActivateTextures(0);
     deferredShader->SetCameraPosition(camera->GetPosition());
     glBindVertexArray(quad->GetVaoId());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     // rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
@@ -264,8 +266,9 @@ void Vox::Renderer::RenderDeferred()
 void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 {
     glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
+    glClear(GL_DEPTH_BUFFER_BIT);
     voxelShader->Enable();
     voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
