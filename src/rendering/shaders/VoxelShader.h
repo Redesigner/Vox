@@ -21,7 +21,6 @@ namespace Vox
 		};
 
 		VoxelShader();
-		~VoxelShader();
 
 		void SetArrayTexture(ArrayTexture* arrayTexture);
 		void SetModelMatrix(const glm::mat4x4& model);

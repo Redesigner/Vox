@@ -8,7 +8,7 @@ namespace Vox
 {
 	VoxelShader::VoxelShader()
 	{
-		shader = Load(vertLocation, fragLocation);
+		Load(vertLocation, fragLocation);
 		uniformLocations.viewPosition = GetUniformLocation("viewPosition");
 
 		uniformLocations.modelMatrix = GetUniformLocation("matModel");
@@ -18,10 +18,6 @@ namespace Vox
 		uniformLocations.materialRoughness = GetUniformLocation("materialRoughness");
 		uniformLocations.materialMetallic = GetUniformLocation("materialMetallic");
 		uniformLocations.colorTextures = GetUniformLocation("colorTextures");
-	}
-
-	VoxelShader::~VoxelShader()
-	{
 	}
 
 	void VoxelShader::SetArrayTexture(ArrayTexture* arrayTexture)
