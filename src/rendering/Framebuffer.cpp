@@ -9,7 +9,14 @@ namespace Vox
 	Framebuffer::Framebuffer(int width, int height)
 		:width(width), height(height)
 	{
-		VoxLog(Display, Rendering, "Allocating FrameBuffer.");
+		VoxLog(Display, Rendering, "Allocating FrameBuffer: size({}, {})", width, height);
+
+		if (width == 0 || height == 0)
+		{
+			framebuffer = colorTexture = depthTexture = depthRenderbuffer = 0;
+			VoxLog(Warning, Rendering, "Failed to create FrameBuffer, width or height cannot be 0.");
+			return;
+		}
 
 		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);

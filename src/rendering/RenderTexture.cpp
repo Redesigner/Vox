@@ -10,12 +10,17 @@ namespace Vox
 	RenderTexture::RenderTexture(unsigned int width, unsigned int height)
 		:width(width), height(height)
 	{
-		VoxLog(Display, Rendering, "Allocating new framebuffer for RenderTexture.");
+		VoxLog(Display, Rendering, "Allocating new framebuffer for RenderTexture: size ({}, {}).", width, height);
+
+		if (width == 0 || height == 0)
+		{
+			framebuffer = texture = 0;
+			VoxLog(Warning, Rendering, "Failed to create renderTexture, width or height cannot be 0.");
+			return;
+		}
 
 		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
