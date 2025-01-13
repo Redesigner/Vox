@@ -120,7 +120,7 @@ void Vox::Renderer::Render(Editor* editor)
     camera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
     glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
-    RenderGBuffer();
+    // RenderGBuffer();
     RenderVoxelGrid(testVoxelGrid.get());
     RenderDeferred();
     RenderSky();

@@ -37,9 +37,6 @@ namespace Vox
 		}
 		fragmentShader = fragmentShaderId.value();
 
-
-		glBindFragDataLocation(shader, 0, "gPosition");
-
 		glAttachShader(shader, vertexShader);
 		glAttachShader(shader, fragmentShader);
 		glLinkProgram(shader);
@@ -65,13 +62,14 @@ namespace Vox
 			return false;
 		}
 
-		VoxLog(Display, Rendering, "ShaderProgram created successfully.");
+		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}]", shader, vertexShader, fragmentShader);
 		loaded = true;
 		return true;
 	}
 
 	void Shader::Enable()
 	{
+		// VoxLog(Display, Rendering, "Enabling shader program '{}'", shader);
 		glUseProgram(shader);
 	}
 
