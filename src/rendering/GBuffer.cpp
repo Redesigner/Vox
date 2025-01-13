@@ -13,28 +13,35 @@ namespace Vox
 	GBuffer::GBuffer(int width, int height)
 		:width(width), height(height)
 	{
-		VoxLog(Display, Rendering, "Allocating GBuffer");
+		VoxLog(Display, Rendering, "Allocating GBuffer: size ({}, {})...", width, height);
+
+		if (width == 0 || height == 0)
+		{
+			framebuffer = 0;
+			positionTexture = normalTexture = albedoTexture = metallicRoughnessTexture = depthTexture = depthRenderbuffer = 0;
+			VoxLog(Warning, Rendering, "Failed to create GBuffer, width or height cannot be 0.");
+			return;
+		}
 
 		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);   // Unbind any framebuffer
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		unsigned int textureIds[6] = {};
-		glGenTextures(6, textureIds);
+		unsigned int textureIds[5] = {};
+		glGenTextures(5, textureIds);
 
 		positionTexture = textureIds[0];
 		normalTexture = textureIds[1];
 		albedoTexture = textureIds[2];
 		metallicRoughnessTexture = textureIds[3];
 		depthTexture = textureIds[4];
-		depthRenderbuffer = textureIds[5];
+
+		glGenRenderbuffers(1, &depthRenderbuffer);
 
 		// Position buffer
 		glBindTexture(GL_TEXTURE_2D, positionTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, positionTexture, 0);
 
 		// Normal buffer
@@ -66,18 +73,20 @@ namespace Vox
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depthTexture, 0);
 
 		// Alternate depth texture
-		glBindTexture(GL_TEXTURE_2D, depthRenderbuffer);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthRenderbuffer, 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
-		VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);
+		// VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);
 
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create gBuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
+			VoxLog(Error, Rendering, "Failed to create GBuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
+		}
+		else
+		{
+			VoxLog(Display, Rendering, "Successfully created GBuffer.");
 		}
 	}
 
@@ -85,8 +94,9 @@ namespace Vox
 	{
 		VoxLog(Display, Rendering, "Destroying GBuffer");
 
-		unsigned int textureIds[6] = { positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture, depthRenderbuffer };
-		glDeleteTextures(6, textureIds);
+		unsigned int textureIds[5] = { positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture };
+		glDeleteTextures(5, textureIds);
+		glDeleteRenderbuffers(1, &depthRenderbuffer);
 		glDeleteFramebuffers(1, &framebuffer);
 	}
 

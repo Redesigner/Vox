@@ -42,15 +42,17 @@ int main()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
         {
-            if (severity == GL_DEBUG_TYPE_ERROR)
+            switch (severity)
             {
-                VoxLog(Error, Rendering, "OpenGL Error {}: {}", type, message);
-            }
-            else if (type == GL_DEBUG_TYPE_OTHER)
-            { }
-            else
-            {
+            case GL_DEBUG_SEVERITY_LOW:
                 VoxLog(Display, Rendering, "OpenGL Callback {}: {}", type, message);
+                break;
+            case GL_DEBUG_SEVERITY_MEDIUM:
+                VoxLog(Warning, Rendering, "OpenGL Callback {}: {}", type, message);
+                break;
+            case GL_DEBUG_SEVERITY_HIGH:
+                VoxLog(Error, Rendering, "OpenGL Error {}: {}", type, message);
+                break;
             }
         }, 0);
 

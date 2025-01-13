@@ -39,7 +39,7 @@ namespace Vox
 
 		static const char* gltfFilter[2];
 
-		glm::vec2 viewportDimensions = glm::vec2(0.0f, 0.0f);
+		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox;
 	};
 }

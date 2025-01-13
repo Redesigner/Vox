@@ -37,6 +37,9 @@ namespace Vox
 		}
 		fragmentShader = fragmentShaderId.value();
 
+
+		glBindFragDataLocation(shader, 0, "gPosition");
+
 		glAttachShader(shader, vertexShader);
 		glAttachShader(shader, fragmentShader);
 		glLinkProgram(shader);

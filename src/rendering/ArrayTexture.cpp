@@ -29,6 +29,7 @@ namespace Vox
 
 	void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
 	{
+		textureName = "../../../" + textureName;
 		if (index >= layerCount)
 		{
 			VoxLog(Error, Rendering, "ArrayTexture: attempted to loadtexture outside of ArrayTexture range.");
