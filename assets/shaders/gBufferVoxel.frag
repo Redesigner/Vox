@@ -22,5 +22,5 @@ void main() {
     gNormal = normalize(fragNormal);
     gAlbedo = texture(colorTextures, vec3(fragTexCoord.xy, fragTextureId)).rgb;
     gMetallicRoughness = vec2(materialRoughness, materialMetallic);
-    // gDepth = gl_FragDepth;
+    gDepth = gl_FragDepth;
 }
