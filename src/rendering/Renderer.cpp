@@ -123,11 +123,14 @@ void Vox::Renderer::Render(Editor* editor)
     RenderGBuffer();
     RenderDeferred();
     RenderSky();
-
     RenderDebugShapes();
 
     int width, height;
     SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
+
+    glBlitNamedFramebuffer(deferredFramebuffer->GetFramebufferId(), 0,
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
     // Make sure that our viewport size matches the window size when drawing with imgui
     // glViewport(0, 0, width, height);
     glViewport(0, 0, 800, 450);
@@ -248,7 +251,7 @@ void Vox::Renderer::RenderDeferred()
 {
     glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
         0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
-        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -261,10 +264,6 @@ void Vox::Renderer::RenderDeferred()
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    glBlitNamedFramebuffer(deferredFramebuffer->GetFramebufferId(), 0,
-        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
-        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
@@ -295,6 +294,7 @@ void Vox::Renderer::RenderDebugShapes()
     // Fill the debug renderer with our shapes
     physicsServer->RenderDebugShapes();
 
+    glEnable(GL_DEPTH_TEST);
     debugLineShader.Enable();
     physicsServer->GetDebugRenderer()->BindAndBufferLines();
     debugLineShader.SetUniformMatrix(debugLineMatrixLocation, camera->GetViewProjectionMatrix());
@@ -312,13 +312,12 @@ void Vox::Renderer::RenderSky()
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
     skyShader.Enable();
-
-    float aspect = static_cast<float>(viewportTexture->GetWidth()) / static_cast<float>(viewportTexture->GetHeight());
+    glDisable(GL_DEPTH_TEST);
     glm::mat4x4 cameraRotation = camera->GetRotationMatrix();;
     glm::mat4x4 projection = camera->GetProjectionMatrix();
-    glm::mat4x4 matrix = glm::mat3(cameraRotation * projection);
+    glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
     skyShader.SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
-    deferredFramebuffer->ActivateTextures();
+    // deferredFramebuffer->ActivateTextures();
     glBindVertexArray(quad->GetVaoId());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

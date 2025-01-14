@@ -147,5 +147,5 @@ void Vox::Camera::UpdateProjectionMatrix()
 
 void Vox::Camera::UpdateViewProjectionMatrix()
 {
-	viewProjectionMatrix = viewMatrix * projectionMatrix;
+	viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
