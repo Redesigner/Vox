@@ -21,12 +21,13 @@ namespace Vox
 		glGenFramebuffers(1, &framebuffer);       // Create the framebuffer object
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-		unsigned int textureIds[3] = {};
-		glGenTextures(3, textureIds);
+		unsigned int textureIds[2] = {};
+		glGenTextures(2, textureIds);
 
 		colorTexture = textureIds[0];
 		depthTexture = textureIds[1];
-		depthRenderbuffer = textureIds[2];
+
+		glGenRenderbuffers(1, &depthRenderbuffer);
 
 		// Color buffer
 		glBindTexture(GL_TEXTURE_2D, colorTexture);
@@ -43,11 +44,9 @@ namespace Vox
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, depthTexture, 0);
 
 		// Alternate depth texture
-		glBindTexture(GL_TEXTURE_2D, depthRenderbuffer);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthRenderbuffer, 0);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
