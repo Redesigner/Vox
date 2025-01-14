@@ -106,7 +106,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     Camera* movedCamera = camera.get();
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
-    testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(255.0f, 255.0f, 255.0f, 255.0f), 1000.0f);
+    testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
 }
 
 Vox::Renderer::~Renderer()
@@ -120,8 +120,7 @@ void Vox::Renderer::Render(Editor* editor)
     camera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
     glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
-    // RenderGBuffer();
-    RenderVoxelGrid(testVoxelGrid.get());
+    RenderGBuffer();
     RenderDeferred();
     RenderSky();
 
@@ -204,8 +203,11 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 
 void Vox::Renderer::RenderGBuffer()
 {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    //glClearDepth(0.0f);
 
     gBufferShader.Enable();
     {
@@ -221,6 +223,8 @@ void Vox::Renderer::RenderGBuffer()
         //    }
         //}
     }
+
+    RenderVoxelGrid(testVoxelGrid.get());
 }
 
 //void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
@@ -258,7 +262,9 @@ void Vox::Renderer::RenderDeferred()
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    // rlBlitFramebuffer(0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0, 0, viewportTexture.texture.width, viewportTexture.texture.height, 0x00000100);
+    glBlitNamedFramebuffer(deferredFramebuffer->GetFramebufferId(), 0,
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
+        0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }

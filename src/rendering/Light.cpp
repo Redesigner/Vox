@@ -31,7 +31,7 @@ namespace Vox
         // Send to shader light color values
         shader->SetUniformColor(uniformLocations.color, color);
 
-        shader->SetUniformFloat(uniformLocations.strength, strength);
+        //shader->SetUniformFloat(uniformLocations.strength, strength);
     }
 
     LightUniformLocations::LightUniformLocations()
@@ -47,11 +47,11 @@ namespace Vox
     LightUniformLocations::LightUniformLocations(DeferredShader* shader)
     {
         int lightsCount = 1;
-        enabled = shader->GetUniformLocation(fmt::format("lights{}.enabled", lightsCount));
-        type = shader->GetUniformLocation(fmt::format("lights{}.type", lightsCount));
-        position = shader->GetUniformLocation(fmt::format("lights{}.position", lightsCount));
-        target = shader->GetUniformLocation(fmt::format("lights{}.target", lightsCount));
-        color = shader->GetUniformLocation(fmt::format("lights{}.color", lightsCount));
-        strength = shader->GetUniformLocation(fmt::format("lights{}.enabled", lightsCount).c_str());
+        enabled = shader->GetUniformLocation(fmt::format("lights[{}].enabled", lightsCount));
+        type = shader->GetUniformLocation(fmt::format("lights[{}].type", lightsCount));
+        position = shader->GetUniformLocation(fmt::format("lights[{}].position", lightsCount));
+        target = shader->GetUniformLocation(fmt::format("lights[{}].target", lightsCount));
+        color = shader->GetUniformLocation(fmt::format("lights[{}].color", lightsCount));
+        strength = shader->GetUniformLocation(fmt::format("lights[{}].enabled", lightsCount).c_str());
     }
 }
