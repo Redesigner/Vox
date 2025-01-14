@@ -51,8 +51,8 @@ Vox::Renderer::Renderer(SDL_Window* window)
     debugTriangleMatrixLocation = debugTriangleShader.GetUniformLocation("viewProjection");
     debugLineMatrixLocation = debugLineShader.GetUniformLocation("viewProjection");
 
-    gBuffer = std::make_unique<GBuffer>(800, 431);
-    deferredFramebuffer = std::make_unique<Framebuffer>(800, 431);
+    gBuffer = std::make_unique<GBuffer>(800, 450);
+    deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
 
     skyShader.Enable();
     skyShader.SetUniformInt(skyShader.GetUniformLocation("color"), 0);
@@ -133,7 +133,7 @@ void Vox::Renderer::Render(Editor* editor)
         0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
     // Make sure that our viewport size matches the window size when drawing with imgui
     // glViewport(0, 0, width, height);
-    glViewport(0, 0, 800, 450);
+    // glViewport(0, 0, 800, 450);
     //editor->Draw(viewportTexture.get());
     SDL_GL_SwapWindow(mainWindow);
 }
@@ -275,7 +275,7 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
     glClear(GL_DEPTH_BUFFER_BIT);
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x - 0.5f, voxelGrid->y - 0.5f, voxelGrid->z - 0.5f)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
+    voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x, voxelGrid->y, voxelGrid->z)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
     voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
     glBindVertexArray(voxelGrid->GetVaoId());
@@ -312,7 +312,6 @@ void Vox::Renderer::RenderSky()
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
     skyShader.Enable();
-    glDisable(GL_DEPTH_TEST);
     glm::mat4x4 cameraRotation = camera->GetRotationMatrix();;
     glm::mat4x4 projection = camera->GetProjectionMatrix();
     glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);

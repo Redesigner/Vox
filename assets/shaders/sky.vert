@@ -9,7 +9,7 @@ out vec2 texCoord;
 out vec4 vertexWS;
 
 void main() {
-    gl_Position = vec4(vertexPosition.xy, 1.0, 1.0);
+    gl_Position = vec4(vertexPosition.xy, 0.999999, 1.0);
     texCoord = vertexTexCoord;
     vertexWS = cameraWorldSpace * gl_Position;
     // vertexWS = vec4(vertexPosition.xy, 1.0, 1.0);
