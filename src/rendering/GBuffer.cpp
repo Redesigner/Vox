@@ -35,6 +35,8 @@ namespace Vox
 		metallicRoughnessTexture = textureIds[3];
 		depthTexture = textureIds[4];
 
+		//VoxLog(Display, Rendering, "Allocated GBuffer textures '({}, {}, {}, {}, {})'", positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture);
+
 		glGenRenderbuffers(1, &depthRenderbuffer);
 
 		// Position buffer
@@ -95,7 +97,8 @@ namespace Vox
 
 	GBuffer::~GBuffer()
 	{
-		VoxLog(Display, Rendering, "Destroying GBuffer");
+		VoxLog(Display, Rendering, "Destroying GBuffer...");
+		// VoxLog(Display, Rendering, "Destroying GBuffer textures '({}, {}, {}, {}, {})'", positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture);
 
 		unsigned int textureIds[5] = { positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture };
 		glDeleteTextures(5, textureIds);

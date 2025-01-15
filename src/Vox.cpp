@@ -49,8 +49,11 @@ int main()
 
             switch (severity)
             {
+            case GL_DEBUG_SEVERITY_NOTIFICATION:
+                // VoxLog(Display, Rendering, "OpenGL Notification {}: {}", typeString, message);
+                break;
             case GL_DEBUG_SEVERITY_LOW:
-                VoxLog(Display, Rendering, "OpenGL Callback {}: {}", typeString, message);
+                VoxLog(Warning, Rendering, "OpenGL Callback {}: {}", typeString, message);
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
                 VoxLog(Warning, Rendering, "OpenGL Callback {}: {}", typeString, message);

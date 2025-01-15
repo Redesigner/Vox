@@ -16,7 +16,7 @@ namespace Vox
 	{
 		if (loaded)
 		{
-			glDeleteTextures(0, &textureId);
+			glDeleteTextures(1, &textureId);
 		}
 	}
 

@@ -27,6 +27,8 @@ namespace Vox
 		colorTexture = textureIds[0];
 		depthTexture = textureIds[1];
 
+		//VoxLog(Display, Rendering, "Allocated Framebuffer textures '({}, {})'", colorTexture, depthTexture);
+
 		glGenRenderbuffers(1, &depthRenderbuffer);
 
 		// Color buffer
@@ -51,16 +53,18 @@ namespace Vox
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create framebuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
+			VoxLog(Error, Rendering, "Failed to create Framebuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
 	}
 
 	Framebuffer::~Framebuffer()
 	{
-		VoxLog(Display, Rendering, "Destroying FrameBuffer");
+		VoxLog(Display, Rendering, "Destroying Framebuffer...");
+		//VoxLog(Display, Rendering, "Destroying Framebuffer textures '({}, {})'", colorTexture, depthTexture);
 
-		unsigned int textureIds[3] = { colorTexture, depthTexture, depthRenderbuffer };
-		glDeleteTextures(6, textureIds);
+		unsigned int textureIds[2] = { colorTexture, depthTexture};
+		glDeleteTextures(2, textureIds);
+		glDeleteRenderbuffers(1, &depthRenderbuffer);
 		glDeleteFramebuffers(1, &framebuffer);
 	}
 
