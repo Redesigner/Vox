@@ -78,6 +78,11 @@ namespace Vox
 		return framebuffer;
 	}
 
+	unsigned int Framebuffer::GetTextureId() const
+	{
+		return colorTexture;
+	}
+
 	std::string Framebuffer::GetFramebufferStatusString(unsigned int framebufferStatus)
 	{
 		switch (framebufferStatus)
@@ -101,5 +106,15 @@ namespace Vox
 		default:
 			return "UNKNOWN";
 		}
+	}
+
+	unsigned int Framebuffer::GetWidth() const
+	{
+		return width;
+	}
+
+	unsigned int Framebuffer::GetHeight() const
+	{
+		return height;
 	}
 }

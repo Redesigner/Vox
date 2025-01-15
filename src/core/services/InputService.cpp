@@ -1,8 +1,8 @@
 #include "InputService.h"
 
-
 #include <cmath>
 
+#include <imgui/imgui_impl_sdl3.h>
 #include <GL/glew.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
@@ -29,6 +29,7 @@ void Vox::InputService::PollEvents()
 	while (SDL_PollEvent(&polledEvent))
 	{
 		HandleEvent(&polledEvent);
+		ImGui_ImplSDL3_ProcessEvent(&polledEvent);
 	}
 }
 

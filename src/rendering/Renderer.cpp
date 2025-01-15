@@ -134,7 +134,8 @@ void Vox::Renderer::Render(Editor* editor)
     // Make sure that our viewport size matches the window size when drawing with imgui
     // glViewport(0, 0, width, height);
     // glViewport(0, 0, 800, 450);
-    //editor->Draw(viewportTexture.get());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    editor->Draw(deferredFramebuffer.get());
     SDL_GL_SwapWindow(mainWindow);
 }
 

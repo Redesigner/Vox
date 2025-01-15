@@ -14,7 +14,13 @@ namespace Vox
 
 		unsigned int GetFramebufferId() const;
 
+		unsigned int GetTextureId() const;
+
 		static std::string GetFramebufferStatusString(unsigned int framebufferStatus);
+
+		unsigned int GetWidth() const;
+
+		unsigned int GetHeight() const;
 
 	private:
 		int width, height;

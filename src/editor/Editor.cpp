@@ -7,13 +7,13 @@
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
-#include "rendering/RenderTexture.h"
+#include "rendering/Framebuffer.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-    void Editor::Draw(RenderTexture* viewportRenderTexture)
+    void Editor::Draw(Framebuffer* viewportRenderTexture)
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
@@ -25,8 +25,8 @@ namespace Vox
             ImGui::SetNextWindowSize(viewport->GetWorkSize());
             ImGui::SetNextWindowViewport(viewport->ID);
 #else 
-            // ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-            // ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+             ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 #endif
             bool windowOpen = true;
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -34,12 +34,11 @@ namespace Vox
             ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
             ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
 
-            //ImVec2 dimensions = ImGui::GetContentRegionAvail();
-            //ImVec2 bottomRight = ImGui::GetContentRegionMax();
-            //viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
-            //viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
-            //ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
-            //rlImGuiImageRenderTextureFit(viewportRenderTexture, false);
+            ImVec2 dimensions = ImGui::GetContentRegionAvail();
+            ImVec2 bottomRight = ImGui::GetContentRegionMax();
+            viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
+            viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
+            ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
 
             DrawToolbar();
             DrawDebugConsole();
@@ -49,6 +48,7 @@ namespace Vox
             ImGui::PopStyleVar(2);
         }
         ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
