@@ -34,6 +34,7 @@ int main()
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+    SDL_GL_SetSwapInterval(1);
 
     SDL_Window* window = SDL_CreateWindow("Vox", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     SDL_GLContext context = SDL_GL_CreateContext(window);

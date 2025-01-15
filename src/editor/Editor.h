@@ -8,7 +8,7 @@
 
 namespace Vox
 {
-	class RenderTexture;
+	class Framebuffer;
 
 	class Editor
 	{
@@ -21,7 +21,7 @@ namespace Vox
 			unsigned int left, top, right, bottom;
 		};
 
-		void Draw(RenderTexture* viewportRenderTexture);
+		void Draw(Framebuffer* viewportRenderTexture);
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		glm::vec2 GetViewportDimensions() const;
 		Box GetViewportBox() const;
