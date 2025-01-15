@@ -177,6 +177,33 @@ Vox::Camera* Vox::Renderer::GetCurrentCamera() const
     return camera.get();
 }
 
+std::string Vox::Renderer::GetGlDebugTypeString(unsigned int errorCode)
+{
+    switch (errorCode)
+    {
+    case GL_DEBUG_TYPE_ERROR:
+        return "GL_DEBUG_TYPE_ERROR";
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        return "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        return "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR ";
+    case GL_DEBUG_TYPE_PORTABILITY:
+        return "GL_DEBUG_TYPE_PORTABILITY";
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        return "GL_DEBUG_TYPE_PERFORMANCE";
+    case GL_DEBUG_TYPE_MARKER:
+        return "GL_DEBUG_TYPE_MARKER";
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+        return "GL_DEBUG_TYPE_PUSH_GROUP";
+    case GL_DEBUG_TYPE_POP_GROUP:
+        return "GL_DEBUG_TYPE_POP_GROUP";
+    case GL_DEBUG_TYPE_OTHER:
+        return "GL_DEBUG_TYPE_OTHER";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
@@ -187,7 +214,8 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
         int viewportHeight = static_cast<int>(editorViewportSize.y);
         if (viewportTexture->GetWidth() != viewportWidth || viewportTexture->GetHeight() != viewportHeight)
         {
-            viewportTexture.release();
+            VoxLog(Display, Rendering, "Resizing GBuffer and Viewport texture to '({}, {})'", viewportWidth, viewportHeight);
+            viewportTexture.reset();
             viewportTexture = std::make_unique<RenderTexture>(viewportWidth, viewportHeight);
 
             // @TODO: add resize method?
@@ -208,6 +236,7 @@ void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 void Vox::Renderer::RenderGBuffer()
 {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
     glClear(GL_DEPTH_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
