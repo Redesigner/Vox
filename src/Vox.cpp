@@ -4,7 +4,9 @@
 #include <thread>
 
 #include <GL/glew.h>
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 #include <imgui/imgui.h>
@@ -163,11 +165,18 @@ int main()
             float xViewport, yViewport;
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
-                glm::vec3 rayStartViewport = glm::vec3(xViewport, yViewport, -1.0f);
-                glm::vec3 rayEndViewport = glm::vec3(xViewport, yViewport, 1.0f);
-                JPH::Vec3 rayStart /*= Vec3From(Vector3Unproject(rayStartViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()))*/;
-                JPH::Vec3 rayEnd /*= Vec3From(Vector3Unproject(rayEndViewport, camera->GetProjectionMatrix(), camera->GetViewMatrix()))*/;
+                glm::vec4 rayStartViewport = glm::vec4(xViewport, yViewport, -1.0f, 1.0f);
+                glm::vec4 rayEndViewport = glm::vec4(xViewport, yViewport, 1.0f, 1.0f);
+                glm::mat4x4 inverseCamera = glm::inverseTranspose(camera->GetViewProjectionMatrix());
+                glm::vec4 rayStartAffine = rayStartViewport * inverseCamera;
+                glm::vec4 rayEndAffine = rayEndViewport * inverseCamera;
+                rayStartAffine /= rayStartAffine.w;
+                rayEndAffine /= rayEndAffine.w;
+                JPH::Vec3 rayStart = Vec3From(rayStartAffine);
+                JPH::Vec3 rayEnd = Vec3From(rayEndAffine);
 
+                debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sRed, 5.0f);
+                VoxLog(Display, Game, "Casting ray from '({}, {}, {})' to '({}, {}, {})'", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ(), rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ());
                 Vox::RayCastResultNormal raycastResult;
                 if (physicsServer->RayCast(rayStart, rayEnd - rayStart, raycastResult))
                 {
