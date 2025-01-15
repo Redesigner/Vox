@@ -38,7 +38,7 @@ namespace Vox
             ImVec2 bottomRight = ImGui::GetContentRegionMax();
             viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
             viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
-            ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()));
+            ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()), {0, 1}, {1, 0});
 
             DrawToolbar();
             DrawDebugConsole();
