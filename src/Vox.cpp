@@ -45,16 +45,18 @@ int main()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
         {
+            std::string typeString = Vox::Renderer::GetGlDebugTypeString(type);
+
             switch (severity)
             {
             case GL_DEBUG_SEVERITY_LOW:
-                VoxLog(Display, Rendering, "OpenGL Callback {}: {}", type, message);
+                VoxLog(Display, Rendering, "OpenGL Callback {}: {}", typeString, message);
                 break;
             case GL_DEBUG_SEVERITY_MEDIUM:
-                VoxLog(Warning, Rendering, "OpenGL Callback {}: {}", type, message);
+                VoxLog(Warning, Rendering, "OpenGL Callback {}: {}", typeString, message);
                 break;
             case GL_DEBUG_SEVERITY_HIGH:
-                VoxLog(Error, Rendering, "OpenGL Error {}: {}", type, message);
+                VoxLog(Error, Rendering, "OpenGL Error {}: {}", typeString, message);
                 break;
             }
         }, 0);

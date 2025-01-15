@@ -45,6 +45,8 @@ namespace Vox
 
 		Camera* GetCurrentCamera() const;
 
+		static std::string GetGlDebugTypeString(unsigned int errorCode);
+
 	private:
 		void UpdateViewportDimensions(Editor* editor);
 
