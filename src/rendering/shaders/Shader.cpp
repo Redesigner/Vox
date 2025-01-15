@@ -62,7 +62,7 @@ namespace Vox
 			return false;
 		}
 
-		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}]", shader, vertexShader, fragmentShader);
+		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
 		loaded = true;
 		return true;
 	}
