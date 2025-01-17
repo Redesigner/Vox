@@ -13,9 +13,6 @@ namespace Vox
 	{
 	public:
 		~Shader();
-
-		bool Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
-
 		void Enable();
 		void Disable();
 
@@ -28,10 +25,9 @@ namespace Vox
 		void SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix);
 
 	protected:
-		unsigned int shader, vertexShader, fragmentShader;
-
-	private:
-		bool loaded = false;
+		bool Link();
 		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType);
+
+		unsigned int shader;
 	};
 }

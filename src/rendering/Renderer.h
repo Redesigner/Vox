@@ -6,7 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
-#include "rendering/shaders/Shader.h"
+#include "rendering/shaders/PixelShader.h"
 
 struct SDL_Window;
 class VoxelGrid;
@@ -75,12 +75,12 @@ namespace Vox
 		std::unique_ptr<VoxelShader> voxelShader;
 		std::unique_ptr<DeferredShader> deferredShader;
 
-		Shader gBufferShader;
+		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
 
-		Shader skyShader;
+		PixelShader skyShader;
 
-		Shader debugLineShader, debugTriangleShader;
+		PixelShader debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 
 		LightUniformLocations lightUniformLocations;

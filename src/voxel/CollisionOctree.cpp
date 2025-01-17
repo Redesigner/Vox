@@ -606,6 +606,15 @@ namespace Octree
 		state = Full;
 	}
 
+	PhysicsVoxel::PhysicsVoxel()
+	{
+	}
+
+	PhysicsVoxel::PhysicsVoxel(bool solid)
+		:solid(solid)
+	{
+	}
+
 	bool PhysicsVoxel::operator==(const PhysicsVoxel& voxel) const
 	{
 		return solid == voxel.solid;

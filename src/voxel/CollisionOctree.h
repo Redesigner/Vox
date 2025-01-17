@@ -24,6 +24,9 @@ namespace Octree
 
 	struct PhysicsVoxel
 	{
+		PhysicsVoxel();
+		PhysicsVoxel(bool solid);
+
 		bool solid = false;
 
 		bool operator == (const PhysicsVoxel& voxel) const;
