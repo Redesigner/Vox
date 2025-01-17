@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rendering/shaders/Shader.h"
+#include "rendering/shaders/PixelShader.h"
 
 #include <string>
 
@@ -10,7 +10,7 @@ namespace Vox
 {
 	class ArrayTexture;
 
-	class VoxelShader : public Shader
+	class VoxelShader : public PixelShader
 	{
 	public:
 		struct UniformLocations

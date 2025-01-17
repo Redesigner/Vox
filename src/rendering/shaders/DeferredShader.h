@@ -4,11 +4,11 @@
 
 #include <glm/vec3.hpp>
 
-#include "rendering/shaders/Shader.h"
+#include "rendering/shaders/PixelShader.h"
 
 namespace Vox
 {
-	class DeferredShader : public Shader
+	class DeferredShader : public PixelShader
 	{
 		struct UniformLocations
 		{

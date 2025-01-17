@@ -71,7 +71,7 @@ unsigned short Octree::Node::GetSize() const
 	return size;
 }
 
-Voxel* Octree::Node::GetVoxel(int x, int y, int z)
+Voxel* Octree::Node::GetVoxel(int x, int y, int z) const
 {
 	switch (state)
 	{

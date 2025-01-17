@@ -9,62 +9,7 @@ namespace Vox
 {
 	Shader::~Shader()
 	{
-		if (loaded)
-		{
-			glDeleteShader(vertexShader);
-			glDeleteShader(fragmentShader);
-			glDeleteProgram(shader);
-		}
-	}
-
-	bool Shader::Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
-	{
-		shader = glCreateProgram();
-
-		std::optional<unsigned int> vertexShaderId = LoadShaderStage(vertexShaderFilePath, GL_VERTEX_SHADER);
-		if (!vertexShaderId)
-		{
-			glDeleteProgram(shader);
-			return false;
-		}
-		vertexShader = vertexShaderId.value();
-
-		std::optional<unsigned int> fragmentShaderId = LoadShaderStage(fragmentShaderFilePath, GL_FRAGMENT_SHADER);
-		if (!fragmentShaderId)
-		{
-			glDeleteProgram(shader);
-			return false;
-		}
-		fragmentShader = fragmentShaderId.value();
-
-		glAttachShader(shader, vertexShader);
-		glAttachShader(shader, fragmentShader);
-		glLinkProgram(shader);
-
-		GLint isLinked = 0;
-		glGetProgramiv(shader, GL_LINK_STATUS, &isLinked);
-		if (isLinked == GL_FALSE)
-		{
-			GLint maxLength = 0;
-			glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-			std::string logString = std::string(infoLog.begin(), infoLog.end());
-
-			size_t separatorLocation = vertexShaderFilePath.rfind('/') + 1;
-			std::string vertexShaderName = vertexShaderFilePath.substr(separatorLocation, vertexShaderFilePath.length() - separatorLocation);
-			separatorLocation = fragmentShaderFilePath.rfind('/') + 1;
-			std::string fragmentShaderName = fragmentShaderFilePath.substr(separatorLocation, fragmentShaderFilePath.length() - separatorLocation);
-			VoxLog(Error, Rendering, "Failed to link shader '{}' and '{}':\n{}", vertexShaderName, fragmentShaderName, logString);
-
-			glDeleteProgram(shader);
-			return false;
-		}
-
-		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
-		loaded = true;
-		return true;
+		glDeleteProgram(shader);
 	}
 
 	void Shader::Enable()
@@ -111,6 +56,34 @@ namespace Vox
 	void Shader::SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix)
 	{
 		glUniformMatrix4fv(uniformLocation, 1, false, &matrix[0][0]);
+	}
+
+	bool Shader::Link()
+	{
+		glLinkProgram(shader);
+
+		GLint isLinked = 0;
+		glGetProgramiv(shader, GL_LINK_STATUS, &isLinked);
+		if (isLinked == GL_FALSE)
+		{
+			GLint maxLength = 0;
+			glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+			std::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+			//std::string logString = std::string(infoLog.begin(), infoLog.end());
+
+			//size_t separatorLocation = vertexShaderFilePath.rfind('/') + 1;
+			//std::string vertexShaderName = vertexShaderFilePath.substr(separatorLocation, vertexShaderFilePath.length() - separatorLocation);
+			//separatorLocation = fragmentShaderFilePath.rfind('/') + 1;
+			//std::string fragmentShaderName = fragmentShaderFilePath.substr(separatorLocation, fragmentShaderFilePath.length() - separatorLocation);
+			//VoxLog(Error, Rendering, "Failed to link shader '{}' and '{}':\n{}", vertexShaderName, fragmentShaderName, logString);
+
+			glDeleteProgram(shader);
+			return false;
+		}
+
+		return true;
 	}
 
 	std::optional<unsigned int> Shader::LoadShaderStage(std::string shaderFilePath, unsigned int shaderType)

@@ -24,7 +24,7 @@ namespace Octree
 
 		unsigned short GetSize() const;
 
-		Voxel* GetVoxel(int x, int y, int z);
+		Voxel* GetVoxel(int x, int y, int z) const;
 
 		void SetVoxel(int x, int y, int z, Voxel* voxel);
 
