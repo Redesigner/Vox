@@ -53,12 +53,20 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
-    unsigned int voxelData[34][34][34] = { 0 };
-    voxelData[0][0][0] = 2;
-    voxelData[5][5][5] = 1;
+    const unsigned int voxelGridSize = 32;
+
+    unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
+    voxelData[0][0][1] = 1;
+    voxelData[0][0][0] = 1;
+    voxelData[1][0][0] = 1;
+    voxelData[0][1][0] = 1;
+    voxelData[4][2][2] = 1;
+    voxelData[3][3][2] = 1;
+    voxelData[1][1][1] = 1;
+    voxelData[1][7][7] = 1;
 
     unsigned int voxelBuffers[2];
-    glGenBuffers(2, voxelBuffers);
+    glCreateBuffers(2, voxelBuffers);
     voxelSsbo = voxelBuffers[0];
     voxelMeshSsbo = voxelBuffers[1];
 
@@ -66,19 +74,26 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(voxelData), voxelData, GL_STREAM_READ);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, voxelSsbo);
 
-    size_t voxelMeshStride = sizeof(float) * 8 + sizeof(unsigned int);
-    unsigned int dummyData[9 * 96] = { 0 };
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, voxelMeshSsbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, voxelMeshStride * 96, dummyData, GL_DYNAMIC_DRAW);
+    size_t voxelMeshStride = sizeof(float) * 16;
+    glNamedBufferStorage(voxelMeshSsbo, voxelMeshStride * voxelGridSize * voxelGridSize * voxelGridSize, NULL, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, voxelMeshSsbo);
+
+    unsigned int vertexCounterSsbo = 0;
+    glGenBuffers(1, &vertexCounterSsbo);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, vertexCounterSsbo);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(unsigned int), NULL, GL_DYNAMIC_READ);
+    GLuint* a = { 0 };
+    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), a);
+    //glNamedBufferStorage(vertexCounterSsbo, sizeof(int), NULL, GL_DYNAMIC_DRAW);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, vertexCounterSsbo);
 
     voxelMeshVao = 0;
     glGenVertexArrays(1, &voxelMeshVao);
     glBindVertexArray(voxelMeshVao);
     glBindBuffer(GL_ARRAY_BUFFER, voxelMeshSsbo);
-    size_t texCoordOffset = sizeof(float) * 3;
-    size_t normalOffest = sizeof(float) * 5;
-    size_t materialIdOffset = sizeof(float) * 8;
+    size_t texCoordOffset = sizeof(float) * 4;
+    size_t normalOffest = sizeof(float) * 8;
+    size_t materialIdOffset = sizeof(float) * 12;
     glVertexAttribPointer(0, 3, GL_FLOAT, false, voxelMeshStride, 0); // position
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(texCoordOffset)); // texCoord
@@ -89,7 +104,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glEnableVertexAttribArray(3);
 
     voxelGenerationShader.Enable();
-    glDispatchCompute(32, 32, 32);
+    glDispatchCompute(4, 4, 4);
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
@@ -353,6 +368,7 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(voxelMeshVao);
+    glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 96);
 }
 
