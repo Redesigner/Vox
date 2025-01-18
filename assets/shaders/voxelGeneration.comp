@@ -15,12 +15,12 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 layout(std430, binding = 0) buffer voxels
 {
     // 32 cube with 1 voxel of padding on each side
-    uint[16][16][16] voxel;
+    uint[32][32][32] voxel;
 };
 
 layout(std430, binding = 1) buffer vertexOut
 {
-    VoxelVertex vertices[96];
+    VoxelVertex vertices[6144];
 };
 
 layout(binding = 2, offset = 0) uniform atomic_uint vertexCount;
@@ -34,7 +34,7 @@ void main()
         return;
     }
 
-    if (atomicCounter(vertexCount) >= 16)
+    if (atomicCounter(vertexCount) >= 1024)
     {
         return;
     }
