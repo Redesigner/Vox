@@ -1,15 +1,17 @@
 #pragma once
 
+#include "rendering/shaders/Shader.h"
+
 #include <string>
 
 namespace Vox
 {
-	class ComputeShader
+	class ComputeShader : public Shader
 	{
 	public:
-		ComputeShader(std::string shaderFilePath);
+		bool Load(std::string shaderFilePath);
 
 	private:
-
+		unsigned int computeShader;
 	};
 }

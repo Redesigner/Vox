@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
+#include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
 
 struct SDL_Window;
@@ -82,6 +83,10 @@ namespace Vox
 
 		PixelShader debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
+
+		ComputeShader voxelGenerationShader;
+
+		unsigned int voxelSsbo, voxelMeshSsbo, voxelMeshVao;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;
