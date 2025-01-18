@@ -71,7 +71,7 @@ namespace Vox
 
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-			//std::string logString = std::string(infoLog.begin(), infoLog.end());
+			std::string logString = std::string(infoLog.begin(), infoLog.end());
 
 			//size_t separatorLocation = vertexShaderFilePath.rfind('/') + 1;
 			//std::string vertexShaderName = vertexShaderFilePath.substr(separatorLocation, vertexShaderFilePath.length() - separatorLocation);
@@ -79,6 +79,7 @@ namespace Vox
 			//std::string fragmentShaderName = fragmentShaderFilePath.substr(separatorLocation, fragmentShaderFilePath.length() - separatorLocation);
 			//VoxLog(Error, Rendering, "Failed to link shader '{}' and '{}':\n{}", vertexShaderName, fragmentShaderName, logString);
 
+			VoxLog(Error, Rendering, "Failed to link shader '{}': \n{}", shader, logString);
 			glDeleteProgram(shader);
 			return false;
 		}

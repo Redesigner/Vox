@@ -32,8 +32,10 @@ bool Vox::PixelShader::Load(std::string vertexShaderFilePath, std::string fragme
 
 	glAttachShader(shader, vertexShader);
 	glAttachShader(shader, fragmentShader);
-	Link();
-
-	VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
-	return true;
+	if (Link())
+	{
+		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
+		return true;
+	}
+	return false;
 }
