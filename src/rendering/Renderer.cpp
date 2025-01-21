@@ -55,19 +55,9 @@ Vox::Renderer::Renderer(SDL_Window* window)
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
     const unsigned int voxelGridSize = 34;
-    const unsigned int maxVertexCount = 4096;
+    const unsigned int maxVertexCount = 16384;
 
     unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
-    voxelData[0][0][1] = 1;
-    voxelData[0][0][0] = 1;
-    voxelData[0][0][2] = 1;
-    voxelData[0][0][3] = 1;
-    voxelData[1][0][1] = 1;
-    voxelData[16][18][16] = 1;
-    voxelData[3][3][2] = 1;
-    voxelData[1][1][1] = 1;
-    voxelData[31][31][31] = 1;
-
     for (int x = 1; x < 10; ++x)
     {
         for (int y = 17; y < 26; ++y)
@@ -75,6 +65,24 @@ Vox::Renderer::Renderer(SDL_Window* window)
             for (int z = 1; z < 10; ++z)
             {
                 if (rand() % 5 != 0)
+                {
+                    voxelData[x][y][z] = 1;
+                }
+            }
+        }
+    }
+
+    for (int x = 16; x < 32; ++x)
+    {
+        for (int y = 16; y < 32; ++y)
+        {
+            for (int z = 0; z < 16; ++z)
+            {
+                int dx = x - 24;
+                int dy = y - 24;
+                int dz = z - 8;
+                int dSquared = dx * dx + dy * dy + dz * dz;
+                if (dSquared < 64)
                 {
                     voxelData[x][y][z] = 1;
                 }
@@ -110,7 +118,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glBindBuffer(GL_ARRAY_BUFFER, voxelMeshSsbo);
     size_t texCoordOffset = sizeof(float) * 4;
     size_t normalOffest = sizeof(float) * 8;
-    size_t materialIdOffset = sizeof(float) * 12;
+    size_t materialIdOffset = sizeof(float) * 11;
     glVertexAttribPointer(0, 3, GL_FLOAT, false, voxelMeshStride, 0); // position
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(texCoordOffset)); // texCoord
@@ -402,8 +410,8 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
     glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(voxelMeshVao);
-    glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 4096);
+    //glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, 16384);
 }
 
 void Vox::Renderer::RenderDebugShapes()

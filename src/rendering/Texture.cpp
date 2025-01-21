@@ -28,6 +28,7 @@ namespace Vox
 			VoxLog(Warning, FileSystem, "Failed to load image.");
 			return false;
 		}
+		VoxLog(Display, FileSystem, "Loaded image {}", filename);
 
 		width = surface->w;
 		height = surface->h;
