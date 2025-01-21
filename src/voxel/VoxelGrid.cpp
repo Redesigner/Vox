@@ -116,11 +116,6 @@ void VoxelGrid::SetVoxel(Voxel voxel, unsigned int x, unsigned int y, unsigned i
 
 void VoxelGrid::GenerateMesh()
 {
-	for (int y = 0; y < height; ++y)
-	{
-		GenerateSlice(y);
-	}
-
 	indices.clear();
 
 	for (int x = 0; x < width; ++x)
@@ -253,7 +248,6 @@ void VoxelGrid::GenerateSlice(unsigned int y)
 
 					if (rowInterrupted)
 					{
-						++quadLower;
 						break;
 					}
 					
@@ -279,6 +273,10 @@ void VoxelGrid::GenerateSlice(unsigned int y)
 	}
 
 	VoxLog(Display, Game, "Found {} quads on height {}", quads.size(), y);
+	for (Quad quad : quads)
+	{
+		VoxLog(Display, Game, "\t({}, {}, {}, {})", quad.x, quad.y, quad.w, quad.h);
+	}
 }
 
 bool VoxelGrid::FaceExposedTop(unsigned int x, unsigned int y, unsigned int z)

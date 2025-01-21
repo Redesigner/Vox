@@ -46,12 +46,14 @@ public:
 
 	int x, y, z = 0;
 
+	// TEMP
+	void GenerateSlice(unsigned int y);
+	// END
+
 private:
 	void GenerateVertexObjects();
 
 	// TEMP FOR ALGORITHM TESTING
-	void GenerateSlice(unsigned int y);
-
 	bool FaceExposedTop(unsigned int x, unsigned int y, unsigned int z);
 
 	std::vector<std::vector<bool>> visitedVoxels;

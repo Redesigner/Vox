@@ -144,6 +144,21 @@ Vox::Renderer::Renderer(SDL_Window* window)
     testVoxelGrid->GetVoxel(21, 18, 16).filled = true;
     testVoxelGrid->GetVoxel(18, 17, 16).filled = true;
     testVoxelGrid->GetVoxel(18, 17, 17).filled = true;
+    testVoxelGrid->GetVoxel(19, 17, 18).filled = true;
+
+    for (int x = 0; x < 5; ++x)
+    {
+        for (int z = 0; z < 5; ++z)
+        {
+            if (rand() % 5 != 0)
+            {
+                testVoxelGrid->GetVoxel(x, 16, z).filled = true;
+            }
+        }
+    }
+
+    testVoxelGrid->GenerateSlice(16);
+    testVoxelGrid->GenerateSlice(17);
 
     testVoxelGrid->x = -16;
     testVoxelGrid->y = -16;
