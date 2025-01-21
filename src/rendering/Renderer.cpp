@@ -26,6 +26,7 @@
 
 Vox::Renderer::Renderer(SDL_Window* window)
 {
+    glEnable(GL_CULL_FACE);
     mainWindow = window;
     // This is realtive to the build location -- I'll have to fix this later
     // ChangeDirectory("../../../");
@@ -54,6 +55,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
     const unsigned int voxelGridSize = 34;
+    const unsigned int maxVertexCount = 4096;
 
     unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
     voxelData[0][0][1] = 1;
@@ -66,13 +68,16 @@ Vox::Renderer::Renderer(SDL_Window* window)
     voxelData[1][1][1] = 1;
     voxelData[31][31][31] = 1;
 
-    for (int x = 1; x < 9; ++x)
+    for (int x = 1; x < 10; ++x)
     {
-        for (int z = 1; z < 9; ++z)
+        for (int y = 17; y < 26; ++y)
         {
-            if (rand() % 5 != 0)
+            for (int z = 1; z < 10; ++z)
             {
-                voxelData[x][19][z] = 1;
+                if (rand() % 5 != 0)
+                {
+                    voxelData[x][y][z] = 1;
+                }
             }
         }
     }
@@ -87,7 +92,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, voxelSsbo);
 
     size_t voxelMeshStride = sizeof(float) * 16;
-    glNamedBufferStorage(voxelMeshSsbo, voxelMeshStride * 1024 * 6, NULL, GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(voxelMeshSsbo, voxelMeshStride * maxVertexCount, NULL, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, voxelMeshSsbo);
 
     unsigned int vertexCounterSsbo = 0;
@@ -398,7 +403,7 @@ void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
 
     glBindVertexArray(voxelMeshVao);
     glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, 1024);
+    glDrawArrays(GL_TRIANGLES, 0, 4096);
 }
 
 void Vox::Renderer::RenderDebugShapes()
