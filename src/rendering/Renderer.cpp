@@ -104,7 +104,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glEnableVertexAttribArray(3);
 
     voxelGenerationShader.Enable();
-    glDispatchCompute(4, 4, 4);
+    // glDispatchCompute(4, 4, 4);
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
@@ -141,8 +141,9 @@ Vox::Renderer::Renderer(SDL_Window* window)
             }
         }
     }
-    testVoxelGrid->GetVoxel(21, 18, 16).filled  = true;
-    testVoxelGrid->GetVoxel(18, 17, 16).filled  = true;
+    testVoxelGrid->GetVoxel(21, 18, 16).filled = true;
+    testVoxelGrid->GetVoxel(18, 17, 16).filled = true;
+    testVoxelGrid->GetVoxel(18, 17, 17).filled = true;
 
     testVoxelGrid->x = -16;
     testVoxelGrid->y = -16;
