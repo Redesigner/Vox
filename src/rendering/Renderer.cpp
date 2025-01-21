@@ -66,13 +66,13 @@ Vox::Renderer::Renderer(SDL_Window* window)
     voxelData[1][1][1] = 1;
     voxelData[31][31][31] = 1;
 
-    for (int x = 1; x < 33; ++x)
+    for (int x = 1; x < 9; ++x)
     {
-        for (int z = 1; z < 33; ++z)
+        for (int z = 1; z < 9; ++z)
         {
             if (rand() % 5 != 0)
             {
-                voxelData[x][5][z] = 1;
+                voxelData[x][19][z] = 1;
             }
         }
     }
