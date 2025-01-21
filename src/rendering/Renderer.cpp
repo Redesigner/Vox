@@ -53,17 +53,29 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
-    const unsigned int voxelGridSize = 32;
+    const unsigned int voxelGridSize = 34;
 
     unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
     voxelData[0][0][1] = 1;
     voxelData[0][0][0] = 1;
     voxelData[0][0][2] = 1;
     voxelData[0][0][3] = 1;
+    voxelData[1][0][1] = 1;
     voxelData[16][18][16] = 1;
     voxelData[3][3][2] = 1;
     voxelData[1][1][1] = 1;
     voxelData[31][31][31] = 1;
+
+    for (int x = 1; x < 33; ++x)
+    {
+        for (int z = 1; z < 33; ++z)
+        {
+            if (rand() % 5 != 0)
+            {
+                voxelData[x][5][z] = 1;
+            }
+        }
+    }
 
     unsigned int voxelBuffers[2];
     glCreateBuffers(2, voxelBuffers);
@@ -104,7 +116,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     glEnableVertexAttribArray(3);
 
     voxelGenerationShader.Enable();
-    // glDispatchCompute(4, 4, 4);
+    glDispatchCompute(1, 1, 1);
 
     gBuffer = std::make_unique<GBuffer>(800, 450);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
@@ -146,20 +158,20 @@ Vox::Renderer::Renderer(SDL_Window* window)
     testVoxelGrid->GetVoxel(18, 17, 17).filled = true;
     testVoxelGrid->GetVoxel(19, 17, 18).filled = true;
 
-    srand(5);
-    for (int x = 0; x < 5; ++x)
-    {
-        for (int z = 0; z < 5; ++z)
-        {
-            if (rand() % 5 != 0)
-            {
-                testVoxelGrid->GetVoxel(x, 16, z).filled = true;
-            }
-        }
-    }
+    //srand(5);
+    //for (int x = 0; x < 5; ++x)
+    //{
+    //    for (int z = 0; z < 5; ++z)
+    //    {
+    //        if (rand() % 5 != 0)
+    //        {
+    //            testVoxelGrid->GetVoxel(x, 16, z).filled = true;
+    //        }
+    //    }
+    //}
 
-    testVoxelGrid->GenerateSlice(16);
-    testVoxelGrid->GenerateSlice(17);
+    //testVoxelGrid->GenerateSlice(16);
+    //testVoxelGrid->GenerateSlice(17);
 
     testVoxelGrid->x = -16;
     testVoxelGrid->y = -16;
