@@ -262,7 +262,7 @@ void VoxelGrid::GenerateSlice(unsigned int y)
 				// either reached the end of our slice, or hit a wall
 				// regardless, our quad is complete!
 				quads.emplace_back(x, z, quadRight - x, quadLower - z);
-				x = quadRight + 1;
+				x = quadRight;
 			}
 		}
 	}
