@@ -146,6 +146,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
     testVoxelGrid->GetVoxel(18, 17, 17).filled = true;
     testVoxelGrid->GetVoxel(19, 17, 18).filled = true;
 
+    srand(5);
     for (int x = 0; x < 5; ++x)
     {
         for (int z = 0; z < 5; ++z)
