@@ -31,7 +31,11 @@
 
 int main()
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        VoxLog(Error, Rendering, "Failed to init SDL: {}", SDL_GetError());
+        return -1;
+    }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetSwapInterval(1);

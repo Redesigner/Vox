@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 
+#include "core/logging/Logging.h"
 #include "voxel/Octree.h"
 
 
@@ -115,6 +116,11 @@ void VoxelGrid::SetVoxel(Voxel voxel, unsigned int x, unsigned int y, unsigned i
 
 void VoxelGrid::GenerateMesh()
 {
+	for (int y = 0; y < height; ++y)
+	{
+		GenerateSlice(y);
+	}
+
 	indices.clear();
 
 	for (int x = 0; x < width; ++x)
@@ -202,6 +208,87 @@ void VoxelGrid::GenerateVertexObjects()
 	glEnableVertexAttribArray(3);
 
 	meshCreated = true;
+}
+
+void VoxelGrid::GenerateSlice(unsigned int y)
+{
+	// Track which voxels in this slice we've already visited
+	visitedVoxels.clear();
+	visitedVoxels = std::vector<std::vector<bool>>(depth, std::vector<bool>(width, false));
+
+	std::vector<Quad> quads;
+
+	// Sweep left to right, english reading direction
+	for (int z = 0; z < depth; ++z)
+	{
+		for (int x = 0; x < width; ++x)
+		{
+			// Find the first unexposed, visited voxel
+			if (!visitedVoxels[x][z] && FaceExposedTop(x, y, z))
+			{
+				visitedVoxels[x][z] = true;
+
+				// find the width of our quad first, by sweeping to the 'right'
+				int quadRight = x + 1;
+				for (; quadRight < width && !visitedVoxels[quadRight][z] && FaceExposedTop(quadRight, y, z); ++quadRight)
+				{
+					visitedVoxels[quadRight][z] = true;
+				}
+
+				// Place our cursor to the right of the last visited voxel,
+				// this will wrap around if it's outside the width when our loop checks it
+
+				int quadLower = z + 1;
+				for (; quadLower < depth; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						if (visitedVoxels[subX][quadLower] || !FaceExposedTop(subX, y, quadLower))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						++quadLower;
+						break;
+					}
+					
+					// 'Visit' all the voxels in this row since it is part of our quad
+					// but only after we're sure every one counted, otherwise, this shouldn't
+					// be part of our quad
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						visitedVoxels[subX][quadLower] = true;
+					}
+				}
+				// either reached the end of our slice, or hit a wall
+				// regardless, our quad is complete!
+				quads.emplace_back(x, z, quadRight - x, quadLower - z);
+				x = quadRight + 1;
+			}
+		}
+	}
+	if (quads.empty())
+	{
+		VoxLog(Display, Game, "No quads generated.");
+		return;
+	}
+
+	VoxLog(Display, Game, "Found {} quads on height {}", quads.size(), y);
+}
+
+bool VoxelGrid::FaceExposedTop(unsigned int x, unsigned int y, unsigned int z)
+{
+	if (x >= width || y >= height || z + 1 >= depth)
+	{
+		return false;
+	}
+
+	return GetVoxel(x, y, z).filled && !GetVoxel(x, y + 1, z).filled;
 }
 
 void VoxelGrid::UnloadVertexObjects()

@@ -15,6 +15,12 @@ namespace Octree
 
 class VoxelGrid
 {
+	// TEMP FOR TESTING
+	struct Quad
+	{
+		unsigned int x, y, w, h;
+	};
+
 	struct Vbos
 	{
 		unsigned int position, texCoord, normal, textureId, index;
@@ -42,6 +48,15 @@ public:
 
 private:
 	void GenerateVertexObjects();
+
+	// TEMP FOR ALGORITHM TESTING
+	void GenerateSlice(unsigned int y);
+
+	bool FaceExposedTop(unsigned int x, unsigned int y, unsigned int z);
+
+	std::vector<std::vector<bool>> visitedVoxels;
+	// END TEMP
+
 
 	void UnloadVertexObjects();
 
