@@ -18,7 +18,7 @@ struct Quad
     uint h;
 };
 
-layout(local_size_x = 32, local_size_y = 1) in;
+layout(local_size_x = 32, local_size_y = 6) in;
 
 layout(std430, binding = 0) buffer voxels
 {
@@ -39,23 +39,99 @@ void atomicInsertQuadTop(uint x, uint y, uint z, uint w, uint h)
 {
 	uvec3 quadOrigin = uvec3(x, y, z);
     uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
-    vertices[firstIndex] =      VoxelVertex(quadOrigin + uvec3(0, 0, 0), vec2(0.0, 0.0), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
-    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + uvec3(w, 0, 0), vec2(  w,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
-    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + uvec3(0, 0, h), vec2(0.0,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
-    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + uvec3(w, 0, h), vec2(  w,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
-    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + uvec3(0, 0, h), vec2(0.0,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
-    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + uvec3(w, 0, 0), vec2(  w, 0.0), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + uvec3(0, 1, 0), vec2(0.0, 0.0), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + uvec3(w, 1, 0), vec2(  w,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + uvec3(0, 1, h), vec2(0.0,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + uvec3(w, 1, h), vec2(  w,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + uvec3(0, 1, h), vec2(0.0,   h), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + uvec3(w, 1, 0), vec2(  w, 0.0), vec3(0.0, 1.0, 0.0), 1, vec3(1.0));
+}
+void atomicInsertQuadBottom(uint x, uint y, uint z, uint w, uint h)
+{
+	uvec3 quadOrigin = uvec3(x, y, z);
+    uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + uvec3(0, 0, 0), vec2(0.0, 0.0), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + uvec3(w, 0, 0), vec2(  w,   h), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + uvec3(0, 0, h), vec2(0.0,   h), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + uvec3(w, 0, h), vec2(  w,   h), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + uvec3(0, 0, h), vec2(0.0,   h), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + uvec3(w, 0, 0), vec2(  w, 0.0), vec3(0.0, -1.0, 0.0), 1, vec3(1.0));
+}
+void atomicInsertQuadLeft(uint x, uint y, uint z, uint w, uint h)
+{
+	uvec3 quadOrigin = uvec3(x, y, z);
+    uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + vec3(0, 0, 0), vec2(0.0, 0.0), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + vec3(0, 0, w), vec2(  w,   h), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + vec3(0, h, 0), vec2(0.0,   h), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + vec3(0, h, w), vec2(  w,   h), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + vec3(0, h, 0), vec2(0.0,   h), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + vec3(0, 0, w), vec2(  w, 0.0), vec3(-1.0, 0.0, 0.0), 1, vec3(1.0));
+}
+void atomicInsertQuadRight(uint x, uint y, uint z, uint w, uint h)
+{
+	uvec3 quadOrigin = uvec3(x, y, z);
+    uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + vec3(1, 0, 0), vec2(0.0, 0.0), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + vec3(1, 0, w), vec2(  w,   h), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + vec3(1, h, 0), vec2(0.0,   h), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + vec3(1, h, w), vec2(  w,   h), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + vec3(1, h, 0), vec2(0.0,   h), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + vec3(1, 0, w), vec2(  w, 0.0), vec3(1.0, 0.0, 0.0), 1, vec3(1.0));
+}
+void atomicInsertQuadFront(uint x, uint y, uint z, uint w, uint h)
+{
+	uvec3 quadOrigin = uvec3(x, y, z);
+    uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + vec3(0, 0, 1), vec2(0.0, 0.0), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + vec3(w, 0, 1), vec2(  w,   h), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + vec3(0, h, 1), vec2(0.0,   h), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + vec3(w, h, 1), vec2(  w,   h), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + vec3(0, h, 1), vec2(0.0,   h), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + vec3(w, 0, 1), vec2(  w, 0.0), vec3(0.0, 0.0, 1.0), 1, vec3(1.0));
+}
+void atomicInsertQuadBack(uint x, uint y, uint z, uint w, uint h)
+{
+	uvec3 quadOrigin = uvec3(x, y, z);
+    uint firstIndex = atomicCounterIncrement(vertexCount) * 6;
+    vertices[firstIndex] =      VoxelVertex(quadOrigin + vec3(0, 0, 0), vec2(0.0, 0.0), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
+    vertices[firstIndex + 1] =  VoxelVertex(quadOrigin + vec3(w, 0, 0), vec2(  w,   h), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
+    vertices[firstIndex + 2] =  VoxelVertex(quadOrigin + vec3(0, h, 0), vec2(0.0,   h), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
+    vertices[firstIndex + 3] =  VoxelVertex(quadOrigin + vec3(w, h, 0), vec2(  w,   h), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
+    vertices[firstIndex + 4] =  VoxelVertex(quadOrigin + vec3(0, h, 0), vec2(0.0,   h), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
+    vertices[firstIndex + 5] =  VoxelVertex(quadOrigin + vec3(w, 0, 0), vec2(  w, 0.0), vec3(0.0, 0.0, -1.0), 1, vec3(1.0));
 }
 
 bool FaceExposedTop(uint x, uint y, uint z)
 {
 	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 2][z + 1] == 0;
 }
-
-void main()
+bool FaceExposedBottom(uint x, uint y, uint z)
 {
-	bool visitedVoxels[size][size];
+	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y][z + 1] == 0;
+}
+bool FaceExposedLeft(uint x, uint y, uint z)
+{
+	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x][y + 1][z + 1] == 0;
+}
+bool FaceExposedRight(uint x, uint y, uint z)
+{
+	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 2][y + 1][z + 1] == 0;
+}
+bool FaceExposedFront(uint x, uint y, uint z)
+{
+	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 1][z + 2] == 0;
+}
+bool FaceExposedBack(uint x, uint y, uint z)
+{
+	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 1][z] == 0;
+}
 
+bool visitedVoxels[size][size];
+
+// =========SLICING ALGORITHMS=========
+void sliceTop(int y)
+{
 	for (int x = 0; x < size; ++x)
 	{
 		for (int y = 0; y < 32; ++y)
@@ -63,9 +139,6 @@ void main()
 			visitedVoxels[x][y] = false;
 		}
 	}
-
-	int y = int(gl_GlobalInvocationID.x);
-
 	for (int z = 0; z < size; ++z)
 	{
 		for (int x = 0; x < size; ++x)
@@ -118,4 +191,294 @@ void main()
 			}
 		}
 	}
+}
+
+void sliceBottom(int y)
+{
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < 32; ++y)
+		{
+			visitedVoxels[x][y] = false;
+		}
+	}
+	for (int z = 0; z < size; ++z)
+	{
+		for (int x = 0; x < size; ++x)
+		{
+			if (!visitedVoxels[x][z] && FaceExposedBottom(x, y, z))
+			{
+				visitedVoxels[x][z] = true;
+
+				int quadRight = x + 1;
+				for (; quadRight < size && !visitedVoxels[quadRight][z] && FaceExposedBottom(quadRight, y, z); ++quadRight)
+				{
+					visitedVoxels[quadRight][z] = true;
+				}
+
+				int quadLower = z + 1;
+				for (; quadLower < size; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						if (visitedVoxels[subX][quadLower] || !FaceExposedBottom(subX, y, quadLower))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						break;
+					}
+					
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						visitedVoxels[subX][quadLower] = true;
+					}
+				}
+				atomicInsertQuadBottom(x, y, z, quadRight - x, quadLower - z);
+				x = quadRight;
+			}
+		}
+	}
+}
+
+void sliceLeft(int x)
+{
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < 32; ++y)
+		{
+			visitedVoxels[x][y] = false;
+		}
+	}
+	for (int y = 0; y < size; ++y)
+	{
+		for (int z = 0; z < size; ++z)
+		{
+			if (!visitedVoxels[z][y] && FaceExposedLeft(x, y, z))
+			{
+				visitedVoxels[z][y] = true;
+
+				int quadRight = z + 1;
+				for (; quadRight < size && !visitedVoxels[quadRight][y] && FaceExposedLeft(x, y, quadRight); ++quadRight)
+				{
+					visitedVoxels[quadRight][y] = true;
+				}
+
+				int quadLower = y + 1;
+				for (; quadLower < size; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subZ = z; subZ < quadRight; ++subZ)
+					{
+						if (visitedVoxels[subZ][quadLower] || !FaceExposedLeft(x, quadLower, subZ))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						break;
+					}
+					
+					for (int subZ = z; subZ < quadRight; ++subZ)
+					{
+						visitedVoxels[subZ][quadLower] = true;
+					}
+				}
+				atomicInsertQuadLeft(x, y, z, quadRight - z, quadLower - y);
+				z = quadRight;
+			}
+		}
+	}
+}
+
+void sliceRight(int x)
+{
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < 32; ++y)
+		{
+			visitedVoxels[x][y] = false;
+		}
+	}
+	for (int y = 0; y < size; ++y)
+	{
+		for (int z = 0; z < size; ++z)
+		{
+			if (!visitedVoxels[z][y] && FaceExposedRight(x, y, z))
+			{
+				visitedVoxels[z][y] = true;
+
+				int quadRight = z + 1;
+				for (; quadRight < size && !visitedVoxels[quadRight][y] && FaceExposedRight(x, y, quadRight); ++quadRight)
+				{
+					visitedVoxels[quadRight][y] = true;
+				}
+
+				int quadLower = y + 1;
+				for (; quadLower < size; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subZ = z; subZ < quadRight; ++subZ)
+					{
+						if (visitedVoxels[subZ][quadLower] || !FaceExposedRight(x, quadLower, subZ))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						break;
+					}
+					
+					for (int subZ = z; subZ < quadRight; ++subZ)
+					{
+						visitedVoxels[subZ][quadLower] = true;
+					}
+				}
+				atomicInsertQuadRight(x, y, z, quadRight - z, quadLower - y);
+				z = quadRight;
+			}
+		}
+	}
+}
+void sliceFront(int z)
+{
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < 32; ++y)
+		{
+			visitedVoxels[x][y] = false;
+		}
+	}
+	for (int y = 0; y < size; ++y)
+	{
+		for (int x = 0; x < size; ++x)
+		{
+			if (!visitedVoxels[x][y] && FaceExposedFront(x, y, z))
+			{
+				visitedVoxels[x][y] = true;
+
+				int quadRight = x + 1;
+				for (; quadRight < size && !visitedVoxels[quadRight][y] && FaceExposedFront(quadRight, y, z); ++quadRight)
+				{
+					visitedVoxels[quadRight][y] = true;
+				}
+
+				int quadLower = y + 1;
+				for (; quadLower < size; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						if (visitedVoxels[subX][quadLower] || !FaceExposedFront(subX, quadLower, z))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						break;
+					}
+					
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						visitedVoxels[subX][quadLower] = true;
+					}
+				}
+				atomicInsertQuadFront(x, y, z, quadRight - x, quadLower - y);
+				x = quadRight;
+			}
+		}
+	}
+}
+void sliceBack(int z)
+{
+	for (int x = 0; x < size; ++x)
+	{
+		for (int y = 0; y < 32; ++y)
+		{
+			visitedVoxels[x][y] = false;
+		}
+	}
+	for (int y = 0; y < size; ++y)
+	{
+		for (int x = 0; x < size; ++x)
+		{
+			if (!visitedVoxels[x][y] && FaceExposedBack(x, y, z))
+			{
+				visitedVoxels[x][y] = true;
+
+				int quadRight = x + 1;
+				for (; quadRight < size && !visitedVoxels[quadRight][y] && FaceExposedBack(quadRight, y, z); ++quadRight)
+				{
+					visitedVoxels[quadRight][y] = true;
+				}
+
+				int quadLower = y + 1;
+				for (; quadLower < size; ++quadLower)
+				{
+					bool rowInterrupted = false;
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						if (visitedVoxels[subX][quadLower] || !FaceExposedBack(subX, quadLower, z))
+						{
+							rowInterrupted = true;
+							break;
+						}
+					}
+
+					if (rowInterrupted)
+					{
+						break;
+					}
+					
+					for (int subX = x; subX < quadRight; ++subX)
+					{
+						visitedVoxels[subX][quadLower] = true;
+					}
+				}
+				atomicInsertQuadBack(x, y, z, quadRight - x, quadLower - y);
+				x = quadRight;
+			}
+		}
+	}
+}
+
+void main()
+{
+	int y = int(gl_GlobalInvocationID.x);
+	
+	switch(gl_GlobalInvocationID.y)
+	{
+    case 0:
+        sliceTop(y);
+		break;
+	case 1:
+		sliceBottom(y);
+		break;
+	case 2:
+		sliceLeft(y);
+		break;
+	case 3:
+		sliceRight(y);
+		break;
+	case 4:
+		sliceFront(y);
+		break;
+	case 5:
+		sliceBack(y);
+		break;
+    }
 }
