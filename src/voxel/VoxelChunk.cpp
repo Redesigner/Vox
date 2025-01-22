@@ -6,21 +6,26 @@ namespace Vox
 	{
 	}
 
-	void VoxelChunk::SetVoxel(glm::ivec3 voxelPosition, Voxel voxel)
+	void VoxelChunk::SetVoxel(glm::uvec3 voxelPosition, Voxel voxel)
 	{
+		// Do not use 0 -- it should be reserved to avoid allocating an extra byte in our voxels
+		assert(voxel.materialId != 0, "Cannot set a voxel materialId to '0'! Use EraseVoxel instead");
+		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
 		Octree::PhysicsVoxel solidVoxel = Octree::PhysicsVoxel(true);
-		voxels.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, &voxel);
+		voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z] = voxel;
 		voxelCollisionMask.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, &solidVoxel);
 	}
 
-	void VoxelChunk::EraseVoxel(glm::ivec3 voxelPosition)
+	void VoxelChunk::EraseVoxel(glm::uvec3 voxelPosition)
 	{
-		voxels.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, nullptr);
+		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
+		voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z].materialId = 0;
 		voxelCollisionMask.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, nullptr);
 	}
 
-	Voxel VoxelChunk::GetVoxel(glm::ivec3 voxelPosition) const
+	Voxel VoxelChunk::GetVoxel(glm::uvec3 voxelPosition) const
 	{
-		return *voxels.GetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z);
+		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
+		return voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z];
 	}
 }

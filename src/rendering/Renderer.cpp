@@ -136,56 +136,8 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     skyShader.Enable();
     skyShader.SetUniformInt(skyShader.GetUniformLocation("color"), 0);
-    //int position = 0;
-    //rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "color"), position);
-    //rlSetUniform(GetShaderLocation(skyShader, "color"), &position, SHADER_UNIFORM_INT, 1);
 
     skyShader.SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
-    //position = 1;
-    //rlSetUniformSampler(rlGetLocationUniform(skyShader.id, "depth"), position);
-    //rlSetUniform(GetShaderLocation(skyShader, "depth"), &position, SHADER_UNIFORM_INT, 1);
-    //rlDisableShader();
-
-    //defaultMaterial.maps[MATERIAL_MAP_DIFFUSE].color = GRAY;
-    //defaultMaterial.shader = gBufferShader;
-
-    //int dataSize = 0;
-    //unsigned char* octreeRaw = LoadFileData("assets/voxels/test.vox", &dataSize);
-    //std::vector<char> octreeData;
-    //octreeData.insert(octreeData.begin(), octreeRaw, octreeRaw + dataSize);
-    //std::shared_ptr<Octree::Node> octree = Octree::Node::FromPacked(octreeData);
-    //testVoxelGrid = VoxelGrid::FromOctree(octree.get());
-    testVoxelGrid = std::make_shared<VoxelGrid>(32, 32, 32);
-    for (int x = 0; x < 32; ++x)
-    {
-        for (int y = 0; y < 16; ++y)
-        {
-            for (int z = 0; z < 32; ++z)
-            {
-                testVoxelGrid->GetVoxel(x, y, z).filled = true;
-            }
-        }
-    }
-    testVoxelGrid->GetVoxel(21, 18, 16).filled = true;
-    testVoxelGrid->GetVoxel(18, 17, 16).filled = true;
-    testVoxelGrid->GetVoxel(18, 17, 17).filled = true;
-    testVoxelGrid->GetVoxel(19, 17, 18).filled = true;
-
-    //srand(5);
-    //for (int x = 0; x < 5; ++x)
-    //{
-    //    for (int z = 0; z < 5; ++z)
-    //    {
-    //        if (rand() % 5 != 0)
-    //        {
-    //            testVoxelGrid->GetVoxel(x, 16, z).filled = true;
-    //        }
-    //    }
-    //}
-
-    //testVoxelGrid->GenerateSlice(16);
-    //testVoxelGrid->GenerateSlice(17);
-
     testVoxelGrid->x = -16;
     testVoxelGrid->y = -16;
     testVoxelGrid->z = -16;

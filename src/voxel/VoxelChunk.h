@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include <glm/glm.hpp>
 
 #include "voxel/CollisionOctree.h"
@@ -13,15 +15,15 @@ namespace Vox
 	public:
 		VoxelChunk();
 
-		void SetVoxel(glm::ivec3 voxelPosition, Voxel voxel);
+		void SetVoxel(glm::uvec3 voxelPosition, Voxel voxel);
 
-		void EraseVoxel(glm::ivec3 voxelPosition);
+		void EraseVoxel(glm::uvec3 voxelPosition);
 
-		Voxel GetVoxel(glm::ivec3 voxelPosition) const;
+		Voxel GetVoxel(glm::uvec3 voxelPosition) const;
 
 	private:
-
-		Octree::Node voxels = Octree::Node(dimensions);
+		std::array<std::array<std::array<Voxel, 32>, 32>, 32> voxels;
+		
 		Octree::CollisionNode voxelCollisionMask = Octree::CollisionNode(dimensions);
 
 		const unsigned int dimensions = 32;
