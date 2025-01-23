@@ -2,10 +2,12 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
+#include "rendering/VoxelChunkMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
 
@@ -75,6 +77,8 @@ namespace Vox
 
 		std::unique_ptr<VoxelShader> voxelShader;
 		std::unique_ptr<DeferredShader> deferredShader;
+
+		std::vector<VoxelChunkMesh> voxelMeshes;
 
 		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
