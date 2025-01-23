@@ -7,12 +7,11 @@
 #include <glm/vec3.hpp>
 
 #include "rendering/Light.h"
-#include "rendering/VoxelChunkMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
+#include "rendering/VoxelMesh.h"
 
 struct SDL_Window;
-class VoxelGrid;
 
 namespace Vox
 {
@@ -50,6 +49,8 @@ namespace Vox
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
+		VoxelMeshRef CreateVoxelMesh(glm::ivec2 position);
+
 	private:
 		void UpdateViewportDimensions(Editor* editor);
 
@@ -59,7 +60,11 @@ namespace Vox
 
 		void RenderDeferred();
 
-		void RenderVoxelGrid(VoxelGrid* voxelGrid);
+		void UpdateVoxelMeshes();
+
+		void RenderVoxelMeshes();
+
+		void RenderVoxelMesh(VoxelMesh& voxelMesh);
 
 		void RenderSky();
 
@@ -67,30 +72,26 @@ namespace Vox
 
 		void CopyViewportToTexture(RenderTexture& texture);
 
+		void CreateVoxelVao();
+
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<Framebuffer> deferredFramebuffer;
-
-		std::shared_ptr<VoxelGrid> testVoxelGrid;
-		std::unique_ptr<ArrayTexture> voxelTextures;
-
-		std::weak_ptr<Vox::PhysicsServer> debugPhysicsServer;
-
-		std::unique_ptr<VoxelShader> voxelShader;
 		std::unique_ptr<DeferredShader> deferredShader;
-
-		std::vector<VoxelChunkMesh> voxelMeshes;
-
 		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
 
+		std::unique_ptr<ArrayTexture> voxelTextures;
+		std::unique_ptr<VoxelShader> voxelShader;
+		std::vector<VoxelMesh> voxelMeshes;
+		ComputeShader voxelGenerationShader;
+		unsigned int voxelMeshVao;
+		std::vector<VoxelMesh> voxelChunkMeshes;
+
 		PixelShader skyShader;
 
+		std::weak_ptr<Vox::PhysicsServer> debugPhysicsServer;
 		PixelShader debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
-
-		ComputeShader voxelGenerationShader;
-
-		unsigned int voxelSsbo, voxelMeshSsbo, voxelMeshVao;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;
