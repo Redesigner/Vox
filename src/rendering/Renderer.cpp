@@ -54,8 +54,9 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
+    CreateVoxelVao();
+
     const unsigned int voxelGridSize = 34;
-    const unsigned int maxVertexCount = 16384;
 
     unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
     for (int x = 1; x < 10; ++x)
@@ -90,47 +91,6 @@ Vox::Renderer::Renderer(SDL_Window* window)
         }
     }
 
-    unsigned int voxelBuffers[2];
-    glCreateBuffers(2, voxelBuffers);
-    voxelSsbo = voxelBuffers[0];
-    voxelMeshSsbo = voxelBuffers[1];
-
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, voxelSsbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(voxelData), voxelData, GL_STREAM_READ);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, voxelSsbo);
-
-    size_t voxelMeshStride = sizeof(float) * 16;
-    glNamedBufferStorage(voxelMeshSsbo, voxelMeshStride * maxVertexCount, NULL, GL_DYNAMIC_STORAGE_BIT);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, voxelMeshSsbo);
-
-    unsigned int vertexCounterSsbo = 0;
-    glGenBuffers(1, &vertexCounterSsbo);
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, vertexCounterSsbo);
-    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(unsigned int), NULL, GL_DYNAMIC_READ);
-    GLuint* a = { 0 };
-    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), a);
-    //glNamedBufferStorage(vertexCounterSsbo, sizeof(int), NULL, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, vertexCounterSsbo);
-
-    voxelMeshVao = 0;
-    glGenVertexArrays(1, &voxelMeshVao);
-    glBindVertexArray(voxelMeshVao);
-    glBindBuffer(GL_ARRAY_BUFFER, voxelMeshSsbo);
-    size_t texCoordOffset = sizeof(float) * 4;
-    size_t normalOffest = sizeof(float) * 8;
-    size_t materialIdOffset = sizeof(float) * 11;
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, voxelMeshStride, 0); // position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(texCoordOffset)); // texCoord
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(normalOffest)); // normal
-    glEnableVertexAttribArray(2);
-    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, voxelMeshStride, reinterpret_cast<void*>(materialIdOffset)); // texCoord
-    glEnableVertexAttribArray(3);
-
-    voxelGenerationShader.Enable();
-    glDispatchCompute(1, 1, 1);
-
     gBuffer = std::make_unique<GBuffer>(800, 450);
     deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
 
@@ -138,10 +98,6 @@ Vox::Renderer::Renderer(SDL_Window* window)
     skyShader.SetUniformInt(skyShader.GetUniformLocation("color"), 0);
 
     skyShader.SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
-    testVoxelGrid->x = -16;
-    testVoxelGrid->y = -16;
-    testVoxelGrid->z = -16;
-    testVoxelGrid->GenerateMesh();
 
     voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
     voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
@@ -253,6 +209,12 @@ std::string Vox::Renderer::GetGlDebugTypeString(unsigned int errorCode)
     }
 }
 
+Vox::VoxelMeshRef Vox::Renderer::CreateVoxelMesh(glm::ivec2 position)
+{
+    voxelMeshes.emplace_back(position);
+    return VoxelMeshRef(&voxelMeshes, voxelMeshes.size() - 1);
+}
+
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
 {
     // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
@@ -306,7 +268,8 @@ void Vox::Renderer::RenderGBuffer()
         //}
     }
 
-    RenderVoxelGrid(testVoxelGrid.get());
+    UpdateVoxelMeshes();
+    RenderVoxelMeshes();
 }
 
 //void Vox::Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
@@ -347,22 +310,36 @@ void Vox::Renderer::RenderDeferred()
     glEnable(GL_DEPTH_TEST);
 }
 
-void Vox::Renderer::RenderVoxelGrid(VoxelGrid* voxelGrid)
+void Vox::Renderer::UpdateVoxelMeshes()
+{
+    voxelGenerationShader.Enable();
+    for (VoxelMesh& voxelMesh : voxelChunkMeshes)
+    {
+        if (voxelMesh.NeedsRegeneration())
+        {
+            voxelMesh.Regenerate();
+        }
+    }
+}
+
+void Vox::Renderer::RenderVoxelMeshes()
 {
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
     glClear(GL_DEPTH_BUFFER_BIT);
+    glBindVertexArray(voxelMeshVao);
     voxelShader->Enable();
-    voxelShader->SetModelMatrix(glm::translate(glm::mat4x4(1.0f), glm::vec3(voxelGrid->x, voxelGrid->y, voxelGrid->z)) /** MatrixScale(2.0f, 2.0f, 2.0f)*/);
     voxelShader->SetViewMatrix(camera->GetViewMatrix());
     voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
-    glBindVertexArray(voxelGrid->GetVaoId());
     voxelShader->SetArrayTexture(voxelTextures.get());
-    glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
+}
 
-    glBindVertexArray(voxelMeshVao);
-    //glMemoryBarrier(GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT);
+void Vox::Renderer::RenderVoxelMesh(VoxelMesh& voxelMesh)
+{
+    glBindVertexBuffer(0, voxelMesh.GetMeshId(), 0, sizeof(float) * 16);
+    voxelShader->SetModelMatrix(voxelMesh.GetTransform());
+    // glDrawElements(GL_TRIANGLES, voxelGrid->GetVertexCount(), GL_UNSIGNED_INT, 0);
     glDrawArrays(GL_TRIANGLES, 0, 16384);
 }
 
@@ -410,4 +387,22 @@ void Vox::Renderer::CopyViewportToTexture(RenderTexture& texture)
         0, 0, texture.GetWidth(), texture.GetHeight(),
         0, 0, texture.GetWidth(), texture.GetHeight(),
         GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, 0);
+}
+
+void Vox::Renderer::CreateVoxelVao()
+{
+    size_t voxelMeshStride = sizeof(float) * 16;
+    glGenVertexArrays(1, &voxelMeshVao);
+    glBindVertexArray(voxelMeshVao);
+    size_t texCoordOffset = sizeof(float) * 4;
+    size_t normalOffest = sizeof(float) * 8;
+    size_t materialIdOffset = sizeof(float) * 11;
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, voxelMeshStride, 0); // position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(texCoordOffset)); // texCoord
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(normalOffest)); // normal
+    glEnableVertexAttribArray(2);
+    glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, voxelMeshStride, reinterpret_cast<void*>(materialIdOffset)); // texCoord
+    glEnableVertexAttribArray(3);
 }
