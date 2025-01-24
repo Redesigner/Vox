@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include "rendering/VoxelMesh.h"
+#include "core/datatypes/Ref.h"
 #include "voxel/CollisionOctree.h"
 #include "voxel/Octree.h"
 #include "voxel/Voxel.h"
@@ -12,6 +12,7 @@
 namespace Vox
 {
 	class Renderer;
+	class VoxelMesh;
 
 	class VoxelChunk
 	{
@@ -30,7 +31,7 @@ namespace Vox
 	private:
 		glm::ivec2 chunkLocation;
 
-		VoxelMeshRef mesh;
+		Ref<VoxelMesh> mesh;
 
 		std::array<std::array<std::array<Voxel, 32>, 32>, 32> voxels;
 

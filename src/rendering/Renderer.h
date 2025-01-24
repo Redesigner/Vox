@@ -6,6 +6,7 @@
 
 #include <glm/vec3.hpp>
 
+#include "core/datatypes/Ref.h"
 #include "rendering/Light.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
@@ -49,7 +50,7 @@ namespace Vox
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
-		VoxelMeshRef CreateVoxelMesh(glm::ivec2 position);
+		Ref<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
 
 	private:
 		void UpdateViewportDimensions(Editor* editor);

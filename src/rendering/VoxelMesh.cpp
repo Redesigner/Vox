@@ -59,32 +59,4 @@ namespace Vox
 	{
 		return voxelMeshSsbo;
 	}
-
-	VoxelMeshRef::VoxelMeshRef()
-		:container(nullptr), index(0)
-	{
-	}
-
-	VoxelMeshRef::VoxelMeshRef(std::vector<VoxelMesh>* container, size_t index)
-		:container(container), index(index)
-	{
-	}
-
-	VoxelMesh* VoxelMeshRef::operator->()
-	{
-		assert(container);
-		return &container->at(index);
-	}
-
-	VoxelMesh& VoxelMeshRef::operator*()
-	{
-		assert(container);
-		return container->at(index);
-	}
-
-	const VoxelMesh& VoxelMeshRef::operator*() const
-	{
-		assert(container);
-		return container->at(index);
-	}
 }
