@@ -128,7 +128,7 @@ void Vox::Renderer::Render(Editor* editor)
     RenderGBuffer();
     RenderDeferred();
     RenderSky();
-    RenderDebugShapes();
+    //RenderDebugShapes();
 
     int width, height;
     SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
@@ -280,7 +280,7 @@ void Vox::Renderer::RenderGBuffer()
 //        albedo.g / 255.0f,
 //        albedo.b / 255.0f
 //    );
-//    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(&materialAlbedo));
+//    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(materialAlbedo));
 //    // The shader uniform location is automatically assigned when the shader is loaded by raylib
 //    // SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
 //    rlSetUniformMatrix(gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);

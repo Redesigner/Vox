@@ -16,6 +16,7 @@ namespace Vox
 		const unsigned int maxVertexCount = 1024 * 16 * 6;
 		glNamedBufferStorage(voxelDataSsbo, sizeof(int) * 32 * 32 * 32, NULL, GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT);
 		glNamedBufferStorage(voxelMeshSsbo, sizeof(float) * 16 * maxVertexCount, NULL, GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT);
+		glNamedBufferStorage(meshCounter, sizeof(unsigned int), NULL, GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT);
 		transform = glm::translate(glm::mat4x4(1.0f), glm::vec3(position.x - 16, -16, position.y - 16));
 	}
 
@@ -33,7 +34,8 @@ namespace Vox
 	void VoxelMesh::Regenerate()
 	{
 		unsigned int counterStart = 0;
-		glNamedBufferData(meshCounter, sizeof(unsigned int), &counterStart, GL_STREAM_READ);
+		//glNamedBufferData(meshCounter, sizeof(unsigned int), &counterStart, GL_STREAM_READ);
+		glNamedBufferSubData(meshCounter, 0, sizeof(unsigned int), &counterStart);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, voxelDataSsbo);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, voxelMeshSsbo);
 		glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, meshCounter);
