@@ -8,18 +8,21 @@ namespace Vox
 	VoxelMesh::VoxelMesh(glm::ivec2 position)
 	{
 		unsigned int buffers[3] = { 0 };
-		glGenBuffers(3, buffers);
+		glCreateBuffers(3, buffers);
 		voxelDataSsbo = buffers[0];
 		voxelMeshSsbo = buffers[1];
 		meshCounter = buffers[2];
 
-		transform = glm::translate(glm::mat4x4(1.0f), glm::vec3(position.x, 0, position.y));
+		const unsigned int maxVertexCount = 1024 * 16 * 6;
+		glNamedBufferStorage(voxelDataSsbo, sizeof(int) * 32 * 32 * 32, NULL, GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT);
+		glNamedBufferStorage(voxelMeshSsbo, sizeof(float) * 16 * maxVertexCount, NULL, GL_DYNAMIC_STORAGE_BIT | GL_MAP_WRITE_BIT);
+		transform = glm::translate(glm::mat4x4(1.0f), glm::vec3(position.x - 16, -16, position.y - 16));
 	}
 
 	VoxelMesh::~VoxelMesh()
 	{
-		unsigned int buffers[2] = { voxelDataSsbo, voxelMeshSsbo };
-		glDeleteBuffers(2, buffers);
+		unsigned int buffers[3] = { voxelDataSsbo, voxelMeshSsbo, meshCounter };
+		glDeleteBuffers(3, buffers);
 	}
 
 	bool VoxelMesh::NeedsRegeneration() const
@@ -41,7 +44,7 @@ namespace Vox
 
 	void VoxelMesh::UpdateData(std::array<std::array<std::array<Voxel, 32>, 32>, 32>* data)
 	{
-		glNamedBufferData(voxelMeshSsbo, sizeof(data), data, GL_DYNAMIC_DRAW);
+		glNamedBufferSubData(voxelDataSsbo, 0, sizeof(*data), data);
 		dirty = true;
 	}
 

@@ -23,20 +23,24 @@ namespace Vox
 
 		Octree::PhysicsVoxel solidVoxel = Octree::PhysicsVoxel(true);
 		voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z] = voxel;
-		voxelCollisionMask.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, &solidVoxel);
-		mesh->UpdateData(&voxels);
+		voxelCollisionMask.SetVoxel(voxelPosition.x - 16, voxelPosition.y - 16, voxelPosition.z - 16, &solidVoxel);
 	}
 
 	void VoxelChunk::EraseVoxel(glm::uvec3 voxelPosition)
 	{
 		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
 		voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z].materialId = 0;
-		voxelCollisionMask.SetVoxel(voxelPosition.x, voxelPosition.y, voxelPosition.z, nullptr);
+		voxelCollisionMask.SetVoxel(voxelPosition.x - 16, voxelPosition.y - 16, voxelPosition.z - 16, nullptr);
 	}
 
 	Voxel VoxelChunk::GetVoxel(glm::uvec3 voxelPosition) const
 	{
 		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
 		return voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z];
+	}
+
+	void VoxelChunk::FinalizeUpdate()
+	{
+		mesh->UpdateData(&voxels);
 	}
 }

@@ -2,7 +2,7 @@
 
 struct Voxel
 {
-	unsigned short materialId = 0;
+	unsigned int materialId = 0;
 
 	bool operator == (const Voxel& voxel) const;
 };

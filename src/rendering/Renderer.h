@@ -85,7 +85,6 @@ namespace Vox
 		std::vector<VoxelMesh> voxelMeshes;
 		ComputeShader voxelGenerationShader;
 		unsigned int voxelMeshVao;
-		std::vector<VoxelMesh> voxelChunkMeshes;
 
 		PixelShader skyShader;
 

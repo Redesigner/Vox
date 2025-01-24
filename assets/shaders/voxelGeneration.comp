@@ -23,7 +23,7 @@ layout(local_size_x = 32, local_size_y = 6) in;
 layout(std430, binding = 0) buffer voxels
 {
     // 32 cube with 1 voxel of padding on each side
-    uint[34][34][34] voxel;
+    uint[32][32][32] voxel;
 };
 
 layout(std430, binding = 1) buffer vertexOut
@@ -104,27 +104,27 @@ void atomicInsertQuadBack(uint x, uint y, uint z, uint w, uint h)
 
 bool FaceExposedTop(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 2][z + 1] == 0;
+	return voxel[x][y][z] == 1 && (y == 31 || voxel[x][y + 1][z] == 0);
 }
 bool FaceExposedBottom(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y][z + 1] == 0;
+	return voxel[x][y][z] == 1 && (y == 0 || voxel[x][y - 1][z] == 0);
 }
 bool FaceExposedLeft(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x][y + 1][z + 1] == 0;
+	return voxel[x][y][z] == 1 && (x == 0 || voxel[x - 1][y][z] == 0);
 }
 bool FaceExposedRight(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 2][y + 1][z + 1] == 0;
+	return voxel[x][y][z] == 1 && (x == 31 || voxel[x + 1][y][z] == 0);
 }
 bool FaceExposedFront(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 1][z + 2] == 0;
+	return voxel[x][y][z] == 1 && (z == 31 || voxel[x][y][z + 1] == 0);
 }
 bool FaceExposedBack(uint x, uint y, uint z)
 {
-	return voxel[x + 1][y + 1][z + 1] == 1 && voxel[x + 1][y + 1][z] == 0;
+	return voxel[x][y][z] == 1 && (z == 0 || voxel[x][y][z - 1] == 0);
 }
 
 bool visitedVoxels[size][size];
