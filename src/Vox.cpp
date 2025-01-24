@@ -28,6 +28,7 @@
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
 #include "voxel/CollisionOctree.h"
+#include "voxel/VoxelChunk.h"
 
 int main()
 {
@@ -89,6 +90,8 @@ int main()
         std::shared_ptr<Vox::DebugRenderer> debugRenderer = std::make_shared<Vox::DebugRenderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
 
+        Vox::VoxelChunk voxelChunk = Vox::VoxelChunk(glm::ivec2(0, 0), localRenderer);
+
         physicsServer->SetDebugRenderer(debugRenderer);
 
         unsigned int characterControllerId = physicsServer->CreateCharacterController(0.5f, 1.0f);
@@ -100,6 +103,8 @@ int main()
 
         Octree::CollisionNode collisionTest = Octree::CollisionNode(32);
         Octree::PhysicsVoxel testVoxel = Octree::PhysicsVoxel();
+        Voxel defaultVoxel = Voxel();
+        defaultVoxel.materialId = 1;
         testVoxel.solid = true;
         for (int x = -16; x < 16; ++x)
         {
@@ -108,9 +113,11 @@ int main()
                 for (int z = -16; z < 16; ++z)
                 {
                     collisionTest.SetVoxel(x, y, z, &testVoxel);
+                    voxelChunk.SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
                 }
             }
         }
+        voxelChunk.FinalizeUpdate();
 
         for (int x = 14; x < 16; ++x)
         {
@@ -171,7 +178,7 @@ int main()
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
         Vox::Editor* localEditor = editor.get();
         Vox::Camera* camera = renderer->GetCurrentCamera();
-        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, physicsServer, camera](int x, int y) {
+        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, physicsServer, camera, &voxelChunk](int x, int y) {
             float xViewport, yViewport;
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
@@ -201,7 +208,16 @@ int main()
                     debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, 0.0f), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, gridSize), JPH::Color::sRed, 5.0f);
                     debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, gridSize), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, 0.0f), JPH::Color::sRed, 5.0f);
                     // TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));  
-                    VoxLog(Display, Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());   
+                    VoxLog(Display, Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());
+                    voxelPosition += raycastResult.impactNormal;
+                    glm::uvec3 clickedVoxel = glm::uvec3(voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16);
+                    if (clickedVoxel.x >= 0 && clickedVoxel.x < 32 && clickedVoxel.y >= 0 && clickedVoxel.y < 32 && clickedVoxel.z >= 0 && clickedVoxel.z < 32)
+                    {
+                        Voxel newVoxel = Voxel();
+                        newVoxel.materialId = 1;
+                        voxelChunk.SetVoxel(clickedVoxel, newVoxel);
+                        voxelChunk.FinalizeUpdate();
+                    }
                 }
             }
             });
