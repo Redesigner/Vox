@@ -22,7 +22,7 @@ namespace Vox
 		CapsuleShapeSettings capsuleShapeSettings(halfHeight, radius);
 		ShapeSettings::ShapeResult capsuleShapeResult = capsuleShapeSettings.Create();
 		capsuleShape = capsuleShapeResult.Get();
-		Ref<CharacterVirtualSettings> settings = new CharacterVirtualSettings();
+		JPH::Ref<CharacterVirtualSettings> settings = new CharacterVirtualSettings();
 		settings->mMaxSlopeAngle =  glm::radians(50.0f);
 		settings->mMaxStrength = 5.0f;
 		settings->mShape = capsuleShape;

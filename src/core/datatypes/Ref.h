@@ -1,6 +1,9 @@
 #pragma once
 
+#include <utility>
 #include <vector>
+
+#include "core/datatypes/ObjectContainer.h"
 
 namespace Vox
 {
@@ -14,31 +17,20 @@ namespace Vox
 		{
 		}
 
-		Ref(std::vector<T>* container, size_t index)
-			:container(container), index(index)
+		Ref(ObjectContainer<T>* container, std::pair<size_t, int> id)
+			:container(container), index(id.first), id(id.second)
 		{
 		}
 
 		T* operator->()
 		{
 			assert(container);
-			return &container->at(index);
-		}
-
-		T& operator*()
-		{
-			assert(container);
-			return container->at(index);
-		}
-
-		const T& operator*() const
-		{
-			assert(container);
-			return container->at(index);
+			return container->Get(index, id);
 		}
 
 	private:
-		std::vector<T>* container;
+		ObjectContainer<T>* container;
 		size_t index;
+		int id;
 	};
 }
