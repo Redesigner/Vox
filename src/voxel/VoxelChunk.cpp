@@ -42,5 +42,6 @@ namespace Vox
 	void VoxelChunk::FinalizeUpdate()
 	{
 		mesh->UpdateData(&voxels);
+		mesh.MarkDirty();
 	}
 }

@@ -275,7 +275,7 @@ namespace Vox
 
 	Ref<VoxelBody> PhysicsServer::CreateVoxelBody()
 	{
-		return Ref<VoxelBody>(&voxelBodies, voxelBodies.Create());
+		return Ref<VoxelBody>(&voxelBodies, voxelBodies.Create(32));
 	}
 
 	bool PhysicsServer::RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut)
