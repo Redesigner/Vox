@@ -13,7 +13,7 @@ namespace Vox
 	// @TODO: What happens if our reference is invalidated?
 	public:
 		Ref()
-			:container(nullptr), index(0)
+			:container(nullptr), index(0), id(0)
 		{
 		}
 
@@ -26,6 +26,12 @@ namespace Vox
 		{
 			assert(container);
 			return container->Get(index, id);
+		}
+
+		void MarkDirty()
+		{
+			assert(container);
+			container->MarkDirty(index, id);
 		}
 
 	private:

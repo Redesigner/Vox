@@ -18,7 +18,7 @@ namespace Vox
 	private:
 		std::vector<T> backingData;
 		std::vector<int> backingIds;
-		std::vector<size_t> dirtyInstances;
+		std::vector<std::pair<size_t, int>> dirtyInstances;
 		unsigned int currentIndex;
 
 		// size_t emptyIndex
@@ -27,7 +27,7 @@ namespace Vox
 		{
 			backingData = std::vector<T>();
 			backingIds = std::vector<int>();
-			dirtyInstances = std::vector<size_t>();
+			dirtyInstances = std::vector<std::pair<size_t, int>>();
 			currentIndex = 0;
 		}
 
@@ -44,17 +44,17 @@ namespace Vox
 			return &backingData.at(index);
 		}
 
-		void MarkDirty(size_t index)
+		void MarkDirty(size_t index, int id)
 		{
-			for (const size_t& dirtyInstance : dirtyInstances)
+			for (const std::pair<size_t, int>& dirtyInstance : dirtyInstances)
 			{
-				if (dirtyInstance == index)
+				if (dirtyInstance.first == index)
 				{
 					return;
 				}
 			}
 
-			dirtyInstances.insert(index);
+			dirtyInstances.emplace_back(std::pair<size_t, int>(index, id));
 		}
 
 		template <class... Args>
@@ -74,7 +74,9 @@ namespace Vox
 		std::vector<T>::iterator begin() { return backingData.begin(); }
 		std::vector<T>::iterator end() { return backingData.end(); }
 
-		std::vector<T>::iterator dbegin() { return dirtyInstances.begin(); }
-		std::vector<T>::iterator dend() { return dirtyInstances.end(); }
+		const std::vector<std::pair<size_t, int>>& GetDiryIndices() const
+		{
+			return dirtyInstances;
+		}
 	};
 }

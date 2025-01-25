@@ -312,14 +312,15 @@ void Vox::Renderer::RenderDeferred()
 void Vox::Renderer::UpdateVoxelMeshes()
 {
     voxelGenerationShader.Enable();
-    for (VoxelMesh& voxelMesh : voxelMeshes)
+    for (const std::pair<size_t, int>& index : voxelMeshes.GetDiryIndices())
     {
-        if (voxelMesh.NeedsRegeneration())
+        if (VoxelMesh* mesh = voxelMeshes.Get(index.first, index.second))
         {
             VoxLog(Display, Rendering, "Updating voxel mesh...");
-            voxelMesh.Regenerate();
+            mesh->Regenerate();
         }
     }
+    voxelMeshes.ClearDirty();
 }
 
 void Vox::Renderer::RenderVoxelMeshes()
