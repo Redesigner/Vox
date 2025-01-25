@@ -37,6 +37,8 @@ namespace Vox
 		const JPH::uint cMaxBodyPairs = 1024;
 		const JPH::uint cMaxContactConstraints = 1024;
 
+		voxelBodies = ObjectContainer<VoxelBody>(8);
+
 		physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints,
 			broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
 
@@ -269,6 +271,11 @@ namespace Vox
 		BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
 		// physicsSystem.
 		return bodyId;
+	}
+
+	Ref<VoxelBody> PhysicsServer::CreateVoxelBody()
+	{
+		return Ref<VoxelBody>(&voxelBodies, voxelBodies.Create());
 	}
 
 	bool PhysicsServer::RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut)

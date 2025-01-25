@@ -6,6 +6,7 @@
 
 #include <glm/vec3.hpp>
 
+#include "core/datatypes/ObjectContainer.h"
 #include "core/datatypes/Ref.h"
 #include "rendering/Light.h"
 #include "rendering/shaders/ComputeShader.h"
@@ -83,7 +84,7 @@ namespace Vox
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;
-		std::vector<VoxelMesh> voxelMeshes;
+		ObjectContainer<VoxelMesh> voxelMeshes;
 		ComputeShader voxelGenerationShader;
 		unsigned int voxelMeshVao;
 

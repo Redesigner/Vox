@@ -7,21 +7,12 @@
 
 namespace Vox
 {
-	class VoxelChunkBody
+	class VoxelBody
 	{
 	public:
-
+		VoxelBody();
 
 	private:
 		JPH::BodyID bodyId;
-	};
-
-	struct VoxelChunkRef
-	{
-	public:
-		VoxelChunkRef(std::vector<VoxelChunkBody>* container, size_t index);
-
-	private:
-
 	};
 }

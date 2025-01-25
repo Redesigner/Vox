@@ -7,6 +7,8 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
+#include "core/datatypes/ObjectContainer.h"
+#include "core/datatypes/Ref.h"
 #include "physics/BroadPhaseLayer.h"
 #include "physics/CharacterController.h"
 #include "physics/ContactListener.h"
@@ -15,6 +17,7 @@
 #include "physics/ObjectPairLayerFilter.h"
 #include "physics/RaycastResultNormal.h"
 #include "physics/SpringArm.h"
+#include "physics/VoxelBody.h"
 
 namespace JPH
 {
@@ -41,6 +44,8 @@ namespace Vox
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
 		JPH::BodyID CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings);
+
+		Ref<VoxelBody> CreateVoxelBody();
 
 		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut);
 
@@ -113,6 +118,8 @@ namespace Vox
 		std::vector<CharacterController> characterControllers;
 
 		std::vector<SpringArm> springArms;
+
+		ObjectContainer<VoxelBody> voxelBodies;
 
 		BroadPhaseLayerImplementation broadPhaseLayerImplementation;
 		ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;
