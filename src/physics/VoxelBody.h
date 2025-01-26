@@ -23,8 +23,11 @@ namespace Vox
 	public:
 		VoxelBody(unsigned int dimensions);
 
-		void SetVoxel(glm::uvec3 position);
+		void CreateVoxel(glm::uvec3 position);
 		void EraseVoxel(glm::uvec3 position);
+
+		JPH::BodyID GetBodyId() const;
+		void SetBodyId(JPH::BodyID bodyId);
 
 		JPH::Ref<JPH::StaticCompoundShapeSettings> GetShapeSettings();
 

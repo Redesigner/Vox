@@ -90,7 +90,7 @@ int main()
         std::shared_ptr<Vox::DebugRenderer> debugRenderer = std::make_shared<Vox::DebugRenderer>();
         Vox::Renderer* localRenderer = renderer.get(); // This is just for a test
 
-        Vox::VoxelChunk voxelChunk = Vox::VoxelChunk(glm::ivec2(0, 0), localRenderer);
+        Vox::VoxelChunk voxelChunk = Vox::VoxelChunk(glm::ivec2(0, 0), physicsServer.get(), localRenderer);
 
         physicsServer->SetDebugRenderer(debugRenderer);
 
@@ -101,7 +101,6 @@ int main()
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
-        Octree::CollisionNode collisionTest = Octree::CollisionNode(32);
         Octree::PhysicsVoxel testVoxel = Octree::PhysicsVoxel();
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
@@ -112,31 +111,11 @@ int main()
             {
                 for (int z = -16; z < 16; ++z)
                 {
-                    collisionTest.SetVoxel(x, y, z, &testVoxel);
                     voxelChunk.SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
                 }
             }
         }
         voxelChunk.FinalizeUpdate();
-
-        for (int x = 14; x < 16; ++x)
-        {
-            for (int y = 0; y < 2; ++y)
-            {
-                for (int z = 14; z < 16; ++z)
-                {
-                    collisionTest.SetVoxel(x, y, z, &testVoxel);
-                }
-            }
-        }
-        collisionTest.SetVoxel(5, 2, 0, &testVoxel);
-        collisionTest.SetVoxel(2, 1, 0, &testVoxel);
-        collisionTest.SetVoxel(15, 2, 15, &testVoxel);
-
-        collisionTest.SetVoxel(-16, 0, -16, &testVoxel);
-        collisionTest.SetVoxel(15, 0, -16, &testVoxel);
-        collisionTest.SetVoxel(-16, 0, 15, &testVoxel);
-        collisionTest.SetVoxel(15, 0, 15, &testVoxel);
 
         editor->BindOnGLTFOpened([&renderer](std::string fileName)
             {
@@ -172,7 +151,6 @@ int main()
             });
 
         // JPH::BodyID boxId = physicsServer->CreateStaticBox(JPH::Vec3(32.0f, 16.0f, 32.0f), JPH::Vec3(0.0f, -8.0f, 0.0f));
-        physicsServer->CreateCompoundShape(collisionTest.MakeCompoundShape());
         JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(1.0f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();

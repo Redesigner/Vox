@@ -6,6 +6,7 @@
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Reference.h>
+#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 
 namespace JPH
 {
