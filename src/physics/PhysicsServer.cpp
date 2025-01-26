@@ -205,7 +205,7 @@ namespace Vox
 	void PhysicsServer::RenderDebugShapes()
 	{
 		JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
-		physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
+		// physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 		physicsSystem.DrawConstraints(debugRenderer.get());
 		for (CharacterController& characterController : characterControllers)
 		{
