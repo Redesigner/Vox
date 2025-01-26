@@ -128,7 +128,7 @@ void Vox::Renderer::Render(Editor* editor)
     RenderGBuffer();
     RenderDeferred();
     RenderSky();
-    //RenderDebugShapes();
+    RenderDebugShapes();
 
     int width, height;
     SDL_GetWindowSizeInPixels(mainWindow, &width, &height);

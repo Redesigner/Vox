@@ -95,6 +95,8 @@ namespace Vox
 
 		void UpdateSpringArms();
 
+		void UpdateVoxelBodies();
+
 		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
 
 		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);

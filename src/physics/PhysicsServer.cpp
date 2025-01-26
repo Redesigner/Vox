@@ -66,6 +66,7 @@ namespace Vox
 		++stepCount;
 		StepCharacterControllers();
 		UpdateSpringArms();
+		UpdateVoxelBodies();
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
 
@@ -246,6 +247,26 @@ namespace Vox
 		{
 			springArm.Update(this);
 		}
+	}
+
+	void PhysicsServer::UpdateVoxelBodies()
+	{
+		JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
+		for (const std::pair<size_t, int>& index : voxelBodies.GetDiryIndices())
+		{
+			if (VoxelBody* body = voxelBodies.Get(index.first, index.second))
+			{
+				if (!body->GetBodyId().IsInvalid())
+				{
+					VoxLog(Display, Physics, "Destroying voxel body.");
+					bodyInterface.RemoveBody(body->GetBodyId());
+					bodyInterface.DestroyBody(body->GetBodyId());
+				}
+				VoxLog(Display, Physics, "Creating new voxel body.");
+				body->SetBodyId(CreateCompoundShape(body->GetShapeSettings()));
+			}
+		}
+		voxelBodies.ClearDirty();
 	}
 
 	JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)
