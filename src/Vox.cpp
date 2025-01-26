@@ -101,10 +101,8 @@ int main()
 
         renderer->SetDebugPhysicsServer(physicsServer);
 
-        Octree::PhysicsVoxel testVoxel = Octree::PhysicsVoxel();
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
-        testVoxel.solid = true;
         for (int x = -16; x < 16; ++x)
         {
             for (int y = -16; y < 0; ++y)
@@ -149,9 +147,6 @@ int main()
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });
-
-        // JPH::BodyID boxId = physicsServer->CreateStaticBox(JPH::Vec3(32.0f, 16.0f, 32.0f), JPH::Vec3(0.0f, -8.0f, 0.0f));
-        JPH::BodyID playerCapsuleId = physicsServer->CreatePlayerCapsule(1.0f, 0.5f, JPH::Vec3(2.0f, 5.0f, 2.0f));
 
         Vox::InputService* inputService = Vox::ServiceLocator::GetInputService();
         Vox::Editor* localEditor = editor.get();
@@ -203,8 +198,6 @@ int main()
         while (!inputService->ShouldCloseWindow())
         {
             inputService->PollEvents();
-            JPH::Vec3 playerPhysicsPosition = physicsServer->GetObjectPosition(playerCapsuleId);
-            glm::vec3 playerPosition = glm::vec3(playerPhysicsPosition.GetX(), playerPhysicsPosition.GetY(), playerPhysicsPosition.GetZ());
             renderer->Render(editor.get());
         }
         runPhysics = false;
