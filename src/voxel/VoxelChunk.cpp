@@ -10,40 +10,41 @@ namespace Vox
 	{
 		mesh = renderer->CreateVoxelMesh(chunkLocation);
 		body = physicsServer->CreateVoxelBody();
+		voxels = std::make_unique<std::array<std::array<std::array<Voxel, 32>, 32>, 32>>();
 	}
 
 	void VoxelChunk::SetVoxel(glm::uvec3 voxelPosition, Voxel voxel)
 	{
 		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
 
-		if (voxel == voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z])
+		if (voxel == voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z])
 		{
 			return;
 		}
 
-		if (voxel.materialId == 0 && voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z].materialId != 0)
+		if (voxel.materialId == 0 && voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z].materialId != 0)
 		{
 			body->EraseVoxel(voxelPosition);
 			// body.MarkDirty();
 		}
-		else if (voxel.materialId != 0 && voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z].materialId == 0)
+		else if (voxel.materialId != 0 && voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z].materialId == 0)
 		{
 			body->CreateVoxel(voxelPosition);
 			// body.MarkDirty();
 		}
 
-		voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z] = voxel;
+		voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z] = voxel;
 	}
 
 	Voxel VoxelChunk::GetVoxel(glm::uvec3 voxelPosition) const
 	{
 		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
-		return voxels[voxelPosition.x][voxelPosition.y][voxelPosition.z];
+		return voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z];
 	}
 
 	void VoxelChunk::FinalizeUpdate()
 	{
-		mesh->UpdateData(&voxels);
+		mesh->UpdateData(voxels.get());
 		mesh.MarkDirty();
 		body.MarkDirty();
 	}
