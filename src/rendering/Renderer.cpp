@@ -116,6 +116,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
 Vox::Renderer::~Renderer()
 {
+    glDeleteBuffers(1, &voxelMeshVao);
 }
 
 void Vox::Renderer::Render(Editor* editor)
