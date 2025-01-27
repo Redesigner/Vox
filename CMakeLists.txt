@@ -34,11 +34,13 @@ FetchContent_Declare(
 set(SDLIMAGE_AVIF OFF)
 FETCHCONTENT_MAKEAVAILABLE(SDLImage)
 
-find_package(SDL3 CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(GLEW CONFIG REQUIRED)
-find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(GLEW CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(SDL3 CONFIG REQUIRED)
+find_package(tinyfiledialogs CONFIG REQUIRED)
+
+find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 
 # Add source to this project's executable.
 file (GLOB_RECURSE Vox_SRC
@@ -53,19 +55,22 @@ string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 # Include source directory to allow absolute paths
 target_include_directories(Vox PRIVATE "src/")
 
+target_link_libraries(Vox PRIVATE fmt::fmt)
+target_link_libraries(Vox PRIVATE GLEW::GLEW)
+target_link_libraries(Vox PRIVATE glm::glm)
+target_link_libraries(Vox PRIVATE Jolt)
 target_link_libraries(Vox PRIVATE SDL3::SDL3)
 target_link_libraries(Vox PRIVATE SDL3_image::SDL3_image)
-target_link_libraries(Vox PRIVATE glm::glm)
-target_link_libraries(Vox PRIVATE GLEW::GLEW)
 target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)
-target_link_libraries(Vox PRIVATE fmt::fmt)
-target_link_libraries(Vox PRIVATE Jolt)
 
 # Add Jolt Physics
 target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
 # Add ImGui
-target_include_directories(Vox PRIVATE "external")
+target_include_directories(Vox PRIVATE "external/imgui")
+
+# Add tinyglTF
+target_include_directories(Vox PRIVATE ${TINYGLTF_INCLUDE_DIRS})
 target_sources(Vox PRIVATE
 	"external/imgui/imgui.h"
 	"external/imgui/imgui.cpp"
