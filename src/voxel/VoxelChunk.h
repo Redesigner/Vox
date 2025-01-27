@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include <glm/glm.hpp>
 
@@ -35,7 +36,7 @@ namespace Vox
 
 		Ref<VoxelBody> body;
 
-		std::array<std::array<std::array<Voxel, 32>, 32>, 32> voxels;
+		std::unique_ptr<std::array<std::array<std::array<Voxel, 32>, 32>, 32>> voxels;
 
 		const unsigned int dimensions = 32;
 		
