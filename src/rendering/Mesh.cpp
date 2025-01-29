@@ -2,25 +2,38 @@
 
 namespace Vox
 {
-	Mesh::Mesh(tinygltf::Model& meshSource, unsigned int meshIndex)
+	Mesh::Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int indexBuffer, unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer)
+		:vertexCount(vertexCount), componentType(componentType), indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer)
 	{
-		tinygltf::Mesh& mesh = meshSource.meshes.at(meshIndex);
+	}
 
-		std::vector<int> requiredBufferViews;
-		// Find whichever bufferViews we need
+	unsigned int Mesh::GetVertexCount() const
+	{
+		return vertexCount;
+	}
 
-		for (tinygltf::Primitive primitive : mesh.primitives)
-		{
-			for (const std::pair<std::string, int>& attributes : primitive.attributes)
-			{
-				requiredBufferViews.emplace_back(attributes.second);
-			}
-		}
+	unsigned int Mesh::GetComponentType() const
+	{
+		return componentType;
+	}
 
-		std::vector<int> requiredBuffers;
-		for (int bufferView : requiredBufferViews)
-		{
-			meshSource.bufferViews[bufferView];
-		}
+	unsigned int Mesh::GetIndexBuffer() const
+	{
+		return indexBuffer;
+	}
+
+	unsigned int Mesh::GetPositionBuffer() const
+	{
+		return positionBuffer;
+	}
+
+	unsigned int Mesh::GetNormalBuffer() const
+	{
+		return normalBuffer;
+	}
+
+	unsigned int Mesh::GetUVBuffer() const
+	{
+		return uvBuffer;
 	}
 }
