@@ -54,6 +54,7 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
+    CreateMeshVao();
     CreateVoxelVao();
 
     const unsigned int voxelGridSize = 34;
@@ -270,6 +271,7 @@ void Vox::Renderer::RenderGBuffer()
         //}
     }
 
+    glBindVertexArray(meshVao);
     testModel->Render();
 
     UpdateVoxelMeshes();
@@ -403,19 +405,20 @@ void Vox::Renderer::CreateMeshVao()
 {
     // For this format, it's easiest to assume that our different attributes are not interleaved
     // Blender exports this way
-    glGenVertexArrays(1, &voxelMeshVao);
+    glGenVertexArrays(1, &meshVao);
+    glBindVertexArray(meshVao);
     // Position
-    glEnableVertexArrayAttrib(voxelMeshVao, 0);
-    glVertexArrayAttribFormat(voxelMeshVao, 0, 3, GL_FLOAT, false, 0);
-    glVertexArrayAttribBinding(voxelMeshVao, 0, 0);
+    glEnableVertexArrayAttrib(meshVao, 0);
+    glVertexArrayAttribFormat(meshVao, 0, 3, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(meshVao, 0, 0);
     // Normal
-    glEnableVertexArrayAttrib(voxelMeshVao, 1);
-    glVertexArrayAttribFormat(voxelMeshVao, 1, 3, GL_FLOAT, false, 0);
-    glVertexArrayAttribBinding(voxelMeshVao, 1, 0);
+    glEnableVertexArrayAttrib(meshVao, 1);
+    glVertexArrayAttribFormat(meshVao, 1, 3, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(meshVao, 1, 0);
     // TexCoord
-    glEnableVertexArrayAttrib(voxelMeshVao, 2);
-    glVertexArrayAttribFormat(voxelMeshVao, 2, 2, GL_FLOAT, false, 0);
-    glVertexArrayAttribBinding(voxelMeshVao, 2, 0);
+    glEnableVertexArrayAttrib(meshVao, 2);
+    glVertexArrayAttribFormat(meshVao, 2, 2, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(meshVao, 2, 0);
 }
 
 void Vox::Renderer::CreateVoxelVao()

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "rendering/Mesh.h"
+
 namespace tinygltf
 {
 	class Model;
@@ -23,5 +25,7 @@ namespace Vox
 		std::vector<unsigned int> bufferIds;
 
 		std::unique_ptr<tinygltf::Model> model;
+
+		std::vector<Mesh> meshes;
 	};
 }
