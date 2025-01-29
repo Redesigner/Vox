@@ -9,6 +9,7 @@
 #include "core/datatypes/ObjectContainer.h"
 #include "core/datatypes/Ref.h"
 #include "rendering/Light.h"
+#include "rendering/Model.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
 #include "rendering/VoxelMesh.h"
@@ -74,6 +75,8 @@ namespace Vox
 
 		void CopyViewportToTexture(RenderTexture& texture);
 
+		void CreateMeshVao();
+
 		void CreateVoxelVao();
 
 		std::unique_ptr<GBuffer> gBuffer;
@@ -81,6 +84,9 @@ namespace Vox
 		std::unique_ptr<DeferredShader> deferredShader;
 		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
+		unsigned int meshVao;
+
+		std::unique_ptr<Model> testModel;
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;

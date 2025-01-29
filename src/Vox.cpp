@@ -32,6 +32,7 @@
 
 int main()
 {
+    // Initialize SDL
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         VoxLog(Error, Rendering, "Failed to init SDL: {}", SDL_GetError());
@@ -46,6 +47,7 @@ int main()
     SDL_GL_MakeCurrent(window, context);
     GLenum glewResult = glewInit();
 
+    // Initialize OpenGL bindings
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -67,8 +69,9 @@ int main()
                 VoxLog(Error, Rendering, "OpenGL Error {}: {}", typeString, message);
                 break;
             }
-        }, 0);
+        }, 0); 
 
+    // Initialize imgui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();

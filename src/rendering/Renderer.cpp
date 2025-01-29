@@ -112,6 +112,8 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
+
+    testModel = std::make_unique<Model>("../../../assets/models/mushroom.glb");
 }
 
 Vox::Renderer::~Renderer()
@@ -268,6 +270,8 @@ void Vox::Renderer::RenderGBuffer()
         //}
     }
 
+    testModel->Render();
+
     UpdateVoxelMeshes();
     RenderVoxelMeshes();
 }
@@ -395,6 +399,25 @@ void Vox::Renderer::CopyViewportToTexture(RenderTexture& texture)
         GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, 0);
 }
 
+void Vox::Renderer::CreateMeshVao()
+{
+    // For this format, it's easiest to assume that our different attributes are not interleaved
+    // Blender exports this way
+    glGenVertexArrays(1, &voxelMeshVao);
+    // Position
+    glEnableVertexArrayAttrib(voxelMeshVao, 0);
+    glVertexArrayAttribFormat(voxelMeshVao, 0, 3, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(voxelMeshVao, 0, 0);
+    // Normal
+    glEnableVertexArrayAttrib(voxelMeshVao, 1);
+    glVertexArrayAttribFormat(voxelMeshVao, 1, 3, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(voxelMeshVao, 1, 0);
+    // TexCoord
+    glEnableVertexArrayAttrib(voxelMeshVao, 2);
+    glVertexArrayAttribFormat(voxelMeshVao, 2, 2, GL_FLOAT, false, 0);
+    glVertexArrayAttribBinding(voxelMeshVao, 2, 0);
+}
+
 void Vox::Renderer::CreateVoxelVao()
 {
     size_t voxelMeshStride = sizeof(float) * 16;
@@ -403,14 +426,6 @@ void Vox::Renderer::CreateVoxelVao()
     size_t texCoordOffset = sizeof(float) * 4;
     size_t normalOffest = sizeof(float) * 8;
     size_t materialIdOffset = sizeof(float) * 11;
-    //glVertexAttribPointer(0, 3, GL_FLOAT, false, voxelMeshStride, 0); // position
-    //glEnableVertexAttribArray(0);
-    //glVertexAttribPointer(1, 2, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(texCoordOffset)); // texCoord
-    //glEnableVertexAttribArray(1);
-    //glVertexAttribPointer(2, 3, GL_FLOAT, false, voxelMeshStride, reinterpret_cast<void*>(normalOffest)); // normal
-    //glEnableVertexAttribArray(2);
-    //glVertexAttribIPointer(3, 1, GL_UNSIGNED_INT, voxelMeshStride, reinterpret_cast<void*>(materialIdOffset)); // texCoord
-    //glEnableVertexAttribArray(3);
     glVertexAttribFormat(0, 3, GL_FLOAT, false, 0);
     glVertexAttribFormat(1, 2, GL_FLOAT, false, texCoordOffset);
     glVertexAttribFormat(2, 3, GL_FLOAT, false, normalOffest);
