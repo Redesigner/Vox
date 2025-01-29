@@ -69,8 +69,6 @@ target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 # Add ImGui
 target_include_directories(Vox PRIVATE "external/imgui")
 
-# Add tinyglTF
-target_include_directories(Vox PRIVATE ${TINYGLTF_INCLUDE_DIRS})
 target_sources(Vox PRIVATE
 	"external/imgui/imgui.h"
 	"external/imgui/imgui.cpp"
@@ -81,6 +79,9 @@ target_sources(Vox PRIVATE
 	"external/imgui/imgui_tables.cpp"
 	"external/imgui/imgui_widgets.cpp"
 )
+
+# Add tinyglTF
+target_include_directories(Vox PRIVATE ${TINYGLTF_INCLUDE_DIRS})
 
 set_property(TARGET Vox PROPERTY CXX_STANDARD 20)
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Vox)
