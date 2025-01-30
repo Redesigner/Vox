@@ -43,11 +43,12 @@ find_package(tinyfiledialogs CONFIG REQUIRED)
 find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 
 # Add source to this project's executable.
-file (GLOB_RECURSE Vox_SRC
-	"src/*.cpp"
-)
+# file (GLOB_RECURSE Vox_SRC
+#	"src/*.cpp"
+#)
 
-add_executable (Vox ${Vox_SRC})
+add_executable (Vox "")
+include ("src/sources.cmake")
 
 # Disable RTTI for compatibility with Jolt
 string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})

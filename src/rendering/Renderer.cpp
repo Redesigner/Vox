@@ -186,6 +186,18 @@ Vox::Camera* Vox::Renderer::GetCurrentCamera() const
     return camera.get();
 }
 
+bool Vox::Renderer::UploadModel(std::string alias, std::string relativeFilePath)
+{
+    if (uploadedModels.contains(alias))
+    {
+        VoxLog(Warning, Rendering, "Failed to upload model '{}'. A model already exists with that name.", alias);
+        return false;
+    }
+
+    uploadedModels.emplace(alias, relativeFilePath);
+    return true;
+}
+
 std::string Vox::Renderer::GetGlDebugTypeString(unsigned int errorCode)
 {
     switch (errorCode)
