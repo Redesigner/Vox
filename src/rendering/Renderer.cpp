@@ -39,8 +39,8 @@ Vox::Renderer::Renderer(SDL_Window* window)
     gBufferModelMatrixLocation = gBufferShader.GetUniformLocation("matModel");
     gBufferViewMatrixLocation = gBufferShader.GetUniformLocation("matView");
     gBufferProjectionMatrixLocation = gBufferShader.GetUniformLocation("matProjection");
-    materialRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
-    materialColorLocation = gBufferShader.GetUniformLocation("materialAlbedo");
+    gBufferRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
+    gBufferAlbedoLocation = gBufferShader.GetUniformLocation("materialAlbedo");
 
     voxelShader = std::make_unique<VoxelShader>();
     deferredShader = std::make_unique<DeferredShader>();
@@ -257,22 +257,13 @@ void Vox::Renderer::RenderGBuffer()
     //glClearDepth(0.0f);
 
     gBufferShader.Enable();
-    {
-        // Set camera matrices
-        gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, camera->GetViewMatrix());
-        gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, camera->GetProjectionMatrix());
-
-        //if (IsModelValid(testModel))
-        //{
-        //    for (int i = 0; i < testModel.meshCount; ++i)
-        //    {
-        //        DrawMeshGBuffer(&testModel.meshes[i], &testModel.materials[testModel.meshMaterial[i]], testModel.transform);
-        //    }
-        //}
-    }
+    // Set camera matrices
+    gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, camera->GetViewMatrix());
+    gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, camera->GetProjectionMatrix());
 
     glBindVertexArray(meshVao);
-    testModel->Render();
+    
+    testModel->Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
 
     UpdateVoxelMeshes();
     RenderVoxelMeshes();
@@ -332,10 +323,6 @@ void Vox::Renderer::UpdateVoxelMeshes()
 
 void Vox::Renderer::RenderVoxelMeshes()
 {
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
-    glClear(GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(voxelMeshVao);
     voxelShader->Enable();
     voxelShader->SetViewMatrix(camera->GetViewMatrix());

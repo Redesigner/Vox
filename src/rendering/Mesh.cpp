@@ -2,8 +2,10 @@
 
 namespace Vox
 {
-	Mesh::Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int indexBuffer, unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer)
-		:vertexCount(vertexCount), componentType(componentType), indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer)
+	Mesh::Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
+		unsigned int indexBuffer,unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer)
+		:vertexCount(vertexCount), componentType(componentType), materialIndex(materialIndex),
+			indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer)
 	{
 	}
 
@@ -15,6 +17,11 @@ namespace Vox
 	unsigned int Mesh::GetComponentType() const
 	{
 		return componentType;
+	}
+
+	unsigned int Mesh::GetMaterialIndex() const
+	{
+		return materialIndex;
 	}
 
 	unsigned int Mesh::GetIndexBuffer() const

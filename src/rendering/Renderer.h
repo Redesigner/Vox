@@ -84,6 +84,7 @@ namespace Vox
 		std::unique_ptr<DeferredShader> deferredShader;
 		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
+		int gBufferAlbedoLocation, gBufferRoughnessLocation;
 		unsigned int meshVao;
 
 		std::unique_ptr<Model> testModel;
@@ -102,7 +103,6 @@ namespace Vox
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;
-		int materialColorLocation, materialRoughnessLocation = 0;
 
 		std::unique_ptr<Vox::Camera> camera;
 
