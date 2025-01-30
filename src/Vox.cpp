@@ -103,7 +103,7 @@ int main()
         VoxLog(Display, Game, "Test log!");
 
         renderer->SetDebugPhysicsServer(physicsServer);
-
+        renderer->UploadModel("Mushroom", "../../../assets/models/mushroom.glb");
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
         for (int x = -16; x < 16; ++x)

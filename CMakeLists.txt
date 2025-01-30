@@ -38,7 +38,6 @@ find_package(fmt CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
-find_package(tinyfiledialogs CONFIG REQUIRED)
 
 find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 
@@ -48,7 +47,7 @@ find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 #)
 
 add_executable (Vox "")
-include ("src/sources.cmake")
+include ("sources.cmake")
 
 # Disable RTTI for compatibility with Jolt
 string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -62,7 +61,6 @@ target_link_libraries(Vox PRIVATE glm::glm)
 target_link_libraries(Vox PRIVATE Jolt)
 target_link_libraries(Vox PRIVATE SDL3::SDL3)
 target_link_libraries(Vox PRIVATE SDL3_image::SDL3_image)
-target_link_libraries(Vox PRIVATE tinyfiledialogs::tinyfiledialogs)
 
 # Add Jolt Physics
 target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)

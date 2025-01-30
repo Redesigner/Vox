@@ -4,7 +4,6 @@
 #include <string>
 
 #include <glm/vec2.hpp>
-#include "tinyfiledialogs.h"
 
 namespace Vox
 {

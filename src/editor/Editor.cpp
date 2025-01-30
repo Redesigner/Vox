@@ -3,7 +3,6 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
-#include <tinyfiledialogs.h>
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -141,15 +140,15 @@ namespace Vox
     void Editor::openGLTF()
     {
 
-        char* fileNameRaw = tinyfd_openFileDialog(NULL, NULL, 2, gltfFilter, "GLTF (*.gltf, *.glb)", false);
-        if (fileNameRaw)
-        {
-            onGLTFOpened(fileNameRaw);
-        }
-        else
-        {
-            VoxLog(Display, Input, "Dialog closed without selecting file.");
-        }
+        //char* fileNameRaw = tinyfd_openFileDialog(NULL, NULL, 2, gltfFilter, "GLTF (*.gltf, *.glb)", false);
+        //if (fileNameRaw)
+        //{
+        //    onGLTFOpened(fileNameRaw);
+        //}
+        //else
+        //{
+        //    VoxLog(Display, Input, "Dialog closed without selecting file.");
+        //}
     }
 
     Editor::Box::Box()

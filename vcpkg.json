@@ -1,9 +1,9 @@
 {
   "dependencies": [
     "fmt",
+    "libpng",
     "glew",
     "glm",
-    "tinyfiledialogs",
     "tinygltf",
     "sdl3"
   ]
