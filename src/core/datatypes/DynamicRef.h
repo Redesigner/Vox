@@ -3,20 +3,20 @@
 #include <utility>
 #include <vector>
 
-#include "core/datatypes/ObjectContainer.h"
+#include "core/datatypes/DynamicObjectContainer.h"
 
 namespace Vox
 {
 	template <typename T>
-	struct Ref
+	struct DynamicRef
 	{
 	public:
-		Ref()
+		DynamicRef()
 			:container(nullptr), index(0), id(0)
 		{
 		}
 
-		Ref(ObjectContainer<T>* container, std::pair<size_t, int> id)
+		DynamicRef(DynamicObjectContainer<T>* container, std::pair<size_t, int> id)
 			:container(container), index(id.first), id(id.second)
 		{
 		}
@@ -27,8 +27,14 @@ namespace Vox
 			return container->Get(index, id);
 		}
 
+		void MarkDirty()
+		{
+			assert(container);
+			container->MarkDirty(index, id);
+		}
+
 	private:
-		ObjectContainer<T>* container;
+		DynamicObjectContainer<T>* container;
 		size_t index;
 		int id;
 	};

@@ -6,8 +6,8 @@
 
 #include <glm/vec3.hpp>
 
-#include "core/datatypes/ObjectContainer.h"
-#include "core/datatypes/Ref.h"
+#include "core/datatypes/DynamicObjectContainer.h"
+#include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
 #include "rendering/Model.h"
 #include "rendering/shaders/ComputeShader.h"
@@ -52,7 +52,7 @@ namespace Vox
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
-		Ref<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
+		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
 
 	private:
 		void UpdateViewportDimensions(Editor* editor);
@@ -91,7 +91,7 @@ namespace Vox
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;
-		ObjectContainer<VoxelMesh> voxelMeshes;
+		DynamicObjectContainer<VoxelMesh> voxelMeshes;
 		ComputeShader voxelGenerationShader;
 		unsigned int voxelMeshVao;
 

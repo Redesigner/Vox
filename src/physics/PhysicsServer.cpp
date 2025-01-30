@@ -37,7 +37,7 @@ namespace Vox
 		const JPH::uint cMaxBodyPairs = 1024;
 		const JPH::uint cMaxContactConstraints = 1024;
 
-		voxelBodies = ObjectContainer<VoxelBody>(8);
+		voxelBodies = DynamicObjectContainer<VoxelBody>(8);
 
 		physicsSystem.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints,
 			broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
@@ -294,9 +294,9 @@ namespace Vox
 		return bodyId;
 	}
 
-	Ref<VoxelBody> PhysicsServer::CreateVoxelBody()
+	DynamicRef<VoxelBody> PhysicsServer::CreateVoxelBody()
 	{
-		return Ref<VoxelBody>(&voxelBodies, voxelBodies.Create(32));
+		return DynamicRef<VoxelBody>(&voxelBodies, voxelBodies.Create(32));
 	}
 
 	bool PhysicsServer::RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut)

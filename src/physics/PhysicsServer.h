@@ -7,8 +7,8 @@
 
 #include <Jolt/Physics/PhysicsSystem.h>
 
-#include "core/datatypes/ObjectContainer.h"
-#include "core/datatypes/Ref.h"
+#include "core/datatypes/DynamicObjectContainer.h"
+#include "core/datatypes/DynamicRef.h"
 #include "physics/BroadPhaseLayer.h"
 #include "physics/CharacterController.h"
 #include "physics/ContactListener.h"
@@ -45,7 +45,7 @@ namespace Vox
 
 		JPH::BodyID CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings);
 
-		Ref<VoxelBody> CreateVoxelBody();
+		DynamicRef<VoxelBody> CreateVoxelBody();
 
 		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut);
 
@@ -121,7 +121,7 @@ namespace Vox
 
 		std::vector<SpringArm> springArms;
 
-		ObjectContainer<VoxelBody> voxelBodies;
+		DynamicObjectContainer<VoxelBody> voxelBodies;
 
 		BroadPhaseLayerImplementation broadPhaseLayerImplementation;
 		ObjectVsBroadPhaseLayerFilterImplementation	objectVsBroadPhaseLayerFilter;

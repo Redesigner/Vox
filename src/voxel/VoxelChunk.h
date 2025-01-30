@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-#include "core/datatypes/Ref.h"
+#include "core/datatypes/DynamicRef.h"
 #include "physics/VoxelBody.h"
 #include "voxel/CollisionOctree.h"
 #include "voxel/Octree.h"
@@ -32,9 +32,9 @@ namespace Vox
 	private:
 		glm::ivec2 chunkLocation;
 
-		Ref<VoxelMesh> mesh;
+		DynamicRef<VoxelMesh> mesh;
 
-		Ref<VoxelBody> body;
+		DynamicRef<VoxelBody> body;
 
 		std::unique_ptr<std::array<std::array<std::array<Voxel, 32>, 32>, 32>> voxels;
 
