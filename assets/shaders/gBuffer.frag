@@ -6,8 +6,8 @@ layout (location = 3) out vec2 gMetallicRoughness;
 layout (location = 4) out float gDepth;
 
 in vec3 fragPosition;
-in vec2 fragTexCoord;
 in vec3 fragNormal;
+in vec2 fragTexCoord;
 
 uniform vec4 materialAlbedo;
 uniform float materialRoughness;

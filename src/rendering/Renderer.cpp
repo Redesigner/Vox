@@ -401,11 +401,11 @@ void Vox::Renderer::CreateMeshVao()
     // Normal
     glEnableVertexArrayAttrib(meshVao, 1);
     glVertexArrayAttribFormat(meshVao, 1, 3, GL_FLOAT, false, 0);
-    glVertexArrayAttribBinding(meshVao, 1, 0);
+    glVertexArrayAttribBinding(meshVao, 1, 1);
     // TexCoord
     glEnableVertexArrayAttrib(meshVao, 2);
     glVertexArrayAttribFormat(meshVao, 2, 2, GL_FLOAT, false, 0);
-    glVertexArrayAttribBinding(meshVao, 2, 0);
+    glVertexArrayAttribBinding(meshVao, 2, 2);
 }
 
 void Vox::Renderer::CreateVoxelVao()
