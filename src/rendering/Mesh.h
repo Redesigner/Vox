@@ -8,11 +8,14 @@ namespace Vox
 	class Mesh
 	{
 	public:
-		Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int indexBuffer, unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer);
+		Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
+			unsigned int indexBuffer, unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer);
 
 		unsigned int GetVertexCount() const;
 
 		unsigned int GetComponentType() const;
+
+		unsigned int GetMaterialIndex() const;
 
 		unsigned int GetIndexBuffer() const;
 
@@ -25,6 +28,7 @@ namespace Vox
 	private:
 		unsigned int vertexCount;
 		unsigned int componentType;
+		unsigned int materialIndex;
 		unsigned int indexBuffer, positionBuffer, normalBuffer, uvBuffer;
 	};
 }

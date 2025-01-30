@@ -4,7 +4,10 @@
 #include <string>
 #include <vector>
 
+#include <glm/mat4x4.hpp>
+
 #include "rendering/Mesh.h"
+#include "rendering/PBRMaterial.h"
 
 namespace tinygltf
 {
@@ -13,19 +16,25 @@ namespace tinygltf
 
 namespace Vox
 {
+	class Shader;
+
 	class Model
 	{
 	public:
 		Model(std::string filepath);
 		~Model();
 
-		void Render();
+		void Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
+
+		glm::mat4x4 GetMatrix() const;
 
 	private:
 		std::vector<unsigned int> bufferIds;
 
-		std::unique_ptr<tinygltf::Model> model;
-
 		std::vector<Mesh> meshes;
+
+		std::vector<PBRMaterial> materials;
+
+		glm::mat4x4 transform;
 	};
 }

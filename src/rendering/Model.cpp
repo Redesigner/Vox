@@ -1,14 +1,15 @@
 #include "Model.h"
 
-#include <GL/glew.h>
-
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
+#include <GL/glew.h>
+#include <glm/ext/matrix_transform.hpp>
 #include <tiny_gltf.h>
 
 #include "core/logging/Logging.h"
+#include "rendering/shaders/Shader.h"
 
 namespace Vox
 {
@@ -17,23 +18,34 @@ namespace Vox
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
-		model = std::make_unique<tinygltf::Model>();
-		bool ret = loader.LoadBinaryFromFile(model.get(), &err, &warn, filepath);
+		tinygltf::Model model;
+		bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
 
 		// Buffer our data into opengl
 		// One GL buffer corresponds to a bufferview
-		bufferIds = std::vector<unsigned int>(model->bufferViews.size(), 0);
-		glCreateBuffers(model->bufferViews.size(), bufferIds.data());
-		for (int i = 0; i < model->bufferViews.size(); ++i)
+		bufferIds = std::vector<unsigned int>(model.bufferViews.size(), 0);
+		glCreateBuffers(model.bufferViews.size(), bufferIds.data());
+		for (int i = 0; i < model.bufferViews.size(); ++i)
 		{
-			tinygltf::BufferView bufferView = model->bufferViews[i];
-			glNamedBufferData(bufferIds[i], bufferView.byteLength, model->buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+			tinygltf::BufferView bufferView = model.bufferViews[i];
+			glNamedBufferData(bufferIds[i], bufferView.byteLength, model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
-		for (const tinygltf::Mesh& mesh : model->meshes)
+		for (const tinygltf::Material& material : model.materials)
+		{
+			const std::vector<double>& color = material.pbrMetallicRoughness.baseColorFactor;
+			materials.emplace_back(glm::vec4(color[0], color[1], color[2], color[3]), material.pbrMetallicRoughness.roughnessFactor, material.pbrMetallicRoughness.metallicFactor);
+		}
+
+		for (const tinygltf::Mesh& mesh : model.meshes)
 		{
 			for (const tinygltf::Primitive& primitive : mesh.primitives)
 			{
+				if (primitive.attributes.size() > 3)
+				{
+					VoxLog(Warning, Rendering, "GLTF model has more than three attributes. Models currently only support having POSITION, NORMAL, and TEXCOORD_0.");
+				}
+
 				auto positionBuffer = primitive.attributes.find("POSITION");
 				if (positionBuffer == primitive.attributes.end())
 				{
@@ -55,14 +67,20 @@ namespace Vox
 					break;
 				}
 
-				const unsigned int indexCount = model->accessors[primitive.indices].count;
-				const unsigned int indexBufferId = bufferIds[model->accessors[primitive.indices].bufferView];
-				const unsigned int positionBufferId = bufferIds[model->accessors[positionBuffer->second].bufferView];
-				const unsigned int normalBufferId = bufferIds[model->accessors[normalBuffer->second].bufferView];
-				const unsigned int uvBufferId = bufferIds[model->accessors[uvBuffer->second].bufferView];
-				meshes.emplace_back(indexCount, model->accessors[primitive.indices].componentType, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
+				const unsigned int indexCount = model.accessors[primitive.indices].count;
+				const unsigned int indexBufferId = bufferIds[model.accessors[primitive.indices].bufferView];
+				const unsigned int positionBufferId = bufferIds[model.accessors[positionBuffer->second].bufferView];
+				const unsigned int normalBufferId = bufferIds[model.accessors[normalBuffer->second].bufferView];
+				const unsigned int uvBufferId = bufferIds[model.accessors[uvBuffer->second].bufferView];
+				meshes.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
 			}
 		}
+
+		transform = glm::identity<glm::mat4x4>();
+		transform = glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		size_t separatorLocation = filepath.rfind('/') + 1;
+		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), meshes.size());
 	}
 
 	Model::~Model()
@@ -70,42 +88,30 @@ namespace Vox
 		glDeleteBuffers(bufferIds.size(), bufferIds.data());
 	}
 
-	void Model::Render()
+	// @TODO: store uniforms in a more easily accessbile format?
+	void Model::Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
+		shader.SetUniformMatrix(modelUniformLocation, transform);
 		// Assume our VAO is already bound?
 
 		// Render primitives one at a time;
 
 		for (const Mesh& mesh : meshes)
 		{
+			const PBRMaterial& material = materials[mesh.GetMaterialIndex()];
+			shader.SetUniformColor(colorUniformLocation, material.albedo);
+			shader.SetUniformFloat(roughnessUniformLocation, material.roughness);
+
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBuffer());
 			glBindVertexBuffer(0, mesh.GetPositionBuffer(), 0, sizeof(float) * 3);
 			glBindVertexBuffer(1, mesh.GetNormalBuffer(), 0, sizeof(float) * 3);
 			glBindVertexBuffer(2, mesh.GetUVBuffer(), 0, sizeof(float) * 2);
 			glDrawElements(GL_TRIANGLES, mesh.GetVertexCount(), mesh.GetComponentType(), 0);
 		}
+	}
 
-		/*
-		for (const tinygltf::Mesh& mesh : model->meshes)
-		{
-			for (const tinygltf::Primitive& primitive : mesh.primitives)
-			{
-				// This is not in order...
-				auto accessorIterator = primitive.attributes.cbegin();
-				for (int i = 0; i < primitive.attributes.size(); ++i)
-				{
-					tinygltf::Accessor& accessor = model->accessors[accessorIterator->second];
-					tinygltf::BufferView& bufferView = model->bufferViews[accessor.bufferView];
-					glBindVertexBuffer(i, bufferIds[accessor.bufferView], bufferView.byteOffset, bufferView.byteStride);
-					++accessorIterator;
-				}
-
-				tinygltf::Accessor& indexAccessor = model->accessors[primitive.indices];
-				tinygltf::BufferView& indexBufferView = model->bufferViews[indexAccessor.bufferView];
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIds[indexBufferView.buffer]);
-				glDrawElements(primitive.mode, indexAccessor.count, indexAccessor.componentType, 0);
-			}
-		}
-		*/
+	glm::mat4x4 Model::GetMatrix() const
+	{
+		return transform;
 	}
 }
