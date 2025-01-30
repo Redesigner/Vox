@@ -213,9 +213,9 @@ std::string Vox::Renderer::GetGlDebugTypeString(unsigned int errorCode)
     }
 }
 
-Vox::Ref<Vox::VoxelMesh> Vox::Renderer::CreateVoxelMesh(glm::ivec2 position)
+Vox::DynamicRef<Vox::VoxelMesh> Vox::Renderer::CreateVoxelMesh(glm::ivec2 position)
 {
-    return Vox::Ref<VoxelMesh>(&voxelMeshes, voxelMeshes.Create(position));
+    return Vox::DynamicRef<VoxelMesh>(&voxelMeshes, voxelMeshes.Create(position));
 }
 
 void Vox::Renderer::UpdateViewportDimensions(Editor* editor)
