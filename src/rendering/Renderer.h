@@ -10,6 +10,7 @@
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
+#include "rendering/mesh/MeshInstanceContainer.h"
 #include "rendering/mesh/Model.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
@@ -96,8 +97,6 @@ namespace Vox
 		int gBufferAlbedoLocation, gBufferRoughnessLocation;
 		unsigned int meshVao;
 
-		std::unique_ptr<Model> testModel;
-
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;
 		DynamicObjectContainer<VoxelMesh> voxelMeshes;
@@ -105,7 +104,7 @@ namespace Vox
 		unsigned int voxelMeshVao;
 
 		// A container holding all of our meshes to be retrieved later
-		std::unordered_map<std::string, Model> uploadedModels;
+		std::unordered_map<std::string, MeshInstanceContainer> uploadedModels;
 
 		PixelShader skyShader;
 
@@ -123,7 +122,5 @@ namespace Vox
 		std::unique_ptr<FullscreenQuad> quad;
 
 		std::unique_ptr<RenderTexture> viewportTexture;
-		// Material defaultMaterial;
-		// Model testModel;
 	};
 }

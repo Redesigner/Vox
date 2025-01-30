@@ -26,6 +26,7 @@ target_sources(Vox PRIVATE
 	"src/rendering/Texture.cpp"
 	"src/rendering/mesh/Mesh.cpp"
 	"src/rendering/mesh/MeshInstance.cpp"
+	"src/rendering/mesh/MeshInstanceContainer.cpp"
 	"src/rendering/mesh/Model.cpp"
 	"src/rendering/mesh/VoxelMesh.cpp"
 	"src/rendering/shaders/ComputeShader.cpp"

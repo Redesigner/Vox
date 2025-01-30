@@ -113,8 +113,6 @@ Vox::Renderer::Renderer(SDL_Window* window)
 
     lightUniformLocations = LightUniformLocations(deferredShader.get());
     testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
-
-    testModel = std::make_unique<Model>("../../../assets/models/mushroom.glb");
 }
 
 Vox::Renderer::~Renderer()
@@ -194,7 +192,8 @@ bool Vox::Renderer::UploadModel(std::string alias, std::string relativeFilePath)
         return false;
     }
 
-    uploadedModels.emplace(alias, relativeFilePath);
+    auto newMeshInstance = uploadedModels.emplace(alias, 8);
+    newMeshInstance.first->second.LoadMesh(relativeFilePath);
     return true;
 }
 
@@ -274,8 +273,11 @@ void Vox::Renderer::RenderGBuffer()
     gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, camera->GetProjectionMatrix());
 
     glBindVertexArray(meshVao);
-    
-    testModel->Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
+
+    for (auto& meshes : uploadedModels)
+    {
+        meshes.second.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
+    }
 
     UpdateVoxelMeshes();
     RenderVoxelMeshes();
