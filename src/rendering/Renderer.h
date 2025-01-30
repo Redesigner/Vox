@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/vec3.hpp>
@@ -9,10 +10,10 @@
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
-#include "rendering/Model.h"
+#include "rendering/mesh/Model.h"
+#include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
-#include "rendering/VoxelMesh.h"
 
 struct SDL_Window;
 
@@ -49,6 +50,14 @@ namespace Vox
 		void SetCameraTarget(glm::vec3 target);
 
 		Camera* GetCurrentCamera() const;
+
+		/**
+		 * @brief Uploads a glTF model to the GPU
+		 * @param alias the name to identify the model by
+		 * @param relativeFilePath file path of the model, relative to 'assets'
+		 * @return true if the model was loaded successfully, false otherwise
+		 */
+		bool UploadModel(std::string alias, std::string relativeFilePath);
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
@@ -94,6 +103,9 @@ namespace Vox
 		DynamicObjectContainer<VoxelMesh> voxelMeshes;
 		ComputeShader voxelGenerationShader;
 		unsigned int voxelMeshVao;
+
+		// A container holding all of our meshes to be retrieved later
+		std::unordered_map<std::string, Model> uploadedModels;
 
 		PixelShader skyShader;
 

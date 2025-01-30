@@ -6,7 +6,7 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "rendering/Mesh.h"
+#include "rendering/mesh/Mesh.h"
 #include "rendering/PBRMaterial.h"
 
 namespace tinygltf
