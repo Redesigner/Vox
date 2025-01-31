@@ -26,6 +26,13 @@ namespace Vox
 
 		position = glm::vec3(0.0f);
 		rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+
+		ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
+			if (pressed && characterController->IsGrounded())
+			{
+				characterController->AddImpulse(JPH::Vec3(0.0f, 6.0f, 0.0f));
+			}
+			});
 	}
 
 	void Character::Update()
