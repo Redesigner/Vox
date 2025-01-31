@@ -17,6 +17,7 @@
 #include <SDL3/SDL_opengl.h>
 #include <SDL3/SDL_video.h>
 
+#include "character/Character.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/services/InputService.h"
@@ -28,6 +29,7 @@
 #include "physics/TypeConversions.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
+#include "rendering/mesh/MeshInstance.h"
 #include "rendering/Renderer.h"
 #include "voxel/CollisionOctree.h"
 #include "voxel/VoxelChunk.h"
@@ -108,12 +110,9 @@ int main()
 
         renderer->SetDebugPhysicsServer(physicsServer);
         renderer->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
-        Ref<MeshInstance> meshInstance = renderer->CreateMeshInstance("mushroom");
-        if (meshInstance)
-        {
-            meshInstance->SetTransform(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 10.0f, 0.0f)));
-        }
-        renderer->CreateMeshInstance("mushroom");
+
+        Ref<MeshInstance> mushroom = renderer->CreateMeshInstance("mushroom");
+        Character character = Character(characterController, mushroom);
 
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
@@ -212,6 +211,7 @@ int main()
         while (!inputService->ShouldCloseWindow())
         {
             inputService->PollEvents();
+            character.Update();
             renderer->Render(editor.get());
         }
         runPhysics = false;

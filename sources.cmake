@@ -41,4 +41,4 @@ target_sources(Vox PRIVATE
 	"src/voxel/VoxelChunk.cpp"
 	"src/voxel/VoxelGrid.cpp"
 	"src/voxel/VoxelWorld.cpp"
-)
+ "src/character/Character.cpp")
