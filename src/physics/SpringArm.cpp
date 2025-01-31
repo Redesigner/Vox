@@ -18,7 +18,6 @@ namespace Vox
 		origin = JPH::Vec3::sZero();
 		originType = OriginType::CharacterOrigin;
 		eulerRotation = JPH::Vec3::sZero();
-		originCharacterId = 0;
 		originBody = JPH::BodyID();
 		resultPosition = JPH::Vec3::sZero();
 		springLength = 0.0f;
@@ -43,10 +42,10 @@ namespace Vox
 		originBody = bodyId;
 	}
 
-	void SpringArm::SetOrigin(unsigned int characterControllerId)
+	void SpringArm::SetOrigin(Ref<CharacterController> originCharacterIn)
 	{
 		originType = OriginType::CharacterOrigin;
-		originCharacterId = characterControllerId;
+		originCharacter = originCharacterIn;
 	}
 
 	JPH::Vec3 SpringArm::GetOrigin() const
@@ -92,8 +91,8 @@ namespace Vox
 
 			case OriginType::CharacterOrigin:
 			{
-				origin = physicsServer->GetCharacterControllerPosition(originCharacterId);
-				originRotation = physicsServer->GetCharacterControllerRotation(originCharacterId).GetEulerAngles();
+				origin = originCharacter->GetPosition();
+				originRotation = originCharacter->GetRotation().GetEulerAngles();
 			}
 		}
 		origin += springOffset;

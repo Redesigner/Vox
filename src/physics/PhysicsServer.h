@@ -9,6 +9,7 @@
 
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
+#include "core/datatypes/Ref.h"
 #include "physics/BroadPhaseLayer.h"
 #include "physics/CharacterController.h"
 #include "physics/ContactListener.h"
@@ -34,9 +35,6 @@ namespace Vox
 		PhysicsServer();
 		~PhysicsServer();
 
-		using CharacterControllerId = unsigned int;
-		using SpringArmId = unsigned int;
-
 		void Step();
 
 		JPH::BodyID CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position);
@@ -51,30 +49,11 @@ namespace Vox
 
 
 		// Character Controller functions
-		// @TODO: move these over to a custom reference class
-		CharacterControllerId CreateCharacterController(float radius, float halfHeight);
+		Ref<CharacterController> CreateCharacterController(float radius, float halfHeight);
 
-		JPH::Vec3 GetCharacterControllerVelocity(CharacterControllerId id) const;
+		Ref<SpringArm> CreateSpringArm(Ref<CharacterController>& id);
 
-		JPH::Vec3 GetCharacterControllerPosition(CharacterControllerId id) const;
-
-		JPH::Quat GetCharacterControllerRotation(CharacterControllerId id) const;
-
-		void SetCharacterControllerYaw(CharacterControllerId id, float yaw);
-
-
-		SpringArmId CreateSpringArm(CharacterControllerId id);
-
-		SpringArmId CreateSpringArm(JPH::BodyID bodyId);
-
-		void SetSpringArmEulerRotation(SpringArmId id, JPH::Vec3 rotation);
-
-		JPH::Vec3 GetSpringArmEulerRotation(SpringArmId id) const;
-
-		JPH::Vec3 GetSpringArmResult(SpringArmId id) const;
-
-		JPH::Vec3 GetSpringArmOrigin(SpringArmId id) const;
-
+		Ref<SpringArm> CreateSpringArm(JPH::BodyID bodyId);
 
 		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
@@ -101,10 +80,6 @@ namespace Vox
 
 		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
 
-		const SpringArm* GetSpringArm(SpringArmId id) const;
-		SpringArm* GetSpringArm(SpringArmId id);
-
-
 		JPH::PhysicsSystem physicsSystem;
 
 		JPH::uint stepCount = 0;
@@ -117,9 +92,9 @@ namespace Vox
 
 		std::vector<JPH::BodyID> bodyIds;
 
-		std::vector<CharacterController> characterControllers;
+		ObjectContainer<CharacterController> characterControllers;
 
-		std::vector<SpringArm> springArms;
+		ObjectContainer<SpringArm> springArms;
 
 		DynamicObjectContainer<VoxelBody> voxelBodies;
 
