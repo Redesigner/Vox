@@ -43,8 +43,6 @@ namespace Vox
 
 		// void LoadTestModel(std::string path);
 
-		void SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer);
-
 		void SetCameraPosition(glm::vec3 position);
 
 		void SetCameraRotation(glm::vec3 rotation);
@@ -110,8 +108,6 @@ namespace Vox
 		std::unordered_map<std::string, MeshInstanceContainer> uploadedModels;
 
 		PixelShader skyShader;
-
-		std::weak_ptr<Vox::PhysicsServer> debugPhysicsServer;
 		PixelShader debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 

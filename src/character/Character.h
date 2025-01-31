@@ -1,5 +1,9 @@
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+#include <glm/vec3.hpp>
+
 #include "core/datatypes/Ref.h"
 
 namespace Vox
@@ -17,5 +21,8 @@ namespace Vox
 	private:
 		Ref<CharacterController> characterController;
 		Ref<MeshInstance> meshInstance;
+
+		glm::quat rotation;
+		glm::vec3 position;
 	};
 }

@@ -5,14 +5,13 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 
-#include "core/services/InputService.h"
-#include "core/services/ServiceLocator.h"
 #include "physics/ObjectLayerTypes.h"
 #include "physics/PhysicsServer.h"
 
 namespace Vox
 {
 	CharacterController::CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem)
+		:requestedVelocity(0.0f, 0.0f, 0.0f)
 	{
 		using namespace JPH;
 
@@ -33,17 +32,6 @@ namespace Vox
 		settings->mSupportingVolume = Plane(Vec3::sAxisY(), -radius); // Accept contacts that touch the lower sphere of the capsule
 		character = new CharacterVirtual(settings, RVec3(2.0f, 15.0f, 0.0f), Quat::sIdentity(), 0, physicsSystem);
 		// character->SetListener(this);
-
-		Vox::ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool wasPressed)
-			{
-				if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
-				{
-					Vec3 velocity = character->GetLinearVelocity();
-					velocity.SetY(velocity.GetY() + 10.0f);
-					character->SetLinearVelocity(velocity);
-				}
-			}
-		);
 	}
 
 	JPH::Vec3 CharacterController::GetPosition() const
@@ -61,16 +49,12 @@ namespace Vox
 		return character->GetRotation();
 	}
 
-	void CharacterController::SetYaw(float yaw)
-	{
-		this->yaw = yaw;
-	}
-
 	void CharacterController::Update(float deltaTime, PhysicsServer* physicsServer)
 	{
 
 		JPH::PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
-		JPH::Vec3 currentVelocity = character->GetLinearVelocity();
+		// JPH::Vec3 currentVelocity = character->GetLinearVelocity();
+		JPH::Vec3 currentVelocity = requestedVelocity;
 		if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
 		{
 			if (currentVelocity.GetY() <= 0.0f)
@@ -84,11 +68,6 @@ namespace Vox
 			currentVelocity += gravity * deltaTime;
 		}
 
-		glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-		float cos = std::cosf(yaw);
-		float sin = std::sinf(yaw);
-		currentVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
-		currentVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * - 4.0f);
 		character->SetLinearVelocity(currentVelocity);
 		character->Update(deltaTime, physicsSystem->GetGravity(), physicsSystem->GetDefaultBroadPhaseLayerFilter(Physics::CollisionLayer::Dynamic), physicsSystem->GetDefaultLayerFilter(Physics::CollisionLayer::Dynamic), {}, {}, *physicsServer->GetAllocator());
 	}

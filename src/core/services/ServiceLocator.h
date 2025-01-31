@@ -7,6 +7,8 @@ struct SDL_Window;
 namespace Vox
 {
 	class InputService;
+	class Renderer;
+	class PhysicsServer;
 
 	class ServiceLocator
 	{
@@ -16,7 +18,13 @@ namespace Vox
 
 		static InputService* GetInputService();
 
+		static Renderer* GetRenderer();
+
+		static PhysicsServer* GetPhysicsServer();
+
 	private:
 		static InputService* inputService;
+		static Renderer* renderer;
+		static PhysicsServer* physicsServer;
 	};
 }
