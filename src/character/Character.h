@@ -8,19 +8,23 @@
 
 namespace Vox
 {
+	class Camera;
 	class CharacterController;
 	struct MeshInstance;
+	class SpringArm;
 
 	class Character
 	{
 	public:
-		Character(Ref<CharacterController> characterController, Ref<MeshInstance> meshInstance);
+		Character();
 
 		void Update();
 
 	private:
 		Ref<CharacterController> characterController;
 		Ref<MeshInstance> meshInstance;
+		Ref<Camera> camera;
+		Ref<SpringArm> springArm;
 
 		glm::quat rotation;
 		glm::vec3 position;

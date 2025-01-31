@@ -107,13 +107,6 @@ namespace Vox
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
         voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
 
-        camera = std::make_unique<Camera>();
-        camera->SetPosition(6.0f, 2.0f, 6.0f);
-        camera->SetRotation(0.0f, 0.0f, 0.0f);
-        camera->SetAspectRatio(800.0 / 431.0);
-        camera->SetFovY(45.0f);
-        Camera* movedCamera = camera.get();
-
         lightUniformLocations = LightUniformLocations(deferredShader.get());
         testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
     }
@@ -126,7 +119,7 @@ namespace Vox
     void Renderer::Render(Editor* editor)
     {
         UpdateViewportDimensions(editor);
-        camera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
+        currentCamera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
         glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
         RenderGBuffer();
@@ -161,24 +154,24 @@ namespace Vox
     //    }
     //}
 
-    void Renderer::SetCameraPosition(glm::vec3 position)
+    Ref<Camera> Renderer::CreateCamera()
     {
-        camera->SetPosition(position);
+        Ref<Camera> newCamera = Ref<Camera>(&cameras, cameras.Create());
+        newCamera->SetPosition(0.0f, 0.0f, 0.0f);
+        newCamera->SetRotation(0.0f, 0.0f, 0.0f);
+        // newCamera->SetAspectRatio(viewportTexture->GetAspectRatio());
+        newCamera->SetFovY(45.0f);
+        return newCamera;
     }
 
-    void Renderer::SetCameraRotation(glm::vec3 rotation)
+    Ref<Camera> Renderer::GetCurrentCamera() const
     {
-        camera->SetRotation(rotation);
+        return currentCamera;
     }
 
-    void Renderer::SetCameraTarget(glm::vec3 target)
+    void Renderer::SetCurrentCamera(Ref<Camera> camera)
     {
-        camera->SetTarget(target);
-    }
-
-    Camera* Renderer::GetCurrentCamera() const
-    {
-        return camera.get();
+        currentCamera = camera;
     }
 
     bool Renderer::UploadModel(std::string alias, std::string relativeFilePath)
@@ -278,8 +271,8 @@ namespace Vox
 
         gBufferShader.Enable();
         // Set camera matrices
-        gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, camera->GetViewMatrix());
-        gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, camera->GetProjectionMatrix());
+        gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, currentCamera->GetViewMatrix());
+        gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
 
         glBindVertexArray(meshVao);
 
@@ -321,7 +314,7 @@ namespace Vox
         // shader->SetCameraPosition(camera.position);
         testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
         gBuffer->ActivateTextures(0);
-        deferredShader->SetCameraPosition(camera->GetPosition());
+        deferredShader->SetCameraPosition(currentCamera->GetPosition());
         glBindVertexArray(quad->GetVaoId());
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
@@ -348,8 +341,8 @@ namespace Vox
     {
         glBindVertexArray(voxelMeshVao);
         voxelShader->Enable();
-        voxelShader->SetViewMatrix(camera->GetViewMatrix());
-        voxelShader->SetProjectionMatrix(camera->GetProjectionMatrix());
+        voxelShader->SetViewMatrix(currentCamera->GetViewMatrix());
+        voxelShader->SetProjectionMatrix(currentCamera->GetProjectionMatrix());
         voxelShader->SetArrayTexture(voxelTextures.get());
 
         for (VoxelMesh& voxelMesh : voxelMeshes)
@@ -375,12 +368,12 @@ namespace Vox
         glEnable(GL_DEPTH_TEST);
         debugLineShader.Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferLines();
-        debugLineShader.SetUniformMatrix(debugLineMatrixLocation, camera->GetViewProjectionMatrix());
+        debugLineShader.SetUniformMatrix(debugLineMatrixLocation, currentCamera->GetViewProjectionMatrix());
         glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
 
         debugTriangleShader.Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-        debugTriangleShader.SetUniformMatrix(debugTriangleMatrixLocation, camera->GetViewProjectionMatrix());
+        debugTriangleShader.SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
         glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
     }
 
@@ -390,8 +383,8 @@ namespace Vox
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
         skyShader.Enable();
-        glm::mat4x4 cameraRotation = camera->GetRotationMatrix();;
-        glm::mat4x4 projection = camera->GetProjectionMatrix();
+        glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();;
+        glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
         glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
         skyShader.SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
         // deferredFramebuffer->ActivateTextures();

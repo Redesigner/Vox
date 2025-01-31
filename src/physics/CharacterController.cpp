@@ -53,8 +53,9 @@ namespace Vox
 	{
 
 		JPH::PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
-		// JPH::Vec3 currentVelocity = character->GetLinearVelocity();
-		JPH::Vec3 currentVelocity = requestedVelocity;
+		JPH::Vec3 currentVelocity = character->GetLinearVelocity();
+		currentVelocity.SetX(requestedVelocity.GetX());
+		currentVelocity.SetZ(requestedVelocity.GetZ());
 		if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
 		{
 			if (currentVelocity.GetY() <= 0.0f)

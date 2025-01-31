@@ -100,15 +100,11 @@ int main()
 
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
-        Ref<CharacterController> characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
-        Ref<SpringArm> springArm = ServiceLocator::GetPhysicsServer()->CreateSpringArm(characterController);
-
         VoxLog(Display, Game, "Test log!");
 
         ServiceLocator::GetRenderer()->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
 
-        Ref<MeshInstance> mushroom = ServiceLocator::GetRenderer()->CreateMeshInstance("mushroom");
-        Character character = Character(characterController, mushroom);
+        Character character = Character();
 
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
@@ -132,19 +128,12 @@ int main()
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([&runPhysics, frameTime, springArm, &characterController]
+        std::thread physicsThread = std::thread([&runPhysics, frameTime]
             {
                 while (runPhysics)
                 {
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
-                    // this is not a good way to set this, but it's fine for a test, I think
                     ServiceLocator::GetPhysicsServer()->Step();
-                    glm::vec3 cameraPositon = Vector3From(springArm->GetResultPosition());
-                    glm::vec3 cameraRotation = Vector3From(springArm->GetEulerRotation());
-                    cameraRotation *= -1.0f;
-                    ServiceLocator::GetRenderer()->SetCameraPosition(cameraPositon);
-                    ServiceLocator::GetRenderer()->SetCameraTarget(Vector3From(springArm->GetOrigin()));
-                    // localRenderer->SetCameraRotation(cameraRotation);
 
                     if (threadStartTime + frameTime < std::chrono::steady_clock::now())
                     {
@@ -157,9 +146,14 @@ int main()
 
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();
-        Camera* camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
-        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, camera, &voxelChunk](int x, int y) {
+        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, &voxelChunk](int x, int y) {
             float xViewport, yViewport;
+            Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
+            if (!camera)
+            {
+                return;
+            }
+
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
                 glm::vec4 rayStartViewport = glm::vec4(xViewport, yViewport, -1.0f, 1.0f);

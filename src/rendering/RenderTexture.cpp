@@ -61,4 +61,9 @@ namespace Vox
 	{
 		return height;
 	}
+	
+	double RenderTexture::GetAspectRatio() const
+	{
+		return static_cast<double>(height) / static_cast<double>(width);
+	}
 }
