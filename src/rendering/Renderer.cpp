@@ -125,7 +125,6 @@ namespace Vox
 
     void Renderer::Render(Editor* editor)
     {
-        // @TODO fix whatever is happening with vsync here
         UpdateViewportDimensions(editor);
         camera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
         glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
@@ -133,7 +132,7 @@ namespace Vox
         RenderGBuffer();
         RenderDeferred();
         RenderSky();
-        RenderDebugShapes();
+        // RenderDebugShapes();
 
         int width, height;
         SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
@@ -161,11 +160,6 @@ namespace Vox
     //        testModel.materials[i].shader = gBufferShader;
     //    }
     //}
-
-    void Renderer::SetDebugPhysicsServer(std::shared_ptr<PhysicsServer> physicsServer)
-    {
-        debugPhysicsServer = physicsServer;
-    }
 
     void Renderer::SetCameraPosition(glm::vec3 position)
     {
@@ -373,11 +367,7 @@ namespace Vox
 
     void Renderer::RenderDebugShapes()
     {
-        std::shared_ptr<PhysicsServer> physicsServer = debugPhysicsServer.lock();
-        if (!physicsServer)
-        {
-            return;
-        }
+        PhysicsServer* physicsServer = ServiceLocator::GetPhysicsServer();
 
         // Fill the debug renderer with our shapes
         physicsServer->RenderDebugShapes();

@@ -93,25 +93,21 @@ int main()
 
         ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
-        std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(window);
         std::unique_ptr<Editor> editor = std::make_unique<Editor>();
-        std::shared_ptr<PhysicsServer> physicsServer = std::make_unique<PhysicsServer>();
         std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
-        Renderer* localRenderer = renderer.get(); // This is just for a test
 
-        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), physicsServer.get(), localRenderer);
+        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), ServiceLocator::GetRenderer());
 
-        physicsServer->SetDebugRenderer(debugRenderer);
+        ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
-        Ref<CharacterController> characterController = physicsServer->CreateCharacterController(0.5f, 1.0f);
-        Ref<SpringArm> springArm = physicsServer->CreateSpringArm(characterController);
+        Ref<CharacterController> characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
+        Ref<SpringArm> springArm = ServiceLocator::GetPhysicsServer()->CreateSpringArm(characterController);
 
         VoxLog(Display, Game, "Test log!");
 
-        renderer->SetDebugPhysicsServer(physicsServer);
-        renderer->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
+        ServiceLocator::GetRenderer()->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
 
-        Ref<MeshInstance> mushroom = renderer->CreateMeshInstance("mushroom");
+        Ref<MeshInstance> mushroom = ServiceLocator::GetRenderer()->CreateMeshInstance("mushroom");
         Character character = Character(characterController, mushroom);
 
         Voxel defaultVoxel = Voxel();
@@ -128,7 +124,7 @@ int main()
         }
         voxelChunk.FinalizeUpdate();
 
-        editor->BindOnGLTFOpened([&renderer](std::string fileName)
+        editor->BindOnGLTFOpened([](std::string fileName)
             {
                 // renderer->LoadTestModel(fileName);
             });
@@ -136,21 +132,19 @@ int main()
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([physicsServer, &runPhysics, frameTime, localRenderer, springArm, &characterController]
+        std::thread physicsThread = std::thread([&runPhysics, frameTime, springArm, &characterController]
             {
                 while (runPhysics)
                 {
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
                     // this is not a good way to set this, but it's fine for a test, I think
-                    physicsServer->Step();
+                    ServiceLocator::GetPhysicsServer()->Step();
                     glm::vec3 cameraPositon = Vector3From(springArm->GetResultPosition());
                     glm::vec3 cameraRotation = Vector3From(springArm->GetEulerRotation());
                     cameraRotation *= -1.0f;
-                    localRenderer->SetCameraPosition(cameraPositon);
-                    localRenderer->SetCameraTarget(Vector3From(springArm->GetOrigin()));
+                    ServiceLocator::GetRenderer()->SetCameraPosition(cameraPositon);
+                    ServiceLocator::GetRenderer()->SetCameraTarget(Vector3From(springArm->GetOrigin()));
                     // localRenderer->SetCameraRotation(cameraRotation);
-
-                    characterController->SetYaw(cameraRotation.y);
 
                     if (threadStartTime + frameTime < std::chrono::steady_clock::now())
                     {
@@ -163,8 +157,8 @@ int main()
 
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();
-        Camera* camera = renderer->GetCurrentCamera();
-        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, physicsServer, camera, &voxelChunk](int x, int y) {
+        Camera* camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
+        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, camera, &voxelChunk](int x, int y) {
             float xViewport, yViewport;
             if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
@@ -181,7 +175,7 @@ int main()
                 debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sRed, 5.0f);
                 VoxLog(Display, Game, "Casting ray from '({}, {}, {})' to '({}, {}, {})'", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ(), rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ());
                 RayCastResultNormal raycastResult;
-                if (physicsServer->RayCast(rayStart, rayEnd - rayStart, raycastResult))
+                if (ServiceLocator::GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
                 {
                     debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
                     const unsigned int gridSize = 1;
@@ -212,7 +206,7 @@ int main()
         {
             inputService->PollEvents();
             character.Update();
-            renderer->Render(editor.get());
+            ServiceLocator::GetRenderer()->Render(editor.get());
         }
         runPhysics = false;
         physicsThread.join();
