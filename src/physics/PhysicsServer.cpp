@@ -84,110 +84,25 @@ namespace Vox
 		return capsuleId;
 	}
 
-	unsigned int PhysicsServer::CreateCharacterController(float radius, float halfHeight)
+	Ref<CharacterController> PhysicsServer::CreateCharacterController(float radius, float halfHeight)
 	{
-		characterControllers.emplace_back(radius, halfHeight, &physicsSystem);
-		return characterControllers.size() - 1;
+		return Ref<CharacterController>(&characterControllers, characterControllers.Create(radius, halfHeight, &physicsSystem));
 	}
 
-	JPH::Vec3 PhysicsServer::GetCharacterControllerVelocity(CharacterControllerId id) const
+	Ref<SpringArm> PhysicsServer::CreateSpringArm(Ref<CharacterController>& id)
 	{
-		if (id >= characterControllers.size())
-		{
-			VoxLog(Error, Physics, "Failed to get character controller velocity. Character controller id was invalid.");
-			return JPH::Vec3::sZero();
-		}
-
-		return characterControllers[id].GetVelocity();
+		Ref<SpringArm> result = Ref<SpringArm>(&springArms, springArms.Create());
+		result->SetOrigin(id);
+		result->SetLength(4.0f);
+		result->SetOffset({ 0.0f, 1.0f, 0.0f });
+		return result;
 	}
 
-	JPH::Vec3 PhysicsServer::GetCharacterControllerPosition(CharacterControllerId id) const
+	Ref<SpringArm> PhysicsServer::CreateSpringArm(JPH::BodyID bodyId)
 	{
-		if (id >= characterControllers.size())
-		{
-			VoxLog(Error, Physics, "Failed to get character controller position.Character controller id was invalid.");
-			return JPH::Vec3::sZero();
-		}
-
-		return characterControllers[id].GetPosition();
-	}
-
-	JPH::Quat PhysicsServer::GetCharacterControllerRotation(CharacterControllerId id) const
-	{
-		if (id >= characterControllers.size())
-		{
-			VoxLog(Error, Physics, "Failed to get character controller rotation. Character controller id was invalid.");
-			return JPH::Quat::sIdentity();
-		}
-
-		return characterControllers[id].GetRotation();
-	}
-
-	void PhysicsServer::SetCharacterControllerYaw(CharacterControllerId id, float yaw)
-	{
-		if (id >= characterControllers.size())
-		{
-			VoxLog(Error, Physics, "Failed to set character controller yaw. Character controller id was invalid.");
-			return;
-		}
-
-		characterControllers[id].SetYaw(yaw);
-	}
-
-	unsigned int PhysicsServer::CreateSpringArm(CharacterControllerId id)
-	{
-		SpringArm& newArm = springArms.emplace_back();
-		unsigned int resultId = springArms.size() - 1;
-		newArm.SetOrigin(id);
-		newArm.SetLength(4.0f);
-		newArm.SetOffset({ 0.0f, 1.0f, 0.0f });
-		return resultId;
-	}
-
-	unsigned int PhysicsServer::CreateSpringArm(JPH::BodyID bodyId)
-	{
-		SpringArm& newArm = springArms.emplace_back();
-		unsigned int resultId = springArms.size() - 1;
-		newArm.SetOrigin(bodyId);
-		return resultId;
-	}
-
-	void PhysicsServer::SetSpringArmEulerRotation(SpringArmId id, JPH::Vec3 rotation)
-	{
-		if (SpringArm* springArm = GetSpringArm(id))
-		{
-			springArm->SetEulerRotation(rotation);
-		}
-	}
-
-	JPH::Vec3 PhysicsServer::GetSpringArmEulerRotation(SpringArmId id) const
-	{
-		if (const SpringArm* springArm = GetSpringArm(id))
-		{
-			return springArm->GetEulerRotation();
-		}
-
-		return JPH::Vec3::sZero();
-	}
-
-	JPH::Vec3 PhysicsServer::GetSpringArmResult(SpringArmId id) const
-	{
-		if (const SpringArm* springArm = GetSpringArm(id))
-		{
-			return springArm->GetResultPosition();
-		}
-
-		return JPH::Vec3::sZero();
-	}
-
-	JPH::Vec3 PhysicsServer::GetSpringArmOrigin(SpringArmId id) const
-	{
-		if (const SpringArm* springArm = GetSpringArm(id))
-		{
-			return springArm->GetOrigin();
-		}
-
-		return JPH::Vec3::sZero();
+		Ref<SpringArm> result = Ref<SpringArm>(&springArms, springArms.Create());
+		result->SetOrigin(bodyId);
+		return result;
 	}
 
 	JPH::Vec3 PhysicsServer::GetObjectPosition(const JPH::BodyID& id) const
@@ -323,27 +238,5 @@ namespace Vox
 			return true;
 		}
 		return false;
-	}
-
-	const SpringArm* PhysicsServer::GetSpringArm(SpringArmId id) const
-	{
-		if (id >= springArms.size())
-		{
-			VoxLog(Warning, Physics, "Unable to get spring arm. The spring arm ID was not valid.");
-			return nullptr;
-		}
-
-		return &springArms[id];
-	}
-
-	SpringArm* PhysicsServer::GetSpringArm(SpringArmId id)
-	{
-		if (id >= springArms.size())
-		{
-			VoxLog(Warning, Physics, "Unable to get spring arm. The spring arm ID was not valid.");
-			return nullptr;
-		}
-
-		return &springArms[id];
 	}
 }

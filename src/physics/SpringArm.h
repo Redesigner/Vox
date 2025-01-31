@@ -6,6 +6,8 @@
 #include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Body/BodyID.h>
 
+#include "core/datatypes/Ref.h"
+
 namespace Vox
 {
 	class CharacterController;
@@ -23,7 +25,7 @@ namespace Vox
 		SpringArm();
 
 		void SetOrigin(JPH::BodyID bodyId);
-		void SetOrigin(unsigned int characterControllerId);
+		void SetOrigin(Ref<CharacterController> originCharacterIn);
 		JPH::Vec3 GetOrigin() const;
 
 		void SetOffset(JPH::Vec3 offset);
@@ -40,7 +42,7 @@ namespace Vox
 
 	private:
 		JPH::BodyID originBody;
-		unsigned int originCharacterId;
+		Ref<CharacterController> originCharacter;
 
 		JPH::Vec3 springOffset;
 

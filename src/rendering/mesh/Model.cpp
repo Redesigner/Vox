@@ -102,6 +102,8 @@ namespace Vox
 			glBindVertexBuffer(0, mesh.GetPositionBuffer(), 0, sizeof(float) * 3);
 			glBindVertexBuffer(1, mesh.GetNormalBuffer(), 0, sizeof(float) * 3);
 			glBindVertexBuffer(2, mesh.GetUVBuffer(), 0, sizeof(float) * 2);
+
+			// @TODO: use glDrawElementsInstanced instead?
 			glDrawElements(GL_TRIANGLES, mesh.GetVertexCount(), mesh.GetComponentType(), 0);
 		}
 	}

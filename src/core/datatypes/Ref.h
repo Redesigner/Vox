@@ -23,7 +23,13 @@ namespace Vox
 
 		T* operator->()
 		{
-			assert(container);
+			// assert(container);
+			return container->Get(index, id);
+		}
+
+		const T* operator->() const
+		{
+			// assert(container);
 			return container->Get(index, id);
 		}
 
