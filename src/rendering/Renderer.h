@@ -28,6 +28,7 @@ namespace Vox
 	class Framebuffer;
 	class FullscreenQuad;
 	class GBuffer;
+	class MeshInstance;
 	class PhysicsServer;
 	class RenderTexture;
 	class VoxelShader;
@@ -59,6 +60,8 @@ namespace Vox
 		 * @return true if the model was loaded successfully, false otherwise
 		 */
 		bool UploadModel(std::string alias, std::string relativeFilePath);
+
+		Ref<MeshInstance> CreateMeshInstance(std::string meshName);
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 

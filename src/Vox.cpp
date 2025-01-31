@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <GL/glew.h>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -103,7 +104,14 @@ int main()
         VoxLog(Display, Game, "Test log!");
 
         renderer->SetDebugPhysicsServer(physicsServer);
-        renderer->UploadModel("Mushroom", "../../../assets/models/mushroom.glb");
+        renderer->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
+        Vox::Ref<Vox::MeshInstance> meshInstance = renderer->CreateMeshInstance("mushroom");
+        if (meshInstance)
+        {
+            meshInstance->SetTransform(glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 10.0f, 0.0f)));
+        }
+        renderer->CreateMeshInstance("mushroom");
+
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
         for (int x = -16; x < 16; ++x)

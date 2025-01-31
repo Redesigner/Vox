@@ -76,9 +76,6 @@ namespace Vox
 			}
 		}
 
-		transform = glm::identity<glm::mat4x4>();
-		transform = glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f));
-
 		size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), meshes.size());
 	}
@@ -89,9 +86,8 @@ namespace Vox
 	}
 
 	// @TODO: store uniforms in a more easily accessbile format?
-	void Model::Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
+	void Model::Render(Shader& shader, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
-		shader.SetUniformMatrix(modelUniformLocation, transform);
 		// Assume our VAO is already bound?
 
 		// Render primitives one at a time;
@@ -108,10 +104,5 @@ namespace Vox
 			glBindVertexBuffer(2, mesh.GetUVBuffer(), 0, sizeof(float) * 2);
 			glDrawElements(GL_TRIANGLES, mesh.GetVertexCount(), mesh.GetComponentType(), 0);
 		}
-	}
-
-	glm::mat4x4 Model::GetMatrix() const
-	{
-		return transform;
 	}
 }

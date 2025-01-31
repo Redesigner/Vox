@@ -24,9 +24,7 @@ namespace Vox
 		Model(std::string filepath);
 		~Model();
 
-		void Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
-
-		glm::mat4x4 GetMatrix() const;
+		void Render(Shader& shader, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
 
 	private:
 		std::vector<unsigned int> bufferIds;
@@ -34,7 +32,5 @@ namespace Vox
 		std::vector<Mesh> meshes;
 
 		std::vector<PBRMaterial> materials;
-
-		glm::mat4x4 transform;
 	};
 }
