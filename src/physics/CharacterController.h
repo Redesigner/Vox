@@ -23,6 +23,10 @@ namespace Vox
 
 		JPH::Quat GetRotation() const;
 
+		void AddImpulse(JPH::Vec3 impulse);
+
+		bool IsGrounded() const;
+
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 
 		float GetRadius() const;
@@ -33,6 +37,10 @@ namespace Vox
 
 	private:
 		float radius, halfHeight;
+
+		bool grounded = true;
+
+		JPH::Vec3 pendingImpulses;
 
 		JPH::Ref<JPH::CharacterVirtual> character;
 		JPH::Ref<JPH::Shape> capsuleShape;

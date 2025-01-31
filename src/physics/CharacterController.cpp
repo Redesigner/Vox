@@ -11,7 +11,7 @@
 namespace Vox
 {
 	CharacterController::CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem)
-		:requestedVelocity(0.0f, 0.0f, 0.0f)
+		:requestedVelocity(0.0f, 0.0f, 0.0f), pendingImpulses(0.0f, 0.0f, 0.0f)
 	{
 		using namespace JPH;
 
@@ -49,13 +49,26 @@ namespace Vox
 		return character->GetRotation();
 	}
 
+	void CharacterController::AddImpulse(JPH::Vec3 impulse)
+	{
+		pendingImpulses += impulse;
+	}
+
+	bool CharacterController::IsGrounded() const
+	{
+		return grounded;
+	}
+
 	void CharacterController::Update(float deltaTime, PhysicsServer* physicsServer)
 	{
+		grounded = character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround;
 
 		JPH::PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
 		JPH::Vec3 currentVelocity = character->GetLinearVelocity();
 		currentVelocity.SetX(requestedVelocity.GetX());
 		currentVelocity.SetZ(requestedVelocity.GetZ());
+		currentVelocity += pendingImpulses;
+		pendingImpulses = JPH::Vec3(0.0f, 0.0f, 0.0f);
 		if (character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround)
 		{
 			if (currentVelocity.GetY() <= 0.0f)
