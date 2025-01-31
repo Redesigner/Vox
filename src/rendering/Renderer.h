@@ -43,13 +43,11 @@ namespace Vox
 
 		// void LoadTestModel(std::string path);
 
-		void SetCameraPosition(glm::vec3 position);
+		Ref<Camera> CreateCamera();
 
-		void SetCameraRotation(glm::vec3 rotation);
+		Ref<Camera> GetCurrentCamera() const;
 
-		void SetCameraTarget(glm::vec3 target);
-
-		Camera* GetCurrentCamera() const;
+		void SetCurrentCamera(Ref<Camera> camera);
 
 		/**
 		 * @brief Uploads a glTF model to the GPU
@@ -114,7 +112,9 @@ namespace Vox
 		LightUniformLocations lightUniformLocations;
 		Light testLight;
 
-		std::unique_ptr<Vox::Camera> camera;
+		Ref<Camera> currentCamera;
+
+		ObjectContainer<Camera> cameras;
 
 		SDL_Window* mainWindow;
 
