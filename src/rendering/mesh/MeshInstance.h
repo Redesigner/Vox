@@ -10,7 +10,11 @@ namespace Vox
 	struct MeshInstance
 	{
 	public:
+		MeshInstance();
 
+		void SetTransform(glm::mat4x4 transformIn);
+
+		glm::mat4x4 GetTransform() const;
 
 	private:
 		glm::mat4x4 transform;

@@ -25,7 +25,11 @@ namespace Vox
 
 	void MeshInstanceContainer::Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
-		model->Render(shader, modelUniformLocation, colorUniformLocation, roughnessUniformLocation);
+		for (MeshInstance& meshInstance : meshInstances)
+		{
+			shader.SetUniformMatrix(modelUniformLocation, meshInstance.GetTransform());
+			model->Render(shader, colorUniformLocation, roughnessUniformLocation);
+		}
 	}
 
 	Ref<MeshInstance> MeshInstanceContainer::CreateMeshInstance()

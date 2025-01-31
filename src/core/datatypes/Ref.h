@@ -27,6 +27,11 @@ namespace Vox
 			return container->Get(index, id);
 		}
 
+		explicit operator bool() const
+		{
+			return container != nullptr;
+		}
+
 	private:
 		ObjectContainer<T>* container;
 		size_t index;
