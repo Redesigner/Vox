@@ -53,14 +53,15 @@ namespace Vox
 			{
 				transform = glm::identity<glm::mat4x4>();
 
-				if (node.rotation.size() == 4)
-				{
-					transform *= glm::toMat4(glm::quat(node.rotation[1], node.rotation[2], node.rotation[3], node.rotation[0]));
-				}
-
 				if (node.translation.size() == 3)
 				{
 					transform = glm::translate(transform, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+				}
+
+				if (node.rotation.size() == 4)
+				{
+					glm::quat rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+					transform *= glm::toMat4(rotation);
 				}
 
 				if (node.scale.size() == 3)
