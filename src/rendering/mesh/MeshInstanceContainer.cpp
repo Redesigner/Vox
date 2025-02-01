@@ -27,8 +27,7 @@ namespace Vox
 	{
 		for (MeshInstance& meshInstance : meshInstances)
 		{
-			shader.SetUniformMatrix(modelUniformLocation, meshInstance.GetTransform());
-			model->Render(shader, colorUniformLocation, roughnessUniformLocation);
+			model->Render(shader, modelUniformLocation, meshInstance.GetTransform(), colorUniformLocation, roughnessUniformLocation);
 		}
 	}
 

@@ -24,7 +24,7 @@ namespace Vox
 		Model(std::string filepath);
 		~Model();
 
-		void Render(Shader& shader, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
+		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
 
 	private:
 		std::vector<unsigned int> bufferIds;

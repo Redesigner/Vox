@@ -43,4 +43,14 @@ namespace Vox
 	{
 		return uvBuffer;
 	}
+
+	void Mesh::SetTransform(glm::mat4x4 transformIn)
+	{
+		transform = transformIn;
+	}
+
+	glm::mat4x4 Mesh::GetTransform() const
+	{
+		return transform;
+	}
 }

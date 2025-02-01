@@ -102,7 +102,7 @@ int main()
 
         VoxLog(Display, Game, "Test log!");
 
-        ServiceLocator::GetRenderer()->UploadModel("mushroom", "../../../assets/models/mushroom.glb");
+        ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
 
         Character character = Character();
 
