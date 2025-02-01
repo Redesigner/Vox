@@ -18,7 +18,7 @@ namespace Vox
 	Character::Character()
 	{
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
-		meshInstance = ServiceLocator::GetRenderer()->CreateMeshInstance("mushroom");
+		meshInstance = ServiceLocator::GetRenderer()->CreateMeshInstance("witch");
 		springArm = ServiceLocator::GetPhysicsServer()->CreateSpringArm(characterController);
 		camera = ServiceLocator::GetRenderer()->CreateCamera();
 
