@@ -4,15 +4,4 @@
 
 namespace Vox
 {
-	ModelNode::ModelNode()
-	{
-	}
-
-	void ModelNode::UpdateTransform(Transform newTransform)
-	{
-		for (Primitive* primitive : primitives)
-		{
-
-		}
-	}
 }
