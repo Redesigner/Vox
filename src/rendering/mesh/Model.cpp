@@ -111,12 +111,12 @@ namespace Vox
 				const unsigned int positionBufferId = bufferIds[model.accessors[positionBuffer->second].bufferView];
 				const unsigned int normalBufferId = bufferIds[model.accessors[normalBuffer->second].bufferView];
 				const unsigned int uvBufferId = bufferIds[model.accessors[uvBuffer->second].bufferView];
-				Mesh& newMesh = meshes.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
-				newMesh.SetTransform(transform);
+				Primitive& newPrimitive = primitives.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
+				newPrimitive.SetTransform(transform);
 			}
 		}
 		size_t separatorLocation = filepath.rfind('/') + 1;
-		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), meshes.size());
+		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
 
 	Model::~Model()
@@ -131,21 +131,21 @@ namespace Vox
 
 		// Render primitives one at a time;
 
-		for (const Mesh& mesh : meshes)
+		for (const Primitive& primitive : primitives)
 		{
-			const PBRMaterial& material = materials[mesh.GetMaterialIndex()];
+			const PBRMaterial& material = materials[primitive.GetMaterialIndex()];
 			shader.SetUniformColor(colorUniformLocation, material.albedo);
 			shader.SetUniformFloat(roughnessUniformLocation, material.roughness);
 
-			shader.SetUniformMatrix(modelUniformLocation, transform * mesh.GetTransform());
+			shader.SetUniformMatrix(modelUniformLocation, transform * primitive.GetTransform());
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.GetIndexBuffer());
-			glBindVertexBuffer(0, mesh.GetPositionBuffer(), 0, sizeof(float) * 3);
-			glBindVertexBuffer(1, mesh.GetNormalBuffer(), 0, sizeof(float) * 3);
-			glBindVertexBuffer(2, mesh.GetUVBuffer(), 0, sizeof(float) * 2);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.GetIndexBuffer());
+			glBindVertexBuffer(0, primitive.GetPositionBuffer(), 0, sizeof(float) * 3);
+			glBindVertexBuffer(1, primitive.GetNormalBuffer(), 0, sizeof(float) * 3);
+			glBindVertexBuffer(2, primitive.GetUVBuffer(), 0, sizeof(float) * 2);
 
 			// @TODO: use glDrawElementsInstanced instead?
-			glDrawElements(GL_TRIANGLES, mesh.GetVertexCount(), mesh.GetComponentType(), 0);
+			glDrawElements(GL_TRIANGLES, primitive.GetVertexCount(), primitive.GetComponentType(), 0);
 		}
 	}
 }

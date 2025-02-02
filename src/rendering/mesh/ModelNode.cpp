@@ -1,6 +1,6 @@
 #include "ModelNode.h"
 
-#include "rendering/mesh/Mesh.h"
+#include "rendering/mesh/Primitive.h"
 
 namespace Vox
 {
@@ -10,7 +10,7 @@ namespace Vox
 
 	void ModelNode::UpdateTransform(Transform newTransform)
 	{
-		for (Mesh* mesh : meshes)
+		for (Primitive* primitive : primitives)
 		{
 
 		}

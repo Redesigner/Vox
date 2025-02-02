@@ -6,7 +6,7 @@
 
 namespace Vox
 {
-	class Mesh;
+	class Primitive;
 	class ModelNode
 	{
 	public:
@@ -16,7 +16,7 @@ namespace Vox
 
 	private:
 		std::vector<ModelNode*> children;
-		std::vector<Mesh*> meshes;
+		std::vector<Primitive*> primitives;
 
 		Transform localTransform;
 		Transform globalTransform;
