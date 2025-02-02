@@ -1,55 +1,55 @@
-#include "Mesh.h"
+#include "Primitive.h"
 
 namespace Vox
 {
-	Mesh::Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
+	Primitive::Primitive(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
 		unsigned int indexBuffer,unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer)
 		:vertexCount(vertexCount), componentType(componentType), materialIndex(materialIndex),
 			indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer)
 	{
 	}
 
-	unsigned int Mesh::GetVertexCount() const
+	unsigned int Primitive::GetVertexCount() const
 	{
 		return vertexCount;
 	}
 
-	unsigned int Mesh::GetComponentType() const
+	unsigned int Primitive::GetComponentType() const
 	{
 		return componentType;
 	}
 
-	unsigned int Mesh::GetMaterialIndex() const
+	unsigned int Primitive::GetMaterialIndex() const
 	{
 		return materialIndex;
 	}
 
-	unsigned int Mesh::GetIndexBuffer() const
+	unsigned int Primitive::GetIndexBuffer() const
 	{
 		return indexBuffer;
 	}
 
-	unsigned int Mesh::GetPositionBuffer() const
+	unsigned int Primitive::GetPositionBuffer() const
 	{
 		return positionBuffer;
 	}
 
-	unsigned int Mesh::GetNormalBuffer() const
+	unsigned int Primitive::GetNormalBuffer() const
 	{
 		return normalBuffer;
 	}
 
-	unsigned int Mesh::GetUVBuffer() const
+	unsigned int Primitive::GetUVBuffer() const
 	{
 		return uvBuffer;
 	}
 
-	void Mesh::SetTransform(glm::mat4x4 transformIn)
+	void Primitive::SetTransform(glm::mat4x4 transformIn)
 	{
 		transform = transformIn;
 	}
 
-	glm::mat4x4 Mesh::GetTransform() const
+	glm::mat4x4 Primitive::GetTransform() const
 	{
 		return transform;
 	}

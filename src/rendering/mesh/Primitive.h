@@ -6,11 +6,10 @@
 
 namespace Vox
 {
-	// @TODO: consider renaming to primtive to match GLTF naming conventions
-	class Mesh
+	class Primitive
 	{
 	public:
-		Mesh(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
+		Primitive(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
 			unsigned int indexBuffer, unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer);
 
 		unsigned int GetVertexCount() const;

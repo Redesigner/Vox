@@ -6,7 +6,7 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "rendering/mesh/Mesh.h"
+#include "rendering/mesh/Primitive.h"
 #include "rendering/PBRMaterial.h"
 
 namespace tinygltf
@@ -29,7 +29,7 @@ namespace Vox
 	private:
 		std::vector<unsigned int> bufferIds;
 
-		std::vector<Mesh> meshes;
+		std::vector<Primitive> primitives;
 
 		std::vector<PBRMaterial> materials;
 	};
