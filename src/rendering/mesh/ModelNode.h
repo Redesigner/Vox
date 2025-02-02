@@ -2,25 +2,21 @@
 
 #include <vector>
 
+#include <glm/mat4x4.hpp>
+
 #include "core/datatypes/Transform.h"
 
 namespace Vox
 {
-	class Primitive;
-	class ModelNode
+	struct ModelNode
 	{
 	public:
-		ModelNode();
-
-		void UpdateTransform(Transform newTransform);
-
-	private:
-		std::vector<ModelNode*> children;
-		std::vector<Primitive*> primitives;
+		std::vector<int> children;
+		int mesh = -1;
 
 		Transform localTransform;
-		Transform globalTransform;
+		glm::mat4x4 globalTransform = glm::identity<glm::mat4x4>();
 
-		bool root = false;
+		bool root = true;
 	};
 }

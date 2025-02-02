@@ -39,45 +39,25 @@ namespace Vox
 			materials.emplace_back(glm::vec4(color[0], color[1], color[2], color[3]), material.pbrMetallicRoughness.roughnessFactor, material.pbrMetallicRoughness.metallicFactor);
 		}
 
-		for (const tinygltf::Node& node : model.nodes)
+		// initialize all our nodes, since we access them by index
+		nodes = std::vector<ModelNode>(model.nodes.size());
+		for (int i = 0; i < model.nodes.size(); ++i)
 		{
-			// Nodes without a mesh have an index value of -1
-			if (node.mesh < 0)
+			tinygltf::Node& node = model.nodes[i];
+			ModelNode& newNode = nodes[i];
+			newNode.localTransform = CalculateNodeTransform(node);
+			newNode.children = node.children;
+			newNode.mesh = node.mesh;
+			for (int child : node.children)
 			{
-				break;
+				// nodes can only be children of one node, so they should only ever be visited once
+				nodes[child].root = false;
 			}
+		}
 
-			tinygltf::Mesh& mesh = model.meshes[node.mesh];
-			glm::mat4x4 transform;
-			if (node.matrix.size() == 0)
-			{
-				transform = glm::identity<glm::mat4x4>();
-
-				if (node.translation.size() == 3)
-				{
-					transform = glm::translate(transform, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
-				}
-
-				if (node.rotation.size() == 4)
-				{
-					glm::quat rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
-					transform *= glm::toMat4(rotation);
-				}
-
-				if (node.scale.size() == 3)
-				{
-					transform = glm::scale(transform, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
-				}
-			}
-			else
-			{
-				transform = glm::mat4x4(
-					node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
-					node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
-					node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],
-					node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
-				);
-			}
+		for (const tinygltf::Mesh& mesh : model.meshes)
+		{
+			std::vector<unsigned int>& newMesh = meshes.emplace_back();
 			for (const tinygltf::Primitive& primitive : mesh.primitives)
 			{
 				if (primitive.attributes.size() > 3)
@@ -112,9 +92,19 @@ namespace Vox
 				const unsigned int normalBufferId = bufferIds[model.accessors[normalBuffer->second].bufferView];
 				const unsigned int uvBufferId = bufferIds[model.accessors[uvBuffer->second].bufferView];
 				Primitive& newPrimitive = primitives.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
-				newPrimitive.SetTransform(transform);
+				newMesh.emplace_back(primitives.size() - 1); // Store the primitive index so our nodes can find it later
 			}
 		}
+
+		// Initialize our node transforms
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			if (nodes[i].root)
+			{
+				UpdateTransforms(i, glm::identity<glm::mat4x4>());
+			}
+		}
+
 		size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
@@ -146,6 +136,62 @@ namespace Vox
 
 			// @TODO: use glDrawElementsInstanced instead?
 			glDrawElements(GL_TRIANGLES, primitive.GetVertexCount(), primitive.GetComponentType(), 0);
+		}
+	}
+
+	Transform Model::CalculateNodeTransform(const tinygltf::Node& node) const
+	{
+		Transform transform;
+		if (node.matrix.size() == 0)
+		{
+			if (node.translation.size() == 3)
+			{
+				transform.position = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+			}
+
+			if (node.rotation.size() == 4)
+			{
+				transform.rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+			}
+
+			if (node.scale.size() == 3)
+			{
+				transform.scale =  glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+			}
+		}
+		else
+		{
+			transform = Transform(glm::mat4x4(
+				node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
+				node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
+				node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],
+				node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]
+			));
+		}
+
+		return transform;
+	}
+
+	void Model::UpdateTransforms(unsigned int nodeIndex, glm::mat4x4 transform)
+	{
+		if (nodeIndex >= nodes.size())
+		{
+			return;
+		}
+
+		ModelNode& node = nodes[nodeIndex];
+		node.globalTransform = transform * node.localTransform.GetMatrix();
+		if (node.mesh >= 0)
+		{
+			for (int primitiveIndex : meshes[node.mesh])
+			{
+				primitives[primitiveIndex].SetTransform(node.globalTransform);
+			}
+		}
+
+		for (int nodeIndex : node.children)
+		{
+			UpdateTransforms(nodeIndex, node.globalTransform);
 		}
 	}
 }
