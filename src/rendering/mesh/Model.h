@@ -26,6 +26,9 @@ namespace Vox
 		Model(std::string filepath);
 		~Model();
 
+		Model(const Model&) = delete;
+		Model& operator=(Model&&) = delete;
+
 		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
 
 	private:

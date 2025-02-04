@@ -1,6 +1,7 @@
 #pragma once
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <string>
 #include <vector>
 
 #include <glm/gtx/quaternion.hpp>
@@ -16,13 +17,18 @@ namespace Vox
 		{
 			Translation,
 			Rotation,
-			Scale
+			Scale,
+			Error
 		};
 
-		AnimationSampler(std::vector<char>& samples, std::vector<char>& times, SamplerType type);
+		AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timesEnd,
+			std::vector<unsigned char>& samples, size_t samplesStart, size_t samplesEnd,
+			SamplerType type);
 
 		glm::quat EvaluateRotation(float time) const;
 		glm::vec3 EvaulateVector(float time) const;
+
+		static SamplerType GetSamplerType(std::string string);
 
 	private:
 		int GetLeftIndex(float time) const;
