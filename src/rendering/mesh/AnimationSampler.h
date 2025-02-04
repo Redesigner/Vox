@@ -21,9 +21,11 @@ namespace Vox
 			Error
 		};
 
-		AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timesEnd,
-			std::vector<unsigned char>& samples, size_t samplesStart, size_t samplesEnd,
+		AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timeBytes,
+			std::vector<unsigned char>& samples, size_t samplesStart, size_t sampleBytes,
 			SamplerType type);
+
+		~AnimationSampler();
 
 		glm::quat EvaluateRotation(float time) const;
 		glm::vec3 EvaulateVector(float time) const;
@@ -35,8 +37,11 @@ namespace Vox
 
 		SamplerType type;
 
-		std::vector<float> timeKeys;
-		std::vector<glm::quat> rotations;
-		std::vector<glm::vec3> vectors;
+		float* timeKeys;
+		size_t timesCount = 0;
+
+		glm::quat* rotations;
+		glm::vec3* vectors;
+		size_t samplesCount = 0;
 	};
 }
