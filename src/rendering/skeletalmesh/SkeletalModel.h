@@ -6,9 +6,9 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "rendering/mesh/AnimationSampler.h"
 #include "rendering/mesh/ModelNode.h"
-#include "rendering/mesh/SkeletalPrimitive.h"
+#include "rendering/skeletalmesh/AnimationSampler.h"
+#include "rendering/skeletalmesh/SkeletalPrimitive.h"
 #include "rendering/PBRMaterial.h"
 
 namespace tinygltf

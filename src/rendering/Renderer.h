@@ -12,7 +12,7 @@
 #include "rendering/Light.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
 #include "rendering/mesh/Model.h"
-#include "rendering/mesh/SkeletalModel.h"
+#include "rendering/skeletalmesh/SkeletalModel.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
