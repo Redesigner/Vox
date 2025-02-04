@@ -195,7 +195,7 @@ namespace Vox
             return false;
         }
 
-        uploadedSkeletalModels.emplace(std::make_pair(alias, relativeFilePath));
+        uploadedSkeletalModels.emplace(alias, relativeFilePath);
         return true;
     }
 
@@ -291,6 +291,11 @@ namespace Vox
         for (auto& meshes : uploadedModels)
         {
             meshes.second.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
+        }
+
+        for (auto& skeletalMesh : uploadedSkeletalModels)
+        {
+            skeletalMesh.second.Render(gBufferShader, gBufferModelMatrixLocation, glm::identity<glm::mat4x4>(), gBufferAlbedoLocation, gBufferRoughnessLocation);
         }
 
         UpdateVoxelMeshes();

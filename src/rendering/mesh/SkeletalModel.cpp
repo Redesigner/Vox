@@ -31,6 +31,16 @@ namespace Vox
 			glNamedBufferData(bufferIds[i], bufferView.byteLength, model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
+		for (std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType> animationBuffer : GetAnimationBuffers(model))
+		{
+			const tinygltf::BufferView timeBuffer = model.bufferViews[std::get<0>(animationBuffer)];
+			const tinygltf::BufferView samplesBuffer = model.bufferViews[std::get<1>(animationBuffer)];
+
+			samplers.emplace_back(model.buffers[timeBuffer.buffer].data, timeBuffer.byteOffset, timeBuffer.byteOffset + timeBuffer.byteLength,
+				model.buffers[samplesBuffer.buffer].data, samplesBuffer.byteOffset, samplesBuffer.byteOffset + samplesBuffer.byteLength,
+				std::get<2>(animationBuffer));
+		}
+
 		for (const tinygltf::Material& material : model.materials)
 		{
 			const std::vector<double>& color = material.pbrMetallicRoughness.baseColorFactor;
@@ -102,12 +112,13 @@ namespace Vox
 				// accessors retrieve these bufferviews by index
 				SkeletalPrimitive& newPrimitive = primitives.emplace_back();
 				newPrimitive.vertexCount = model.accessors[primitive.indices].count;
-				newPrimitive.indexBuffer = bufferIds[ tempBufferLookup[model.accessors[primitive.indices].bufferView] ];
-				newPrimitive.positionBuffer = bufferIds[ tempBufferLookup[model.accessors[positionBuffer->second].bufferView] ];
-				newPrimitive.normalBuffer = bufferIds[ tempBufferLookup[model.accessors[normalBuffer->second].bufferView] ];
-				newPrimitive.uvBuffer = bufferIds[ tempBufferLookup[model.accessors[uvBuffer->second].bufferView] ];
-				newPrimitive.jointsBuffer = bufferIds[ tempBufferLookup[model.accessors[jointsBuffer->second].bufferView] ];
-				newPrimitive.weightsBuffer = bufferIds[ tempBufferLookup[model.accessors[weightsBuffer->second].bufferView] ];
+				newPrimitive.indexBuffer = tempBufferLookup[model.accessors[primitive.indices].bufferView];
+				newPrimitive.positionBuffer = tempBufferLookup[model.accessors[positionBuffer->second].bufferView];
+				newPrimitive.normalBuffer = tempBufferLookup[model.accessors[normalBuffer->second].bufferView];
+				newPrimitive.uvBuffer = tempBufferLookup[model.accessors[uvBuffer->second].bufferView];
+				newPrimitive.jointsBuffer = tempBufferLookup[model.accessors[jointsBuffer->second].bufferView];
+				newPrimitive.weightsBuffer = tempBufferLookup[model.accessors[weightsBuffer->second].bufferView];
+				newPrimitive.componentType = model.accessors[primitive.indices].componentType;
 				newMesh.emplace_back(primitives.size() - 1);
 			}
 		}
@@ -208,26 +219,60 @@ namespace Vox
 		{
 			for (const tinygltf::Primitive& primitive : mesh.primitives)
 			{
-				for (const std::pair<std::string, int> attribute : primitive.attributes)
+				auto positionBuffer = primitive.attributes.find("POSITION");
+				if (positionBuffer == primitive.attributes.end())
 				{
-					meshBuffers.emplace_back(attribute.second);
+					break;
 				}
+
+				auto normalBuffer = primitive.attributes.find("NORMAL");
+				if (normalBuffer == primitive.attributes.end())
+				{
+					break;
+				}
+
+				auto uvBuffer = primitive.attributes.find("TEXCOORD_0");
+				if (uvBuffer == primitive.attributes.end())
+				{
+					break;
+				}
+
+				auto jointsBuffer = primitive.attributes.find("JOINTS_0");
+				if (jointsBuffer == primitive.attributes.end())
+				{
+					break;
+				}
+
+				auto weightsBuffer = primitive.attributes.find("WEIGHTS_0");
+				if (weightsBuffer == primitive.attributes.end())
+				{
+					break;
+				}
+
+				meshBuffers.emplace_back(positionBuffer->second);
+				meshBuffers.emplace_back(normalBuffer->second);
+				meshBuffers.emplace_back(uvBuffer->second);
+				meshBuffers.emplace_back(jointsBuffer->second);
+				meshBuffers.emplace_back(weightsBuffer->second);
+				meshBuffers.emplace_back(primitive.indices);
 			}
 		}
 		return meshBuffers;
 	}
 
 	// Same as GetMeshBuffers, but for animations instead
-	std::vector<unsigned int> SkeletalModel::GetAnimationBuffers(const tinygltf::Model& model) const
+	std::vector<std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType>> SkeletalModel::GetAnimationBuffers(const tinygltf::Model& model) const
 	{
-		std::vector<unsigned int> animationBuffers;
+		std::vector<std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType>> animationBuffers;
 
 		for (const tinygltf::Animation& animation : model.animations)
 		{
-			for (const tinygltf::AnimationSampler& sampler : animation.samplers)
+			for (const tinygltf::AnimationChannel& channel : animation.channels)
 			{
-				animationBuffers.emplace_back(model.accessors[sampler.input].bufferView);
-				animationBuffers.emplace_back(model.accessors[sampler.output].bufferView);
+				const tinygltf::AnimationSampler sampler = animation.samplers[channel.sampler];
+				animationBuffers.emplace_back(model.accessors[sampler.input].bufferView,
+					model.accessors[sampler.output].bufferView,
+					AnimationSampler::GetSamplerType(channel.target_path));
 			}
 		}
 		return animationBuffers;
