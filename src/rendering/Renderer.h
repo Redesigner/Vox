@@ -12,6 +12,7 @@
 #include "rendering/Light.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
 #include "rendering/mesh/Model.h"
+#include "rendering/mesh/SkeletalModel.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/PixelShader.h"
@@ -56,6 +57,8 @@ namespace Vox
 		 * @return true if the model was loaded successfully, false otherwise
 		 */
 		bool UploadModel(std::string alias, std::string relativeFilePath);
+
+		bool UploadSkeletalModel(std::string alias, std::string relativeFilePath);
 
 		Ref<MeshInstance> CreateMeshInstance(std::string meshName);
 
@@ -104,6 +107,8 @@ namespace Vox
 
 		// A container holding all of our meshes to be retrieved later
 		std::unordered_map<std::string, MeshInstanceContainer> uploadedModels;
+
+		std::unordered_map<std::string, SkeletalModel> uploadedSkeletalModels;
 
 		PixelShader skyShader;
 		PixelShader debugLineShader, debugTriangleShader;

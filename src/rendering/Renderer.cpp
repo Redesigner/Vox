@@ -187,6 +187,18 @@ namespace Vox
         return true;
     }
 
+    bool Renderer::UploadSkeletalModel(std::string alias, std::string relativeFilePath)
+    {
+        if (uploadedSkeletalModels.contains(alias))
+        {
+            VoxLog(Warning, Rendering, "Failed to upload skeletal model '{}'. A model already exists with that name.", alias);
+            return false;
+        }
+
+        uploadedSkeletalModels.emplace(std::make_pair(alias, relativeFilePath));
+        return true;
+    }
+
     Ref<MeshInstance> Renderer::CreateMeshInstance(std::string meshName)
     {
         auto mesh = uploadedModels.find(meshName);
