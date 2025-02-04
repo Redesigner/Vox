@@ -25,8 +25,6 @@ namespace Vox
 			std::vector<unsigned char>& samples, size_t samplesStart, size_t sampleBytes,
 			SamplerType type);
 
-		~AnimationSampler();
-
 		glm::quat EvaluateRotation(float time) const;
 		glm::vec3 EvaulateVector(float time) const;
 
@@ -37,11 +35,9 @@ namespace Vox
 
 		SamplerType type;
 
-		float* timeKeys;
-		size_t timesCount = 0;
+		std::vector<float> timeKeys;
 
-		glm::quat* rotations;
-		glm::vec3* vectors;
-		size_t samplesCount = 0;
+		std::vector<glm::quat> rotations;
+		std::vector<glm::vec3> vectors;
 	};
 }
