@@ -1,10 +1,5 @@
 #include "Model.h"
 
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <GL/glew.h>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>

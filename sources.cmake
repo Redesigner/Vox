@@ -42,4 +42,9 @@ target_sources(Vox PRIVATE
 	"src/voxel/VoxelGrid.cpp"
 	"src/voxel/VoxelWorld.cpp"
 	"src/character/Character.cpp"
-	"src/physics/TypeConversions.cpp"  "src/core/datatypes/Transform.cpp" "src/rendering/mesh/ModelNode.cpp")
+	"src/physics/TypeConversions.cpp"
+	"src/core/datatypes/Transform.cpp" 
+	"src/rendering/mesh/ModelNode.cpp" 
+	"src/rendering/mesh/SkeletalModel.cpp"
+	"src/rendering/mesh/AnimationSampler.cpp"
+)

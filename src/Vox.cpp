@@ -1,5 +1,10 @@
 ﻿#include "Vox.h"
 
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <chrono>
 #include <thread>
 
@@ -103,6 +108,7 @@ int main()
         VoxLog(Display, Game, "Test log!");
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
+        ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
 
         Character character = Character();
 
