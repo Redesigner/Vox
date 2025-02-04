@@ -4,43 +4,55 @@
 
 namespace Vox
 {
-	AnimationSampler::AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timesEnd,
-		std::vector<unsigned char>& samples, size_t samplesStart, size_t samplesEnd,
+	AnimationSampler::AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timeBytes,
+		std::vector<unsigned char>& samples, size_t samplesStart, size_t sampleBytes,
 		SamplerType type)
 		:type(type)
 	{
-		float* timeData = reinterpret_cast<float*>(times.data());
-		timeKeys = std::vector<float>(timeData + timesStart, timeData + timesEnd);
+		timesCount = timeBytes / sizeof(float);
+		timeKeys = new float[timesCount];
+		std::memcpy(timeKeys, &times[timesStart], timeBytes);
 
 		switch (type)
 		{
 		case SamplerType::Translation: case SamplerType::Scale:
 		{
-			glm::vec3* sampleData = reinterpret_cast<glm::vec3*>(samples.data());
-			vectors = std::vector<glm::vec3>(sampleData + samplesStart, sampleData + samplesEnd);
+			samplesCount = sampleBytes / sizeof(glm::vec3);
+			vectors = new glm::vec3[samplesCount];
+			rotations = nullptr;
+			std::memcpy(vectors, &samples[samplesStart], sampleBytes);
 			break;
 		}
 		case SamplerType::Rotation:
 		{
-			glm::quat* sampleData = reinterpret_cast<glm::quat*>(samples.data());
-			rotations = std::vector<glm::quat>(sampleData + samplesStart, sampleData + samplesEnd);
+			samplesCount = sampleBytes / sizeof(glm::vec3);
+			rotations = new glm::quat[sampleBytes];
+			vectors = nullptr;
+			std::memcpy(rotations, &samples[samplesStart], sampleBytes);
 			break;
 		}
 		}
 	}
 
+	AnimationSampler::~AnimationSampler()
+	{
+		//delete[] timeKeys;
+		//delete[] rotations;
+		//delete[] vectors;
+	}
+
 	glm::quat Vox::AnimationSampler::EvaluateRotation(float time) const
 	{
-		assert(!rotations.empty());
+		assert(samplesCount);
 		int leftIndex = GetLeftIndex(time);
 		if (leftIndex == -1)
 		{
 			return rotations[0];
 		}
 
-		if (leftIndex == rotations.size() - 1)
+		if (leftIndex == samplesCount - 1)
 		{
-			return rotations[rotations.size() - 1];
+			return rotations[samplesCount - 1];
 		}
 
 		float alpha = RemapRange(time, timeKeys[leftIndex], timeKeys[leftIndex + 1], 0.0f, 1.0f);
@@ -50,16 +62,16 @@ namespace Vox
 
 	glm::vec3 AnimationSampler::EvaulateVector(float time) const
 	{
-		assert(!rotations.empty());
+		assert(samplesCount);
 		int leftIndex = GetLeftIndex(time);
 		if (leftIndex == -1)
 		{
 			return vectors[0];
 		}
 
-		if (leftIndex == rotations.size() - 1)
+		if (leftIndex == samplesCount - 1)
 		{
-			return vectors[rotations.size() - 1];
+			return vectors[samplesCount - 1];
 		}
 
 		float alpha = RemapRange(time, timeKeys[leftIndex], timeKeys[leftIndex + 1], 0.0f, 1.0f);
@@ -91,7 +103,7 @@ namespace Vox
 	{
 		// Binary search
 		unsigned int left = 0;
-		unsigned int right = timeKeys.size();
+		unsigned int right = timesCount;
 		unsigned int current = right / 2;
 
 		for (;;)

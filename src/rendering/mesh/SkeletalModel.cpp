@@ -36,9 +36,14 @@ namespace Vox
 			const tinygltf::BufferView timeBuffer = model.bufferViews[std::get<0>(animationBuffer)];
 			const tinygltf::BufferView samplesBuffer = model.bufferViews[std::get<1>(animationBuffer)];
 
-			samplers.emplace_back(model.buffers[timeBuffer.buffer].data, timeBuffer.byteOffset, timeBuffer.byteOffset + timeBuffer.byteLength,
-				model.buffers[samplesBuffer.buffer].data, samplesBuffer.byteOffset, samplesBuffer.byteOffset + samplesBuffer.byteLength,
+			AnimationSampler& sampler = samplers.emplace_back(model.buffers[timeBuffer.buffer].data, timeBuffer.byteOffset, timeBuffer.byteLength,
+				model.buffers[samplesBuffer.buffer].data, samplesBuffer.byteOffset, samplesBuffer.byteLength,
 				std::get<2>(animationBuffer));
+			if (std::get<2>(animationBuffer) == AnimationSampler::SamplerType::Translation)
+			{
+				glm::vec3 result = sampler.EvaulateVector(0.5f);
+				result.x += 0.0f;
+			}
 		}
 
 		for (const tinygltf::Material& material : model.materials)
