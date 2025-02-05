@@ -45,6 +45,13 @@ namespace Vox
         gBufferRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
         gBufferAlbedoLocation = gBufferShader.GetUniformLocation("materialAlbedo");
 
+        skeletalMeshShader.Load("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
+        skeletalModelMatrixLocation = skeletalMeshShader.GetUniformLocation("matModel");
+        skeletalViewMatrixLocation = skeletalMeshShader.GetUniformLocation("matView");
+        skeletalProjectionMatrixLocation = skeletalMeshShader.GetUniformLocation("matProjection");
+        skeletalRoughnessLocation = skeletalMeshShader.GetUniformLocation("materialRoughness");
+        skeletalAlbedoLocation = skeletalMeshShader.GetUniformLocation("materialAlbedo");
+
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
 
@@ -58,6 +65,7 @@ namespace Vox
         voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
         CreateMeshVao();
+        CreateSkeletalMeshVao();
         CreateVoxelVao();
 
         const unsigned int voxelGridSize = 34;
@@ -282,10 +290,8 @@ namespace Vox
         //glClearDepth(0.0f);
 
         gBufferShader.Enable();
-        // Set camera matrices
         gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, currentCamera->GetViewMatrix());
         gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
-
         glBindVertexArray(meshVao);
 
         for (auto& meshes : uploadedModels)
@@ -293,31 +299,19 @@ namespace Vox
             meshes.second.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
         }
 
+        skeletalMeshShader.Enable();
+        skeletalMeshShader.SetUniformMatrix(skeletalViewMatrixLocation, currentCamera->GetViewMatrix());
+        skeletalMeshShader.SetUniformMatrix(skeletalProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
+        glBindVertexArray(skeletalMeshVao);
+
         for (auto& skeletalMesh : uploadedSkeletalModels)
         {
-            skeletalMesh.second.Render(gBufferShader, gBufferModelMatrixLocation, glm::identity<glm::mat4x4>(), gBufferAlbedoLocation, gBufferRoughnessLocation);
+            skeletalMesh.second.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::identity<glm::mat4x4>(), skeletalAlbedoLocation, skeletalRoughnessLocation);
         }
 
         UpdateVoxelMeshes();
         RenderVoxelMeshes();
     }
-
-    //void Renderer::DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform)
-    //{
-    //    const Color albedo = material->maps[MATERIAL_MAP_DIFFUSE].color;
-    //    Vector3 materialAlbedo = Vector3(
-    //        albedo.r / 255.0f,
-    //        albedo.g / 255.0f,
-    //        albedo.b / 255.0f
-    //    );
-    //    glUniform3fv(materialColorLocation, 1, reinterpret_cast<float*>(materialAlbedo));
-    //    // The shader uniform location is automatically assigned when the shader is loaded by raylib
-    //    // SetShaderValueMatrix(gBufferShader, gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
-    //    rlSetUniformMatrix(gBufferShader.locs[SHADER_LOC_MATRIX_MODEL], transform);
-    //
-    //    glBindVertexArray(mesh->vaoId);
-    //    glDrawElements(GL_TRIANGLES, mesh->triangleCount * 3, GL_UNSIGNED_SHORT, 0);
-    //}
 
     void Renderer::RenderDeferred()
     {
@@ -435,6 +429,32 @@ namespace Vox
         glEnableVertexArrayAttrib(meshVao, 2);
         glVertexArrayAttribFormat(meshVao, 2, 2, GL_FLOAT, false, 0);
         glVertexArrayAttribBinding(meshVao, 2, 2);
+    }
+
+    void Renderer::CreateSkeletalMeshVao()
+    {
+        glGenVertexArrays(1, &skeletalMeshVao);
+        glBindVertexArray(skeletalMeshVao);
+        // Position
+        glEnableVertexArrayAttrib(skeletalMeshVao, 0);
+        glVertexArrayAttribFormat(skeletalMeshVao, 0, 3, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(skeletalMeshVao, 0, 0);
+        // Normal
+        glEnableVertexArrayAttrib(skeletalMeshVao, 1);
+        glVertexArrayAttribFormat(skeletalMeshVao, 1, 3, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(skeletalMeshVao, 1, 1);
+        // TexCoord
+        glEnableVertexArrayAttrib(skeletalMeshVao, 2);
+        glVertexArrayAttribFormat(skeletalMeshVao, 2, 2, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(skeletalMeshVao, 2, 2);
+        // Joints
+        glEnableVertexArrayAttrib(skeletalMeshVao, 3);
+        glVertexArrayAttribFormat(skeletalMeshVao, 3, 4, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(skeletalMeshVao, 3, 3);
+        // Weights
+        glEnableVertexArrayAttrib(skeletalMeshVao, 4);
+        glVertexArrayAttribFormat(skeletalMeshVao, 4, 4, GL_FLOAT, false, 0);
+        glVertexArrayAttribBinding(skeletalMeshVao, 4, 4);
     }
 
     void Renderer::CreateVoxelVao()
