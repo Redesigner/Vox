@@ -1,5 +1,7 @@
 #include "SkeletalModel.h"
 
+#include <ranges>
+
 #include <GL/glew.h>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -35,7 +37,17 @@ namespace Vox
 		{
 			animations.try_emplace(animation.name, animation, model);
 		}
-		VoxLog(Display, Rendering, "Loaded {} animations.", animations.size());
+		auto keys = std::views::keys(animations);
+		std::string animationNames;
+		for (const std::string& animationName : keys)
+		{
+			animationNames.append(animationName);
+			if (animationName != *--keys.end())
+			{
+				animationNames.append(", ");
+			}
+		}
+		VoxLog(Display, Rendering, "Skeletal mesh loaded {} animations: \n\t'{{ {} }}'", animations.size(), animationNames);
 
 		for (const tinygltf::Material& material : model.materials)
 		{

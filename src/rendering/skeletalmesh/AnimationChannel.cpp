@@ -22,7 +22,7 @@ namespace Vox
 		timeKeys = std::vector<float>();
 		std::copy(
 			reinterpret_cast<float*>(&timeBuffer.data[timeBufferView.byteOffset]),
-			reinterpret_cast<float*>(&timeBuffer.data[timeBufferView.byteOffset + timeBufferView.byteLength - 3]),
+			reinterpret_cast<float*>(&timeBuffer.data[timeBufferView.byteOffset + timeBufferView.byteLength]),
 			std::back_inserter(timeKeys)
 		);
 
@@ -32,8 +32,8 @@ namespace Vox
 		{
 			vectors = std::vector<glm::vec3>();
 			std::copy(
-				reinterpret_cast<glm::vec3*>(&keyframeBuffer.data[keyframeBufferView.byteOffset]),
-				reinterpret_cast<glm::vec3*>(&keyframeBuffer.data[keyframeBufferView.byteOffset + keyframeBufferView.byteLength - 1]),
+				reinterpret_cast<glm::vec3*>(keyframeBuffer.data.data() + keyframeBufferView.byteOffset),
+				reinterpret_cast<glm::vec3*>(keyframeBuffer.data.data() + keyframeBufferView.byteOffset + keyframeBufferView.byteLength),
 				std::back_inserter(vectors)
 			);
 			break;
@@ -42,8 +42,8 @@ namespace Vox
 		{
 			rotations = std::vector<glm::quat>();
 			std::copy(
-				reinterpret_cast<glm::quat*>(&keyframeBuffer.data[keyframeBufferView.byteOffset]),
-				reinterpret_cast<glm::quat*>(&keyframeBuffer.data[keyframeBufferView.byteOffset + keyframeBufferView.byteLength - 1]),
+				reinterpret_cast<glm::quat*>(keyframeBuffer.data.data() + keyframeBufferView.byteOffset),
+				reinterpret_cast<glm::quat*>(keyframeBuffer.data.data() + keyframeBufferView.byteOffset + keyframeBufferView.byteLength),
 				std::back_inserter(rotations)
 			);
 			break;
