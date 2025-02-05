@@ -449,7 +449,7 @@ namespace Vox
         glVertexArrayAttribBinding(skeletalMeshVao, 2, 2);
         // Joints
         glEnableVertexArrayAttrib(skeletalMeshVao, 3);
-        glVertexArrayAttribFormat(skeletalMeshVao, 3, 4, GL_FLOAT, false, 0);
+        glVertexArrayAttribIFormat(skeletalMeshVao, 3, 4, GL_UNSIGNED_BYTE, 0);
         glVertexArrayAttribBinding(skeletalMeshVao, 3, 3);
         // Weights
         glEnableVertexArrayAttrib(skeletalMeshVao, 4);

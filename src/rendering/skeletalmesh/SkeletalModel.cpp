@@ -165,7 +165,7 @@ namespace Vox
 			glBindVertexBuffer(0, primitive.positionBuffer, 0, sizeof(float) * 3);
 			glBindVertexBuffer(1, primitive.normalBuffer, 0, sizeof(float) * 3);
 			glBindVertexBuffer(2, primitive.uvBuffer, 0, sizeof(float) * 2);
-			glBindVertexBuffer(3, primitive.jointsBuffer, 0, sizeof(float) * 4);
+			glBindVertexBuffer(3, primitive.jointsBuffer, 0, sizeof(unsigned char) * 4);
 			glBindVertexBuffer(4, primitive.weightsBuffer, 0, sizeof(float) * 4);
 
 			glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, 0);
