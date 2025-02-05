@@ -30,7 +30,7 @@ namespace Vox
 		settings->mPenetrationRecoverySpeed = 1.0f;
 		settings->mPredictiveContactDistance = 0.1f;
 		settings->mSupportingVolume = Plane(Vec3::sAxisY(), -radius); // Accept contacts that touch the lower sphere of the capsule
-		character = new CharacterVirtual(settings, RVec3(2.0f, 15.0f, 0.0f), Quat::sIdentity(), 0, physicsSystem);
+		character = new CharacterVirtual(settings, RVec3(2.0f, 2.0f, 0.0f), Quat::sIdentity(), 0, physicsSystem);
 		// character->SetListener(this);
 	}
 

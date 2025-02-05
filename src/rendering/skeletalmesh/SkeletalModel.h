@@ -63,5 +63,7 @@ namespace Vox
 		std::vector<AnimationChannel> samplers;
 
 		static const unsigned int maxMatrixCount = 64;
+
+		float currentAnimTime = 0.0f;
 	};
 }
