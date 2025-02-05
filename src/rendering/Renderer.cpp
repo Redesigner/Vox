@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Renderer.h"
 
@@ -51,6 +51,8 @@ namespace Vox
         skeletalProjectionMatrixLocation = skeletalMeshShader.GetUniformLocation("matProjection");
         skeletalRoughnessLocation = skeletalMeshShader.GetUniformLocation("materialRoughness");
         skeletalAlbedoLocation = skeletalMeshShader.GetUniformLocation("materialAlbedo");
+        unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader.GetId(), "data");
+        glUniformBlockBinding(skeletalMeshShader.GetId(), matrixBufferLocation, 0);
 
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();

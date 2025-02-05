@@ -4,6 +4,8 @@
 
 #include <tiny_gltf.h>
 
+#include "rendering/mesh/ModelNode.h"
+
 namespace Vox
 {
 	Animation::Animation(const tinygltf::Animation& animation, tinygltf::Model& model)
@@ -19,5 +21,13 @@ namespace Vox
 	float Animation::GetDuration() const
 	{
 		return duration;
+	}
+
+	void Animation::ApplyToNodes(std::vector<ModelNode>& nodes, float time)
+	{
+		for (AnimationChannel& animationChannel : channels)
+		{
+			animationChannel.ApplyToNode(nodes, time);
+		}
 	}
 }

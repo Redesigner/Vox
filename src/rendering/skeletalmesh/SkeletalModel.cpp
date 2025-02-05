@@ -34,6 +34,10 @@ namespace Vox
 			glNamedBufferData(bufferIds[i], bufferView.byteLength, model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
+		// Allocate space for up to 'maxMatrixCount' matrix objects in our UBO
+		glCreateBuffers(1, &matrixBuffer);
+		glNamedBufferStorage(matrixBuffer, sizeof(glm::mat4x4) * maxMatrixCount, 0, GL_DYNAMIC_STORAGE_BIT);
+
 		for (const tinygltf::Animation& animation : model.animations)
 		{
 			animations.try_emplace(animation.name, animation, model);
@@ -142,6 +146,11 @@ namespace Vox
 			}
 		}
 
+		if (!animations.empty())
+		{
+			SetAnimation(animations.begin()->first, 0.0f);
+		}
+
 		size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
@@ -153,6 +162,8 @@ namespace Vox
 
 	void SkeletalModel::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
+
 		for (const SkeletalPrimitive& primitive : primitives)
 		{
 			const PBRMaterial& material = materials[primitive.materialIndex];
@@ -170,6 +181,26 @@ namespace Vox
 
 			glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, 0);
 		}
+	}
+
+	void SkeletalModel::SetAnimation(std::string animationName, float time)
+	{
+		auto animationLookup = animations.find(animationName);
+		if (animationLookup == animations.end())
+		{
+			VoxLog(Warning, Rendering, "Could not find animation '{}'", animationName);
+			return;
+		}
+
+		Animation& animation = animationLookup->second;
+		animation.ApplyToNodes(nodes, time);
+
+		std::vector<glm::mat4x4> transforms;
+		for (ModelNode& node : nodes)
+		{
+			transforms.emplace_back(node.localTransform.GetMatrix());
+		}
+		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
 
 	Transform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node) const
