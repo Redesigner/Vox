@@ -1,37 +1,57 @@
-#include "AnimationSampler.h"
+#include "AnimationChannel.h"
 
 #include <iterator>
+
+#include <tiny_gltf.h>
 
 #include "core/math/Math.h"
 
 namespace Vox
 {
-	AnimationSampler::AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timeBytes,
-		std::vector<unsigned char>& samples, size_t samplesStart, size_t sampleBytes,
-		SamplerType type)
-		:type(type)
+	AnimationChannel::AnimationChannel(tinygltf::Model& model, const tinygltf::Animation& animation, const tinygltf::AnimationChannel& channel)
 	{
+		const tinygltf::AnimationSampler& sampler = animation.samplers[channel.sampler];
+		const tinygltf::BufferView& timeBufferView = model.bufferViews[sampler.input];
+		const tinygltf::BufferView& keyframeBufferView = model.bufferViews[sampler.output];
+
+		type = GetSamplerType(channel.target_path);
+
+		tinygltf::Buffer& timeBuffer = model.buffers[timeBufferView.buffer];
+		tinygltf::Buffer& keyframeBuffer = model.buffers[keyframeBufferView.buffer];
+
 		timeKeys = std::vector<float>();
-		std::copy(reinterpret_cast<float*>(&times[timesStart]), reinterpret_cast<float*>(&times[timesStart + timeBytes]), std::back_inserter(timeKeys));
+		std::copy(
+			reinterpret_cast<float*>(&timeBuffer.data[timeBufferView.byteOffset]),
+			reinterpret_cast<float*>(&timeBuffer.data[timeBufferView.byteOffset + timeBufferView.byteLength - 3]),
+			std::back_inserter(timeKeys)
+		);
 
 		switch (type)
 		{
 		case SamplerType::Translation: case SamplerType::Scale:
 		{
 			vectors = std::vector<glm::vec3>();
-			std::copy(reinterpret_cast<glm::vec3*>(&samples[samplesStart]), reinterpret_cast<glm::vec3*>(& samples[samplesStart + sampleBytes]), std::back_inserter(vectors));
+			std::copy(
+				reinterpret_cast<glm::vec3*>(&keyframeBuffer.data[keyframeBufferView.byteOffset]),
+				reinterpret_cast<glm::vec3*>(&keyframeBuffer.data[keyframeBufferView.byteOffset + keyframeBufferView.byteLength - 1]),
+				std::back_inserter(vectors)
+			);
 			break;
 		}
 		case SamplerType::Rotation:
 		{
 			rotations = std::vector<glm::quat>();
-			std::copy(reinterpret_cast<glm::quat*>(&samples[samplesStart]), reinterpret_cast<glm::quat*>(&samples[samplesStart + sampleBytes]), std::back_inserter(rotations));
+			std::copy(
+				reinterpret_cast<glm::quat*>(&keyframeBuffer.data[keyframeBufferView.byteOffset]),
+				reinterpret_cast<glm::quat*>(&keyframeBuffer.data[keyframeBufferView.byteOffset + keyframeBufferView.byteLength - 1]),
+				std::back_inserter(rotations)
+			);
 			break;
 		}
 		}
 	}
 
-	glm::quat Vox::AnimationSampler::EvaluateRotation(float time) const
+	glm::quat Vox::AnimationChannel::EvaluateRotation(float time) const
 	{
 		assert(!rotations.empty());
 		int leftIndex = GetLeftIndex(time);
@@ -50,7 +70,7 @@ namespace Vox
 		return glm::mix(rotations[leftIndex], rotations[leftIndex], alpha);
 	}
 
-	glm::vec3 AnimationSampler::EvaulateVector(float time) const
+	glm::vec3 AnimationChannel::EvaulateVector(float time) const
 	{
 		assert(!vectors.empty());
 		int leftIndex = GetLeftIndex(time);
@@ -69,7 +89,7 @@ namespace Vox
 		return glm::mix(vectors[leftIndex], vectors[leftIndex + 1], alpha);
 	}
 
-	AnimationSampler::SamplerType AnimationSampler::GetSamplerType(std::string string)
+	AnimationChannel::SamplerType AnimationChannel::GetSamplerType(std::string string)
 	{
 		if (string == "translation")
 		{
@@ -89,7 +109,7 @@ namespace Vox
 		return SamplerType::Error;
 	}
 
-	int AnimationSampler::GetLeftIndex(float time) const
+	int AnimationChannel::GetLeftIndex(float time) const
 	{
 		// Binary search
 

@@ -37,7 +37,7 @@ target_sources(Vox PRIVATE
 	"src/rendering/shaders/PixelShader.cpp"
 	"src/rendering/shaders/Shader.cpp"
 	"src/rendering/shaders/VoxelShader.cpp"
-	"src/rendering/skeletalmesh/AnimationSampler.cpp"
+	"src/rendering/skeletalmesh/AnimationChannel.cpp"
 	"src/rendering/skeletalmesh/SkeletalModel.cpp"
 	"src/rendering/Texture.cpp"
 	"src/voxel/CollisionOctree.cpp"
@@ -47,4 +47,4 @@ target_sources(Vox PRIVATE
 	"src/voxel/VoxelChunk.cpp"
 	"src/voxel/VoxelGrid.cpp"
 	"src/voxel/VoxelWorld.cpp"
-)
+ "src/rendering/skeletalmesh/Animation.cpp")

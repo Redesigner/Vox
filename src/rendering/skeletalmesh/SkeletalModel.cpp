@@ -31,20 +31,11 @@ namespace Vox
 			glNamedBufferData(bufferIds[i], bufferView.byteLength, model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
-		for (std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType> animationBuffer : GetAnimationBuffers(model))
+		for (const tinygltf::Animation& animation : model.animations)
 		{
-			const tinygltf::BufferView timeBuffer = model.bufferViews[std::get<0>(animationBuffer)];
-			const tinygltf::BufferView samplesBuffer = model.bufferViews[std::get<1>(animationBuffer)];
-
-			AnimationSampler& sampler = samplers.emplace_back(model.buffers[timeBuffer.buffer].data, timeBuffer.byteOffset, timeBuffer.byteLength,
-				model.buffers[samplesBuffer.buffer].data, samplesBuffer.byteOffset, samplesBuffer.byteLength,
-				std::get<2>(animationBuffer));
-			if (std::get<2>(animationBuffer) == AnimationSampler::SamplerType::Translation)
-			{
-				glm::vec3 result = sampler.EvaulateVector(0.5f);
-				result.x += 0.0f;
-			}
+			animations.try_emplace(animation.name, animation, model);
 		}
+		VoxLog(Display, Rendering, "Loaded {} animations.", animations.size());
 
 		for (const tinygltf::Material& material : model.materials)
 		{
@@ -263,23 +254,5 @@ namespace Vox
 			}
 		}
 		return meshBuffers;
-	}
-
-	// Same as GetMeshBuffers, but for animations instead
-	std::vector<std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType>> SkeletalModel::GetAnimationBuffers(const tinygltf::Model& model) const
-	{
-		std::vector<std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType>> animationBuffers;
-
-		for (const tinygltf::Animation& animation : model.animations)
-		{
-			for (const tinygltf::AnimationChannel& channel : animation.channels)
-			{
-				const tinygltf::AnimationSampler sampler = animation.samplers[channel.sampler];
-				animationBuffers.emplace_back(model.accessors[sampler.input].bufferView,
-					model.accessors[sampler.output].bufferView,
-					AnimationSampler::GetSamplerType(channel.target_path));
-			}
-		}
-		return animationBuffers;
 	}
 }

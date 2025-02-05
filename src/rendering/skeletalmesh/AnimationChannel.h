@@ -7,10 +7,16 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
 
+namespace tinygltf
+{
+	class Animation;
+	class AnimationChannel;
+	class Model;
+}
+
 namespace Vox
 {
-
-	class AnimationSampler
+	class AnimationChannel
 	{
 	public:
 		enum class SamplerType : char
@@ -21,9 +27,7 @@ namespace Vox
 			Error
 		};
 
-		AnimationSampler(std::vector<unsigned char>& times, size_t timesStart, size_t timeBytes,
-			std::vector<unsigned char>& samples, size_t samplesStart, size_t sampleBytes,
-			SamplerType type);
+		AnimationChannel(tinygltf::Model& model, const tinygltf::Animation& animation, const tinygltf::AnimationChannel& channel);
 
 		glm::quat EvaluateRotation(float time) const;
 		glm::vec3 EvaulateVector(float time) const;

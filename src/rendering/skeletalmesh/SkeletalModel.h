@@ -2,12 +2,14 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/mat4x4.hpp>
 
 #include "rendering/mesh/ModelNode.h"
-#include "rendering/skeletalmesh/AnimationSampler.h"
+#include "rendering/skeletalmesh/Animation.h"
+#include "rendering/skeletalmesh/AnimationChannel.h"
 #include "rendering/skeletalmesh/SkeletalPrimitive.h"
 #include "rendering/PBRMaterial.h"
 
@@ -39,8 +41,6 @@ namespace Vox
 
 		std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model) const;
 
-		std::vector<std::tuple<unsigned int, unsigned int, AnimationSampler::SamplerType>> GetAnimationBuffers(const tinygltf::Model& model) const;
-
 		std::vector<unsigned int> bufferIds;
 
 		// store our mesh map separately, so our meshes can be iterated faster
@@ -50,8 +50,10 @@ namespace Vox
 
 		std::vector<PBRMaterial> materials;
 
+		std::unordered_map<std::string, Animation> animations;
+
 		std::vector<ModelNode> nodes;
 
-		std::vector<AnimationSampler> samplers;
+		std::vector<AnimationChannel> samplers;
 	};
 }
