@@ -5,6 +5,7 @@
 #include <tiny_gltf.h>
 
 #include "core/math/Math.h"
+#include "rendering/mesh/ModelNode.h"
 
 namespace Vox
 {
@@ -14,7 +15,8 @@ namespace Vox
 		const tinygltf::BufferView& timeBufferView = model.bufferViews[sampler.input];
 		const tinygltf::BufferView& keyframeBufferView = model.bufferViews[sampler.output];
 
-		type = GetSamplerType(channel.target_path);
+		node = channel.target_node;
+		type = GetSamplerTypeFromString(channel.target_path);
 
 		tinygltf::Buffer& timeBuffer = model.buffers[timeBufferView.buffer];
 		tinygltf::Buffer& keyframeBuffer = model.buffers[keyframeBufferView.buffer];
@@ -94,7 +96,34 @@ namespace Vox
 		return timeKeys[timeKeys.size() - 1];
 	}
 
-	AnimationChannel::SamplerType AnimationChannel::GetSamplerType(std::string string)
+	AnimationChannel::SamplerType AnimationChannel::GetType() const
+	{
+		return type;
+	}
+
+	void AnimationChannel::ApplyToNode(std::vector<ModelNode>& nodes, float time)
+	{
+		ModelNode& targetNode = nodes[node];
+		switch (type)
+		{
+		case SamplerType::Translation:
+		{
+			targetNode.localTransform.position = EvaulateVector(time);
+			break;
+		}
+		case SamplerType::Rotation:
+		{
+			targetNode.localTransform.rotation = EvaluateRotation(time);
+			break;
+		}
+		case SamplerType::Scale:
+		{
+			targetNode.localTransform.scale = EvaulateVector(time);
+		}
+		}
+	}
+
+	AnimationChannel::SamplerType AnimationChannel::GetSamplerTypeFromString(std::string string)
 	{
 		if (string == "translation")
 		{

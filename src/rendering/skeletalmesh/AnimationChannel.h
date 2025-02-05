@@ -16,6 +16,8 @@ namespace tinygltf
 
 namespace Vox
 {
+	struct ModelNode;
+
 	class AnimationChannel
 	{
 	public:
@@ -34,10 +36,16 @@ namespace Vox
 
 		float GetDuration() const;
 
-		static SamplerType GetSamplerType(std::string string);
+		SamplerType GetType() const;
+
+		void ApplyToNode(std::vector<ModelNode>& nodes, float time);
+
+		static SamplerType GetSamplerTypeFromString(std::string string);
 
 	private:
 		int GetLeftIndex(float time) const;
+
+		unsigned int node = 0;
 
 		SamplerType type;
 

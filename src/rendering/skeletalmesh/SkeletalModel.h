@@ -34,6 +34,9 @@ namespace Vox
 
 		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
 
+		// @TODO: use something faster than string here
+		void SetAnimation(std::string animationName , float time);
+
 	private:
 		Transform CalculateNodeTransform(const tinygltf::Node& node) const;
 
@@ -42,6 +45,8 @@ namespace Vox
 		std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model) const;
 
 		std::vector<unsigned int> bufferIds;
+
+		unsigned int matrixBuffer;
 
 		// store our mesh map separately, so our meshes can be iterated faster
 		std::vector<std::vector<unsigned int>> meshes;
@@ -55,5 +60,7 @@ namespace Vox
 		std::vector<ModelNode> nodes;
 
 		std::vector<AnimationChannel> samplers;
+
+		static const unsigned int maxMatrixCount = 64;
 	};
 }

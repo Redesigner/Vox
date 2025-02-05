@@ -58,6 +58,11 @@ namespace Vox
 		glUniformMatrix4fv(uniformLocation, 1, false, &matrix[0][0]);
 	}
 
+	unsigned int Shader::GetId() const
+	{
+		return shader;
+	}
+
 	bool Shader::Link()
 	{
 		glLinkProgram(shader);

@@ -13,15 +13,18 @@ uniform mat4 matModel;
 uniform mat4 matView;
 uniform mat4 matProjection;
 
-uniform mat4[64] matJoints;
+uniform data
+{
+    mat4 transform[64];
+} joints;
 
 void main()
 {
     mat4 matBonesCombined = 
-        matJoints[vertexJoints.x] * vertexWeights.x +
-        matJoints[vertexJoints.y] * vertexWeights.y +
-        matJoints[vertexJoints.z] * vertexWeights.z +
-        matJoints[vertexJoints.w] * vertexWeights.w;
+        joints.transform[vertexJoints.x] * vertexWeights.x +
+        joints.transform[vertexJoints.y] * vertexWeights.y +
+        joints.transform[vertexJoints.z] * vertexWeights.z +
+        joints.transform[vertexJoints.w] * vertexWeights.w;
 
     mat4 matSkin = matModel * matBonesCombined;
     vec4 worldPos = matSkin * vec4(vertexPosition, 1.0);

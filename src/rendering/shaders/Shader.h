@@ -24,6 +24,9 @@ namespace Vox
 		void SetUniformColor(int uniformLocation, glm::vec4 color);
 		void SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix);
 
+		// TEMPORARY USAGE ONLY
+		unsigned int GetId() const;
+
 	protected:
 		bool Link();
 		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType);
