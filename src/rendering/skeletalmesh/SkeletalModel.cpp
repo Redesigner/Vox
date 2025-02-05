@@ -172,6 +172,7 @@ namespace Vox
 				newPrimitive.jointsBuffer = tempBufferLookup[model.accessors[jointsBuffer->second].bufferView];
 				newPrimitive.weightsBuffer = tempBufferLookup[model.accessors[weightsBuffer->second].bufferView];
 				newPrimitive.componentType = model.accessors[primitive.indices].componentType;
+				newPrimitive.materialIndex = primitive.material;
 				newMesh.emplace_back(primitives.size() - 1);
 			}
 		}
@@ -192,10 +193,8 @@ namespace Vox
 
 	void SkeletalModel::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
-		if (!animations.empty())
-		{
-			SetAnimation(animations.begin()->first, currentAnimTime);
-		}
+		//SetAnimation("Translate", currentAnimTime);
+		SetAnimation("Rotate", currentAnimTime);
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
 
@@ -242,10 +241,10 @@ namespace Vox
 		}
 
 		std::vector<glm::mat4x4> transforms;
-		for (ModelNode& node : nodes)
-		{
-			transforms.emplace_back(node.localTransform.GetMatrix());
-		}
+		//for (ModelNode& node : nodes)
+		//{
+		//	transforms.emplace_back(node.globalTransform * node.inverseBindMatrix);
+		//}
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
 
