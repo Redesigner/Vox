@@ -181,11 +181,6 @@ namespace Vox
 			UpdateTransforms(node, glm::identity<glm::mat4x4>());
 		}
 
-		if (!animations.empty())
-		{
-			SetAnimation(animations.begin()->first, 0.0f);
-		}
-
 		size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
@@ -197,6 +192,11 @@ namespace Vox
 
 	void SkeletalModel::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
+		if (!animations.empty())
+		{
+			SetAnimation(animations.begin()->first, currentAnimTime);
+		}
+
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
 
 		for (const SkeletalPrimitive& primitive : primitives)
@@ -215,6 +215,12 @@ namespace Vox
 			glBindVertexBuffer(4, primitive.weightsBuffer, 0, sizeof(float) * 4);
 
 			glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, 0);
+		}
+
+		currentAnimTime += 1.0f / 60.0f;
+		if (currentAnimTime >= 2.5f)
+		{
+			currentAnimTime = 0.0f;
 		}
 	}
 
@@ -238,7 +244,7 @@ namespace Vox
 		std::vector<glm::mat4x4> transforms;
 		for (ModelNode& node : nodes)
 		{
-			transforms.emplace_back(/*node.globalTransform * */node.inverseBindMatrix);
+			transforms.emplace_back(node.localTransform.GetMatrix());
 		}
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
