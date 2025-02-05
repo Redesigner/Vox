@@ -32,6 +32,8 @@ namespace Vox
 		glm::quat EvaluateRotation(float time) const;
 		glm::vec3 EvaulateVector(float time) const;
 
+		float GetDuration() const;
+
 		static SamplerType GetSamplerType(std::string string);
 
 	private:

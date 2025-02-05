@@ -17,7 +17,10 @@ namespace Vox
 	public:
 		Animation(const tinygltf::Animation& animation, tinygltf::Model& model);
 
+		float GetDuration() const;
+
 	private:
 		std::vector<AnimationChannel> channels;
+		float duration;
 	};
 }

@@ -89,6 +89,11 @@ namespace Vox
 		return glm::mix(vectors[leftIndex], vectors[leftIndex + 1], alpha);
 	}
 
+	float AnimationChannel::GetDuration() const
+	{
+		return timeKeys[timeKeys.size() - 1];
+	}
+
 	AnimationChannel::SamplerType AnimationChannel::GetSamplerType(std::string string)
 	{
 		if (string == "translation")
