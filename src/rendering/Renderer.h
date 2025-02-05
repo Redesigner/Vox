@@ -89,15 +89,23 @@ namespace Vox
 
 		void CreateMeshVao();
 
+		void CreateSkeletalMeshVao();
+
 		void CreateVoxelVao();
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<Framebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
+
 		PixelShader gBufferShader;
 		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
 		int gBufferAlbedoLocation, gBufferRoughnessLocation;
 		unsigned int meshVao;
+
+		PixelShader skeletalMeshShader;
+		int skeletalModelMatrixLocation, skeletalViewMatrixLocation, skeletalProjectionMatrixLocation;
+		int skeletalAlbedoLocation, skeletalRoughnessLocation;
+		unsigned int skeletalMeshVao;
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;
