@@ -55,13 +55,15 @@ namespace Vox
 		}
 		VoxLog(Display, Rendering, "Skeletal mesh loaded {} animations: \n\t'{{ {} }}'", animations.size(), animationNames);
 
-
+		// Create materials
 		for (const tinygltf::Material& material : model.materials)
 		{
 			const std::vector<double>& color = material.pbrMetallicRoughness.baseColorFactor;
 			materials.emplace_back(glm::vec4(color[0], color[1], color[2], color[3]), material.pbrMetallicRoughness.roughnessFactor, material.pbrMetallicRoughness.metallicFactor);
 		}
 
+
+		// Create nodes
 		nodes = std::vector<ModelNode>(model.nodes.size());
 		for (int i = 0; i < model.nodes.size(); ++i)
 		{
@@ -76,6 +78,42 @@ namespace Vox
 			}
 		}
 
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			if (nodes[i].root)
+			{
+				rootNodes.emplace_back(i);
+			}
+		}
+
+		// Create temporary skins array, which will be copied into the primitives directly
+		// during node creation
+		std::vector<std::vector<glm::mat4x4>> skins = std::vector<std::vector<glm::mat4x4>>();
+		for (const tinygltf::Skin& skin : model.skins)
+		{
+			const tinygltf::BufferView& inverseBindBufferView = model.bufferViews[model.accessors[skin.inverseBindMatrices].bufferView];
+			std::vector<glm::mat4x4>& inverseBindMatrices = skins.emplace_back();
+			tinygltf::Buffer& buffer = model.buffers[inverseBindBufferView.buffer];
+			std::copy(
+				reinterpret_cast<glm::mat4x4*>(buffer.data.data() + inverseBindBufferView.byteOffset),
+				reinterpret_cast<glm::mat4x4*>(buffer.data.data() + inverseBindBufferView.byteOffset + inverseBindBufferView.byteLength),
+				std::back_inserter(inverseBindMatrices)
+			);
+		}
+
+		for (int i = 0; i < skins.size(); ++i)
+		{
+			std::vector<glm::mat4x4>& inverseBindMatrices = skins[i];
+			const tinygltf::Skin& skin = model.skins[i];
+
+			for (int j = 0; j < inverseBindMatrices.size(); ++j)
+			{
+				ModelNode& node = nodes[skin.joints[j]];
+				node.inverseBindMatrix = inverseBindMatrices[j];
+			}
+		}
+
+		// Create primitives
 		for (const tinygltf::Mesh& mesh : model.meshes)
 		{
 			std::vector<unsigned int>& newMesh = meshes.emplace_back();
@@ -138,12 +176,9 @@ namespace Vox
 			}
 		}
 
-		for (int i = 0; i < nodes.size(); ++i)
+		for (int node : rootNodes)
 		{
-			if (nodes[i].root)
-			{
-				UpdateTransforms(i, glm::identity<glm::mat4x4>());
-			}
+			UpdateTransforms(node, glm::identity<glm::mat4x4>());
 		}
 
 		if (!animations.empty())
@@ -195,10 +230,15 @@ namespace Vox
 		Animation& animation = animationLookup->second;
 		animation.ApplyToNodes(nodes, time);
 
+		for (int node : rootNodes)
+		{
+			UpdateTransforms(node, glm::identity<glm::mat4x4>());
+		}
+
 		std::vector<glm::mat4x4> transforms;
 		for (ModelNode& node : nodes)
 		{
-			transforms.emplace_back(node.localTransform.GetMatrix());
+			transforms.emplace_back(/*node.globalTransform * */node.inverseBindMatrix);
 		}
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}

@@ -108,7 +108,8 @@ int main()
         VoxLog(Display, Game, "Test log!");
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
-        ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
+        //ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
+        ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
         Character character = Character();
 

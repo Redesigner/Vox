@@ -308,7 +308,7 @@ namespace Vox
 
         for (auto& skeletalMesh : uploadedSkeletalModels)
         {
-            skeletalMesh.second.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::identity<glm::mat4x4>(), skeletalAlbedoLocation, skeletalRoughnessLocation);
+            skeletalMesh.second.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 4.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
         }
 
         UpdateVoxelMeshes();

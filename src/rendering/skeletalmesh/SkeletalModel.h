@@ -58,6 +58,7 @@ namespace Vox
 		std::unordered_map<std::string, Animation> animations;
 
 		std::vector<ModelNode> nodes;
+		std::vector<unsigned int> rootNodes;
 
 		std::vector<AnimationChannel> samplers;
 
