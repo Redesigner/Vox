@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <glm/mat4x4.hpp>
@@ -11,7 +12,10 @@ namespace Vox
 	struct ModelNode
 	{
 	public:
+		std::string name;
+
 		std::vector<int> children;
+
 		int mesh = -1;
 
 		Transform localTransform;

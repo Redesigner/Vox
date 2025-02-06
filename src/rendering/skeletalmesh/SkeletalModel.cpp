@@ -72,6 +72,7 @@ namespace Vox
 			newNode.localTransform = CalculateNodeTransform(node);
 			newNode.children = node.children;
 			newNode.mesh = node.mesh;
+			newNode.name = node.name;
 			for (int child : node.children)
 			{
 				nodes[child].root = false;
@@ -88,7 +89,7 @@ namespace Vox
 
 		// Create temporary skins array, which will be copied into the primitives directly
 		// during node creation
-		std::vector<std::vector<glm::mat4x4>> skins = std::vector<std::vector<glm::mat4x4>>();
+		skins = std::vector<std::vector<glm::mat4x4>>();
 		for (const tinygltf::Skin& skin : model.skins)
 		{
 			const tinygltf::BufferView& inverseBindBufferView = model.bufferViews[model.accessors[skin.inverseBindMatrices].bufferView];
@@ -99,6 +100,8 @@ namespace Vox
 				reinterpret_cast<glm::mat4x4*>(buffer.data.data() + inverseBindBufferView.byteOffset + inverseBindBufferView.byteLength),
 				std::back_inserter(inverseBindMatrices)
 			);
+
+			joints = skin.joints;
 		}
 
 		for (int i = 0; i < skins.size(); ++i)
@@ -241,10 +244,11 @@ namespace Vox
 		}
 
 		std::vector<glm::mat4x4> transforms;
-		//for (ModelNode& node : nodes)
-		//{
-		//	transforms.emplace_back(node.globalTransform * node.inverseBindMatrix);
-		//}
+		for (int i = 0; i < joints.size(); ++i)
+		{
+			ModelNode& node = nodes[joints[i]];
+			transforms.emplace_back(node.globalTransform * node.inverseBindMatrix);
+		}
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
 

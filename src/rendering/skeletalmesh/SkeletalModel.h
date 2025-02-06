@@ -62,6 +62,10 @@ namespace Vox
 
 		std::vector<AnimationChannel> samplers;
 
+		std::vector<std::vector<glm::mat4x4>> skins;
+
+		std::vector<int> joints;
+
 		static const unsigned int maxMatrixCount = 64;
 
 		float currentAnimTime = 0.0f;
