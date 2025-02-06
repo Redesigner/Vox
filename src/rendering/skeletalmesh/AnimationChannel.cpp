@@ -69,7 +69,7 @@ namespace Vox
 
 		float alpha = RemapRange(time, timeKeys[leftIndex], timeKeys[leftIndex + 1], 0.0f, 1.0f);
 
-		return glm::mix(rotations[leftIndex], rotations[leftIndex], alpha);
+		return glm::slerp(rotations[leftIndex], rotations[leftIndex + 1], alpha);
 	}
 
 	glm::vec3 AnimationChannel::EvaulateVector(float time) const

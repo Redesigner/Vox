@@ -197,7 +197,8 @@ namespace Vox
 	void SkeletalModel::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
 		//SetAnimation("Translate", currentAnimTime);
-		SetAnimation("Rotate", currentAnimTime);
+		//SetAnimation("Rotate", currentAnimTime);
+		SetAnimation("StingerShot", currentAnimTime);
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
 
