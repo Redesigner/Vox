@@ -18,11 +18,13 @@
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
+#include <nlohmann/json.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
 #include <SDL3/SDL_video.h>
 
 #include "character/Character.h"
+#include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/services/InputService.h"
@@ -53,12 +55,16 @@ int main()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetSwapInterval(1);
 
-    SDL_Window* window = SDL_CreateWindow("Vox", 800, 450, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    VoxConfig config = VoxConfig();
+    config.Load();
+
+    SDL_Window* window = SDL_CreateWindow("Vox", config.windowSize.x, config.windowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    SDL_SetWindowPosition(window, config.windowPosition.x, config.windowPosition.y);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
     GLenum glewResult = glewInit();
 
-    // Initialize OpenGL bindings
+    // Initialize OpenGL debug bindings
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -80,7 +86,7 @@ int main()
                 VoxLog(Error, Rendering, "OpenGL Error {}: {}", typeString, message);
                 break;
             }
-        }, 0); 
+        }, 0);
 
     // Initialize imgui
     IMGUI_CHECKVERSION();
@@ -93,6 +99,8 @@ int main()
     //io.Fonts->AddFontFromFileTTF("includes/fonts/arial.ttf", 14.0f);
     ImGui_ImplSDL3_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init();
+
+    // INITIALIZE RESOURCES FOR MAIN LOOP
     {
         ServiceLocator::InitServices(window);
 
@@ -218,6 +226,13 @@ int main()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
+
+    int x, y, w, h;
+    SDL_GetWindowPosition(window, &x, &y);
+    SDL_GetWindowSizeInPixels(window, &w, &h);
+    config.windowPosition = glm::ivec2(x, y);
+    config.windowSize = glm::ivec2(w, h);
+    config.Write();
 
     SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);

@@ -22,6 +22,7 @@ namespace Vox
 	{
 		Physics,
 		Rendering,
+		Config,
 		Game,
 		Input,
 		FileSystem

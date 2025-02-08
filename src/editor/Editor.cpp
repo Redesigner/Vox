@@ -6,6 +6,7 @@
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
+#include "editor/AssetDisplayWindow.h"
 #include "rendering/Framebuffer.h"
 
 namespace Vox
@@ -31,7 +32,7 @@ namespace Vox
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
-            ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
+            ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
             ImVec2 dimensions = ImGui::GetContentRegionAvail();
             ImVec2 bottomRight = ImGui::GetContentRegionMax();
@@ -41,6 +42,8 @@ namespace Vox
 
             DrawToolbar();
             DrawDebugConsole();
+
+            AssetDisplayWindow::Draw();
 
             ImGui::End();
             ImGui::PopStyleColor();
