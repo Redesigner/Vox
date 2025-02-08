@@ -244,6 +244,7 @@ namespace Vox
 			UpdateTransforms(node, glm::identity<glm::mat4x4>());
 		}
 
+		// @TODO: handle multiple skins -- even if blender doesn't necessarily export these
 		std::vector<glm::mat4x4> transforms;
 		for (int i = 0; i < joints.size(); ++i)
 		{

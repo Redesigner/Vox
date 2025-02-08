@@ -4,6 +4,7 @@
     "libpng",
     "glew",
     "glm",
+    "nlohmann-json",
     "tinygltf",
     "sdl3"
   ]

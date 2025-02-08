@@ -47,4 +47,4 @@ target_sources(Vox PRIVATE
 	"src/voxel/VoxelChunk.cpp"
 	"src/voxel/VoxelGrid.cpp"
 	"src/voxel/VoxelWorld.cpp"
- "src/rendering/skeletalmesh/Animation.cpp")
+ "src/rendering/skeletalmesh/Animation.cpp" "src/editor/AssetDisplayWindow.cpp" "src/core/config/Config.cpp")
