@@ -37,6 +37,8 @@ namespace Vox
 		// @TODO: use something faster than string here
 		void SetAnimation(std::string animationName , float time);
 
+		const std::unordered_map<std::string, Animation>& GetAnimations() const;
+
 	private:
 		Transform CalculateNodeTransform(const tinygltf::Node& node) const;
 
@@ -59,8 +61,6 @@ namespace Vox
 
 		std::vector<ModelNode> nodes;
 		std::vector<unsigned int> rootNodes;
-
-		std::vector<AnimationChannel> samplers;
 
 		std::vector<std::vector<glm::mat4x4>> skins;
 

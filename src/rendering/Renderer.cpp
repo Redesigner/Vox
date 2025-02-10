@@ -253,6 +253,16 @@ namespace Vox
         return DynamicRef<VoxelMesh>(&voxelMeshes, voxelMeshes.Create(position));
     }
 
+    const std::unordered_map<std::string, MeshInstanceContainer>& Renderer::GetMeshes() const
+    {
+        return uploadedModels;
+    }
+
+    const std::unordered_map<std::string, SkeletalModel>& Renderer::GetSkeletalMeshes() const
+    {
+        return uploadedSkeletalModels;
+    }
+
     void Renderer::UpdateViewportDimensions(Editor* editor)
     {
         // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport

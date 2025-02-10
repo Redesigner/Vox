@@ -66,6 +66,10 @@ namespace Vox
 
 		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
 
+		const std::unordered_map<std::string, MeshInstanceContainer>& GetMeshes() const;
+
+		const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
+
 	private:
 		void UpdateViewportDimensions(Editor* editor);
 
