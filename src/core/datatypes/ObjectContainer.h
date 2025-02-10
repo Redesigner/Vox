@@ -51,6 +51,11 @@ namespace Vox
 			return resultPair;
 		}
 
+		size_t size() const
+		{
+			return backingData.size();
+		}
+
 		std::vector<T>::iterator begin() { return backingData.begin(); }
 		std::vector<T>::iterator end() { return backingData.end(); }
 	};

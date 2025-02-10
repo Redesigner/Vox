@@ -23,6 +23,8 @@ namespace Vox
 
 		Ref<MeshInstance> CreateMeshInstance();
 
+		size_t GetInstanceCount() const;
+
 	private:
 		std::unique_ptr<Model> model;
 		ObjectContainer<MeshInstance> meshInstances;

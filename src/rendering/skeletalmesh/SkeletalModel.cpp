@@ -254,6 +254,11 @@ namespace Vox
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
 
+	const std::unordered_map<std::string, Animation>& SkeletalModel::GetAnimations() const
+	{
+		return animations;
+	}
+
 	Transform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node) const
 	{
 		Transform transform;
