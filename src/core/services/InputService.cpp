@@ -15,8 +15,13 @@ Vox::InputService::InputService(SDL_Window* window)
 	ToggleCursorLock();
 	windowClosed = false;
 
+	windowMaximized = false;
+	windowFullscreen = false;
+
+	// Register some default callbacks!
 	RegisterKeyboardCallback(SDL_SCANCODE_ESCAPE, [this](bool pressed) { windowClosed = true; });
 	RegisterKeyboardCallback(SDL_SCANCODE_TAB, [this](bool pressed) { if (pressed) ToggleCursorLock(); });
+	RegisterKeyboardCallback(SDL_SCANCODE_F11, [this](bool pressed) { if (pressed) ToggleFullscreen(); });
 }
 
 Vox::InputService::~InputService()
@@ -132,6 +137,16 @@ void Vox::InputService::ToggleCursorLock()
 	}
 }
 
+bool Vox::InputService::IsWindowFullscreen() const
+{
+	return windowFullscreen;
+}
+
+bool Vox::InputService::IsWindowMaximized() const
+{
+	return windowMaximized;
+}
+
 void Vox::InputService::HandleEvent(SDL_Event* event)
 {
 	switch (event->type)
@@ -198,6 +213,21 @@ void Vox::InputService::HandleWindowEvent(SDL_WindowEvent& windowEvent)
 			return;
 		}
 
+		case SDL_EVENT_WINDOW_RESTORED:
+		{
+			SDL_RestoreWindow(SDL_GetWindowFromID(windowEvent.windowID));
+			windowFullscreen = false;
+			windowMaximized = false;
+			return;
+		}
+		
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+		{
+			SDL_MaximizeWindow(SDL_GetWindowFromID(windowEvent.windowID));
+			windowMaximized = true;
+			return;
+		}
+
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		{
 			windowClosed = true;
@@ -248,6 +278,20 @@ void Vox::InputService::ExecuteCallbacks(SDL_Scancode scancode, bool pressed)
 	for (KeyboardEventCallback& callback : callbacks->second)
 	{
 		callback(pressed);
+	}
+}
+
+void Vox::InputService::ToggleFullscreen()
+{
+	if (windowFullscreen)
+	{
+		SDL_SetWindowFullscreen(mainWindow, false);
+		windowFullscreen = false;
+	}
+	else
+	{
+		SDL_SetWindowFullscreen(mainWindow, true);
+		windowFullscreen = true;
 	}
 }
 

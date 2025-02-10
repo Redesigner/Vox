@@ -5,7 +5,8 @@
 
 #include "core/logging/Logging.h"
 
-using json = nlohmann::json;
+// Config files should be human readable, so we want this to be in a set order
+using json = nlohmann::ordered_json;
 
 namespace Vox
 {
@@ -15,6 +16,7 @@ namespace Vox
 	{
 		windowPosition = glm::ivec2(0, 0);
 		windowSize = glm::ivec2(800, 450);
+		windowMaximized = false;
 	}
 
 	void VoxConfig::Load()
@@ -48,6 +50,8 @@ namespace Vox
 		int64_t* w = configJson["window"]["w"].get_ptr<json::number_integer_t*>();
 		int64_t* h = configJson["window"]["h"].get_ptr<json::number_integer_t*>();
 
+		bool* configWindowMaximized = configJson["window"]["maximized"].get_ptr<bool*>();
+
 		if (x && y)
 		{
 			windowPosition = glm::ivec2(*x, *y);
@@ -56,6 +60,12 @@ namespace Vox
 		if (w && h)
 		{
 			windowSize = glm::ivec2(*w, *h);
+		}
+
+
+		if (configWindowMaximized)
+		{
+			windowMaximized = *configWindowMaximized;
 		}
 	}
 
@@ -73,6 +83,7 @@ namespace Vox
 		configJson["window"]["y"] = windowPosition.y;
 		configJson["window"]["w"] = windowSize.x;
 		configJson["window"]["h"] = windowSize.y;
+		configJson["window"]["maximized"] = windowMaximized;
 
 		int test = configJson["window"]["h"];
 		std::string configString = configJson.dump(4);
