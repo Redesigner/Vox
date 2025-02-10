@@ -62,6 +62,11 @@ int main()
     SDL_SetWindowPosition(window, config.windowPosition.x, config.windowPosition.y);
     SDL_GLContext context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
+    if (config.windowMaximized)
+    {
+        SDL_MaximizeWindow(window);
+    }
+
     GLenum glewResult = glewInit();
 
     // Initialize OpenGL debug bindings
@@ -220,19 +225,19 @@ int main()
         runPhysics = false;
         physicsThread.join();
     }
+    int x, y, w, h;
+    SDL_GetWindowPosition(window, &x, &y);
+    SDL_GetWindowSizeInPixels(window, &w, &h);
+    config.windowPosition = glm::ivec2(x, y);
+    config.windowSize = glm::ivec2(w, h);
+    config.windowMaximized = ServiceLocator::GetInputService()->IsWindowMaximized();
+    config.Write();
 
     ServiceLocator::DeleteServices();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
-
-    int x, y, w, h;
-    SDL_GetWindowPosition(window, &x, &y);
-    SDL_GetWindowSizeInPixels(window, &w, &h);
-    config.windowPosition = glm::ivec2(x, y);
-    config.windowSize = glm::ivec2(w, h);
-    config.Write();
 
     SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);

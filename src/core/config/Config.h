@@ -20,5 +20,7 @@ namespace Vox
 
 		glm::ivec2 windowPosition;
 		glm::ivec2 windowSize;
+		
+		bool windowMaximized;
 	};
 }

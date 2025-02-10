@@ -6,6 +6,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "core/config/Config.h"
+
 #include <glm/vec2.hpp>
 #include <SDL3/SDL_events.h>
 
@@ -53,6 +55,10 @@ namespace Vox
 
 		void ToggleCursorLock();
 
+		bool IsWindowFullscreen() const;
+
+		bool IsWindowMaximized() const;
+
 	private:
 		void HandleEvent(SDL_Event* event);
 
@@ -64,15 +70,22 @@ namespace Vox
 
 		void ExecuteCallbacks(SDL_Scancode scancode, bool pressed);
 
+		void ToggleFullscreen();
+
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
 		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
 		std::vector<MouseClickEventCallback> mouseClickEventCallbacks;
 
+		// @TODO: move window logic and variables to a separate wrapper class?
 		bool windowClosed = false;
 
 		bool cursorLocked = false;
 
 		bool keyPressed[SDL_SCANCODE_COUNT]{ false };
+
+		bool windowFullscreen;
+
+		bool windowMaximized;
 
 		SDL_Window* mainWindow;
 	};
