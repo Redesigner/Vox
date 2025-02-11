@@ -10,9 +10,9 @@
 
 namespace Vox
 {
-	void AssetDisplayWindow::Draw()
+	void AssetDisplayWindow::Draw(bool* open)
 	{
-		if (ImGui::Begin("Assets"))
+		if (ImGui::Begin("Assets", open))
 		{
 			if (ImGui::CollapsingHeader("Static Meshes"))
 			{

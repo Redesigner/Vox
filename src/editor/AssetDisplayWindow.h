@@ -12,7 +12,7 @@ namespace Vox
 	public:
 		AssetDisplayWindow() = delete;
 
-		static void Draw();
+		static void Draw(bool* open);
 
 	private:
 		static void DrawMeshData(const std::pair<const std::string, MeshInstanceContainer>& mesh);

@@ -43,7 +43,10 @@ namespace Vox
             DrawToolbar();
             DrawDebugConsole();
 
-            AssetDisplayWindow::Draw();
+            if (drawAssetViewer)
+            {
+                AssetDisplayWindow::Draw(&drawAssetViewer);
+            }
 
             ImGui::End();
             ImGui::PopStyleColor();
@@ -87,7 +90,16 @@ namespace Vox
         {
             DrawFileToolbar();
             ImGui::MenuItem("Edit");
-            ImGui::MenuItem("Tools");
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5.0f, 5.0f));
+            if (ImGui::BeginMenu("Tools"))
+            {
+                if (ImGui::MenuItem("Asset List Viewer"))
+                {
+                    drawAssetViewer = !drawAssetViewer;
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::PopStyleVar();
             DrawImportToolbar();
             ImGui::EndMenuBar();
         }

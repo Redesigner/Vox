@@ -226,10 +226,13 @@ int main()
         physicsThread.join();
     }
     int x, y, w, h;
-    SDL_GetWindowPosition(window, &x, &y);
-    SDL_GetWindowSizeInPixels(window, &w, &h);
-    config.windowPosition = glm::ivec2(x, y);
-    config.windowSize = glm::ivec2(w, h);
+    if (!ServiceLocator::GetInputService()->IsWindowFullscreen())
+    {
+        SDL_GetWindowPosition(window, &x, &y);
+        SDL_GetWindowSizeInPixels(window, &w, &h);
+        config.windowPosition = glm::ivec2(x, y);
+        config.windowSize = glm::ivec2(w, h);
+    }
     config.windowMaximized = ServiceLocator::GetInputService()->IsWindowMaximized();
     config.Write();
 

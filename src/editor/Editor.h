@@ -38,6 +38,8 @@ namespace Vox
 
 		static const char* gltfFilter[2];
 
+		bool drawAssetViewer = false;
+
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };
 	};
