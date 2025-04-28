@@ -11,41 +11,24 @@ endif()
 
 project ("Vox")
 
-include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
-include(FetchContent)
-
-# Build Jolt Physics
-FetchContent_Declare(
-        JoltPhysics
-        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "v5.2.0"
-		SOURCE_SUBDIR "Build"
-)
-FetchContent_MakeAvailable(JoltPhysics)
-set_property(TARGET Jolt PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-# Build SDL Image
-list(APPEND CMAKE_PROGRAM_PATH "C:\\Program Files\\NASM")
-FetchContent_Declare(
-	SDLImage
-	GIT_REPOSITORY "https://github.com/libsdl-org/SDL_image"
-	GIT_TAG "preview-3.1.0"
-)
-set(SDLIMAGE_AVIF OFF)
-FETCHCONTENT_MAKEAVAILABLE(SDLImage)
+#if (DEFINED $ENV{VCPKG_ROOT})
+#	message (STATUS "vcpkg found from env variable")
+	include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+#else()
+#	message (STATUS "vcpkg not defined in env variables")
+#	include (${vcpkg}/scripts/buildsystems/vcpkg.cmake)
+#endif()
 
 find_package(fmt CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(Jolt CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_image CONFIG REQUIRED)
 
 find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
-
-# Add source to this project's executable.
-# file (GLOB_RECURSE Vox_SRC
-#	"src/*.cpp"
-#)
 
 add_executable (Vox "")
 include ("sources.cmake")
@@ -59,27 +42,11 @@ target_include_directories(Vox PRIVATE "src/")
 target_link_libraries(Vox PRIVATE fmt::fmt)
 target_link_libraries(Vox PRIVATE GLEW::GLEW)
 target_link_libraries(Vox PRIVATE glm::glm)
-target_link_libraries(Vox PRIVATE Jolt)
+target_link_libraries(Vox PRIVATE imgui::imgui)
+target_link_libraries(Vox PRIVATE Jolt::Jolt)
 target_link_libraries(Vox PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(Vox PRIVATE SDL3::SDL3)
-target_link_libraries(Vox PRIVATE SDL3_image::SDL3_image)
-
-# Add Jolt Physics
-target_include_directories(Vox PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
-
-# Add ImGui
-target_include_directories(Vox PRIVATE "external/imgui")
-
-target_sources(Vox PRIVATE
-	"external/imgui/imgui.h"
-	"external/imgui/imgui.cpp"
-	"external/imgui/imgui_impl_opengl3.cpp"
-	"external/imgui/imgui_impl_sdl3.cpp"
-	"external/imgui/imgui_demo.cpp"
-	"external/imgui/imgui_draw.cpp"
-	"external/imgui/imgui_tables.cpp"
-	"external/imgui/imgui_widgets.cpp"
-)
+target_link_libraries(Vox PRIVATE $<IF:$<TARGET_EXISTS:SDL3_image::SDL3_image-shared>,SDL3_image::SDL3_image-shared,SDL3_image::SDL3_image-static>)
 
 # Add tinyglTF
 target_include_directories(Vox PRIVATE ${TINYGLTF_INCLUDE_DIRS})

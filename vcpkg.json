@@ -1,11 +1,30 @@
 {
   "dependencies": [
     "fmt",
-    "libpng",
     "glew",
     "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "opengl3-binding",
+        "sdl3-binding"
+      ]
+    },
+    {
+      "name": "joltphysics",
+      "features": [
+        "debugrenderer"
+      ]
+    },
+    "libpng",
     "nlohmann-json",
-    "tinygltf",
-    "sdl3"
+    "sdl3",
+    {
+      "name": "sdl3-image",
+      "features": [
+        "png"
+      ]
+    },
+    "tinygltf"
   ]
 }

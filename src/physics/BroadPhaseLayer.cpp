@@ -18,7 +18,7 @@ JPH::BroadPhaseLayer BroadPhaseLayerImplementation::GetBroadPhaseLayer(JPH::Obje
 	return objectBroadPhaseMap[inLayer];
 }
 
-const char* BroadPhaseLayerImplementation::GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const
-{
-	return "nullptr";
-}
+//const char* BroadPhaseLayerImplementation::GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const
+//{
+//	return "nullptr";
+//}
