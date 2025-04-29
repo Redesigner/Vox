@@ -12,7 +12,7 @@ namespace Vox
 		glDeleteProgram(shader);
 	}
 
-	void Shader::Enable()
+	void Shader::Enable() const
 	{
 		// VoxLog(Display, Rendering, "Enabling shader program '{}'", shader);
 		glUseProgram(shader);
@@ -23,12 +23,12 @@ namespace Vox
 		glUseProgram(0);
 	}
 
-	int Shader::GetUniformLocation(const char* uniformName)
+	int Shader::GetUniformLocation(const char* uniformName) const
 	{
 		return glGetUniformLocation(shader, uniformName);
 	}
 
-	int Shader::GetUniformLocation(const std::string& uniformName)
+	int Shader::GetUniformLocation(const std::string& uniformName) const
 	{
 		return glGetUniformLocation(shader, uniformName.c_str());
 	}
@@ -135,7 +135,7 @@ namespace Vox
 				return std::nullopt;
 			}
 			std::vector<GLchar> errorLog(maxLength);
-			glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
+			glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog.data());
 			std::string logString = std::string(errorLog.begin(), errorLog.end());
 			VoxLog(Error, Rendering, "Shader failed to compile: {}", logString);
 

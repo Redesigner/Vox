@@ -9,15 +9,17 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
+set (${GIT_DIR} "../../../")
+
 project ("Vox")
 
-#if (DEFINED $ENV{VCPKG_ROOT})
-#	message (STATUS "vcpkg found from env variable")
+if (DEFINED ENV{VCPKG_ROOT})
+message (STATUS "vcpkg found at '$ENV{VCPKG_ROOT}'")
 	include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
-#else()
-#	message (STATUS "vcpkg not defined in env variables")
-#	include (${vcpkg}/scripts/buildsystems/vcpkg.cmake)
-#endif()
+else()
+	message (STATUS "vcpkg not defined in env variables")
+	include ("C:/Program Files/Microsoft Visual Studio/2022/Community/VC/vcpkg/scripts/buildsystems/vcpkg.cmake")
+endif()
 
 find_package(fmt CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)

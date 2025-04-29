@@ -5,5 +5,5 @@ dirIndent = len(currentDir.split('\\'))
 for root, dirs, files in os.walk(currentDir + '/src'):
     path = root.split(os.sep)
     for file in files:
-        if (file.endswith('.cpp')):
+        if (file.endswith('.cpp') | file.endswith('.h')):
             print("\"src/" + '/'.join(path[dirIndent:]) + '/' + file + '"')

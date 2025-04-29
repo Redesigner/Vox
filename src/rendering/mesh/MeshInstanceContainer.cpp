@@ -33,7 +33,7 @@ namespace Vox
 
 	Ref<MeshInstance> MeshInstanceContainer::CreateMeshInstance()
 	{
-		return Ref<MeshInstance>(&meshInstances, meshInstances.Create());
+		return {&meshInstances, meshInstances.Create()};
 	}
 
 	size_t MeshInstanceContainer::GetInstanceCount() const

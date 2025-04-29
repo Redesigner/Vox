@@ -13,12 +13,12 @@ namespace Vox
 	{
 	public:
 		~Shader();
-		void Enable();
-		void Disable();
+		void Enable() const;
+		static void Disable();
 
-		int GetUniformLocation(const char* uniformName);
-		int GetUniformLocation(const std::string& uniformName);
-		void SetUniformInt(int uniformLocation, int value);
+		int GetUniformLocation(const char* uniformName) const;
+		int GetUniformLocation(const std::string& uniformName) const;
+		static void SetUniformInt(int uniformLocation, int value);
 		void SetUniformFloat(int uniformLocation, float value);
 		void SetUniformVec3(int uniformLocation, glm::vec3 value);
 		void SetUniformColor(int uniformLocation, glm::vec4 color);
@@ -31,6 +31,6 @@ namespace Vox
 		bool Link();
 		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType);
 
-		unsigned int shader;
+		unsigned int shader = 0;
 	};
 }
