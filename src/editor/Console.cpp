@@ -71,6 +71,36 @@ namespace Vox
             {
                 ImGui::SameLine();
             }
+            else
+            {
+                ImGui::SameLine(0, 100.0f);
+            }
+        }
+        
+        std::vector<LogLevel>& levels = Logger::GetLevels();
+        for (int i = 0; i < levels.size(); ++i)
+        {
+            if (filter.GetLevelFilter(levels[i]))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, buttonColorSelected);
+                if (ImGui::Button(Logger::GetLevelTag(levels[i]).c_str()))
+                {
+                    filter.SetLevelFilter(levels[i], false);
+                }
+                ImGui::PopStyleColor();
+            }
+            else
+            {
+                if (ImGui::Button(Logger::GetLevelTag(levels[i]).c_str()))
+                {
+                    filter.SetLevelFilter(levels[i], true);
+                }
+            }
+            
+            if (i < levels.size() - 1)
+            {
+                ImGui::SameLine();
+            }
         }
         ImGui::PopFont();
         ImGui::PopStyleVar(1);

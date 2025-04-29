@@ -39,7 +39,14 @@ namespace Vox
 	}
 
 	std::vector<LogEntry> Logger::entries = std::vector<LogEntry>();
-
+	
+	std::vector<LogLevel> Logger::levels = {
+		Verbose,
+		Display,
+		Warning,
+		Error
+	};
+	
 	std::vector<LogCategory> Logger::categories = {
 		Config,
 		FileSystem,
@@ -70,10 +77,29 @@ namespace Vox
 
 		case Config:
 			return "Config";
-			
-		default:
-			return "Unknown";
 		}
+		
+		return "Unknown";
+	}
+
+	std::string Logger::GetLevelTag(LogLevel level)
+	{
+		switch (level)
+		{
+		case Verbose:
+			return "Verbose";
+			
+		case Display:
+			return "Display";
+
+		case Warning:
+			return "Warning";
+
+		case Error:
+			return "Error";
+		}
+
+		return "Unknown";
 	}
 
 	glm::vec3 Logger::GetLevelColor(LogLevel level)
@@ -110,5 +136,10 @@ namespace Vox
 	std::vector<LogCategory>& Logger::GetCategories()
 	{
 		return categories;
+	}
+
+	std::vector<LogLevel>& Logger::GetLevels()
+	{
+		return levels;
 	}
 }

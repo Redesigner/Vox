@@ -76,13 +76,18 @@ namespace Vox
 		static std::vector<LogEntry> GetEntriesFiltered(LogFilter filter);
 
 		static std::vector<LogCategory>& GetCategories();
+
+		static std::vector<LogLevel>& GetLevels();
 		
 		static std::string GetCategoryTag(LogCategory category);
+
+		static std::string GetLevelTag(LogLevel level);
 
 	private:
 		static std::vector<LogEntry> entries;
 
 		static std::vector<LogCategory> categories;
-		
+
+		static std::vector<LogLevel> levels;
 	};
 }
