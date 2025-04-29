@@ -13,7 +13,7 @@ namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-    void Editor::Draw(Framebuffer* viewportRenderTexture)
+    void Editor::Draw(const Framebuffer* viewportRenderTexture)
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
@@ -29,19 +29,31 @@ namespace Vox
              ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 #endif
             bool windowOpen = true;
+            ImGui::PushFont(gitLabSans14);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
             ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-            ImVec2 dimensions = ImGui::GetContentRegionAvail();
-            ImVec2 bottomRight = ImGui::GetContentRegionMax();
+            ImGui::SetScrollY(0);
+            
+            const ImVec2 dimensions = ImGui::GetContentRegionAvail();
+            const ImVec2 bottomRight = ImGui::GetContentRegionMax();
             viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
-            viewportBox = Box(bottomRight.x - dimensions.x, bottomRight.y - dimensions.y, bottomRight.x, bottomRight.y);
-            ImGui::Image(viewportRenderTexture->GetTextureId(), ImVec2(viewportRenderTexture->GetWidth(), viewportRenderTexture->GetHeight()), {0, 1}, {1, 0});
+            viewportBox = Box(
+                static_cast<int>(bottomRight.x - dimensions.x),
+                static_cast<int>(bottomRight.y - dimensions.y),
+                static_cast<int>(bottomRight.x),
+                static_cast<int>(bottomRight.y));
+            ImGui::Image(viewportRenderTexture->GetTextureId(),
+                ImVec2(static_cast<float>(viewportRenderTexture->GetWidth()), static_cast<float>(viewportRenderTexture->GetHeight())),
+                {0, 1}, {1, 0});
 
             DrawToolbar();
-            DrawDebugConsole();
+            if (console)
+            {
+                console->Draw();
+            }
 
             if (drawAssetViewer)
             {
@@ -51,6 +63,7 @@ namespace Vox
             ImGui::End();
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
+            ImGui::PopFont();
         }
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -82,6 +95,16 @@ namespace Vox
         xOut = Vox::RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
         yOut = Vox::RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
         return true;
+    }
+
+    ImFont* Editor::GetFont_GitLab18()
+    {
+        return gitLabSans18;
+    }
+
+    ImFont* Editor::GetFont_GitLab24()
+    {
+        return gitLabSans24;
     }
 
     void Editor::DrawToolbar()
@@ -133,24 +156,7 @@ namespace Vox
         }
         ImGui::PopStyleVar();
     }
-
-    void Editor::DrawDebugConsole()
-    {
-        const float consoleHeight = ImGui::GetTextLineHeightWithSpacing() * 8;
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight - 5.0f);
-        if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, consoleHeight), ImGuiChildFlags_Borders))
-        {
-            for (const Vox::LogEntry& entry : Vox::Logger::GetEntries())
-            {
-                glm::vec3 entryColor = Vox::Logger::GetLevelColor(entry.level);
-                ImGui::TextColored(ImVec4(entryColor.r / 255.0f, entryColor.g / 255.0f, entryColor.b / 255.0f, 1.0f), entry.entry.c_str());
-            }
-            ImGui::SetScrollHereY(1.0f);
-        }
-        ImGui::PopStyleColor();
-        ImGui::EndChild();
-    }
+    
 
     void Editor::openGLTF()
     {
@@ -175,4 +181,18 @@ namespace Vox
         :left(left), top(top), right(right), bottom(bottom)
     {
     }
+
+    Editor::Editor()
+    {
+        console = std::make_unique<Console>();
+        
+        const ImGuiIO& io = ImGui::GetIO();
+        gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
+        gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
+        gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
+    }
+
+    ImFont* Editor::gitLabSans14 = nullptr;
+    ImFont* Editor::gitLabSans18 = nullptr;
+    ImFont* Editor::gitLabSans24 = nullptr;
 }

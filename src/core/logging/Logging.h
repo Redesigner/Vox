@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -27,7 +28,7 @@ namespace Vox
 		Input,
 		FileSystem
 	};
-
+	
 	struct LogEntry
 	{
 		LogEntry(std::string entry, LogLevel level, LogCategory category);
@@ -37,13 +38,25 @@ namespace Vox
 		LogCategory category;
 	};
 
+	struct LogFilter
+	{
+		LogFilter();
+		
+		bool GetIsFiltered(const LogEntry& entry) const;
+
+		[[nodiscard]] bool GetCategoryFilter(LogCategory category) const;
+		[[nodiscard]] bool GetLevelFilter(LogLevel level) const;
+		
+		void SetCategoryFilter(LogCategory category, bool filter);
+		void SetLevelFilter(LogLevel level, bool filter);
+
+	private:	
+		std::array<bool, 6> categoryFilter;
+		std::array<bool, 4> levelFilter;
+	};
+	
 	class Logger
 	{
-
-	private:
-		static std::string GetCategoryTag(LogCategory category);
-
-		static std::vector<LogEntry> entries;
 
 	public:
 		static glm::vec3 GetLevelColor(LogLevel level);
@@ -60,5 +73,16 @@ namespace Vox
 
 		static std::vector<LogEntry>& GetEntries();
 
+		static std::vector<LogEntry> GetEntriesFiltered(LogFilter filter);
+
+		static std::vector<LogCategory>& GetCategories();
+		
+		static std::string GetCategoryTag(LogCategory category);
+
+	private:
+		static std::vector<LogEntry> entries;
+
+		static std::vector<LogCategory> categories;
+		
 	};
 }

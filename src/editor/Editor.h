@@ -4,6 +4,11 @@
 #include <string>
 
 #include <glm/vec2.hpp>
+#include <memory>
+
+#include "editor/Console.h"
+
+struct ImFont;
 
 namespace Vox
 {
@@ -20,17 +25,21 @@ namespace Vox
 			unsigned int left, top, right, bottom;
 		};
 
-		void Draw(Framebuffer* viewportRenderTexture);
+		Editor();
+
+		void Draw(const Framebuffer* viewportRenderTexture);
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		glm::vec2 GetViewportDimensions() const;
 		Box GetViewportBox() const;
 		bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
+		static ImFont* GetFont_GitLab18();
+		static ImFont* GetFont_GitLab24();
+
 	private:
 		void DrawToolbar();
 		void DrawFileToolbar();
 		void DrawImportToolbar();
-		void DrawDebugConsole();
 
 		void openGLTF();
 
@@ -40,7 +49,13 @@ namespace Vox
 
 		bool drawAssetViewer = false;
 
+		std::unique_ptr<Console> console;
+		
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };
+
+		static ImFont* gitLabSans14;
+		static ImFont* gitLabSans18;
+		static ImFont* gitLabSans24;
 	};
 }

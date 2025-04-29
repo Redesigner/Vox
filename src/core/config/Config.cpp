@@ -14,7 +14,7 @@ namespace Vox
 
 	VoxConfig::VoxConfig()
 	{
-		windowPosition = glm::ivec2(0, 0);
+		windowPosition = glm::ivec2(100, 100);
 		windowSize = glm::ivec2(800, 450);
 		windowMaximized = false;
 	}

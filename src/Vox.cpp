@@ -99,7 +99,7 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     io.Fonts->Build();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.DisplaySize = ImVec2(800, 450);
     //io.Fonts->AddFontFromFileTTF("includes/fonts/arial.ttf", 14.0f);
     ImGui_ImplSDL3_InitForOpenGL(window, context);

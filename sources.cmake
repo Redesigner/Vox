@@ -21,6 +21,7 @@ target_sources(Vox PRIVATE
 	"src/core/services/ServiceLocator.h"
 	"src/editor/AssetDisplayWindow.cpp"
 	"src/editor/AssetDisplayWindow.h"
+	"src/editor/Console.cpp"
 	"src/editor/Console.h"
 	"src/editor/Editor.cpp"
 	"src/editor/Editor.h"
