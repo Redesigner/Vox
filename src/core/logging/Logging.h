@@ -44,8 +44,13 @@ namespace Vox
 		
 		bool GetIsFiltered(const LogEntry& entry) const;
 
-		[[nodiscard]] bool GetCategoryFilter(LogCategory category) const;
-		[[nodiscard]] bool GetLevelFilter(LogLevel level) const;
+		bool operator==(const LogFilter& other) const;
+
+		[[nodiscard]] bool IsCategoryDisplayed(LogCategory category) const;
+		[[nodiscard]] bool IsLevelDisplayed(LogLevel level) const;
+
+		[[nodiscard]] const std::array<bool, 6>& GetCategoryFilter() const;
+		[[nodiscard]] const std::array<bool, 4>& GetLevelFilter() const;
 		
 		void SetCategoryFilter(LogCategory category, bool filter);
 		void SetLevelFilter(LogLevel level, bool filter);
@@ -75,6 +80,8 @@ namespace Vox
 
 		static std::vector<LogEntry> GetEntriesFiltered(LogFilter filter);
 
+		static std::vector<size_t> GetEntriesFilteredByIndex(LogFilter filter);
+
 		static std::vector<LogCategory>& GetCategories();
 
 		static std::vector<LogLevel>& GetLevels();
@@ -89,5 +96,9 @@ namespace Vox
 		static std::vector<LogCategory> categories;
 
 		static std::vector<LogLevel> levels;
+
+		static size_t lastCachedSize;
+		static LogFilter lastCachedFilter;
+		static std::vector<size_t> cachedFilteredIndices;
 	};
 }

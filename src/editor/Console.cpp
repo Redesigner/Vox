@@ -25,8 +25,11 @@ namespace Vox
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
             if (ImGui::BeginChild("ConsoleEntries", ImVec2(-FLT_MIN, ImGui::GetWindowHeight() - ImGui::GetCursorPosY()), ImGuiChildFlags_Borders))
             {
-                for (const Vox::LogEntry& entry : Vox::Logger::GetEntriesFiltered(filter))
+                std::vector<size_t> validEntries = Logger::GetEntriesFilteredByIndex(filter);
+                const std::vector<LogEntry>& entries = Logger::GetEntries();
+                for (size_t entryIndex : validEntries)
                 {
+                    const LogEntry& entry = entries[entryIndex];
                     glm::vec3 entryColor = Vox::Logger::GetLevelColor(entry.level);
                     ImGui::TextColored(ImVec4(entryColor.r / 255.0f, entryColor.g / 255.0f, entryColor.b / 255.0f, 1.0f), entry.entry.c_str());
                 }
@@ -50,7 +53,7 @@ namespace Vox
         std::vector<LogCategory>& categories = Logger::GetCategories();
         for (int i = 0; i < categories.size(); ++i)
         {
-            if (filter.GetCategoryFilter(categories[i]))
+            if (filter.IsCategoryDisplayed(categories[i]))
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, buttonColorSelected);
                 if (ImGui::Button(Logger::GetCategoryTag(categories[i]).c_str()))
@@ -80,7 +83,7 @@ namespace Vox
         std::vector<LogLevel>& levels = Logger::GetLevels();
         for (int i = 0; i < levels.size(); ++i)
         {
-            if (filter.GetLevelFilter(levels[i]))
+            if (filter.IsLevelDisplayed(levels[i]))
             {
                 ImGui::PushStyleColor(ImGuiCol_Button, buttonColorSelected);
                 if (ImGui::Button(Logger::GetLevelTag(levels[i]).c_str()))

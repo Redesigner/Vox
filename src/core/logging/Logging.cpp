@@ -13,14 +13,29 @@ namespace Vox
 		return categoryFilter[entry.category] && levelFilter[entry.level];
 	}
 
-	bool LogFilter::GetCategoryFilter(LogCategory category) const
+	bool LogFilter::operator==(const LogFilter& other) const
+	{
+		return categoryFilter == other.GetCategoryFilter() && levelFilter == other.GetLevelFilter();
+	}
+
+	bool LogFilter::IsCategoryDisplayed(LogCategory category) const
 	{
 		return categoryFilter[category];
 	}
 
-	bool LogFilter::GetLevelFilter(LogLevel level) const
+	bool LogFilter::IsLevelDisplayed(LogLevel level) const
 	{
 		return levelFilter[level];
+	}
+
+	const std::array<bool, 6>& LogFilter::GetCategoryFilter() const
+	{
+		return categoryFilter;
+	}
+
+	const std::array<bool, 4>& LogFilter::GetLevelFilter() const
+	{
+		return levelFilter;
 	}
 
 	void LogFilter::SetCategoryFilter(LogCategory category, bool filter)
@@ -55,6 +70,10 @@ namespace Vox
 		Physics,
 		Rendering
 	};
+
+	size_t Logger::lastCachedSize = 0;
+	LogFilter Logger::lastCachedFilter{};
+	std::vector<size_t> Logger::cachedFilteredIndices{};
 	
 	std::string Logger::GetCategoryTag(LogCategory category)
 	{
@@ -131,6 +150,29 @@ namespace Vox
 			}
 		}
 		return result;
+	}
+
+	std::vector<size_t> Logger::GetEntriesFilteredByIndex(LogFilter filter)
+	{
+		// Check if our last filter has changed, or more entries have been added
+		if (filter == lastCachedFilter && entries.size() == lastCachedSize)
+		{
+			return cachedFilteredIndices;
+		}
+
+		lastCachedFilter = filter;
+		lastCachedSize = entries.size();
+
+		cachedFilteredIndices.clear();
+		
+		for (size_t i = 0; i < entries.size(); ++i)
+		{
+			if (filter.GetIsFiltered(entries[i]))
+			{
+				cachedFilteredIndices.emplace_back(i);
+			}
+		}
+		return cachedFilteredIndices;
 	}
 
 	std::vector<LogCategory>& Logger::GetCategories()
