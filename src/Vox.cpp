@@ -123,14 +123,25 @@ int main()
 
         TestObjectChild testObjectChild;
         testObjectChild.InitProperties();
+
+        TestObject testObject;
+        testObject.InitProperties();
+        
         std::string propertyList;
-        for (Property& property : testObjectChild.GetProperties())
+        for (const Property& property : testObjectChild.GetProperties())
         {
             propertyList.append(property.GetName());
             propertyList.append(" ");
         }
-        
-        VoxLog(Display, Game, "TestObject has '{}' properties: '{}'", testObjectChild.GetProperties().size(), propertyList);
+        VoxLog(Display, Game, "TestObjectChild has '{}' properties: '{}'", testObjectChild.GetProperties().size(), propertyList);
+
+        propertyList.clear();
+        for (const Property& property : testObject.GetProperties())
+        {
+            propertyList.append(property.GetName());
+            propertyList.append(" ");
+        }
+        VoxLog(Display, Game, "TestObject has '{}' properties: '{}'", testObject.GetProperties().size(), propertyList);
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");

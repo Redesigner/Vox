@@ -9,7 +9,7 @@ namespace Vox
 {
     Console::Console()
     {
-        filter.SetCategoryFilter(LogCategory::Game, false);
+        filter.SetLevelFilter(Verbose, false);
     }
 
     void Console::Draw()

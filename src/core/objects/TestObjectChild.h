@@ -10,5 +10,7 @@ namespace Vox
         
     private:
         unsigned int test2 = 0;
+
+        IMPLEMENT_PROPERTIES()
     };
 }

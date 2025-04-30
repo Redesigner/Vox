@@ -3,6 +3,10 @@
 
 #include "core/objects/Property.h"
 
+#define IMPLEMENT_PROPERTIES() inline static std::vector<Property> properties;\
+public: std::vector<Property>& GetProperties() override { return properties; }\
+private:
+
 namespace Vox
 {
     class Object
@@ -12,13 +16,10 @@ namespace Vox
         virtual ~Object() = default;
 
         void InitProperties();
-        
-        std::vector<Property> GetProperties() const;
+
+        virtual std::vector<Property>& GetProperties() = 0;
 
     protected:
-        virtual void BuildProperties(std::vector<Property>& properties) = 0;
-        
-    private:
-        std::vector<Property> properties;
+        virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
     };
 }

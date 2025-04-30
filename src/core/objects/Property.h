@@ -7,7 +7,7 @@
 #define DECLARE_PROPERTY(Type, Name) Type Name;\
     Vox::Property _##Name {Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name)};
 
-#define REGISTER_PROPERTY(Type, Name) properties.emplace_back(#Name, Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name));
+#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name));
 namespace Vox
 {
     // start with an underscore because some of these are reserved keywords

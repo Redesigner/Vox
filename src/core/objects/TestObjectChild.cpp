@@ -1,6 +1,6 @@
 ﻿#include "TestObjectChild.h"
 
-void Vox::TestObjectChild::BuildProperties(std::vector<Property>& properties)
+void Vox::TestObjectChild::BuildProperties(std::vector<Property>& propertiesInOut)
 {
     TestObject::BuildProperties(properties);
 

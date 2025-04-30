@@ -12,6 +12,7 @@ namespace Vox
         
     private:
         float test = 0.0f;
-        
+
+        IMPLEMENT_PROPERTIES()
     };
 }

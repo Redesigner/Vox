@@ -2,7 +2,7 @@
 
 namespace Vox
 {
-    void TestObject::BuildProperties(std::vector<Property>& properties)
+    void TestObject::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         REGISTER_PROPERTY(float, test)
     }
