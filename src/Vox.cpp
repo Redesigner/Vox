@@ -27,6 +27,7 @@
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
+#include "core/objects/TestObjectChild.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -119,6 +120,17 @@ int main()
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
         VoxLog(Display, Game, "Test log!");
+
+        TestObjectChild testObjectChild;
+        testObjectChild.InitProperties();
+        std::string propertyList;
+        for (Property& property : testObjectChild.GetProperties())
+        {
+            propertyList.append(property.GetName());
+            propertyList.append(" ");
+        }
+        
+        VoxLog(Display, Game, "TestObject has '{}' properties: '{}'", testObjectChild.GetProperties().size(), propertyList);
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
