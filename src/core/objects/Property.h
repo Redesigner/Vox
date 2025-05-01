@@ -4,12 +4,15 @@
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 
-#define PROPERTY_OFFSET(Type, obj) (reinterpret_cast<char *>(static_cast<(Type)*>(&(obj))) - reinterpret_cast<char*>(&(obj)))
+#define PROPERTY_OFFSET(Class, Property) ((reinterpret_cast<char*>(&(Property)) - reinterpret_cast<char*>(this) ) - Vox::objectOffset<Object>(this))
+
+#define CLASS_TYPE() std::remove_reference<decltype(*this)>::type
 
 #define DECLARE_PROPERTY(Type, Name) Type Name;\
-    Vox::Property _##Name {Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(std::remove_reference<decltype(*this)>::type, Name)};
+    Vox::Property _##Name {Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name)};
 
-#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name));
+#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name));
+
 namespace Vox
 {
     // start with an underscore because some of these are reserved keywords
@@ -27,6 +30,12 @@ namespace Vox
     };
 
     typedef unsigned int uint;
+
+    template<typename Parent, typename Child>
+    size_t objectOffset(Child* object)
+    {
+        return reinterpret_cast<char*>(static_cast<Parent*>(object)) - reinterpret_cast<char*>(object);    
+    }
     
     template <typename T> consteval PropertyType GetPropertyType() { return PropertyType::_invalid; }
     template <> consteval PropertyType GetPropertyType<bool>() { return PropertyType::_bool; }

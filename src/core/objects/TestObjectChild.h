@@ -3,8 +3,17 @@
 
 namespace Vox
 {
-    class TestObjectChild : public TestObject, public TestObject2
+    class ITestInterface
     {
+    public:
+        virtual void doSomething() = 0;
+    };
+    
+    class TestObjectChild : public ITestInterface, public TestObject
+    {
+    public:
+        void doSomething() override {};
+        
     protected:
         void BuildProperties(std::vector<Property>& properties) override;
         
