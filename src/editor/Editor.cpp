@@ -6,6 +6,9 @@
 
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
+#include "core/objects/TestObject.h"
+#include "core/objects/TestObjectChild.h"
+#include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "rendering/Framebuffer.h"
 
@@ -63,6 +66,9 @@ namespace Vox
             ImGui::End();
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
+
+            DetailPanel::Draw(testObject.get());
+            
             ImGui::PopFont();
         }
         ImGui::Render();
@@ -190,6 +196,9 @@ namespace Vox
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
         gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
         gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
+
+        testObject = std::make_unique<TestObjectChild>();
+        testObject->InitProperties();
     }
 
     ImFont* Editor::gitLabSans14 = nullptr;

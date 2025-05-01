@@ -7,6 +7,11 @@ namespace Vox
     {
     }
 
+    PropertyType Property::GetType() const
+    {
+        return type;
+    }
+
     const std::string& Property::GetName() const
     {
         return name;

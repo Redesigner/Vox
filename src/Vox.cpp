@@ -119,30 +119,6 @@ int main()
 
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
-        VoxLog(Display, Game, "Test log!");
-
-        TestObjectChild testObjectChild;
-        testObjectChild.InitProperties();
-
-        TestObject testObject;
-        testObject.InitProperties();
-        
-        std::string propertyList;
-        for (const Property& property : testObjectChild.GetProperties())
-        {
-            propertyList.append(property.GetName());
-            propertyList.append(" ");
-        }
-        VoxLog(Display, Game, "TestObjectChild has '{}' properties: '{}'", testObjectChild.GetProperties().size(), propertyList);
-
-        propertyList.clear();
-        for (const Property& property : testObject.GetProperties())
-        {
-            propertyList.append(property.GetName());
-            propertyList.append(" ");
-        }
-        VoxLog(Display, Game, "TestObject has '{}' properties: '{}'", testObject.GetProperties().size(), propertyList);
-
         ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");

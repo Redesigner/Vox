@@ -12,6 +12,7 @@ struct ImFont;
 
 namespace Vox
 {
+	class TestObject;
 	class Framebuffer;
 
 	class Editor
@@ -54,6 +55,8 @@ namespace Vox
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };
 
+		std::unique_ptr<TestObject> testObject = nullptr;
+		
 		static ImFont* gitLabSans14;
 		static ImFont* gitLabSans18;
 		static ImFont* gitLabSans24;

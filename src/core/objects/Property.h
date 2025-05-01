@@ -4,8 +4,10 @@
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 
+#define PROPERTY_OFFSET(Type, obj) (reinterpret_cast<char *>(static_cast<(Type)*>(&(obj))) - reinterpret_cast<char*>(&(obj)))
+
 #define DECLARE_PROPERTY(Type, Name) Type Name;\
-    Vox::Property _##Name {Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name)};
+    Vox::Property _##Name {Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(std::remove_reference<decltype(*this)>::type, Name)};
 
 #define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), offsetof(std::remove_reference<decltype(*this)>::type, Name));
 namespace Vox
@@ -46,7 +48,7 @@ namespace Vox
         {
             if (GetType() == GetPropertyType<T>())
             {
-                return static_cast<T*>(objectLocation + propertyLocationOffset);
+                return reinterpret_cast<T*>(static_cast<char*>(objectLocation) + propertyLocationOffset);
             }
 
             return nullptr;
@@ -56,7 +58,7 @@ namespace Vox
         T& GetValueChecked(void* objectLocation) const
         {
             assert(GetType() == GetPropertyType<T>());
-            return *static_cast<T*>(objectLocation + propertyLocationOffset);
+            return *reinterpret_cast<T*>(static_cast<char*>(objectLocation) + propertyLocationOffset);
         }
 
         const std::string& GetName() const;
