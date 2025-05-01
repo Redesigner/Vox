@@ -1,12 +1,16 @@
 ﻿#include "DetailPanel.h"
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
+#include <fmt/base.h>
+#include <fmt/format.h>
 
 namespace Vox
 {
     void DetailPanel::Draw(Object* object)
     {
-        if (ImGui::Begin("Object", 0))
+        assert(object);
+        if (ImGui::Begin(fmt::format("{}###DetailPanel", object->GetDisplayName()).c_str(), 0))
         {
             for (Property& property : object->GetProperties())
             {
@@ -32,9 +36,9 @@ namespace Vox
             }
         case PropertyType::_string:
             {
-                std::string string = *property.GetValuePtr<std::string>(object);
+                std::string& string = *property.GetValuePtr<std::string>(object);
                 size_t size = string.size();
-                ImGui::InputText(property.GetName().c_str(), string.data(), size);
+                ImGui::InputText(property.GetName().c_str(), &string, ImGuiInputTextFlags_None);
                 break;
             }
         }

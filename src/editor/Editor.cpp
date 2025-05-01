@@ -4,6 +4,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
 
+#include "WorldOutline.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/objects/TestObject.h"
@@ -67,7 +68,15 @@ namespace Vox
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
 
-            DetailPanel::Draw(testObject.get());
+            if (WorldOutline::GetSelectedObject())
+            {
+                DetailPanel::Draw(WorldOutline::GetSelectedObject());
+            }
+
+            if (!currentWorld.expired())
+            {
+                WorldOutline::Draw(currentWorld.lock().get());
+            }
             
             ImGui::PopFont();
         }
@@ -101,6 +110,11 @@ namespace Vox
         xOut = Vox::RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
         yOut = Vox::RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
         return true;
+    }
+
+    void Editor::SetWorld(const std::shared_ptr<World>& world)
+    {
+        currentWorld = world;
     }
 
     ImFont* Editor::GetFont_GitLab18()
@@ -196,9 +210,6 @@ namespace Vox
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
         gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
         gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
-
-        testObject = std::make_unique<TestObjectChild>();
-        testObject->InitProperties();
     }
 
     ImFont* Editor::gitLabSans14 = nullptr;

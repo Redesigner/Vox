@@ -21,6 +21,7 @@ namespace Vox
         float test2 = 5.0f;
         std::string testString3 = "this string is a member of TestObjectChild";
 
+        IMPLEMENT_NAME(TestObjectChild)
         IMPLEMENT_PROPERTIES()
     };
 }

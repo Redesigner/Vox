@@ -22,7 +22,7 @@ namespace Vox
 
 		// size_t emptyIndex
 	public:
-		ObjectContainer(size_t size)
+		explicit ObjectContainer(size_t size)
 		{
 			backingData = std::vector<T>();
 			backingIds = std::vector<int>();
@@ -56,7 +56,9 @@ namespace Vox
 			return backingData.size();
 		}
 
-		std::vector<T>::iterator begin() { return backingData.begin(); }
-		std::vector<T>::iterator end() { return backingData.end(); }
+		typename std::vector<T>::iterator begin() { return backingData.begin(); }
+		typename std::vector<T>::const_iterator begin() const { return backingData.cbegin(); }
+		typename std::vector<T>::iterator end() { return backingData.end(); }
+		typename std::vector<T>::const_iterator end() const { return backingData.cend(); }
 	};
 }

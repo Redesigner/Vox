@@ -12,6 +12,7 @@ struct ImFont;
 
 namespace Vox
 {
+	class World;
 	class TestObject;
 	class Framebuffer;
 
@@ -29,11 +30,17 @@ namespace Vox
 		Editor();
 
 		void Draw(const Framebuffer* viewportRenderTexture);
+		
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
+		
 		glm::vec2 GetViewportDimensions() const;
+		
 		Box GetViewportBox() const;
+		
 		bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
+		void SetWorld(const std::shared_ptr<World>& world);
+		
 		static ImFont* GetFont_GitLab18();
 		static ImFont* GetFont_GitLab24();
 
@@ -55,7 +62,7 @@ namespace Vox
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };
 
-		std::unique_ptr<TestObject> testObject = nullptr;
+		std::weak_ptr<World> currentWorld;
 		
 		static ImFont* gitLabSans14;
 		static ImFont* gitLabSans18;

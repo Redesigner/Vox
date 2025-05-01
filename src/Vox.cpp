@@ -28,6 +28,7 @@
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/objects/TestObjectChild.h"
+#include "core/objects/World.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -163,6 +164,11 @@ int main()
                 }
             });
 
+        std::shared_ptr<World> testWorld = std::make_shared<World>();
+        editor->SetWorld(testWorld);
+        testWorld->CreateObject<TestObjectChild>()->InitProperties();
+        testWorld->CreateObject<TestObject>()->InitProperties();
+        
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();
         inputService->RegisterMouseClickCallback([localEditor, debugRenderer, &voxelChunk](int x, int y) {
