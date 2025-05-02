@@ -30,7 +30,9 @@
 #include "core/objects/TestObjectChild.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/TestActor.h"
+#include "core/objects/component/TestComponent.h"
 #include "core/services/InputService.h"
+#include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "physics/CharacterController.h"
@@ -166,10 +168,17 @@ int main()
             });
 
         std::shared_ptr<World> testWorld = std::make_shared<World>();
+        
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
         editor->SetWorld(testWorld);
-        testWorld->CreateObject<TestObjectChild>()->InitProperties();
-        testWorld->CreateObject<TestObject>()->InitProperties();
-        testWorld->CreateObject<TestActor>()->InitProperties();
+        testWorld->CreateObject<TestObjectChild>();
+        testWorld->CreateObject<TestObject>();
+        testWorld->CreateObject<TestActor>();
+
+        testWorld->CreateObject("Test Actor");
         
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();

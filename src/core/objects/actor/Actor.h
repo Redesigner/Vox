@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/objects/Object.h"
+#include "core/objects/component/Component.h"
 
 namespace  Vox
 {

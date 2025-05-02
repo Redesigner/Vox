@@ -17,6 +17,8 @@ namespace Vox
             return objects.emplace_back( new T(std::forward<Args>(args)...));
         }
 
+        Object* CreateObject(const std::string& className);
+
         ~World();
         
     private:

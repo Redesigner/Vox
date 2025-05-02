@@ -1,7 +1,5 @@
 ﻿#include "Actor.h"
 
-#include "core/objects/component/Component.h"
-
 namespace Vox
 {
     void Actor::BuildProperties(std::vector<Property>& propertiesInOut)

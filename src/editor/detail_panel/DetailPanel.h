@@ -8,6 +8,6 @@ namespace Vox
     public:
         static void Draw(Object* object);
 
-        static void DrawProperty(Object* object, Property& property);
+        static void DrawProperty(Object* object, const Property& property);
     };
 }

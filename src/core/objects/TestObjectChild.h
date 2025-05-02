@@ -16,9 +16,7 @@ namespace Vox
         
         //void doSomething() override {};
         
-    protected:
         void BuildProperties(std::vector<Property>& properties) override;
-
         
     private:
         float test2 = 5.0f;

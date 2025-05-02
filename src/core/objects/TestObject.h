@@ -10,7 +10,6 @@ namespace Vox
     public:
         TestObject();
         
-    protected:
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
     private:
@@ -23,7 +22,7 @@ namespace Vox
 
     class TestObject2 : public Object
     {
-    protected:
+    public:
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
     private:

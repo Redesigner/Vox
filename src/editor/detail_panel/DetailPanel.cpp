@@ -12,9 +12,9 @@ namespace Vox
     void DetailPanel::Draw(Object* object)
     {
         assert(object);
-        if (ImGui::Begin(fmt::format("{}###DetailPanel", object->GetClassDisplayName()).c_str(), 0))
+        if (ImGui::Begin(fmt::format("{}###DetailPanel", "").c_str(), 0))
         {
-            for (Property& property : object->GetProperties())
+            for (const Property& property : object->GetProperties())
             {
                 DrawProperty(object, property);
             }
@@ -22,7 +22,7 @@ namespace Vox
         ImGui::End();
     }
 
-    void DetailPanel::DrawProperty(Object* object, Property& property)
+    void DetailPanel::DrawProperty(Object* object, const Property& property)
     {
         switch (property.GetType())
         {

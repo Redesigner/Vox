@@ -9,6 +9,7 @@ namespace Vox
 	class InputService;
 	class Renderer;
 	class PhysicsServer;
+	class ObjectService;
 
 	class ServiceLocator
 	{
@@ -22,9 +23,12 @@ namespace Vox
 
 		static PhysicsServer* GetPhysicsServer();
 
+		static ObjectService* GetObjectService();
+
 	private:
 		static InputService* inputService;
 		static Renderer* renderer;
 		static PhysicsServer* physicsServer;
+		static ObjectService* objectService;
 	};
 }

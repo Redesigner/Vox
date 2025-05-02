@@ -1,4 +1,6 @@
 ﻿#pragma once
+
+#include "core/concepts/Concepts.h"
 #include "core/objects/Object.h"
 
 namespace Vox
@@ -13,9 +15,8 @@ namespace Vox
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
         template <class T, typename... Args>
-        static std::unique_ptr<T> Create(Actor* parent, Args&&... args)
+        static std::unique_ptr<T> Create(Actor* parent, Args&&... args) requires Derived<T, Component>
         {
-            static_assert(std::is_convertible<T*, Component*>());
             std::unique_ptr<T> result = std::make_unique<T>(std::forward<Args>(args)...);
             result->parent = parent;
             return result;

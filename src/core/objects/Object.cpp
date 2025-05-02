@@ -1,10 +1,21 @@
 ﻿#include "Object.h"
 
+#include "TestObject.h"
+#include "core/services/ObjectService.h"
+#include "core/services/ServiceLocator.h"
+
 namespace Vox
-{    
-    void Object::InitProperties()
+{
+    const std::vector<Property>& Object::GetProperties() const
     {
-        BuildProperties(GetProperties());
+        const ObjectClass* objectClass = GetClass();
+        assert(objectClass && "ObjectClass was invalid");
+        return objectClass->GetProperties();
+    }
+
+    const ObjectClass* Object::GetClass() const
+    {
+        return ServiceLocator::GetObjectService()->GetObjectClass(GetClassDisplayName());
     }
 
     const std::string& Object::GetDisplayName() const
