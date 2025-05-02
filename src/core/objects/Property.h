@@ -11,7 +11,7 @@
 #define DECLARE_PROPERTY(Type, Name) Type Name;\
     Vox::Property _##Name {Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name)};
 
-#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name));
+#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(Property::FormatProperty(#Name), Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name));
 
 namespace Vox
 {
@@ -71,6 +71,8 @@ namespace Vox
         }
 
         const std::string& GetName() const;
+
+        static std::string FormatProperty(std::string propertyString);
         
     private:
         size_t propertyLocationOffset = 0;

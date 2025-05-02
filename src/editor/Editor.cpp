@@ -52,7 +52,11 @@ namespace Vox
             ImGui::Image(viewportRenderTexture->GetTextureId(),
                 ImVec2(static_cast<float>(viewportRenderTexture->GetWidth()), static_cast<float>(viewportRenderTexture->GetHeight())),
                 {0, 1}, {1, 0});
-
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetNextFrameWantCaptureMouse(false);
+            }
+            
             DrawToolbar();
             if (console)
             {

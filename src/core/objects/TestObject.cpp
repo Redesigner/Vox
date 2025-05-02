@@ -2,6 +2,11 @@
 
 namespace Vox
 {
+    TestObject::TestObject()
+    {
+        displayName = fmt::format("{}_Default", TestObject::classDisplayName);
+    }
+
     void TestObject::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         REGISTER_PROPERTY(float, test)

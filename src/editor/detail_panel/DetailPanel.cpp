@@ -5,12 +5,14 @@
 #include <fmt/base.h>
 #include <fmt/format.h>
 
+#include "Vec3DetailPanel.h"
+
 namespace Vox
 {
     void DetailPanel::Draw(Object* object)
     {
         assert(object);
-        if (ImGui::Begin(fmt::format("{}###DetailPanel", object->GetDisplayName()).c_str(), 0))
+        if (ImGui::Begin(fmt::format("{}###DetailPanel", object->GetClassDisplayName()).c_str(), 0))
         {
             for (Property& property : object->GetProperties())
             {
@@ -40,6 +42,11 @@ namespace Vox
                 size_t size = string.size();
                 ImGui::InputText(property.GetName().c_str(), &string, ImGuiInputTextFlags_None);
                 break;
+            }
+        case PropertyType::_vec3:
+            {
+                glm::vec3* vector = property.GetValuePtr<glm::vec3>(object);
+                Vec3DetailPanel::Draw(property.GetName().c_str(), vector);
             }
         }
     }

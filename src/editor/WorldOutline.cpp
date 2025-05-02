@@ -31,7 +31,7 @@ namespace Vox
     {
         bool result = false;
         ImGuiTreeNodeFlags flags = object == currentlySelectedObject ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
-        if (ImGui::TreeNodeEx(object->GetDisplayName().c_str(), flags))
+        if (ImGui::TreeNodeEx(fmt::format("{} {}", object->GetClassDisplayName(), object->GetDisplayName()).c_str(), flags))
         {
             ImGui::TreePop();
         }

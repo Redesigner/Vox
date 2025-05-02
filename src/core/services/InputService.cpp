@@ -35,6 +35,7 @@ void Vox::InputService::PollEvents()
 	{
 		HandleEvent(&polledEvent);
 		ImGui_ImplSDL3_ProcessEvent(&polledEvent);
+
 	}
 }
 
@@ -190,7 +191,10 @@ void Vox::InputService::HandleEvent(SDL_Event* event)
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		{
-			HandleMouseButtonEvent(event->button);
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
+				HandleMouseButtonEvent(event->button);
+			}
 			return;
 		}
 
