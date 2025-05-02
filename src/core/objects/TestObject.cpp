@@ -4,7 +4,7 @@ namespace Vox
 {
     TestObject::TestObject()
     {
-        displayName = fmt::format("{}_Default", TestObject::classDisplayName);
+        displayName = fmt::format("{}_Default", classDisplayName);
     }
 
     void TestObject::BuildProperties(std::vector<Property>& propertiesInOut)

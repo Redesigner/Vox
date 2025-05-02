@@ -12,6 +12,8 @@
 #define IMPLEMENT_NAME(Name) inline static std::string classDisplayName = std::regex_replace(std::string(#Name), std::regex("(\\B[A-Z])"), " $1");\
     const std::string& GetClassDisplayName() const { return classDisplayName; }
 
+#define DEFAULT_DISPLAY_NAME() displayName = fmt::format("{}_Default", classDisplayName);
+
 namespace Vox
 {
     /// Object is an object type that has reflected properties

@@ -1,1 +1,21 @@
 ﻿#include "Actor.h"
+
+#include "core/objects/component/Component.h"
+
+namespace Vox
+{
+    void Actor::BuildProperties(std::vector<Property>& propertiesInOut)
+    {
+        REGISTER_PROPERTY(glm::vec3, position)
+    }
+
+    const std::vector<std::unique_ptr<Component>>& Actor::GetComponents() const
+    {
+        return components;
+    }
+
+    void Actor::RegisterComponent(std::unique_ptr<Component> component)
+    {
+        components.emplace_back(std::move(component));
+    }
+}

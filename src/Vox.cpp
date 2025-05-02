@@ -29,6 +29,7 @@
 #include "core/math/Math.h"
 #include "core/objects/TestObjectChild.h"
 #include "core/objects/World.h"
+#include "core/objects/actor/TestActor.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -168,6 +169,7 @@ int main()
         editor->SetWorld(testWorld);
         testWorld->CreateObject<TestObjectChild>()->InitProperties();
         testWorld->CreateObject<TestObject>()->InitProperties();
+        testWorld->CreateObject<TestActor>()->InitProperties();
         
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();
