@@ -1,6 +1,9 @@
 ﻿#pragma once
 
+#include "core/concepts/Concepts.h"
 #include "core/objects/Object.h"
+#include "core/services/ObjectService.h"
+#include "core/services/ServiceLocator.h"
 
 namespace Vox
 {
@@ -10,10 +13,8 @@ namespace Vox
         [[nodiscard]] const std::vector<Object*>& GetObjects() const;
 
         template <typename T, class... Args>
-        Object* CreateObject(Args&&... args)
+        Object* CreateObject(Args&&... args) requires Derived<T, Object>
         {
-            static_assert(std::is_base_of_v<Object, T>);
-
             return objects.emplace_back( new T(std::forward<Args>(args)...));
         }
 

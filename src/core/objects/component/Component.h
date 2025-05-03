@@ -25,7 +25,6 @@ namespace Vox
     private:
         Actor* parent = nullptr;
         
-        IMPLEMENT_NAME(Component)
-        IMPLEMENT_PROPERTIES()
+        IMPLEMENT_OBJECT(Component)
     };
 }

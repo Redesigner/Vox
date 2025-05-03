@@ -16,8 +16,7 @@ namespace Vox
         float test = 0.0f;
         std::string testString = "this string is a member of TestObject";
         
-        IMPLEMENT_PROPERTIES()
-        IMPLEMENT_NAME(TestObject)
+        IMPLEMENT_OBJECT(TestObject)
     };
 
     class TestObject2 : public Object
@@ -30,7 +29,6 @@ namespace Vox
         float test4f = 222.0f;
         std::string testString2 = "this string is a member of TestObject2";
         
-        IMPLEMENT_PROPERTIES()
-        IMPLEMENT_NAME(TestObject2)
+        IMPLEMENT_OBJECT(TestObject2)
     };
 }

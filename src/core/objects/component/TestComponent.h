@@ -7,9 +7,12 @@ namespace Vox
     {
     public:
         TestComponent();
+
+        void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
     private:
-        IMPLEMENT_PROPERTIES()
-        IMPLEMENT_NAME(TestComponent)
+        IMPLEMENT_OBJECT(TestComponent)
+
+        std::string tag;
     };
 }

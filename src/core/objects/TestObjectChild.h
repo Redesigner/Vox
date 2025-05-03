@@ -24,7 +24,6 @@ namespace Vox
 
         glm::vec3 position = {5.0f, 15.0f, 0.0f};
         
-        IMPLEMENT_NAME(TestObjectChild)
-        IMPLEMENT_PROPERTIES()
+        IMPLEMENT_OBJECT(TestObjectChild)
     };
 }

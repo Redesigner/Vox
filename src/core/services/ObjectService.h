@@ -10,8 +10,7 @@ namespace Vox
     class ObjectService
     {
     public:
-        void RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass);
-        
+        const ObjectClass* RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass);
         
         template <typename T>
         void RegisterObjectClass() requires Derived<T, Object>
@@ -19,7 +18,18 @@ namespace Vox
             std::vector<Property> properties;
             T defaultObject = T();
             defaultObject.BuildProperties(properties);
-            RegisterObjectClass(defaultObject.GetClassDisplayName(), ObjectClass(T::template GetConstructor<T>(), properties));
+            T::SetObjectClass(RegisterObjectClass(defaultObject.GetClassDisplayName(), ObjectClass(T::template GetConstructor<T>(), properties)));
+        }
+
+        /// Register an object class, skipping if the class is already registered
+        template <typename T>
+        void RegisterObjectClassConditional() requires Derived<T, Object>
+        {
+            if (classRegistry.contains(T().GetClassDisplayName()))
+            {
+                return;
+            }
+            RegisterObjectClass<T>();
         }
 
         const ObjectClass* GetObjectClass(const std::string& objectClassId) const;

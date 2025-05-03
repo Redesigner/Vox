@@ -8,8 +8,7 @@ namespace Vox
     public:
         TestActor();
 
-        IMPLEMENT_NAME(TestActor)
-        IMPLEMENT_PROPERTIES()
+        IMPLEMENT_OBJECT(TestActor)
         
     };
 }

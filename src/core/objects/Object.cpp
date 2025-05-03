@@ -13,11 +13,6 @@ namespace Vox
         return objectClass->GetProperties();
     }
 
-    const ObjectClass* Object::GetClass() const
-    {
-        return ServiceLocator::GetObjectService()->GetObjectClass(GetClassDisplayName());
-    }
-
     const std::string& Object::GetDisplayName() const
     {
         return displayName;

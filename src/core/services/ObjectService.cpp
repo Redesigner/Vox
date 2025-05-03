@@ -4,10 +4,11 @@
 
 namespace Vox
 {
-    void ObjectService::RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass)
+    const ObjectClass* ObjectService::RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass)
     {
         assert(!classRegistry.contains(classId) && "Class is already registered");
-        classRegistry.insert({classId, objectClass});
+        auto newClassEntry = classRegistry.insert({classId, objectClass});
+        return &newClassEntry.first->second;
     }
 
     const ObjectClass* ObjectService::GetObjectClass(const std::string& objectClassId) const

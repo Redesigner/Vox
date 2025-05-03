@@ -173,11 +173,10 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
+        
         editor->SetWorld(testWorld);
         testWorld->CreateObject<TestObjectChild>();
         testWorld->CreateObject<TestObject>();
-        testWorld->CreateObject<TestActor>();
-
         testWorld->CreateObject("Test Actor");
         
         InputService* inputService = ServiceLocator::GetInputService();

@@ -7,13 +7,17 @@
 #include "core/concepts/Concepts.h"
 #include "core/objects/Property.h"
 
-#define IMPLEMENT_PROPERTIES() bool testReplacement = false;
-
-#define IMPLEMENT_NAME(Name) inline static std::string classDisplayName = std::regex_replace(std::string(#Name), std::regex("(\\B[A-Z])"), " $1");\
+#define IMPLEMENT_NAME(Name) private: inline static std::string classDisplayName = std::regex_replace(std::string(#Name), std::regex("(\\B[A-Z])"), " $1");\
     public: std::string& GetClassDisplayName() const override { return classDisplayName; }\
     private:
 
 #define DEFAULT_DISPLAY_NAME() displayName = fmt::format("{}_Default", classDisplayName);
+
+/// Implement the objects name and accessors for its ObjectClass
+#define IMPLEMENT_OBJECT(Name) private: static inline const ObjectClass* objectClass = nullptr;\
+    public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
+    const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
+    IMPLEMENT_NAME(Name)
 
 namespace Vox
 {
@@ -37,16 +41,16 @@ namespace Vox
             return [] { return new T; };
         }
 
-        const std::vector<Property>& GetProperties() const;
+        [[nodiscard]] const std::vector<Property>& GetProperties() const;
 
-        const ObjectClass* GetClass() const;
+        [[nodiscard]] virtual const ObjectClass* GetClass() const = 0;
 
-        virtual std::string& GetClassDisplayName() const = 0;
+        [[nodiscard]] virtual std::string& GetClassDisplayName() const = 0;
 
-        const std::string& GetDisplayName() const;
+        [[nodiscard]] const std::string& GetDisplayName() const;
 
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
-        
+            
     protected:
         std::string displayName;
     };

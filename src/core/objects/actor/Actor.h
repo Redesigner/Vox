@@ -21,7 +21,6 @@ namespace  Vox
 
         std::vector<std::unique_ptr<Component>> components;
         
-        IMPLEMENT_PROPERTIES()
-        IMPLEMENT_NAME(Actor)
+        IMPLEMENT_OBJECT(Actor)
     };
 }
