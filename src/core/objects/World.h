@@ -13,9 +13,9 @@ namespace Vox
         [[nodiscard]] const std::vector<Object*>& GetObjects() const;
 
         template <typename T, class... Args>
-        Object* CreateObject(Args&&... args) requires Derived<T, Object>
+        T* CreateObject(Args&&... args) requires Derived<T, Object>
         {
-            return objects.emplace_back( new T(std::forward<Args>(args)...));
+            return static_cast<T*>(objects.emplace_back( new T(std::forward<Args>(args)...)));
         }
 
         Object* CreateObject(const std::string& className);

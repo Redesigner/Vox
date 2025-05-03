@@ -3,6 +3,7 @@
 #include <regex>
 #include <vector>
 #include <fmt/format.h>
+#include <nlohmann/adl_serializer.hpp>
 
 #include "core/concepts/Concepts.h"
 #include "core/objects/Property.h"
@@ -17,7 +18,8 @@
 #define IMPLEMENT_OBJECT(Name) private: static inline const ObjectClass* objectClass = nullptr;\
     public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
     const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
-    IMPLEMENT_NAME(Name)
+    IMPLEMENT_NAME(Name)\
+    private:
 
 namespace Vox
 {
@@ -50,8 +52,11 @@ namespace Vox
         [[nodiscard]] const std::string& GetDisplayName() const;
 
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
-            
+
+        nlohmann::ordered_json Serialize() const;
+        
     protected:
         std::string displayName;
+        
     };
 }
