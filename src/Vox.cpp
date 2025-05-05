@@ -175,9 +175,12 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
         
         editor->SetWorld(testWorld);
-        testWorld->CreateObject<TestObjectChild>();
+        nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();
         testWorld->CreateObject<TestObject>();
         testWorld->CreateObject("Test Actor");
+        std::string objectString = serializedObject.dump(4);
+
+        VoxLog(Display, Game, "{}", objectString);
         
         InputService* inputService = ServiceLocator::GetInputService();
         Editor* localEditor = editor.get();

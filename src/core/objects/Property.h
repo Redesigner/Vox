@@ -3,6 +3,7 @@
 #include <variant>
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #define PROPERTY_OFFSET(Class, Property) ((reinterpret_cast<char*>(&(Property)) - reinterpret_cast<char*>(this) ) - Vox::objectOffset<Object>(this))
 
@@ -73,6 +74,8 @@ namespace Vox
         const std::string& GetName() const;
 
         static std::string FormatProperty(std::string propertyString);
+
+        nlohmann::ordered_json Serialize(void* objectLocation) const;
         
     private:
         size_t propertyLocationOffset = 0;
