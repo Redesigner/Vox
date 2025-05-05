@@ -24,6 +24,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "character/Character.h"
+#include "components/MeshComponent.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -173,6 +174,8 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
+
+        ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
         
         editor->SetWorld(testWorld);
         nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();

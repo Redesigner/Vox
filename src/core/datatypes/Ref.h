@@ -1,7 +1,6 @@
 #pragma once
 
 #include <utility>
-#include <vector>
 
 #include "core/datatypes/ObjectContainer.h"
 
@@ -19,6 +18,44 @@ namespace Vox
 		Ref(ObjectContainer<T>* container, std::pair<size_t, int> id)
 			:container(container), index(id.first), id(id.second)
 		{
+			container->IncrementRefCount(id);
+		}
+
+		~Ref()
+		{
+			if (container)
+			{
+				container->DecrementRefCount({ index, id });
+			}
+		}
+
+		Ref(const Ref<typename T>& other)
+			:container(other.container), index(other.index), id(other.id)
+		{
+			container->IncrementRefCount({index, id});
+		}
+
+		Ref(Ref&& other)
+			:container(other.container), index(other.index), id(other.id)
+		{
+		}
+
+		Ref& operator =(const Ref& other)
+		{
+			if (&other == this)
+			{
+				return *this;
+			}
+
+			if (container)
+			{
+				container->DecrementRefCount({index, id});
+			}
+			container = other.container;
+			index = other.index;
+			id = other.id;
+			container->IncrementRefCount({index, id});
+			return *this;
 		}
 
 		T* operator->()

@@ -6,8 +6,32 @@
 
 namespace Vox
 {
-    Property::Property(std::string name, const PropertyType propertyType, const size_t offset)
-        :propertyLocationOffset(offset), type(propertyType), name(std::move(name))
+    std::string GetPropertyTypeString(const PropertyType type)
+    {
+        switch (type)
+        {
+        case PropertyType::_bool:
+            return "bool";
+        case PropertyType::_int:
+            return "int";
+        case PropertyType::_uint:
+            return "uint";
+        case PropertyType::_float:
+            return "float";
+        case PropertyType::_string:
+            return "string";
+        case PropertyType::_vec3:
+            return "vec3";
+        case PropertyType::_quat:
+            return "quat";
+        case PropertyType::_invalid:
+        default:
+            return "invalid";
+        }
+    }
+
+    Property::Property(const std::string& name, const PropertyType propertyType, const size_t offset)
+        :propertyLocationOffset(offset), type(propertyType), name(name), friendlyName(FormatProperty(name))
     {
     }
 
@@ -19,6 +43,11 @@ namespace Vox
     const std::string& Property::GetName() const
     {
         return name;
+    }
+
+    const std::string& Property::GetFriendlyName() const
+    {
+        return friendlyName;
     }
 
     std::string Property::FormatProperty(std::string propertyString)
@@ -34,7 +63,7 @@ namespace Vox
         using json = nlohmann::ordered_json;
 
         json propertyJson {};
-        propertyJson[name]["type"] = type;
+        propertyJson[name]["type"] = GetPropertyTypeString(type);
 
         switch (type)
         {

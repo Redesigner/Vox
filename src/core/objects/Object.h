@@ -49,6 +49,8 @@ namespace Vox
 
         [[nodiscard]] virtual std::string& GetClassDisplayName() const = 0;
 
+        virtual void PropertyChanged(const Property& property) {}
+
         [[nodiscard]] const std::string& GetDisplayName() const;
 
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;

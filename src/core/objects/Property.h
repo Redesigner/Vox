@@ -12,7 +12,7 @@
 #define DECLARE_PROPERTY(Type, Name) Type Name;\
     Vox::Property _##Name {Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name)};
 
-#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(Property::FormatProperty(#Name), Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name));
+#define REGISTER_PROPERTY(Type, Name) propertiesInOut.emplace_back(#Name, Vox::GetPropertyType<Type>(), PROPERTY_OFFSET(CLASS_TYPE(), Name));
 
 namespace Vox
 {
@@ -30,7 +30,7 @@ namespace Vox
         _invalid
     };
 
-    typedef unsigned int uint;
+    static std::string GetPropertyTypeString(PropertyType type);
 
     template<typename Parent, typename Child>
     size_t objectOffset(Child* object)
@@ -49,7 +49,7 @@ namespace Vox
     
     struct Property
     {
-        Property(std::string name, PropertyType propertyType, size_t offset);
+        Property(const std::string& name, PropertyType propertyType, size_t offset);
         
         PropertyType GetType() const;
 
@@ -71,7 +71,12 @@ namespace Vox
             return *reinterpret_cast<T*>(static_cast<char*>(objectLocation) + propertyLocationOffset);
         }
 
-        const std::string& GetName() const;
+        /// Get the property name
+        [[nodiscard]] const std::string& GetName() const;
+        
+        /// Get the property name, formatted for better readability
+        /// Spaces and capitalization will be inserted
+        [[nodiscard]] const std::string& GetFriendlyName() const;
 
         static std::string FormatProperty(std::string propertyString);
 
@@ -81,5 +86,6 @@ namespace Vox
         size_t propertyLocationOffset = 0;
         PropertyType type = PropertyType::_invalid;
         std::string name;
+        std::string friendlyName;
     };
 }

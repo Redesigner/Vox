@@ -24,30 +24,36 @@ namespace Vox
 
     void DetailPanel::DrawProperty(Object* object, const Property& property)
     {
+        bool propertyChanged = false;
         switch (property.GetType())
         {
         case PropertyType::_bool:
             {
-                ImGui::Checkbox(property.GetName().c_str(), property.GetValuePtr<bool>(object));
+                propertyChanged = ImGui::Checkbox(property.GetFriendlyName().c_str(), property.GetValuePtr<bool>(object));
                 break;
             }
         case PropertyType::_float:
             {
-                ImGui::InputFloat(property.GetName().c_str(), property.GetValuePtr<float>(object));
+                propertyChanged = ImGui::InputFloat(property.GetFriendlyName().c_str(), property.GetValuePtr<float>(object));
                 break;
             }
         case PropertyType::_string:
             {
                 std::string& string = *property.GetValuePtr<std::string>(object);
                 size_t size = string.size();
-                ImGui::InputText(property.GetName().c_str(), &string, ImGuiInputTextFlags_None);
+                propertyChanged = ImGui::InputText(property.GetFriendlyName().c_str(), &string, ImGuiInputTextFlags_None);
                 break;
             }
         case PropertyType::_vec3:
             {
                 glm::vec3* vector = property.GetValuePtr<glm::vec3>(object);
-                Vec3DetailPanel::Draw(property.GetName().c_str(), vector);
+                propertyChanged = Vec3DetailPanel::Draw(property.GetFriendlyName().c_str(), vector);
             }
+        }
+
+        if (propertyChanged)
+        {
+            object->PropertyChanged(property);
         }
     }
 }
