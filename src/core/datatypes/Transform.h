@@ -10,7 +10,7 @@ namespace Vox
 	struct Transform
 	{
 		Transform();
-		Transform(glm::mat4x4 matrix);
+		explicit Transform(const glm::mat4x4& matrix);
 
 		glm::vec3 position;
 		glm::quat rotation;

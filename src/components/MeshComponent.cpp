@@ -9,8 +9,6 @@ namespace Vox
     MeshComponent::MeshComponent()
     {
         DEFAULT_DISPLAY_NAME()
-
-        position = {0.0f, 0.0f, 0.0f};
     }
 
     MeshComponent::MeshComponent(const std::string& meshName)
@@ -21,22 +19,12 @@ namespace Vox
 
     void MeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)
     {
-        Component::BuildProperties(propertiesInOut);
-
-        REGISTER_PROPERTY(glm::vec3, position)
+        SceneComponent::BuildProperties(propertiesInOut);
     }
-
-    void MeshComponent::PropertyChanged(const Property& property)
+    
+    void MeshComponent::OnTransformUpdated()
     {
-        if (property.GetName() == "position")
-        {
-            if (!mesh)
-            {
-                VoxLog(Error, Game, "MeshComponent failed to update position! Mesh was invalid.");
-            }
-            Transform meshTransform = mesh->GetTransform();
-            meshTransform.position = property.GetValueChecked<glm::vec3>(this);
-            mesh->SetTransform(meshTransform.GetMatrix());
-        }
+        mesh->SetTransform(GetWorldTransform().GetMatrix());
     }
+
 }

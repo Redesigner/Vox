@@ -10,7 +10,7 @@ namespace Vox
 	{
 	}
 
-	Transform::Transform(glm::mat4x4 matrix)
+	Transform::Transform(const glm::mat4x4& matrix)
 	{
 		glm::vec3 skew;
 		glm::vec4 perspective;

@@ -10,7 +10,6 @@ namespace Vox
     {
         displayName = fmt::format("{}_Default", classDisplayName);
 
-        RegisterComponent(Component::Create<MeshComponent>(this, "witch"));
-        RegisterComponent(Component::Create<TestComponent>(this));
+        AttachComponent(Component::Create<MeshComponent>(this, "witch"));
     }
 }

@@ -9,7 +9,15 @@ namespace Vox
     {
         ImGui::Text(label);
         bool result = Vec3DetailPanel::Draw("Position", &transform->position, flags);
-        result |= ImGui::InputFloat4("Rotation", &transform->rotation.x, "%.3f", flags);
+
+        glm::vec3 rotationEulerAxis = eulerAngles(transform->rotation);
+        const bool rotationChanged = Vec3DetailPanel::Draw("Rotation", &rotationEulerAxis, flags);
+
+        if (rotationChanged)
+        {
+            transform->rotation = glm::quat(rotationEulerAxis);
+        }
+        result |= rotationChanged;
         result |= Vec3DetailPanel::Draw("Scale", &transform->scale, flags);
         return result;
     }

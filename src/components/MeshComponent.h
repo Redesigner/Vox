@@ -1,12 +1,12 @@
 ﻿#pragma once
+#include "components/SceneComponent.h"
 #include "core/datatypes/Ref.h"
-#include "core/objects/component/Component.h"
 
 namespace Vox
 {
     struct MeshInstance;
 
-    class MeshComponent : public Component
+    class MeshComponent : public SceneComponent
     {
     public:
         MeshComponent();
@@ -15,13 +15,12 @@ namespace Vox
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
-        void PropertyChanged(const Property& property) override;
+    protected:
+        void OnTransformUpdated() override;
         
     private:
         IMPLEMENT_OBJECT(MeshComponent)
-
-        glm::vec3 position;
-
+        
         Ref<MeshInstance> mesh;
     };
 }
