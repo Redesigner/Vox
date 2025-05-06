@@ -1,7 +1,6 @@
 #include "MeshInstanceContainer.h"
 
 #include "core/logging/Logging.h"
-#include "rendering/mesh/Model.h"
 #include "rendering/shaders/Shader.h"
 
 namespace Vox
@@ -11,7 +10,7 @@ namespace Vox
 	{
 	}
 
-	bool MeshInstanceContainer::LoadMesh(std::string filepath)
+	bool MeshInstanceContainer::LoadMesh(const std::string& filepath)
 	{
 		if (model)
 		{

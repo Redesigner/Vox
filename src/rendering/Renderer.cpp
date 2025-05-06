@@ -1,7 +1,6 @@
-﻿#pragma once
+﻿#include "Renderer.h"
 
-#include "Renderer.h"
-
+#include <ranges>
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -23,8 +22,6 @@
 #include "rendering/shaders/DeferredShader.h"
 #include "rendering/shaders/VoxelShader.h"
 #include "physics/PhysicsServer.h"
-#include "voxel/Octree.h"
-#include "voxel/VoxelGrid.h"
 
 namespace Vox
 {
@@ -32,7 +29,7 @@ namespace Vox
     {
         glEnable(GL_CULL_FACE);
         mainWindow = window;
-        // This is realtive to the build location -- I'll have to fix this later
+        // This is relative to the build location -- I'll have to fix this later
         // ChangeDirectory("../../../");
 
         VoxLog(Display, Rendering, "Set current working directory to {}", SDL_GetBasePath());
@@ -71,48 +68,13 @@ namespace Vox
         CreateSkeletalMeshVao();
         CreateVoxelVao();
 
-        const unsigned int voxelGridSize = 34;
-
-        unsigned int voxelData[voxelGridSize][voxelGridSize][voxelGridSize] = { 0 };
-        for (int x = 1; x < 10; ++x)
-        {
-            for (int y = 17; y < 26; ++y)
-            {
-                for (int z = 1; z < 10; ++z)
-                {
-                    if (rand() % 5 != 0)
-                    {
-                        voxelData[x][y][z] = 1;
-                    }
-                }
-            }
-        }
-
-        for (int x = 16; x < 32; ++x)
-        {
-            for (int y = 16; y < 32; ++y)
-            {
-                for (int z = 0; z < 16; ++z)
-                {
-                    int dx = x - 24;
-                    int dy = y - 24;
-                    int dz = z - 8;
-                    int dSquared = dx * dx + dy * dy + dz * dz;
-                    if (dSquared < 64)
-                    {
-                        voxelData[x][y][z] = 1;
-                    }
-                }
-            }
-        }
-
         gBuffer = std::make_unique<GBuffer>(800, 450);
         deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
 
         skyShader.Enable();
-        skyShader.SetUniformInt(skyShader.GetUniformLocation("color"), 0);
+        Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("color"), 0);
 
-        skyShader.SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
+        Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
@@ -180,12 +142,12 @@ namespace Vox
         return currentCamera;
     }
 
-    void Renderer::SetCurrentCamera(Ref<Camera> camera)
+    void Renderer::SetCurrentCamera(const Ref<Camera>& camera)
     {
         currentCamera = camera;
     }
 
-    bool Renderer::UploadModel(std::string alias, std::string relativeFilePath)
+    bool Renderer::UploadModel(std::string alias, const std::string& relativeFilePath)
     {
         if (uploadedModels.contains(alias))
         {
@@ -194,11 +156,11 @@ namespace Vox
         }
 
         auto newMeshInstance = uploadedModels.emplace(alias, 8);
-        newMeshInstance.first->second.LoadMesh(std::move(relativeFilePath));
+        newMeshInstance.first->second.LoadMesh(relativeFilePath);
         return true;
     }
 
-    auto Renderer::UploadSkeletalModel(std::string alias, std::string relativeFilePath) -> bool
+    bool Renderer::UploadSkeletalModel(std::string alias, const std::string& relativeFilePath)
     {
         if (uploadedSkeletalModels.contains(alias))
         {
@@ -210,7 +172,7 @@ namespace Vox
         return true;
     }
 
-    Ref<MeshInstance> Renderer::CreateMeshInstance(std::string meshName)
+    Ref<MeshInstance> Renderer::CreateMeshInstance(const std::string& meshName)
     {
         const auto mesh = uploadedModels.find(meshName);
         if (mesh == uploadedModels.end())
@@ -251,7 +213,7 @@ namespace Vox
 
     DynamicRef<VoxelMesh> Renderer::CreateVoxelMesh(glm::ivec2 position)
     {
-        return DynamicRef<VoxelMesh>(&voxelMeshes, voxelMeshes.Create(position));
+        return {&voxelMeshes, voxelMeshes.Create(position)};
     }
 
     const std::unordered_map<std::string, MeshInstanceContainer>& Renderer::GetMeshes() const
@@ -264,7 +226,7 @@ namespace Vox
         return uploadedSkeletalModels;
     }
 
-    void Renderer::UpdateViewportDimensions(Editor* editor)
+    void Renderer::UpdateViewportDimensions(const Editor* editor)
     {
         // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
         glm::vec2 editorViewportSize = editor->GetViewportDimensions();
@@ -303,23 +265,23 @@ namespace Vox
         //glClearDepth(0.0f);
 
         gBufferShader.Enable();
-        gBufferShader.SetUniformMatrix(gBufferViewMatrixLocation, currentCamera->GetViewMatrix());
-        gBufferShader.SetUniformMatrix(gBufferProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
+        Vox::PixelShader::SetUniformMatrix(gBufferViewMatrixLocation, currentCamera->GetViewMatrix());
+        Vox::PixelShader::SetUniformMatrix(gBufferProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
         glBindVertexArray(meshVao);
 
-        for (auto& meshes : uploadedModels)
+        for (auto& val : uploadedModels | std::views::values)
         {
-            meshes.second.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
+            val.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
         }
 
         skeletalMeshShader.Enable();
-        skeletalMeshShader.SetUniformMatrix(skeletalViewMatrixLocation, currentCamera->GetViewMatrix());
-        skeletalMeshShader.SetUniformMatrix(skeletalProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
+        Vox::PixelShader::SetUniformMatrix(skeletalViewMatrixLocation, currentCamera->GetViewMatrix());
+        Vox::PixelShader::SetUniformMatrix(skeletalProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
         glBindVertexArray(skeletalMeshVao);
 
-        for (auto& skeletalMesh : uploadedSkeletalModels)
+        for (auto& val : uploadedSkeletalModels | std::views::values)
         {
-            skeletalMesh.second.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
+            val.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
         }
 
         UpdateVoxelMeshes();
@@ -378,7 +340,7 @@ namespace Vox
         }
     }
 
-    void Renderer::RenderVoxelMesh(VoxelMesh& voxelMesh)
+    void Renderer::RenderVoxelMesh(VoxelMesh& voxelMesh) const
     {
         glBindVertexBuffer(0, voxelMesh.GetMeshId(), 0, sizeof(float) * 16);
         voxelShader->SetModelMatrix(voxelMesh.GetTransform());
@@ -395,13 +357,13 @@ namespace Vox
         glEnable(GL_DEPTH_TEST);
         debugLineShader.Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferLines();
-        debugLineShader.SetUniformMatrix(debugLineMatrixLocation, currentCamera->GetViewProjectionMatrix());
-        glDrawArrays(GL_LINES, 0, physicsServer->GetDebugRenderer()->GetLineVertexCount());
+        PixelShader::SetUniformMatrix(debugLineMatrixLocation, currentCamera->GetViewProjectionMatrix());
+        glDrawArrays(GL_LINES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetLineVertexCount()));
 
         debugTriangleShader.Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-        debugTriangleShader.SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
-        glDrawArrays(GL_TRIANGLES, 0, physicsServer->GetDebugRenderer()->GetTriangleVertexCount());
+        PixelShader::SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
     }
 
     void Renderer::RenderSky()
@@ -410,16 +372,16 @@ namespace Vox
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
         skyShader.Enable();
-        glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();
-        glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
-        glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
-        skyShader.SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
+        const glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();
+        const glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
+        const glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
+        PixelShader::SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
         // deferredFramebuffer->ActivateTextures();
         glBindVertexArray(quad->GetVaoId());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    void Renderer::CopyViewportToTexture(RenderTexture& texture)
+    void Renderer::CopyViewportToTexture(const RenderTexture& texture)
     {
         glBlitNamedFramebuffer(0, texture.GetFramebufferId(),
             0, 0, texture.GetWidth(), texture.GetHeight(),
@@ -475,15 +437,14 @@ namespace Vox
 
     void Renderer::CreateVoxelVao()
     {
-        size_t voxelMeshStride = sizeof(float) * 16;
         glGenVertexArrays(1, &voxelMeshVao);
         glBindVertexArray(voxelMeshVao);
-        size_t texCoordOffset = sizeof(float) * 4;
-        size_t normalOffest = sizeof(float) * 8;
-        size_t materialIdOffset = sizeof(float) * 11;
+        constexpr size_t texCoordOffset = sizeof(float) * 4;
+        constexpr size_t normalOffset = sizeof(float) * 8;
+        constexpr size_t materialIdOffset = sizeof(float) * 11;
         glVertexAttribFormat(0, 3, GL_FLOAT, false, 0);
         glVertexAttribFormat(1, 2, GL_FLOAT, false, texCoordOffset);
-        glVertexAttribFormat(2, 3, GL_FLOAT, false, normalOffest);
+        glVertexAttribFormat(2, 3, GL_FLOAT, false, normalOffset);
         glVertexAttribIFormat(3, 1, GL_UNSIGNED_INT, materialIdOffset);
         glVertexAttribBinding(0, 0);
         glVertexAttribBinding(1, 0);

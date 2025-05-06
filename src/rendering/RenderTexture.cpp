@@ -7,7 +7,7 @@
 
 namespace Vox
 {
-	RenderTexture::RenderTexture(unsigned int width, unsigned int height)
+	RenderTexture::RenderTexture(int width, int height)
 		:width(width), height(height)
 	{
 		VoxLog(Display, Rendering, "Allocating new framebuffer for RenderTexture: size ({}, {}).", width, height);
@@ -26,11 +26,10 @@ namespace Vox
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
-		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+		if (const GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER); framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
 			VoxLog(Error, Rendering, "Failed to create renderTexture: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
@@ -52,12 +51,12 @@ namespace Vox
 		return texture;
 	}
 
-	unsigned int RenderTexture::GetWidth() const
+	int RenderTexture::GetWidth() const
 	{
 		return width;
 	}
 
-	unsigned int RenderTexture::GetHeight() const
+	int RenderTexture::GetHeight() const
 	{
 		return height;
 	}

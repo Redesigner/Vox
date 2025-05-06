@@ -16,13 +16,13 @@ namespace Vox
 		void Enable() const;
 		static void Disable();
 
-		int GetUniformLocation(const char* uniformName) const;
-		int GetUniformLocation(const std::string& uniformName) const;
+		[[nodiscard]] int GetUniformLocation(const char* uniformName) const;
+		[[nodiscard]] int GetUniformLocation(const std::string& uniformName) const;
 		static void SetUniformInt(int uniformLocation, int value);
-		void SetUniformFloat(int uniformLocation, float value);
-		void SetUniformVec3(int uniformLocation, glm::vec3 value);
-		void SetUniformColor(int uniformLocation, glm::vec4 color);
-		void SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix);
+		static void SetUniformFloat(int uniformLocation, float value);
+		static void SetUniformVec3(int uniformLocation, glm::vec3 value);
+		static void SetUniformColor(int uniformLocation, glm::vec4 color);
+		static void SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix);
 
 		// TEMPORARY USAGE ONLY
 		unsigned int GetId() const;

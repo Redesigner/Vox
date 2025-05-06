@@ -3,15 +3,11 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
-
-#include <glm/vec3.hpp>
 
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
-#include "rendering/mesh/Model.h"
 #include "rendering/skeletalmesh/SkeletalModel.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
@@ -29,7 +25,6 @@ namespace Vox
 	class Framebuffer;
 	class FullscreenQuad;
 	class GBuffer;
-	class MeshInstance;
 	class PhysicsServer;
 	class RenderTexture;
 	class VoxelShader;
@@ -37,8 +32,14 @@ namespace Vox
 	class Renderer
 	{
 	public:
-		Renderer(SDL_Window* window);
+		explicit Renderer(SDL_Window* window);
 		~Renderer();
+
+		Renderer(const Renderer&) = delete;
+		Renderer(Renderer&&) = delete;
+
+		Renderer& operator =(const Renderer& other) = delete;
+		Renderer& operator =(Renderer&& other) = delete;
 
 		void Render(Editor* editor);
 
@@ -48,7 +49,7 @@ namespace Vox
 
 		Ref<Camera> GetCurrentCamera() const;
 
-		void SetCurrentCamera(Ref<Camera> camera);
+		void SetCurrentCamera(const Ref<Camera>& camera);
 
 		/**
 		 * @brief Uploads a glTF model to the GPU
@@ -56,22 +57,22 @@ namespace Vox
 		 * @param relativeFilePath file path of the model, relative to 'assets'
 		 * @return true if the model was loaded successfully, false otherwise
 		 */
-		bool UploadModel(std::string alias, std::string relativeFilePath);
+		bool UploadModel(std::string alias, const std::string& relativeFilePath);
 
-		bool UploadSkeletalModel(std::string alias, std::string relativeFilePath);
+		bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
 
-		Ref<MeshInstance> CreateMeshInstance(std::string meshName);
+		Ref<MeshInstance> CreateMeshInstance(const std::string& meshName);
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
 		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
 
-		const std::unordered_map<std::string, MeshInstanceContainer>& GetMeshes() const;
+		[[nodiscard]] const std::unordered_map<std::string, MeshInstanceContainer>& GetMeshes() const;
 
-		const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
+		[[nodiscard]] const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
 
 	private:
-		void UpdateViewportDimensions(Editor* editor);
+		void UpdateViewportDimensions(const Editor* editor);
 
 		void RenderGBuffer();
 
@@ -83,13 +84,13 @@ namespace Vox
 
 		void RenderVoxelMeshes();
 
-		void RenderVoxelMesh(VoxelMesh& voxelMesh);
+		void RenderVoxelMesh(VoxelMesh& voxelMesh) const;
 
 		void RenderSky();
 
 		void RenderDebugShapes();
 
-		void CopyViewportToTexture(RenderTexture& texture);
+		static void CopyViewportToTexture(const RenderTexture& texture);
 
 		void CreateMeshVao();
 

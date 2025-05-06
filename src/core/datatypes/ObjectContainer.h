@@ -45,7 +45,7 @@ namespace Vox
 			
 			if (backingData.at(index).has_value())
 			{
-				return &backingData.at(index).value();
+				return &*backingData.at(index);
 			}
 			return nullptr;
 		}
