@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <utility>
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_video.h>
 
@@ -193,11 +194,11 @@ namespace Vox
         }
 
         auto newMeshInstance = uploadedModels.emplace(alias, 8);
-        newMeshInstance.first->second.LoadMesh(relativeFilePath);
+        newMeshInstance.first->second.LoadMesh(std::move(relativeFilePath));
         return true;
     }
 
-    bool Renderer::UploadSkeletalModel(std::string alias, std::string relativeFilePath)
+    auto Renderer::UploadSkeletalModel(std::string alias, std::string relativeFilePath) -> bool
     {
         if (uploadedSkeletalModels.contains(alias))
         {
@@ -211,17 +212,17 @@ namespace Vox
 
     Ref<MeshInstance> Renderer::CreateMeshInstance(std::string meshName)
     {
-        auto mesh = uploadedModels.find(meshName);
+        const auto mesh = uploadedModels.find(meshName);
         if (mesh == uploadedModels.end())
         {
             VoxLog(Error, Rendering, "No mesh with name '{}' exists. Make sure to call 'UploadModel' first.", meshName);
-            return Ref<MeshInstance>();
+            return {};
         }
 
         return mesh->second.CreateMeshInstance();
     }
 
-    std::string Renderer::GetGlDebugTypeString(unsigned int errorCode)
+    std::string Renderer::GetGlDebugTypeString(const unsigned int errorCode)
     {
         switch (errorCode)
         {
@@ -368,9 +369,12 @@ namespace Vox
         voxelShader->SetProjectionMatrix(currentCamera->GetProjectionMatrix());
         voxelShader->SetArrayTexture(voxelTextures.get());
 
-        for (VoxelMesh& voxelMesh : voxelMeshes)
+        for (std::optional<VoxelMesh>& voxelMesh : voxelMeshes)
         {
-            RenderVoxelMesh(voxelMesh);
+            if (voxelMesh.has_value())
+            {
+                RenderVoxelMesh(voxelMesh.value());
+            }
         }
     }
 
@@ -406,7 +410,7 @@ namespace Vox
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
         skyShader.Enable();
-        glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();;
+        glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();
         glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
         glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
         skyShader.SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);

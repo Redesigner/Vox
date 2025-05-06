@@ -10,7 +10,7 @@
 
 namespace Vox
 {
-	CharacterController::CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem)
+	CharacterController::CharacterController(const float inRadius, const float inHalfHeight, JPH::PhysicsSystem* physicsSystem)
 		:requestedVelocity(0.0f, 0.0f, 0.0f), pendingImpulses(0.0f, 0.0f, 0.0f)
 	{
 		using namespace JPH;

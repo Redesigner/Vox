@@ -5,6 +5,8 @@
 #include <glm/vec3.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "core/datatypes/Transform.h"
+
 #define PROPERTY_OFFSET(Class, Property) ((reinterpret_cast<char*>(&(Property)) - reinterpret_cast<char*>(this) ) - Vox::objectOffset<Object>(this))
 
 #define CLASS_TYPE() std::remove_reference<decltype(*this)>::type
@@ -27,6 +29,7 @@ namespace Vox
         _string,
         _vec3,
         _quat,
+        _transform,
         _invalid
     };
 
@@ -46,6 +49,7 @@ namespace Vox
     template <> consteval PropertyType GetPropertyType<std::string>() { return PropertyType::_string; }
     template <> consteval PropertyType GetPropertyType<glm::vec3>() { return PropertyType::_vec3; }
     template <> consteval PropertyType GetPropertyType<glm::quat>() { return PropertyType::_quat; }
+    template <> consteval PropertyType GetPropertyType<Transform>() { return PropertyType::_transform; }
     
     struct Property
     {

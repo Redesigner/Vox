@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -16,7 +17,7 @@ namespace Vox
 	class ObjectContainer
 	{
 	private:
-		std::vector<T> backingData;
+		std::vector<std::optional<T>> backingData;
 		std::vector<int> backingIds;
 		std::vector<unsigned int> backingRefCount;
 		unsigned int currentIndex;
@@ -25,7 +26,7 @@ namespace Vox
 	public:
 		explicit ObjectContainer(size_t size)
 		{
-			backingData = std::vector<T>();
+			backingData = std::vector<std::optional<T>>();
 			backingIds = std::vector<int>();
 			backingRefCount = std::vector<unsigned int>();
 			currentIndex = 0;
@@ -41,13 +42,18 @@ namespace Vox
 			{
 				return nullptr;
 			}
-			return &backingData.at(index);
+			
+			if (backingData.at(index).has_value())
+			{
+				return &backingData.at(index).value();
+			}
+			return nullptr;
 		}
 
 		template <class... Args>
 		std::pair<size_t, int> Create(Args&&... args)
 		{
-			backingData.emplace_back(std::forward<Args>(args)...);
+			backingData.emplace_back(std::in_place, std::forward<Args>(args)...);
 			backingIds.emplace_back(currentIndex);
 			backingRefCount.emplace_back(0);
 			const auto resultPair = std::pair<size_t, int>(backingData.size() - 1, currentIndex++);
@@ -80,16 +86,14 @@ namespace Vox
 				assert(backingRefCount[refPair.first] > 0);
 				if (--backingRefCount[refPair.first] == 0)
 				{
-					backingData.erase(backingData.begin() + refPair.first);
-					backingIds.erase(backingIds.begin() + refPair.first);
-					backingRefCount.erase(backingRefCount.begin() + refPair.first);
+					backingData[refPair.second].reset();
 				}
 			}
 		}
 		
-		typename std::vector<T>::iterator begin() { return backingData.begin(); }
-		typename std::vector<T>::const_iterator begin() const { return backingData.cbegin(); }
-		typename std::vector<T>::iterator end() { return backingData.end(); }
-		typename std::vector<T>::const_iterator end() const { return backingData.cend(); }
+		typename std::vector<std::optional<T>>::iterator begin() { return backingData.begin(); }
+		typename std::vector<std::optional<T>>::const_iterator begin() const { return backingData.cbegin(); }
+		typename std::vector<std::optional<T>>::iterator end() { return backingData.end(); }
+		typename std::vector<std::optional<T>>::const_iterator end() const { return backingData.cend(); }
 	};
 }

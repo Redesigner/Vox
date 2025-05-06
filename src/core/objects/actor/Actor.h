@@ -17,7 +17,7 @@ namespace  Vox
         void RegisterComponent(std::unique_ptr<Component> component);
         
     private:
-        glm::vec3 position {0.0f};
+        Transform transform;
 
         std::vector<std::unique_ptr<Component>> components;
         

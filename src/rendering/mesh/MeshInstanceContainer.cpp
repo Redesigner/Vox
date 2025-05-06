@@ -25,9 +25,12 @@ namespace Vox
 
 	void MeshInstanceContainer::Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
 	{
-		for (MeshInstance& meshInstance : meshInstances)
+		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
-			model->Render(shader, modelUniformLocation, meshInstance.GetTransform(), colorUniformLocation, roughnessUniformLocation);
+			if (meshInstance.has_value())
+			{
+				model->Render(shader, modelUniformLocation, meshInstance->GetTransform(), colorUniformLocation, roughnessUniformLocation);
+			}
 		}
 	}
 

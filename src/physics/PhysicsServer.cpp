@@ -86,12 +86,13 @@ namespace Vox
 
 	Ref<CharacterController> PhysicsServer::CreateCharacterController(float radius, float halfHeight)
 	{
-		return Ref<CharacterController>(&characterControllers, characterControllers.Create(radius, halfHeight, &physicsSystem));
+		auto refIds = characterControllers.Create(radius, halfHeight, &physicsSystem);
+		return {&characterControllers, refIds};
 	}
 
 	Ref<SpringArm> PhysicsServer::CreateSpringArm(Ref<CharacterController>& id)
 	{
-		Ref<SpringArm> result = Ref<SpringArm>(&springArms, springArms.Create());
+		auto result = Ref(&springArms, springArms.Create());
 		result->SetOrigin(id);
 		result->SetLength(4.0f);
 		result->SetOffset({ 0.0f, 1.0f, 0.0f });
@@ -100,7 +101,7 @@ namespace Vox
 
 	Ref<SpringArm> PhysicsServer::CreateSpringArm(JPH::BodyID bodyId)
 	{
-		Ref<SpringArm> result = Ref<SpringArm>(&springArms, springArms.Create());
+		auto result = Ref(&springArms, springArms.Create());
 		result->SetOrigin(bodyId);
 		return result;
 	}
@@ -111,7 +112,7 @@ namespace Vox
 		if (!bodyInterface.IsAdded(id))
 		{
 			VoxLog(Warning, Physics, "Unable to get object position. The body ID was not added to the body interface.");
-			return JPH::Vec3(0.0f, 0.0f, 0.0f);
+			return {0.0f, 0.0f, 0.0f};
 		}
 
 		return bodyInterface.GetPosition(id);
@@ -122,9 +123,14 @@ namespace Vox
 		JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
 		// physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 		physicsSystem.DrawConstraints(debugRenderer.get());
-		for (CharacterController& characterController : characterControllers)
+		for (std::optional<CharacterController>& characterController : characterControllers)
 		{
-			debugRenderer->DrawCapsule(JPH::Mat44::sTranslation(characterController.GetPosition()), characterController.GetHalfHeight(), characterController.GetRadius(), JPH::ColorArg::sRed);
+			if (!characterController.has_value())
+			{
+				continue;
+			}
+			
+			debugRenderer->DrawCapsule(JPH::Mat44::sTranslation(characterController->GetPosition()), characterController->GetHalfHeight(), characterController->GetRadius(), JPH::ColorArg::sRed);
 		}
 	}
 
@@ -150,17 +156,23 @@ namespace Vox
 
 	void PhysicsServer::StepCharacterControllers()
 	{
-		for (CharacterController& characterController : characterControllers)
+		for (std::optional<CharacterController>& characterController : characterControllers)
 		{
-			characterController.Update(fixedTimeStep, this);
+			if (characterController.has_value())
+			{
+				characterController->Update(fixedTimeStep, this);
+			}
 		}
 	}
 
 	void PhysicsServer::UpdateSpringArms()
 	{
-		for (SpringArm& springArm : springArms)
+		for (std::optional<SpringArm>& springArm : springArms)
 		{
-			springArm.Update(this);
+			if (springArm.has_value())
+			{
+				springArm->Update(this);
+			}
 		}
 	}
 

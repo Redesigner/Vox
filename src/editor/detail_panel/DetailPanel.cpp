@@ -5,6 +5,7 @@
 #include <fmt/base.h>
 #include <fmt/format.h>
 
+#include "TransformDetailPanel.h"
 #include "Vec3DetailPanel.h"
 
 namespace Vox
@@ -48,6 +49,13 @@ namespace Vox
             {
                 glm::vec3* vector = property.GetValuePtr<glm::vec3>(object);
                 propertyChanged = Vec3DetailPanel::Draw(property.GetFriendlyName().c_str(), vector);
+                break;
+            }
+        case PropertyType::_transform:
+            {
+                Transform* transform = property.GetValuePtr<Transform>(object);
+                propertyChanged = TransformDetailPanel::Draw(property.GetFriendlyName().c_str(), transform);
+                break;
             }
         }
 

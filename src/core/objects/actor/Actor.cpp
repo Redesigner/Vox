@@ -4,7 +4,7 @@ namespace Vox
 {
     void Actor::BuildProperties(std::vector<Property>& propertiesInOut)
     {
-        REGISTER_PROPERTY(glm::vec3, position)
+        REGISTER_PROPERTY(Transform, transform)
     }
 
     const std::vector<std::unique_ptr<Component>>& Actor::GetComponents() const

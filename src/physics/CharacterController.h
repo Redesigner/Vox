@@ -10,10 +10,10 @@ namespace JPH
 
 namespace Vox
 {
+	class PhysicsServer;
+
 	class CharacterController
 	{
-		friend class PhysicsServer;
-
 	public:
 		CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem);
 
