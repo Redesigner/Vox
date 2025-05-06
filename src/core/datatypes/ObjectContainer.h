@@ -53,11 +53,20 @@ namespace Vox
 		template <class... Args>
 		std::pair<size_t, int> Create(Args&&... args)
 		{
+			for (size_t i = 0; i < backingData.size(); ++i)
+			{
+				if (!backingData[i])
+				{
+					backingData[i].emplace(std::forward<Args>(args)...);
+					backingIds[i] = currentIndex;
+					backingRefCount[i] = 0;
+					return {i, currentIndex++};
+				}
+			}
 			backingData.emplace_back(std::in_place, std::forward<Args>(args)...);
 			backingIds.emplace_back(currentIndex);
 			backingRefCount.emplace_back(0);
-			const auto resultPair = std::pair<size_t, int>(backingData.size() - 1, currentIndex++);
-			return resultPair;
+			return std::pair<size_t, int>(backingData.size() - 1, currentIndex++);
 		}
 
 		[[nodiscard]] size_t size() const
@@ -86,7 +95,7 @@ namespace Vox
 				assert(backingRefCount[refPair.first] > 0);
 				if (--backingRefCount[refPair.first] == 0)
 				{
-					backingData[refPair.second].reset();
+					backingData[refPair.first].reset();
 				}
 			}
 		}
