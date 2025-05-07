@@ -1,15 +1,14 @@
 #pragma once
 
-#include <memory>
-
 struct SDL_Window;
 
 namespace Vox
 {
+	class FileIOService;
 	class InputService;
-	class Renderer;
-	class PhysicsServer;
 	class ObjectService;
+	class PhysicsServer;
+	class Renderer;
 
 	class ServiceLocator
 	{
@@ -17,18 +16,17 @@ namespace Vox
 		static void InitServices(SDL_Window* window);
 		static void DeleteServices();
 
+		static FileIOService* GetFileIoService();
 		static InputService* GetInputService();
-
+		static ObjectService* GetObjectService();
+		static PhysicsServer* GetPhysicsServer();
 		static Renderer* GetRenderer();
 
-		static PhysicsServer* GetPhysicsServer();
-
-		static ObjectService* GetObjectService();
-
 	private:
+		static FileIOService* fileIoService;
 		static InputService* inputService;
-		static Renderer* renderer;
-		static PhysicsServer* physicsServer;
 		static ObjectService* objectService;
+		static PhysicsServer* physicsServer;
+		static Renderer* renderer;
 	};
 }

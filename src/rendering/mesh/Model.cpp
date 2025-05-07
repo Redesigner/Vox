@@ -7,6 +7,7 @@
 
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
+#include "rendering/shaders/pixel_shaders/GBufferShader.h"
 
 namespace Vox
 {
@@ -110,7 +111,7 @@ namespace Vox
 	}
 
 	// @TODO: store uniforms in a more easily accessbile format?
-	void Model::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
+	void Model::Render(GBufferShader* shader, const glm::mat4x4& rootMatrix)
 	{
 		// Assume our VAO is already bound?
 
@@ -118,11 +119,9 @@ namespace Vox
 
 		for (const Primitive& primitive : primitives)
 		{
-			const PBRMaterial& material = materials[primitive.GetMaterialIndex()];
-			shader.SetUniformColor(colorUniformLocation, material.albedo);
-			shader.SetUniformFloat(roughnessUniformLocation, material.roughness);
-
-			shader.SetUniformMatrix(modelUniformLocation, transform * primitive.GetTransform());
+			PBRMaterial& material = materials[primitive.GetMaterialIndex()];
+			shader->SetMaterial(material);
+			shader->SetModelMatrix(rootMatrix * primitive.GetTransform());
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.GetIndexBuffer());
 			glBindVertexBuffer(0, primitive.GetPositionBuffer(), 0, sizeof(float) * 3);

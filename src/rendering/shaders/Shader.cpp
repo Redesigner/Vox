@@ -4,6 +4,8 @@
 #include <SDL3/SDL_iostream.h>
 
 #include "core/logging/Logging.h"
+#include "core/services/FileIOService.h"
+#include "core/services/ServiceLocator.h"
 
 namespace Vox
 {
@@ -14,7 +16,6 @@ namespace Vox
 
 	void Shader::Enable() const
 	{
-		// VoxLog(Display, Rendering, "Enabling shader program '{}'", shader);
 		glUseProgram(shader);
 	}
 
@@ -75,7 +76,7 @@ namespace Vox
 			glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
 			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+			glGetProgramInfoLog(shader, maxLength, &maxLength, infoLog.data());
 			std::string logString = std::string(infoLog.begin(), infoLog.end());
 
 			//size_t separatorLocation = vertexShaderFilePath.rfind('/') + 1;
@@ -92,9 +93,9 @@ namespace Vox
 		return true;
 	}
 
-	std::optional<unsigned int> Shader::LoadShaderStage(std::string shaderFilePath, unsigned int shaderType)
+	std::optional<unsigned int> Shader::LoadShaderStage(std::string shaderFilePath, unsigned int shaderType) const
 	{
-		shaderFilePath = "../../../" + shaderFilePath;
+		shaderFilePath = ServiceLocator::GetFileIoService()->GetRootPath() + shaderFilePath;
 		SDL_IOStream* shaderIO = SDL_IOFromFile(shaderFilePath.c_str(), "r");
 		if (!shaderIO)
 		{
@@ -118,7 +119,7 @@ namespace Vox
 			return std::nullopt;
 		}
 
-		glShaderSource(shaderId, 1, &shaderString, NULL);
+		glShaderSource(shaderId, 1, &shaderString, nullptr);
 		glCompileShader(shaderId);
 
 		GLint shaderCompilationResult = GL_FALSE;
@@ -143,7 +144,7 @@ namespace Vox
 			return std::nullopt;
 		}
 
-		size_t separatorPosition = shaderFilePath.rfind('/') + 1;
+		const size_t separatorPosition = shaderFilePath.rfind('/') + 1;
 		std::string shaderFileName = shaderFilePath.substr(separatorPosition, shaderFilePath.length() - separatorPosition);
 		VoxLog(Display, Rendering, "Shader '{}' compiled successfully.", shaderFileName);
 		return shaderId;

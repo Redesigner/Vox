@@ -11,17 +11,17 @@
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
+#include "physics/PhysicsServer.h"
 #include "rendering/ArrayTexture.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Framebuffer.h"
 #include "rendering/FullscreenQuad.h"
 #include "rendering/GBuffer.h"
-#include "rendering/mesh/MeshInstance.h"
 #include "rendering/RenderTexture.h"
-#include "rendering/shaders/DeferredShader.h"
-#include "rendering/shaders/VoxelShader.h"
-#include "physics/PhysicsServer.h"
+#include "rendering/mesh/MeshInstance.h"
+#include "rendering/shaders/pixel_shaders/DeferredShader.h"
+#include "rendering/shaders/pixel_shaders/VoxelShader.h"
 
 namespace Vox
 {
@@ -36,13 +36,6 @@ namespace Vox
 
         quad = std::make_unique<FullscreenQuad>();
 
-        gBufferShader.Load("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
-        gBufferModelMatrixLocation = gBufferShader.GetUniformLocation("matModel");
-        gBufferViewMatrixLocation = gBufferShader.GetUniformLocation("matView");
-        gBufferProjectionMatrixLocation = gBufferShader.GetUniformLocation("matProjection");
-        gBufferRoughnessLocation = gBufferShader.GetUniformLocation("materialRoughness");
-        gBufferAlbedoLocation = gBufferShader.GetUniformLocation("materialAlbedo");
-
         skeletalMeshShader.Load("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
         skeletalModelMatrixLocation = skeletalMeshShader.GetUniformLocation("matModel");
         skeletalViewMatrixLocation = skeletalMeshShader.GetUniformLocation("matView");
@@ -54,7 +47,8 @@ namespace Vox
 
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
-
+        gBufferShader = std::make_unique<GBufferShader>();
+        
         skyShader.Load("assets/shaders/sky.vert", "assets/shaders/sky.frag");
         debugTriangleShader.Load("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
         debugLineShader.Load("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
@@ -264,14 +258,14 @@ namespace Vox
         //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         //glClearDepth(0.0f);
 
-        gBufferShader.Enable();
-        Vox::PixelShader::SetUniformMatrix(gBufferViewMatrixLocation, currentCamera->GetViewMatrix());
-        Vox::PixelShader::SetUniformMatrix(gBufferProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
+        gBufferShader->Enable();
+        gBufferShader->SetCamera(currentCamera);
+        
         glBindVertexArray(meshVao);
 
         for (auto& val : uploadedModels | std::views::values)
         {
-            val.Render(gBufferShader, gBufferModelMatrixLocation, gBufferAlbedoLocation, gBufferRoughnessLocation);
+            val.Render(gBufferShader.get());
         }
 
         skeletalMeshShader.Enable();

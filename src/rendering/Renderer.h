@@ -11,7 +11,8 @@
 #include "rendering/skeletalmesh/SkeletalModel.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
-#include "rendering/shaders/PixelShader.h"
+#include "rendering/shaders/pixel_shaders/PixelShader.h"
+#include "shaders/pixel_shaders/GBufferShader.h"
 
 struct SDL_Window;
 
@@ -76,8 +77,6 @@ namespace Vox
 
 		void RenderGBuffer();
 
-		// void DrawMeshGBuffer(Mesh* mesh, Material* material, const Matrix& transform);
-
 		void RenderDeferred();
 
 		void UpdateVoxelMeshes();
@@ -101,10 +100,8 @@ namespace Vox
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<Framebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
+		std::unique_ptr<GBufferShader> gBufferShader;
 
-		PixelShader gBufferShader;
-		int gBufferModelMatrixLocation, gBufferViewMatrixLocation, gBufferProjectionMatrixLocation;
-		int gBufferAlbedoLocation, gBufferRoughnessLocation;
 		unsigned int meshVao;
 
 		PixelShader skeletalMeshShader;

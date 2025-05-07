@@ -22,13 +22,13 @@ namespace Vox
 		return true;
 	}
 
-	void MeshInstanceContainer::Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
+	void MeshInstanceContainer::Render(GBufferShader* shader)
 	{
 		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
 			if (meshInstance.has_value())
 			{
-				model->Render(shader, modelUniformLocation, meshInstance->GetTransform(), colorUniformLocation, roughnessUniformLocation);
+				model->Render(shader, meshInstance->GetTransform());
 			}
 		}
 	}

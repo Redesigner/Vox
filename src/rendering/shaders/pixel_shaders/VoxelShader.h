@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "rendering/shaders/PixelShader.h"
+#include "rendering/shaders/pixel_shaders/PixelShader.h"
 
 #include <string>
 

@@ -10,6 +10,11 @@
 #include "rendering/mesh/Primitive.h"
 #include "rendering/PBRMaterial.h"
 
+namespace Vox
+{
+	class GBufferShader;
+}
+
 namespace tinygltf
 {
 	class Model;
@@ -29,7 +34,7 @@ namespace Vox
 		Model(const Model&) = delete;
 		Model& operator=(Model&&) = delete;
 
-		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
+		void Render(GBufferShader* shader, const glm::mat4x4& rootMatrix);
 
 	private:
 		ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;

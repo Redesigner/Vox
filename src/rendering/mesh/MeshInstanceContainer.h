@@ -19,7 +19,7 @@ namespace Vox
 
 		bool LoadMesh(const std::string& filepath);
 
-		void Render(Shader& shader, unsigned int modelUniformLocation, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
+		void Render(GBufferShader* shader);
 
 		Ref<MeshInstance> CreateMeshInstance();
 

@@ -29,7 +29,7 @@ namespace Vox
 
 	protected:
 		bool Link();
-		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType);
+		std::optional<unsigned int> LoadShaderStage(std::string shaderFilePath, unsigned int shaderType) const;
 
 		unsigned int shader = 0;
 	};

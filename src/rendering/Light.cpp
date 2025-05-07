@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 
-#include "rendering/shaders/DeferredShader.h"
+#include "rendering/shaders/pixel_shaders/DeferredShader.h"
 
 namespace Vox
 {
