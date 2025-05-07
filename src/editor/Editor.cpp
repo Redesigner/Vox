@@ -11,13 +11,13 @@
 #include "core/objects/TestObjectChild.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
-#include "rendering/Framebuffer.h"
+#include "rendering/SimpleFramebuffer.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-    void Editor::Draw(const Framebuffer* viewportRenderTexture)
+    void Editor::Draw(const SimpleFramebuffer* viewportRenderTexture)
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();

@@ -1,4 +1,5 @@
-#pragma once
+﻿#pragma once
+#include "Framebuffer.h"
 
 namespace Vox
 {
@@ -6,30 +7,23 @@ namespace Vox
 
     struct Shader;
 
-    class GBuffer
+    class GBuffer : public Framebuffer
     {
     public:
-        GBuffer(int width, int height);
+        GBuffer(int widthIn, int heightIn);
         ~GBuffer();
 
+        GBuffer(const GBuffer&) = delete;
+
+        GBuffer& operator=(const GBuffer&) = delete;
+        
         void ActivateTextures(unsigned int offset = 0) const;
 
         void CopyToFramebuffer(unsigned int targetFramebuffer);
 
-        unsigned int GetFramebufferId() const;
-
     private:
-
-        unsigned int framebuffer;
-
         unsigned int positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture;
 
         unsigned int depthRenderbuffer;
-
-        unsigned int width;
-        unsigned int height;
-
-        GBuffer(const GBuffer&) = delete;
-        GBuffer& operator= (const GBuffer&) = delete;
     };
 }

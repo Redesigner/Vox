@@ -23,7 +23,7 @@ namespace Vox
 	class DebugRenderer;
 	class DeferredShader;
 	class Editor;
-	class Framebuffer;
+	class SimpleFramebuffer;
 	class FullscreenQuad;
 	class GBuffer;
 	class PhysicsServer;
@@ -98,7 +98,7 @@ namespace Vox
 		void CreateVoxelVao();
 
 		std::unique_ptr<GBuffer> gBuffer;
-		std::unique_ptr<Framebuffer> deferredFramebuffer;
+		std::unique_ptr<SimpleFramebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
 		std::unique_ptr<GBufferShader> gBufferShader;
 

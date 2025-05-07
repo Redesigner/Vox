@@ -4,11 +4,11 @@
 
 namespace Vox
 {
-	class Framebuffer
+	class SimpleFramebuffer
 	{
 	public:
-		Framebuffer(int width, int height);
-		~Framebuffer();
+		SimpleFramebuffer(int width, int height);
+		~SimpleFramebuffer();
 
 		void ActivateTextures() const;
 

@@ -1,4 +1,4 @@
-#include "FrameBuffer.h"
+#include "SimpleFramebuffer.h"
 
 #include <GL/glew.h>
 
@@ -6,7 +6,7 @@
 
 namespace Vox
 {
-	Framebuffer::Framebuffer(int width, int height)
+	SimpleFramebuffer::SimpleFramebuffer(int width, int height)
 		:width(width), height(height)
 	{
 		VoxLog(Display, Rendering, "Allocating FrameBuffer: size({}, {})", width, height);
@@ -53,11 +53,11 @@ namespace Vox
 		GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 		if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
 		{
-			VoxLog(Error, Rendering, "Failed to create Framebuffer: {}", Framebuffer::GetFramebufferStatusString(framebufferStatus));
+			VoxLog(Error, Rendering, "Failed to create Framebuffer: {}", SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
 		}
 	}
 
-	Framebuffer::~Framebuffer()
+	SimpleFramebuffer::~SimpleFramebuffer()
 	{
 		VoxLog(Display, Rendering, "Destroying Framebuffer...");
 		//VoxLog(Display, Rendering, "Destroying Framebuffer textures '({}, {})'", colorTexture, depthTexture);
@@ -68,7 +68,7 @@ namespace Vox
 		glDeleteFramebuffers(1, &framebuffer);
 	}
 
-	void Framebuffer::ActivateTextures() const
+	void SimpleFramebuffer::ActivateTextures() const
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, colorTexture);
@@ -77,17 +77,17 @@ namespace Vox
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
 	}
 
-	unsigned int Framebuffer::GetFramebufferId() const
+	unsigned int SimpleFramebuffer::GetFramebufferId() const
 	{
 		return framebuffer;
 	}
 
-	unsigned int Framebuffer::GetTextureId() const
+	unsigned int SimpleFramebuffer::GetTextureId() const
 	{
 		return colorTexture;
 	}
 
-	std::string Framebuffer::GetFramebufferStatusString(unsigned int framebufferStatus)
+	std::string SimpleFramebuffer::GetFramebufferStatusString(unsigned int framebufferStatus)
 	{
 		switch (framebufferStatus)
 		{
@@ -112,12 +112,12 @@ namespace Vox
 		}
 	}
 
-	unsigned int Framebuffer::GetWidth() const
+	unsigned int SimpleFramebuffer::GetWidth() const
 	{
 		return width;
 	}
 
-	unsigned int Framebuffer::GetHeight() const
+	unsigned int SimpleFramebuffer::GetHeight() const
 	{
 		return height;
 	}

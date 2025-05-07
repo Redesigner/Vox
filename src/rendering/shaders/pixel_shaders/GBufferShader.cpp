@@ -19,11 +19,6 @@ namespace Vox
         uniformLocations.albedo = GetUniformLocation("materialAlbedo");
 
         Enable();
-        SetUniformInt(uniformLocations.modelMatrix, 0);
-        SetUniformInt(uniformLocations.viewMatrix, 1);
-        SetUniformInt(uniformLocations.projectionMatrix, 2);
-        SetUniformInt(uniformLocations.roughness, 3);
-        SetUniformInt(uniformLocations.albedo, 4);
     }
 
     void GBufferShader::SetCamera(Ref<Camera> camera) const

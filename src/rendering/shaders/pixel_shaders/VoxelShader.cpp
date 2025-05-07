@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 
-#include "rendering/ArrayTexture.h"
+#include "rendering/buffers/ArrayTexture.h"
 
 namespace Vox
 {

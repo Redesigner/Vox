@@ -1,24 +1,24 @@
 ﻿#include "Renderer.h"
 
-#include <ranges>
 #include <GL/glew.h>
-#include <glm/mat4x4.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <utility>
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_video.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
+#include <ranges>
+#include <utility>
 
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "physics/PhysicsServer.h"
-#include "rendering/ArrayTexture.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
-#include "rendering/Framebuffer.h"
+#include "rendering/SimpleFramebuffer.h"
 #include "rendering/FullscreenQuad.h"
-#include "rendering/GBuffer.h"
-#include "rendering/RenderTexture.h"
+#include "rendering/buffers/ArrayTexture.h"
+#include "rendering/buffers/GBuffer.h"
+#include "rendering/buffers/RenderTexture.h"
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/VoxelShader.h"
@@ -63,7 +63,7 @@ namespace Vox
         CreateVoxelVao();
 
         gBuffer = std::make_unique<GBuffer>(800, 450);
-        deferredFramebuffer = std::make_unique<Framebuffer>(800, 450);
+        deferredFramebuffer = std::make_unique<SimpleFramebuffer>(800, 450);
 
         skyShader.Enable();
         Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("color"), 0);
@@ -238,7 +238,7 @@ namespace Vox
                 gBuffer.reset();
                 gBuffer = std::make_unique<GBuffer>(viewportWidth, viewportHeight);
                 deferredFramebuffer.reset();
-                deferredFramebuffer = std::make_unique<Framebuffer>(viewportWidth, viewportHeight);
+                deferredFramebuffer = std::make_unique<SimpleFramebuffer>(viewportWidth, viewportHeight);
                 glViewport(0, 0, viewportWidth, viewportHeight);
             }
         }
