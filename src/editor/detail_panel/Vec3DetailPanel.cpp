@@ -9,7 +9,7 @@ namespace Vox
     ImColor Vec3DetailPanel::yAxisColor = ImColor(0.0f, 1.0f, 0.0f);
     ImColor Vec3DetailPanel::zAxisColor = ImColor(0.0f, 0.0f, 1.0f);
     
-    bool Vec3DetailPanel::Draw(const char* label, glm::vec3* vector, ImGuiInputTextFlags flags)
+    bool Vec3DetailPanel::Draw(const char* label, glm::vec3* vector, const char* format, ImGuiInputTextFlags flags)
     {
         using namespace ImGui;
 
@@ -47,7 +47,7 @@ namespace Vox
             PushID(i);
             if (i > 0)
                 SameLine(0, g.Style.ItemInnerSpacing.x);
-            value_changed |= InputAxis(pData, axisColor);
+            value_changed |= InputAxis(pData, axisColor, format);
             PopID();
             PopItemWidth();
         }
@@ -64,7 +64,7 @@ namespace Vox
         return value_changed;
     }
 
-    bool Vec3DetailPanel::InputAxis(void* pData, ImColor axisColor)
+    bool Vec3DetailPanel::InputAxis(void* pData, ImColor axisColor, const char* format)
     {
         using namespace ImGui;
         ImGuiWindow* window = GetCurrentWindow();
@@ -84,7 +84,7 @@ namespace Vox
         }
         else
         {
-            DataTypeFormatString(buf, IM_ARRAYSIZE(buf), ImGuiDataType_Float, pData, "%.3f");
+            DataTypeFormatString(buf, IM_ARRAYSIZE(buf), ImGuiDataType_Float, pData, format);
         }
 
         const auto label = "";

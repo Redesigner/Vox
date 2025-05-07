@@ -176,6 +176,10 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
 
         ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
+
+        glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
+        glm::quat testQuat = glm::radians(testRotation);
+        glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
         
         editor->SetWorld(testWorld);
         nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();

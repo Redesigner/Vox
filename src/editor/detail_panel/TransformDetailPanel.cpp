@@ -8,17 +8,18 @@ namespace Vox
     bool TransformDetailPanel::Draw(const char* label, Transform* transform, ImGuiInputTextFlags flags)
     {
         ImGui::Text(label);
-        bool result = Vec3DetailPanel::Draw("Position", &transform->position, flags);
+        bool result = Vec3DetailPanel::Draw("Position", &transform->position, "%.3f", flags);
 
-        glm::vec3 rotationEulerAxis = eulerAngles(transform->rotation);
-        const bool rotationChanged = Vec3DetailPanel::Draw("Rotation", &rotationEulerAxis, flags);
+        glm::vec3 rotationEulerAxis = glm::degrees(transform->rotation);
+        const bool rotationChanged = Vec3DetailPanel::Draw("Rotation", &rotationEulerAxis, "%.1f°", flags);
 
         if (rotationChanged)
         {
-            transform->rotation = glm::quat(rotationEulerAxis);
+            transform->rotation = glm::radians(rotationEulerAxis);
         }
+        
         result |= rotationChanged;
-        result |= Vec3DetailPanel::Draw("Scale", &transform->scale, flags);
+        result |= Vec3DetailPanel::Draw("Scale", &transform->scale, "%.3f", flags);
         return result;
     }
 }

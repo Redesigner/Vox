@@ -40,7 +40,7 @@ namespace Vox
 		const std::unordered_map<std::string, Animation>& GetAnimations() const;
 
 	private:
-		Transform CalculateNodeTransform(const tinygltf::Node& node) const;
+		ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;
 
 		void UpdateTransforms(unsigned int node, glm::mat4x4 transform);
 

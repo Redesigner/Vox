@@ -259,10 +259,10 @@ namespace Vox
 		return animations;
 	}
 
-	Transform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node) const
+	ModelTransform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node) const
 	{
-		Transform transform;
-		if (node.matrix.size() == 0)
+		ModelTransform transform;
+		if (node.matrix.empty())
 		{
 			if (node.translation.size() == 3)
 			{
@@ -281,7 +281,7 @@ namespace Vox
 		}
 		else
 		{
-			transform = Transform(glm::mat4x4(
+			transform = ModelTransform(glm::mat4x4(
 				node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
 				node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
 				node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],

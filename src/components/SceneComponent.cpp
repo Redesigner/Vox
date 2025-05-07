@@ -29,7 +29,7 @@ namespace Vox
         UpdateTransform();
     }
 
-    void SceneComponent::SetRotation(const glm::quat rotation)
+    void SceneComponent::SetRotation(const glm::vec3 rotation)
     {
         localTransform.rotation = rotation;
         UpdateTransform();

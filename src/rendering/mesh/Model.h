@@ -32,7 +32,7 @@ namespace Vox
 		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
 
 	private:
-		Transform CalculateNodeTransform(const tinygltf::Node& node) const;
+		ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;
 
 		void UpdateTransforms(unsigned int node, glm::mat4x4 transform);
 

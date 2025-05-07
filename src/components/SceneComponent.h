@@ -15,7 +15,7 @@ namespace Vox
         void UpdateParentTransform(const Transform& transform);
         
         void SetPosition(glm::vec3 position);
-        void SetRotation(glm::quat rotation);
+        void SetRotation(glm::vec3 rotation);
         void SetScale(glm::vec3 scale);
         void SetTransform(const Transform& transformIn);
 

@@ -20,7 +20,7 @@ namespace  Vox
         [[nodiscard]] const std::vector<std::unique_ptr<SceneComponent>>& GetAttachedComponents() const;
 
         void SetPosition(glm::vec3 position);
-        void SetRotation(glm::quat rotation);
+        void SetRotation(glm::vec3 rotation);
         void SetScale(glm::vec3 scale);
         void SetTransform(const Transform& transformIn);
 

@@ -111,7 +111,7 @@ namespace Vox
                 const Transform& transform = GetValueChecked<Transform>(objectLocation);
                 propertyJson[name]["value"] = {
                     transform.position.x, transform.position.y, transform.position.z,
-                    transform.rotation.x, transform.rotation.y, transform.rotation.z, transform.rotation.w,
+                    transform.rotation.x, transform.rotation.y, transform.rotation.z,
                     transform.scale.x, transform.scale.y, transform.scale.z
                 };
                 break;

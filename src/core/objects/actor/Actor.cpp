@@ -31,7 +31,7 @@ namespace Vox
         UpdateChildTransforms();
     }
 
-    void Actor::SetRotation(const glm::quat rotation)
+    void Actor::SetRotation(const glm::vec3 rotation)
     {
         transform.rotation = rotation;
         UpdateChildTransforms();
