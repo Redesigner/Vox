@@ -1,4 +1,7 @@
 ﻿#pragma once
+
+#ifdef EDITOR  
+
 #include <functional>
 #include <glm/vec2.hpp>
 
@@ -29,3 +32,5 @@ namespace Vox
         unsigned int counter;
     };
 }
+
+#endif

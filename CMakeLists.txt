@@ -37,8 +37,12 @@ find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 add_executable (Vox "")
 include ("sources.cmake")
 
+if (EDITOR)
+	add_compile_definitions(EDITOR)
+endif()
+
 # Disable RTTI for compatibility with Jolt
-string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+# string(REPLACE "/GR" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 
 # Include source directory to allow absolute paths
 target_include_directories(Vox PRIVATE "src/")

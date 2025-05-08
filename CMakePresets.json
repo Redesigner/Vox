@@ -11,12 +11,21 @@
               "CMAKE_C_COMPILER": "cl.exe",
               "CMAKE_CXX_COMPILER": "cl.exe",
               "DCMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-              "VCPKG_TARGET_TRIPLET": "x64-windows"
+              "VCPKG_TARGET_TRIPLET": "x64-windows",
+              "EDITOR": "OFF"
             },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
+            }
+        },
+        {
+            "name": "editor-base",
+            "hidden": true,
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "EDITOR": "ON"
             }
         },
         {
@@ -58,7 +67,46 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "x64-debug-editor",
+            "displayName": "Editor | x64 Debug",
+            "inherits": "editor-base",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x64-release-editor",
+            "displayName": "Editor | x64 Release",
+            "inherits": "x64-debug-editor",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x86-debug-editor",
+            "displayName": "Editor | x86 Debug",
+            "inherits": "editor-base",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x86-release-editor",
+            "displayName": "Editor | x86 Release",
+            "inherits": "x86-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
         }
-
     ]
 }

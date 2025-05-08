@@ -15,10 +15,13 @@ namespace Vox
         :MeshComponent()
     {
         mesh = ServiceLocator::GetRenderer()->CreateMeshInstance(meshName);
+
+#ifdef EDITOR
         mesh->RegisterCallback([](glm::ivec2 test)
         {
            VoxLog(Display, Game, "Object clicked!"); 
         });
+#endif
     }
 
     void MeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)

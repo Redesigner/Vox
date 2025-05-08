@@ -1,4 +1,5 @@
-﻿#include "PickContainer.h"
+﻿#ifdef EDITOR
+#include "PickContainer.h"
 
 #include "Renderer.h"
 #include "buffers/PickBuffer.h"
@@ -48,3 +49,4 @@ namespace Vox
         }
     }
 }
+#endif
