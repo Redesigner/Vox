@@ -16,7 +16,7 @@ namespace Vox
 
         void ActivateTextures(unsigned int offset) const;
 
-        [[nodiscard]] unsigned int GetValue(int x, int y) const;
+        [[nodiscard]] unsigned int GetValue(unsigned int x, unsigned int y) const;
 
     private:
         unsigned int objectTexture = 0;

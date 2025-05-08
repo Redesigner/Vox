@@ -5,10 +5,7 @@
 #include <imgui_impl_sdl3.h>
 
 #include "WorldOutline.h"
-#include "core/logging/Logging.h"
 #include "core/math/Math.h"
-#include "core/objects/TestObject.h"
-#include "core/objects/TestObjectChild.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "rendering/SimpleFramebuffer.h"
@@ -105,14 +102,27 @@ namespace Vox
 
     bool Editor::GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const
     {
-        if ((clickY < viewportBox.top || clickY > viewportBox.bottom) ||
-            (clickX < viewportBox.left || clickX > viewportBox.right))
+        if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
+            clickX < viewportBox.left || clickX > viewportBox.right)
         {
             return false;
         }
 
-        xOut = Vox::RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
-        yOut = Vox::RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
+        xOut = RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
+        yOut = RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
+        return true;
+    }
+
+    bool Editor::GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const
+    {
+        if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
+            clickX < viewportBox.left || clickX > viewportBox.right)
+        {
+            return false;
+        }
+
+        xOut = clickX - viewportBox.left;
+        yOut = clickY - viewportBox.top;
         return true;
     }
 

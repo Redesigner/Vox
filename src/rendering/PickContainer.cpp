@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "buffers/PickBuffer.h"
+#include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 
@@ -14,7 +15,13 @@ namespace Vox
 
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](int x, int y)
         {
-            unsigned int key = ServiceLocator::GetRenderer()->GetPickBuffer()->GetValue(x, y);
+            unsigned int viewX, viewY;
+             if (!ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(viewX, viewY,x, y))
+             {
+                 return;
+             }
+            
+            const unsigned int key = ServiceLocator::GetRenderer()->GetPickBuffer()->GetValue(viewX, viewY);
             if (key == 0)
             {
                 return;

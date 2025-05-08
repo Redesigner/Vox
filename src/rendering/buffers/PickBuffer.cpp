@@ -29,11 +29,11 @@ namespace Vox
         glBindTexture(GL_TEXTURE_2D, objectTexture);
     }
 
-    unsigned int PickBuffer::GetValue(const int x, const int y) const
+    unsigned int PickBuffer::GetValue(const unsigned int x, const unsigned int y) const
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferId);
         unsigned int result = 0;
-        glReadPixels(x, height - y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
+        glReadPixels(static_cast<int>(x), static_cast<int>(height - y), 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
         return result;
     }
 }

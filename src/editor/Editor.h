@@ -39,6 +39,8 @@ namespace Vox
 		
 		bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
+		bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
+		
 		void SetWorld(const std::shared_ptr<World>& world);
 		
 		static ImFont* GetFont_GitLab18();
