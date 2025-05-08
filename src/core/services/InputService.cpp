@@ -87,7 +87,7 @@ void Vox::InputService::UnregisterMouseMotionCallback(MouseMotionEventCallback c
 	}
 }
 
-void Vox::InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
+void Vox::InputService::RegisterMouseClickCallback(const MouseClickEventCallback& callback)
 {
 	mouseClickEventCallbacks.push_back(callback);
 }

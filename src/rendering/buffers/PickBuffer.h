@@ -16,6 +16,8 @@ namespace Vox
 
         void ActivateTextures(unsigned int offset) const;
 
+        [[nodiscard]] unsigned int GetValue(int x, int y) const;
+
     private:
         unsigned int objectTexture = 0;
         unsigned int depthRenderbuffer = 0;

@@ -8,6 +8,7 @@
 #include <ranges>
 #include <utility>
 
+#include "PickContainer.h"
 #include "buffers/PickBuffer.h"
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
@@ -50,10 +51,6 @@ namespace Vox
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
         gBufferShader = std::make_unique<GBufferShader>();
-
-#ifdef EDITOR
-        pickShader = std::make_unique<PickShader>();
-#endif
         
         skyShader.Load("assets/shaders/sky.vert", "assets/shaders/sky.frag");
         debugTriangleShader.Load("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
@@ -70,8 +67,11 @@ namespace Vox
 
         gBuffer = std::make_unique<GBuffer>(800, 450);
         deferredFramebuffer = std::make_unique<SimpleFramebuffer>(800, 450);
+        
 #ifdef EDITOR
         pickBuffer = std::make_unique<PickBuffer>(800, 450);
+        pickShader = std::make_unique<PickShader>();
+        pickContainer = std::make_unique<PickContainer>();
 #endif
 
 
@@ -232,6 +232,18 @@ namespace Vox
     {
         return uploadedSkeletalModels;
     }
+
+#ifdef EDITOR
+    PickContainer* Renderer::GetPickContainer() const
+    {
+        return pickContainer.get();
+    }
+
+    PickBuffer* Renderer::GetPickBuffer() const
+    {
+        return pickBuffer.get();
+    }
+#endif
 
     void Renderer::UpdateViewportDimensions(const Editor* editor)
     {

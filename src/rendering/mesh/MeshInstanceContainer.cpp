@@ -40,7 +40,7 @@ namespace Vox
 		{
 			if (meshInstance.has_value())
 			{
-				model->Render(shader, 25, meshInstance->GetTransform());
+				model->Render(shader, meshInstance->GetPickId(), meshInstance->GetTransform());
 			}
 		}
 	}

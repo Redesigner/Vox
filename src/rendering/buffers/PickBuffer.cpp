@@ -28,4 +28,12 @@ namespace Vox
         glActiveTexture(GL_TEXTURE0 + offset);
         glBindTexture(GL_TEXTURE_2D, objectTexture);
     }
+
+    unsigned int PickBuffer::GetValue(const int x, const int y) const
+    {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferId);
+        unsigned int result = 0;
+        glReadPixels(x, height - y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &result);
+        return result;
+    }
 }

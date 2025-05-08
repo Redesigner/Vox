@@ -17,6 +17,11 @@
 
 namespace Vox
 {
+	class PickContainer;
+}
+
+namespace Vox
+{
 	class PickShader;
 	class PickBuffer;
 }
@@ -79,6 +84,11 @@ namespace Vox
 
 		[[nodiscard]] const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
 
+#ifdef EDITOR
+		PickContainer* GetPickContainer() const;
+		PickBuffer* GetPickBuffer() const;
+#endif
+
 	private:
 		void UpdateViewportDimensions(const Editor* editor);
 
@@ -117,6 +127,7 @@ namespace Vox
 #ifdef EDITOR
 		std::unique_ptr<PickBuffer> pickBuffer;
 		std::unique_ptr<PickShader> pickShader;
+		std::unique_ptr<PickContainer> pickContainer;
 #endif
 		
 		unsigned int meshVao;

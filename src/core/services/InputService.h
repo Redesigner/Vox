@@ -44,7 +44,7 @@ namespace Vox
 		void UnregisterMouseMotionCallback(MouseMotionEventCallback callback);
 
 
-		void RegisterMouseClickCallback(MouseClickEventCallback callback);
+		void RegisterMouseClickCallback(const MouseClickEventCallback& callback);
 
 		void UnregisterMouseClickCallback(MouseClickEventCallback callback);
 
