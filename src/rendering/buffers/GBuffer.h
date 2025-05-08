@@ -14,9 +14,10 @@ namespace Vox
         ~GBuffer();
 
         GBuffer(const GBuffer&) = delete;
-
+        GBuffer(GBuffer&&) = delete;
         GBuffer& operator=(const GBuffer&) = delete;
-        
+        GBuffer& operator=(GBuffer&&) = delete;
+
         void ActivateTextures(unsigned int offset = 0) const;
 
         void CopyToFramebuffer(unsigned int targetFramebuffer);

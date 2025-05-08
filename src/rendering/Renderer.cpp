@@ -8,6 +8,7 @@
 #include <ranges>
 #include <utility>
 
+#include "buffers/PickBuffer.h"
 #include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -22,6 +23,7 @@
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/VoxelShader.h"
+#include "shaders/pixel_shaders/PickShader.h"
 
 namespace Vox
 {
@@ -48,6 +50,10 @@ namespace Vox
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
         gBufferShader = std::make_unique<GBufferShader>();
+
+#ifdef EDITOR
+        pickShader = std::make_unique<PickShader>();
+#endif
         
         skyShader.Load("assets/shaders/sky.vert", "assets/shaders/sky.frag");
         debugTriangleShader.Load("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
@@ -64,10 +70,13 @@ namespace Vox
 
         gBuffer = std::make_unique<GBuffer>(800, 450);
         deferredFramebuffer = std::make_unique<SimpleFramebuffer>(800, 450);
+#ifdef EDITOR
+        pickBuffer = std::make_unique<PickBuffer>(800, 450);
+#endif
+
 
         skyShader.Enable();
         Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("color"), 0);
-
         Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
@@ -93,6 +102,10 @@ namespace Vox
         RenderDeferred();
         RenderSky();
         // RenderDebugShapes();
+
+#ifdef EDITOR
+        RenderPickBuffer();
+#endif
 
         int width, height;
         SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
@@ -223,7 +236,7 @@ namespace Vox
     void Renderer::UpdateViewportDimensions(const Editor* editor)
     {
         // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
-        glm::vec2 editorViewportSize = editor->GetViewportDimensions();
+        const glm::vec2 editorViewportSize = editor->GetViewportDimensions();
         if (viewportTexture)
         {
             int viewportWidth = static_cast<int>(editorViewportSize.x);
@@ -237,8 +250,13 @@ namespace Vox
                 // @TODO: add resize method?
                 gBuffer.reset();
                 gBuffer = std::make_unique<GBuffer>(viewportWidth, viewportHeight);
+                
                 deferredFramebuffer.reset();
                 deferredFramebuffer = std::make_unique<SimpleFramebuffer>(viewportWidth, viewportHeight);
+#ifdef EDITOR
+                pickBuffer.reset();
+                pickBuffer = std::make_unique<PickBuffer>(viewportWidth, viewportHeight);
+#endif
                 glViewport(0, 0, viewportWidth, viewportHeight);
             }
         }
@@ -255,8 +273,6 @@ namespace Vox
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
         glClear(GL_DEPTH_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT);
-        //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        //glClearDepth(0.0f);
 
         gBufferShader->Enable();
         gBufferShader->SetCamera(currentCamera);
@@ -303,6 +319,25 @@ namespace Vox
         glEnable(GL_DEPTH_TEST);
     }
 
+#ifdef EDITOR
+    void Renderer::RenderPickBuffer()
+    {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, pickBuffer->GetFramebufferId());
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        pickShader->Enable();
+        pickShader->SetCamera(currentCamera);
+        glBindVertexArray(meshVao);
+
+        for (auto& val : uploadedModels | std::views::values)
+        {
+            val.Render(pickShader.get());
+        }
+    }
+#endif
+    
     void Renderer::UpdateVoxelMeshes()
     {
         voxelGenerationShader.Enable();

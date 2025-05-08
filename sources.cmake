@@ -106,6 +106,8 @@ target_sources(Vox PRIVATE
 	"src/rendering/buffers/Framebuffer.h"
 	"src/rendering/buffers/GBuffer.cpp"
 	"src/rendering/buffers/GBuffer.h"
+	"src/rendering/buffers/PickBuffer.cpp"
+	"src/rendering/buffers/PickBuffer.h"
 	"src/rendering/buffers/RenderTexture.cpp"
 	"src/rendering/buffers/RenderTexture.h"
 	"src/rendering/buffers/Texture.cpp"

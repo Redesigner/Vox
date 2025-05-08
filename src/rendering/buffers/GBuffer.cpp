@@ -25,22 +25,13 @@ namespace Vox
         
         glGenRenderbuffers(1, &depthRenderbuffer);
 
-        // Position buffer
         BindTexture(positionTexture, 0, GL_RGB32F, GL_RGB, GL_FLOAT);
-        
-        // Normal buffer
         BindTexture(normalTexture, 1, GL_RGB32F, GL_RGB, GL_FLOAT);
-
-        // Albedo buffer
         BindTexture(albedoTexture, 2, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-
-        // Metallic/roughness buffer
         BindTexture(metallicRoughnessTexture, 3, GL_RG, GL_RG, GL_FLOAT);
-
-        // Depth buffer (for reading)
         BindTexture(depthTexture, 4, GL_R32F, GL_RED, GL_FLOAT);
 
-        // Alternate depth texture
+        // Depth buffer
         glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
         glNamedFramebufferRenderbuffer(framebufferId, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
@@ -51,17 +42,7 @@ namespace Vox
         glDrawBuffers(5, buffersToDraw);
 
         // VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);
-
-        GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
-        {
-            VoxLog(Error, Rendering, "Failed to create GBuffer: {}",
-                   SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
-        }
-        else
-        {
-            VoxLog(Display, Rendering, "Successfully created GBuffer.");
-        }
+        CheckStatus();
     }
 
     GBuffer::~GBuffer()

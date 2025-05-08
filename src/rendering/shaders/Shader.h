@@ -19,6 +19,7 @@ namespace Vox
 		[[nodiscard]] int GetUniformLocation(const char* uniformName) const;
 		[[nodiscard]] int GetUniformLocation(const std::string& uniformName) const;
 		static void SetUniformInt(int uniformLocation, int value);
+		static void SetUniformUint(int uniformLocation, unsigned int value);
 		static void SetUniformFloat(int uniformLocation, float value);
 		static void SetUniformVec3(int uniformLocation, glm::vec3 value);
 		static void SetUniformColor(int uniformLocation, glm::vec4 color);

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include "Vox.h"
 #include "core/datatypes/ObjectContainer.h"
 #include "core/datatypes/Ref.h"
 #include "rendering/mesh/MeshInstance.h"
@@ -10,6 +11,7 @@
 namespace Vox
 {
 	class Model;
+	class PickShader;
 	class Shader;
 
 	class MeshInstanceContainer
@@ -19,7 +21,11 @@ namespace Vox
 
 		bool LoadMesh(const std::string& filepath);
 
-		void Render(GBufferShader* shader);
+		void Render(const GBufferShader* shader);
+
+#ifdef EDITOR
+		void Render(const PickShader* shader);
+#endif
 
 		Ref<MeshInstance> CreateMeshInstance();
 

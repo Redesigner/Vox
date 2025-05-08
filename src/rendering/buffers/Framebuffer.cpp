@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 
 #include "core/logging/Logging.h"
+#include "rendering/SimpleFramebuffer.h"
 
 namespace Vox
 {
@@ -44,5 +45,17 @@ namespace Vox
         glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, nullptr);
         glNamedFramebufferTexture(framebufferId, GL_COLOR_ATTACHMENT0 + attachment, textureId, 0);
+    }
+
+    bool Framebuffer::CheckStatus()
+    {
+        if (GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER); framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        {
+            VoxLog(Error, Rendering, "Failed to create FrameBuffer: {}",
+                   SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
+            return false;
+        }
+        VoxLog(Display, Rendering, "Successfully created FrameBuffer.");
+        return true;
     }
 }

@@ -39,6 +39,11 @@ namespace Vox
 		glUniform1i(uniformLocation, value);
 	}
 
+	void Shader::SetUniformUint(int uniformLocation, unsigned int value)
+	{
+		glUniform1ui(uniformLocation, value);
+	}
+
 	void Shader::SetUniformFloat(int uniformLocation, float value)
 	{
 		glUniform1f(uniformLocation, value);

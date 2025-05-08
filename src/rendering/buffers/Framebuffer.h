@@ -16,6 +16,8 @@ namespace Vox
 
         void BindTexture(unsigned int textureId, unsigned int attachment, GLint internalFormat, GLenum format, GLenum type) const;
 
+        static bool CheckStatus();
+
         unsigned int framebufferId = 0;
 
         int width, height;

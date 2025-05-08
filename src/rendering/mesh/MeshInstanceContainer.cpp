@@ -22,7 +22,7 @@ namespace Vox
 		return true;
 	}
 
-	void MeshInstanceContainer::Render(GBufferShader* shader)
+	void MeshInstanceContainer::Render(const GBufferShader* shader)
 	{
 		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
@@ -32,6 +32,19 @@ namespace Vox
 			}
 		}
 	}
+
+#ifdef EDITOR
+	void MeshInstanceContainer::Render(const PickShader* shader)
+	{
+		for (std::optional<MeshInstance>& meshInstance : meshInstances)
+		{
+			if (meshInstance.has_value())
+			{
+				model->Render(shader, 25, meshInstance->GetTransform());
+			}
+		}
+	}
+#endif
 
 	Ref<MeshInstance> MeshInstanceContainer::CreateMeshInstance()
 	{

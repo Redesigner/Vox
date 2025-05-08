@@ -4,23 +4,18 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define GLM_ENABLE_EXPERIMENTAL
-
 #include <chrono>
 #include <thread>
 
 #include <GL/glew.h>
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 #include <Jolt/Jolt.h>
-#include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
 #include <nlohmann/json.hpp>
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_opengl.h>
 #include <SDL3/SDL_video.h>
 
 #include "character/Character.h"
@@ -36,15 +31,11 @@
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
-#include "physics/CharacterController.h"
 #include "physics/PhysicsServer.h"
-#include "physics/SpringArm.h"
 #include "physics/TypeConversions.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
-#include "rendering/mesh/MeshInstance.h"
 #include "rendering/Renderer.h"
-#include "voxel/CollisionOctree.h"
 #include "voxel/VoxelChunk.h"
 
 int main()

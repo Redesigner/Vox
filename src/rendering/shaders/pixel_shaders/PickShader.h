@@ -4,35 +4,29 @@
 
 namespace Vox
 {
-    struct PBRMaterial;
-}
-
-namespace Vox
-{
     class Camera;
 
-    class GBufferShader : public PixelShader
+    class PickShader : public PixelShader
     {
         struct UniformLocations
         {
             int modelMatrix;
             int viewMatrix;
             int projectionMatrix;
-            int roughness;
-            int albedo;
+            int objectId;
         };
         
     public:
-        GBufferShader();
+        PickShader();
 
         void SetCamera(Ref<Camera> camera) const;
-        void SetMaterial(const PBRMaterial& material) const;
+        void SetObjectId(int objectId) const;
         void SetModelMatrix(const glm::mat4x4& matrix) const;
 
     private:
         UniformLocations uniformLocations;
 
-        static inline std::string vertLocation = "assets/shaders/gBuffer.vert";
-        static inline std::string fragLocation = "assets/shaders/gBuffer.frag";
+        static inline std::string vertLocation = "assets/shaders/pickBuffer.vert";
+        static inline std::string fragLocation = "assets/shaders/pickBuffer.frag";
     };
 }

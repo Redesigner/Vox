@@ -8,6 +8,7 @@
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
 #include "rendering/shaders/pixel_shaders/GBufferShader.h"
+#include "rendering/shaders/pixel_shaders/PickShader.h"
 
 namespace Vox
 {
@@ -107,14 +108,12 @@ namespace Vox
 
 	Model::~Model()
 	{
-		glDeleteBuffers(bufferIds.size(), bufferIds.data());
+		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	// @TODO: store uniforms in a more easily accessbile format?
-	void Model::Render(GBufferShader* shader, const glm::mat4x4& rootMatrix)
+	void Model::Render(const GBufferShader* shader, const glm::mat4x4& rootMatrix)
 	{
 		// Assume our VAO is already bound?
-
 		// Render primitives one at a time;
 
 		for (const Primitive& primitive : primitives)
@@ -129,9 +128,23 @@ namespace Vox
 			glBindVertexBuffer(2, primitive.GetUVBuffer(), 0, sizeof(float) * 2);
 
 			// @TODO: use glDrawElementsInstanced instead?
-			glDrawElements(GL_TRIANGLES, primitive.GetVertexCount(), primitive.GetComponentType(), 0);
+			glDrawElements(GL_TRIANGLES, static_cast<int>(primitive.GetVertexCount()), primitive.GetComponentType(), nullptr);
 		}
 	}
+
+#ifdef EDITOR
+	void Model::Render(const PickShader* shader, const int objectId, const glm::mat4x4& rootMatrix)
+	{
+		for (const auto& primitive : primitives)
+		{
+			shader->SetObjectId(objectId);
+			shader->SetModelMatrix(rootMatrix * primitive.GetTransform());
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.GetIndexBuffer());
+			glBindVertexBuffer(0, primitive.GetPositionBuffer(), 0, sizeof(float) * 3);
+			glDrawElements(GL_TRIANGLES, primitive.GetVertexCount(), primitive.GetComponentType(), nullptr);
+		}
+	}
+#endif
 
 	ModelTransform Model::CalculateNodeTransform(const tinygltf::Node& node) const
 	{

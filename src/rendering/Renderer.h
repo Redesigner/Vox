@@ -4,15 +4,22 @@
 #include <string>
 #include <unordered_map>
 
+#include "Vox.h"
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
-#include "rendering/skeletalmesh/SkeletalModel.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/pixel_shaders/PixelShader.h"
+#include "rendering/skeletalmesh/SkeletalModel.h"
 #include "shaders/pixel_shaders/GBufferShader.h"
+
+namespace Vox
+{
+	class PickShader;
+	class PickBuffer;
+}
 
 struct SDL_Window;
 
@@ -79,6 +86,10 @@ namespace Vox
 
 		void RenderDeferred();
 
+#ifdef EDITOR
+		void RenderPickBuffer();
+#endif
+		
 		void UpdateVoxelMeshes();
 
 		void RenderVoxelMeshes();
@@ -99,9 +110,15 @@ namespace Vox
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<SimpleFramebuffer> deferredFramebuffer;
+		
 		std::unique_ptr<DeferredShader> deferredShader;
 		std::unique_ptr<GBufferShader> gBufferShader;
 
+#ifdef EDITOR
+		std::unique_ptr<PickBuffer> pickBuffer;
+		std::unique_ptr<PickShader> pickShader;
+#endif
+		
 		unsigned int meshVao;
 
 		PixelShader skeletalMeshShader;
