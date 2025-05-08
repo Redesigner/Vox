@@ -3,7 +3,6 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#define GLM_ENABLE_EXPERIMENTAL
 #include <chrono>
 #include <thread>
 
@@ -27,6 +26,7 @@
 #include "core/objects/World.h"
 #include "core/objects/actor/TestActor.h"
 #include "core/objects/component/TestComponent.h"
+#include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
@@ -108,7 +108,6 @@ int main()
 
         ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
-        std::unique_ptr<Editor> editor = std::make_unique<Editor>();
         std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
 
         VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), ServiceLocator::GetRenderer());
@@ -134,11 +133,6 @@ int main()
             }
         }
         voxelChunk.FinalizeUpdate();
-
-        editor->BindOnGLTFOpened([](std::string fileName)
-            {
-                // renderer->LoadTestModel(fileName);
-            });
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
@@ -171,8 +165,8 @@ int main()
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
-        
-        editor->SetWorld(testWorld);
+
+        ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();
         testWorld->CreateObject<TestObject>();
         testWorld->CreateObject("Test Actor");
@@ -180,9 +174,7 @@ int main()
 
         VoxLog(Display, Game, "{}", objectString);
         
-        InputService* inputService = ServiceLocator::GetInputService();
-        Editor* localEditor = editor.get();
-        inputService->RegisterMouseClickCallback([localEditor, debugRenderer, &voxelChunk](int x, int y) {
+        ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk](int x, int y) {
             float xViewport, yViewport;
             Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
             if (!camera)
@@ -190,7 +182,7 @@ int main()
                 return;
             }
 
-            if (localEditor->GetClickViewportSpace(xViewport, yViewport, x, y))
+            if (ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
                 glm::vec4 rayStartViewport = glm::vec4(xViewport, yViewport, -1.0f, 1.0f);
                 glm::vec4 rayEndViewport = glm::vec4(xViewport, yViewport, 1.0f, 1.0f);
@@ -232,11 +224,11 @@ int main()
             }
             });
 
-        while (!inputService->ShouldCloseWindow())
+        while (!ServiceLocator::GetInputService()->ShouldCloseWindow())
         {
-            inputService->PollEvents();
+            ServiceLocator::GetInputService()->PollEvents();
             character.Update();
-            ServiceLocator::GetRenderer()->Render(editor.get());
+            ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;
         physicsThread.join();

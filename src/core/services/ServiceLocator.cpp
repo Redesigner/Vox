@@ -1,5 +1,6 @@
 #include "ServiceLocator.h"
 
+#include "EditorService.h"
 #include "FileIOService.h"
 #include "ObjectService.h"
 #include "core/services/InputService.h"
@@ -8,6 +9,7 @@
 
 namespace Vox
 {
+	EditorService* ServiceLocator::editorService = nullptr;
 	FileIOService* ServiceLocator::fileIoService = nullptr;
 	InputService* ServiceLocator::inputService = nullptr;
 	ObjectService* ServiceLocator::objectService = nullptr;
@@ -16,6 +18,7 @@ namespace Vox
 
 	void ServiceLocator::InitServices(SDL_Window* window)
 	{
+		editorService = new EditorService();
 		fileIoService = new FileIOService();
 		inputService = new InputService(window);
 		objectService = new ObjectService();
@@ -25,11 +28,17 @@ namespace Vox
 
 	void ServiceLocator::DeleteServices()
 	{
+		delete editorService;
 		delete fileIoService;
 		delete inputService;
 		delete objectService;
 		delete physicsServer;
 		delete renderer;
+	}
+
+	EditorService* ServiceLocator::GetEditorService()
+	{
+		return editorService;
 	}
 
 	FileIOService* ServiceLocator::GetFileIoService()
