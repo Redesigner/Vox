@@ -1,7 +1,7 @@
-﻿#include "FrameBuffer.h"
+﻿#include "Framebuffer.h"
 
-#include <cassert>
 #include <GL/glew.h>
+#include <cassert>
 
 #include "core/logging/Logging.h"
 #include "rendering/SimpleFramebuffer.h"
@@ -16,12 +16,21 @@ namespace Vox
 
     Framebuffer::~Framebuffer()
     {
-        glDeleteFramebuffers(1, &framebufferId);
+        if (depthRenderbuffer)
+        {
+            glDeleteRenderbuffers(1, &depthRenderbuffer);
+            glDeleteFramebuffers(1, &framebufferId);
+        }
     }
 
     unsigned int Framebuffer::GetFramebufferId() const
     {
         return framebufferId;
+    }
+
+    glm::ivec2 Framebuffer::GetSize() const
+    {
+        return {width, height};
     }
 
     void Framebuffer::CreateFrameBuffer()
@@ -36,7 +45,8 @@ namespace Vox
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferId); // Bind the new FBO
     }
 
-    void Framebuffer::BindTexture(unsigned int textureId, unsigned int attachment, GLint internalFormat, GLenum format, GLenum type) const
+    void Framebuffer::BindTexture(unsigned int textureId, unsigned int attachment, GLint internalFormat, GLenum format,
+                                  GLenum type) const
     {
         assert(attachment < GL_MAX_COLOR_ATTACHMENTS);
 
@@ -45,6 +55,15 @@ namespace Vox
         glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, nullptr);
         glNamedFramebufferTexture(framebufferId, GL_COLOR_ATTACHMENT0 + attachment, textureId, 0);
+    }
+
+    void Framebuffer::AttachDepthBuffer()
+    {
+        glGenRenderbuffers(1, &depthRenderbuffer);
+
+        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
+        glNamedFramebufferRenderbuffer(framebufferId, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
     }
 
     bool Framebuffer::CheckStatus()

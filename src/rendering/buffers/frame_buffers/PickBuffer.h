@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "rendering/buffers/FrameBuffer.h"
+#include "rendering/buffers/frame_buffers/Framebuffer.h"
 
 namespace Vox
 {
@@ -20,6 +20,5 @@ namespace Vox
 
     private:
         unsigned int objectTexture = 0;
-        unsigned int depthRenderbuffer = 0;
     };
 }

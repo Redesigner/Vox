@@ -22,6 +22,7 @@ namespace Vox
 		static void SetUniformUint(int uniformLocation, unsigned int value);
 		static void SetUniformFloat(int uniformLocation, float value);
 		static void SetUniformVec3(int uniformLocation, glm::vec3 value);
+	    static void SetUniformVec2(int uniformLocation, glm::vec2 value);
 		static void SetUniformColor(int uniformLocation, glm::vec4 color);
 		static void SetUniformMatrix(int uniformLocation, glm::mat4x4 matrix);
 

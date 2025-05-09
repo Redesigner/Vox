@@ -33,7 +33,7 @@ namespace Vox
             GL_FRAMEBUFFER_COMPLETE)
         {
             VoxLog(Error, Rendering, "Failed to create renderTexture: {}",
-                   SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
+                SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
         }
     }
 

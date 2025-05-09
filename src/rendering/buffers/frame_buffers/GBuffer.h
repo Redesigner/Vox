@@ -24,7 +24,5 @@ namespace Vox
 
     private:
         unsigned int positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture;
-
-        unsigned int depthRenderbuffer;
     };
 }

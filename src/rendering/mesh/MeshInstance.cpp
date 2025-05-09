@@ -8,7 +8,8 @@
 
 namespace Vox
 {
-    MeshInstance::MeshInstance()
+    MeshInstance::MeshInstance(MeshInstanceContainer* meshOwner)
+        :meshOwner(meshOwner)
     {
         transform = glm::identity<glm::mat4x4>();
     }
@@ -28,6 +29,11 @@ namespace Vox
     glm::mat4x4 MeshInstance::GetTransform() const
     {
         return transform;
+    }
+
+    MeshInstanceContainer* MeshInstance::GetMeshOwner() const
+    {
+        return meshOwner;
     }
 
 #ifdef EDITOR

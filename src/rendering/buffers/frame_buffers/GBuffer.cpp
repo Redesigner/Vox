@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include <fmt/core.h>
 #include <GL/glew.h>
+#include <fmt/core.h>
 
 #include "core/logging/Logging.h"
 #include "rendering/SimpleFramebuffer.h"
-#include "rendering/buffers/Framebuffer.h"
+#include "rendering/buffers/frame_buffers/Framebuffer.h"
 
 namespace Vox
 {
@@ -31,10 +31,7 @@ namespace Vox
         BindTexture(metallicRoughnessTexture, 3, GL_RG, GL_RG, GL_FLOAT);
         BindTexture(depthTexture, 4, GL_R32F, GL_RED, GL_FLOAT);
 
-        // Depth buffer
-        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, width, height);
-        glNamedFramebufferRenderbuffer(framebufferId, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+        AttachDepthBuffer();
 
         GLenum buffersToDraw[5] = {
             GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4
@@ -54,10 +51,9 @@ namespace Vox
             positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture
         };
         glDeleteTextures(5, textureIds);
-        glDeleteRenderbuffers(1, &depthRenderbuffer);
     }
 
-    void GBuffer::ActivateTextures(unsigned int offset) const
+    void GBuffer::ActivateTextures(const unsigned int offset) const
     {
         glActiveTexture(GL_TEXTURE0 + offset);
         glBindTexture(GL_TEXTURE_2D, positionTexture);

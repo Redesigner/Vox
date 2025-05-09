@@ -7,18 +7,24 @@
 
 namespace Vox
 {
+    class MeshInstanceContainer;
+}
+namespace Vox
+{
 	/**
 	 * @brief A struct that contains all the information to draw a separate instance of a mesh
 	 */
 	struct MeshInstance
 	{
 	public:
-		MeshInstance();
+		MeshInstance(MeshInstanceContainer* meshOwner);
 		~MeshInstance();
 		
 		void SetTransform(glm::mat4x4 transformIn);
 
-		glm::mat4x4 GetTransform() const;
+		[[nodiscard]] glm::mat4x4 GetTransform() const;
+
+	    [[nodiscard]] MeshInstanceContainer* GetMeshOwner() const;
 
 #ifdef EDITOR
 		void RegisterCallback(std::function<void(glm::ivec2)> callback);
@@ -28,6 +34,8 @@ namespace Vox
 
 	private:
 		glm::mat4x4 transform;
+
+	    MeshInstanceContainer* meshOwner;
 
 #ifdef EDITOR
 		unsigned int pickId = 0;

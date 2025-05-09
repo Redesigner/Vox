@@ -9,8 +9,10 @@
 #include <utility>
 
 #include "PickContainer.h"
-#include "buffers/PickBuffer.h"
+#include "buffers/frame_buffers/PickBuffer.h"
+#include "buffers/frame_buffers/UVec2Buffer.h"
 #include "core/logging/Logging.h"
+#include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "physics/PhysicsServer.h"
@@ -19,11 +21,12 @@
 #include "rendering/FullscreenQuad.h"
 #include "rendering/SimpleFramebuffer.h"
 #include "rendering/buffers/ArrayTexture.h"
-#include "rendering/buffers/GBuffer.h"
 #include "rendering/buffers/RenderTexture.h"
+#include "rendering/buffers/frame_buffers/GBuffer.h"
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
+#include "shaders/pixel_shaders/OutlineShader.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
@@ -45,7 +48,7 @@ namespace Vox
         skeletalProjectionMatrixLocation = skeletalMeshShader->GetUniformLocation("matProjection");
         skeletalRoughnessLocation = skeletalMeshShader->GetUniformLocation("materialRoughness");
         skeletalAlbedoLocation = skeletalMeshShader->GetUniformLocation("materialAlbedo");
-        unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader->GetId(), "data");
+        const unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader->GetId(), "data");
         glUniformBlockBinding(skeletalMeshShader->GetId(), matrixBufferLocation, 0);
 
         voxelShader = std::make_unique<VoxelShader>();
@@ -72,6 +75,8 @@ namespace Vox
         pickBuffer = std::make_unique<PickBuffer>(800, 450);
         pickShader = std::make_unique<PickShader>();
         pickContainer = std::make_unique<PickContainer>();
+        outlineBuffer = std::make_unique<UVec2Buffer>(800, 450);
+        outlineShader = std::make_unique<OutlineShader>();
 #endif
 
 
@@ -105,6 +110,7 @@ namespace Vox
 
 #ifdef EDITOR
         RenderPickBuffer();
+        RenderOutline();
 #endif
 
         int width, height;
@@ -269,6 +275,10 @@ namespace Vox
                 pickBuffer.reset();
                 pickBuffer = std::make_unique<PickBuffer>(viewportWidth, viewportHeight);
 #endif
+
+                outlineBuffer.reset();
+                outlineBuffer = std::make_unique<UVec2Buffer>(viewportWidth, viewportHeight);
+
                 glViewport(0, 0, viewportWidth, viewportHeight);
             }
         }
@@ -404,6 +414,18 @@ namespace Vox
         physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
         PixelShader::SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
+    }
+
+    void Renderer::RenderOutline()
+    {
+        glBindVertexArray(quad->GetVaoId());
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outlineBuffer->GetFramebufferId());
+
+        outlineShader->Enable();
+        pickBuffer->ActivateTextures(0);
+        outlineShader->SetTextureSize(outlineBuffer->GetSize());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     void Renderer::RenderSky()

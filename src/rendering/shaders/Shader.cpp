@@ -50,11 +50,16 @@ namespace Vox
 	}
 
 	void Shader::SetUniformVec3(int uniformLocation, glm::vec3 value)
+    {
+        glUniform3f(uniformLocation, value.x, value.y, value.z);
+    }
+
+    void Shader::SetUniformVec2(int uniformLocation, glm::vec2 value)
 	{
-		glUniform3f(uniformLocation, value.x, value.y, value.z);
+	    glUniform2f(uniformLocation, value.x, value.y);
 	}
 
-	void Shader::SetUniformColor(int uniformLocation, glm::vec4 color)
+    void Shader::SetUniformColor(int uniformLocation, glm::vec4 color)
 	{
 		glUniform4f(uniformLocation, color.r, color.g, color.b, color.a);
 	}

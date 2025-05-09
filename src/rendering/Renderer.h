@@ -17,6 +17,14 @@
 
 namespace Vox
 {
+    class OutlineShader;
+}
+namespace Vox
+{
+    class UVec2Buffer;
+}
+namespace Vox
+{
 	class PickContainer;
 }
 
@@ -110,6 +118,8 @@ namespace Vox
 
 		void RenderDebugShapes();
 
+	    void RenderOutline();
+
 		static void CopyViewportToTexture(const RenderTexture& texture);
 
 		void CreateMeshVao();
@@ -120,9 +130,11 @@ namespace Vox
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<SimpleFramebuffer> deferredFramebuffer;
+	    std::unique_ptr<UVec2Buffer> outlineBuffer;
 		
 		std::unique_ptr<DeferredShader> deferredShader;
 		std::unique_ptr<GBufferShader> gBufferShader;
+	    std::unique_ptr<OutlineShader> outlineShader;
 
 #ifdef EDITOR
 		std::unique_ptr<PickBuffer> pickBuffer;
@@ -149,6 +161,7 @@ namespace Vox
 
 		std::unordered_map<std::string, SkeletalModel> uploadedSkeletalModels;
 
+	    std::vector<Ref<MeshInstance>> outlinedMeshes;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;

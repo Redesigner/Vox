@@ -2,7 +2,7 @@
 #include "PickContainer.h"
 
 #include "Renderer.h"
-#include "buffers/PickBuffer.h"
+#include "buffers/frame_buffers/PickBuffer.h"
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
