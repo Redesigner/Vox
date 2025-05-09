@@ -29,6 +29,11 @@ namespace Vox
         return currentlySelectedObject;
     }
 
+    void WorldOutline::SetSelectedObject(Object* object)
+    {
+        currentlySelectedObject = object;
+    }
+
     bool WorldOutline::DrawObject(Object* object)
     {
         bool result = false;

@@ -206,6 +206,11 @@ namespace Vox
         //}
     }
 
+    void Editor::SelectObject(Object* object)
+    {
+        WorldOutline::SetSelectedObject(object);
+    }
+
     Editor::Box::Box()
         :left(0), top(0), right(0), bottom(0)
     {

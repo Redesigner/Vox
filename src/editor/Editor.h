@@ -12,6 +12,7 @@ struct ImFont;
 
 namespace Vox
 {
+	class Object;
 	class World;
 	class TestObject;
 	class SimpleFramebuffer;
@@ -42,7 +43,9 @@ namespace Vox
 		bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
 		
 		void SetWorld(const std::shared_ptr<World>& world);
-		
+
+		void SelectObject(Object* object);
+
 		static ImFont* GetFont_GitLab18();
 		static ImFont* GetFont_GitLab24();
 

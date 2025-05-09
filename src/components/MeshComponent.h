@@ -11,7 +11,7 @@ namespace Vox
     public:
         MeshComponent();
 
-        MeshComponent(const std::string& meshName);
+        explicit MeshComponent(const std::string& meshName);
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
@@ -19,6 +19,11 @@ namespace Vox
         void OnTransformUpdated() override;
         
     private:
+
+#ifdef EDITOR
+        void Clicked(glm::ivec2 position);
+#endif
+
         IMPLEMENT_OBJECT(MeshComponent)
         
         Ref<MeshInstance> mesh;

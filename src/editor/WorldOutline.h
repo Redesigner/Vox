@@ -15,6 +15,8 @@ namespace Vox
 
         static Object* GetSelectedObject();
 
+        static void SetSelectedObject(Object* object);
+
     private:
         static bool DrawObject(Object* object);
 
