@@ -7,8 +7,8 @@
 
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
-#include "rendering/shaders/pixel_shaders/GBufferShader.h"
-#include "rendering/shaders/pixel_shaders/PickShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
 {

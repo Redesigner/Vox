@@ -12,12 +12,12 @@ namespace Vox
     {
         struct UniformLocations
         {
-            int position;
-            int normal;
-            int albedo;
-            int metallicRoughness;
-            int depth;
-            int viewPosition;
+            int position = -1;
+            int normal = -1;
+            int albedo = -1;
+            int metallicRoughness = -1;
+            int depth = -1;
+            int viewPosition = -1;
         };
 
     public:
@@ -28,7 +28,7 @@ namespace Vox
     private:
         UniformLocations uniformLocations;
 
-        const std::string vertLocation = "assets/shaders/deferred.vert";
-        const std::string fragLocation = "assets/shaders/deferred.frag";
+        static inline std::string vertLocation = "assets/shaders/deferred.vert";
+        static inline std::string fragLocation = "assets/shaders/deferred.frag";
     };
 }

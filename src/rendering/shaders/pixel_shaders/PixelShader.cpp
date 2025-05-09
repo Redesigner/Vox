@@ -2,40 +2,51 @@
 
 #include <GL/glew.h>
 
+#include <utility>
+
 #include "core/logging/Logging.h"
 
-Vox::PixelShader::~PixelShader()
+namespace Vox
 {
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-}
+    PixelShader::PixelShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
+    {
+        Load(std::move(vertexShaderFilePath), std::move(fragmentShaderFilePath));
+        Enable();
+    }
 
-bool Vox::PixelShader::Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
-{
-	shader = glCreateProgram();
+    PixelShader::~PixelShader()
+    {
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+    }
 
-	std::optional<unsigned int> vertexShaderId = LoadShaderStage(vertexShaderFilePath, GL_VERTEX_SHADER);
-	if (!vertexShaderId)
-	{
-		glDeleteProgram(shader);
-		return false;
-	}
-	vertexShader = vertexShaderId.value();
+    bool PixelShader::Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath)
+    {
+        shader = glCreateProgram();
 
-	std::optional<unsigned int> fragmentShaderId = LoadShaderStage(fragmentShaderFilePath, GL_FRAGMENT_SHADER);
-	if (!fragmentShaderId)
-	{
-		glDeleteProgram(shader);
-		return false;
-	}
-	fragmentShader = fragmentShaderId.value();
+        const std::optional<unsigned int> vertexShaderId = LoadShaderStage(std::move(vertexShaderFilePath), GL_VERTEX_SHADER);
+        if (!vertexShaderId)
+        {
+            glDeleteProgram(shader);
+            return false;
+        }
+        vertexShader = vertexShaderId.value();
 
-	glAttachShader(shader, vertexShader);
-	glAttachShader(shader, fragmentShader);
-	if (Link())
-	{
-		VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
-		return true;
-	}
-	return false;
+        const std::optional<unsigned int> fragmentShaderId = LoadShaderStage(std::move(fragmentShaderFilePath), GL_FRAGMENT_SHADER);
+        if (!fragmentShaderId)
+        {
+            glDeleteProgram(shader);
+            return false;
+        }
+        fragmentShader = fragmentShaderId.value();
+
+        glAttachShader(shader, vertexShader);
+        glAttachShader(shader, fragmentShader);
+        if (Link())
+        {
+            VoxLog(Display, Rendering, "ShaderProgram created successfully: ProgramId: '{}', ['{}', '{}']", shader, vertexShader, fragmentShader);
+            return true;
+        }
+        return false;
+    }
 }

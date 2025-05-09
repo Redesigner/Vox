@@ -12,8 +12,8 @@
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/pixel_shaders/PixelShader.h"
-#include "rendering/skeletalmesh/SkeletalModel.h"
-#include "shaders/pixel_shaders/GBufferShader.h"
+#include "rendering/skeletal_mesh/SkeletalModel.h"
+#include "shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
 
 namespace Vox
 {
@@ -60,7 +60,7 @@ namespace Vox
 
 		Ref<Camera> CreateCamera();
 
-		Ref<Camera> GetCurrentCamera() const;
+		[[nodiscard]] Ref<Camera> GetCurrentCamera() const;
 
 		void SetCurrentCamera(const Ref<Camera>& camera);
 
@@ -85,8 +85,8 @@ namespace Vox
 		[[nodiscard]] const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
 
 #ifdef EDITOR
-		PickContainer* GetPickContainer() const;
-		PickBuffer* GetPickBuffer() const;
+		[[nodiscard]] PickContainer* GetPickContainer() const;
+		[[nodiscard]] PickBuffer* GetPickBuffer() const;
 #endif
 
 	private:
@@ -132,9 +132,10 @@ namespace Vox
 		
 		unsigned int meshVao;
 
-		PixelShader skeletalMeshShader;
+		std::unique_ptr<PixelShader> skeletalMeshShader, skyShader, debugLineShader, debugTriangleShader;
 		int skeletalModelMatrixLocation, skeletalViewMatrixLocation, skeletalProjectionMatrixLocation;
 		int skeletalAlbedoLocation, skeletalRoughnessLocation;
+		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 		unsigned int skeletalMeshVao;
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
@@ -148,9 +149,6 @@ namespace Vox
 
 		std::unordered_map<std::string, SkeletalModel> uploadedSkeletalModels;
 
-		PixelShader skyShader;
-		PixelShader debugLineShader, debugTriangleShader;
-		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;

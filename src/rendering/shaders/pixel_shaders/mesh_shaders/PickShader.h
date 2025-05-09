@@ -1,27 +1,21 @@
 ﻿#pragma once
-#include "PixelShader.h"
-#include "core/datatypes/Ref.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/MeshShader.h"
 
 namespace Vox
 {
     class Camera;
 
-    class PickShader : public PixelShader
+    class PickShader : public MeshShader
     {
         struct UniformLocations
         {
-            int modelMatrix;
-            int viewMatrix;
-            int projectionMatrix;
-            int objectId;
+            int objectId = -1;
         };
         
     public:
         PickShader();
 
-        void SetCamera(Ref<Camera> camera) const;
         void SetObjectId(int objectId) const;
-        void SetModelMatrix(const glm::mat4x4& matrix) const;
 
     private:
         UniformLocations uniformLocations;

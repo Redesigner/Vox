@@ -7,11 +7,11 @@
 
 #include <glm/mat4x4.hpp>
 
-#include "rendering/mesh/ModelNode.h"
-#include "rendering/skeletalmesh/Animation.h"
-#include "rendering/skeletalmesh/AnimationChannel.h"
-#include "rendering/skeletalmesh/SkeletalPrimitive.h"
 #include "rendering/PBRMaterial.h"
+#include "rendering/mesh/ModelNode.h"
+#include "rendering/skeletal_mesh/Animation.h"
+#include "rendering/skeletal_mesh/AnimationChannel.h"
+#include "rendering/skeletal_mesh/SkeletalPrimitive.h"
 
 namespace tinygltf
 {

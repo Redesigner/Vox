@@ -16,15 +16,15 @@
 #include "physics/PhysicsServer.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
-#include "rendering/SimpleFramebuffer.h"
 #include "rendering/FullscreenQuad.h"
+#include "rendering/SimpleFramebuffer.h"
 #include "rendering/buffers/ArrayTexture.h"
 #include "rendering/buffers/GBuffer.h"
 #include "rendering/buffers/RenderTexture.h"
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
-#include "rendering/shaders/pixel_shaders/VoxelShader.h"
-#include "shaders/pixel_shaders/PickShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
+#include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
 {
@@ -39,25 +39,25 @@ namespace Vox
 
         quad = std::make_unique<FullscreenQuad>();
 
-        skeletalMeshShader.Load("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
-        skeletalModelMatrixLocation = skeletalMeshShader.GetUniformLocation("matModel");
-        skeletalViewMatrixLocation = skeletalMeshShader.GetUniformLocation("matView");
-        skeletalProjectionMatrixLocation = skeletalMeshShader.GetUniformLocation("matProjection");
-        skeletalRoughnessLocation = skeletalMeshShader.GetUniformLocation("materialRoughness");
-        skeletalAlbedoLocation = skeletalMeshShader.GetUniformLocation("materialAlbedo");
-        unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader.GetId(), "data");
-        glUniformBlockBinding(skeletalMeshShader.GetId(), matrixBufferLocation, 0);
+        skeletalMeshShader = std::make_unique<PixelShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
+        skeletalModelMatrixLocation = skeletalMeshShader->GetUniformLocation("matModel");
+        skeletalViewMatrixLocation = skeletalMeshShader->GetUniformLocation("matView");
+        skeletalProjectionMatrixLocation = skeletalMeshShader->GetUniformLocation("matProjection");
+        skeletalRoughnessLocation = skeletalMeshShader->GetUniformLocation("materialRoughness");
+        skeletalAlbedoLocation = skeletalMeshShader->GetUniformLocation("materialAlbedo");
+        unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader->GetId(), "data");
+        glUniformBlockBinding(skeletalMeshShader->GetId(), matrixBufferLocation, 0);
 
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
         gBufferShader = std::make_unique<GBufferShader>();
         
-        skyShader.Load("assets/shaders/sky.vert", "assets/shaders/sky.frag");
-        debugTriangleShader.Load("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
-        debugLineShader.Load("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
+        skyShader = std::make_unique<PixelShader>("assets/shaders/sky.vert", "assets/shaders/sky.frag");
+        debugTriangleShader = std::make_unique<PixelShader>("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
+        debugLineShader = std::make_unique<PixelShader>("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
 
-        debugTriangleMatrixLocation = debugTriangleShader.GetUniformLocation("viewProjection");
-        debugLineMatrixLocation = debugLineShader.GetUniformLocation("viewProjection");
+        debugTriangleMatrixLocation = debugTriangleShader->GetUniformLocation("viewProjection");
+        debugLineMatrixLocation = debugLineShader->GetUniformLocation("viewProjection");
 
         voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
 
@@ -75,9 +75,9 @@ namespace Vox
 #endif
 
 
-        skyShader.Enable();
-        Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("color"), 0);
-        Vox::PixelShader::SetUniformInt(skyShader.GetUniformLocation("depth"), 1);
+        skyShader->Enable();
+        Vox::PixelShader::SetUniformInt(skyShader->GetUniformLocation("color"), 0);
+        Vox::PixelShader::SetUniformInt(skyShader->GetUniformLocation("depth"), 1);
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
@@ -296,14 +296,14 @@ namespace Vox
             val.Render(gBufferShader.get());
         }
 
-        skeletalMeshShader.Enable();
+        skeletalMeshShader->Enable();
         Vox::PixelShader::SetUniformMatrix(skeletalViewMatrixLocation, currentCamera->GetViewMatrix());
         Vox::PixelShader::SetUniformMatrix(skeletalProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
         glBindVertexArray(skeletalMeshVao);
 
         for (auto& val : uploadedSkeletalModels | std::views::values)
         {
-            val.Render(skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
+            val.Render(*skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
         }
 
         UpdateVoxelMeshes();
@@ -368,8 +368,7 @@ namespace Vox
     {
         glBindVertexArray(voxelMeshVao);
         voxelShader->Enable();
-        voxelShader->SetViewMatrix(currentCamera->GetViewMatrix());
-        voxelShader->SetProjectionMatrix(currentCamera->GetProjectionMatrix());
+        voxelShader->SetCamera(currentCamera);
         voxelShader->SetArrayTexture(voxelTextures.get());
 
         for (std::optional<VoxelMesh>& voxelMesh : voxelMeshes)
@@ -396,12 +395,12 @@ namespace Vox
         physicsServer->RenderDebugShapes();
 
         glEnable(GL_DEPTH_TEST);
-        debugLineShader.Enable();
+        debugLineShader->Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferLines();
         PixelShader::SetUniformMatrix(debugLineMatrixLocation, currentCamera->GetViewProjectionMatrix());
         glDrawArrays(GL_LINES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetLineVertexCount()));
 
-        debugTriangleShader.Enable();
+        debugTriangleShader->Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
         PixelShader::SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
@@ -412,11 +411,11 @@ namespace Vox
         glBindFramebuffer(GL_READ_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
-        skyShader.Enable();
+        skyShader->Enable();
         const glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();
         const glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
         const glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
-        PixelShader::SetUniformMatrix(skyShader.GetUniformLocation("cameraWorldSpace"), matrix);
+        PixelShader::SetUniformMatrix(skyShader->GetUniformLocation("cameraWorldSpace"), matrix);
         // deferredFramebuffer->ActivateTextures();
         glBindVertexArray(quad->GetVaoId());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

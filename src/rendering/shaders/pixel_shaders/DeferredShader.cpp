@@ -3,12 +3,8 @@
 namespace Vox
 {
     DeferredShader::DeferredShader()
+        :PixelShader(vertLocation, fragLocation)
     {
-        if (!Load(vertLocation, fragLocation))
-        {
-            return;
-        }
-
         uniformLocations.position = GetUniformLocation("gPosition");
         uniformLocations.normal = GetUniformLocation("gNormal");
         uniformLocations.albedo = GetUniformLocation("gAlbedo");
@@ -22,11 +18,6 @@ namespace Vox
         SetUniformInt(uniformLocations.albedo, 2);
         SetUniformInt(uniformLocations.metallicRoughness, 3);
         SetUniformInt(uniformLocations.depth, 4);
-
-        /*
-        shaderLocation = 1;
-        rlSetUniformSampler(uniformLocations.normal, shaderLocation);
-        rlSetUniform(uniformLocations.normal, &shaderLocation, SHADER_UNIFORM_INT, 1);*/
     }
 
     void DeferredShader::SetCameraPosition(glm::vec3 position)

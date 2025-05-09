@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "rendering/skeletalmesh/AnimationChannel.h"
+#include "rendering/skeletal_mesh/AnimationChannel.h"
 
 namespace tinygltf
 {

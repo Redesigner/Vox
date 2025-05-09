@@ -1,33 +1,23 @@
 ﻿#pragma once
-#include "PixelShader.h"
-#include "core/datatypes/Ref.h"
-
-namespace Vox
-{
-    struct PBRMaterial;
-}
+#include "rendering/shaders/pixel_shaders/mesh_shaders/MeshShader.h"
 
 namespace Vox
 {
     class Camera;
+    struct PBRMaterial;
 
-    class GBufferShader : public PixelShader
+    class GBufferShader : public MeshShader
     {
         struct UniformLocations
         {
-            int modelMatrix;
-            int viewMatrix;
-            int projectionMatrix;
-            int roughness;
-            int albedo;
+            int roughness = -1;
+            int albedo = -1;
         };
         
     public:
         GBufferShader();
 
-        void SetCamera(Ref<Camera> camera) const;
         void SetMaterial(const PBRMaterial& material) const;
-        void SetModelMatrix(const glm::mat4x4& matrix) const;
 
     private:
         UniformLocations uniformLocations;

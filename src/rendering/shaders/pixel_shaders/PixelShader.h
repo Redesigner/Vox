@@ -7,11 +7,13 @@ namespace Vox
 	class PixelShader : public Shader
 	{
 	public:
+	    PixelShader(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 		~PixelShader();
 
-		bool Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
-
 	protected:
-		unsigned int vertexShader, fragmentShader;
+		unsigned int vertexShader = 0, fragmentShader = 0;
+
+	private:
+	    bool Load(std::string vertexShaderFilePath, std::string fragmentShaderFilePath);
 	};
 }
