@@ -12,6 +12,7 @@
 #include "buffers/frame_buffers/PickBuffer.h"
 #include "buffers/frame_buffers/UVec2Buffer.h"
 #include "core/logging/Logging.h"
+#include "core/math/Math.h"
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
@@ -27,6 +28,8 @@
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
 #include "shaders/pixel_shaders/OutlineShader.h"
+#include "shaders/pixel_shaders/OutlineShaderDistance.h"
+#include "shaders/pixel_shaders/OutlineShaderJump.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
@@ -75,8 +78,12 @@ namespace Vox
         pickBuffer = std::make_unique<PickBuffer>(800, 450);
         pickShader = std::make_unique<PickShader>();
         pickContainer = std::make_unique<PickContainer>();
+
         outlineBuffer = std::make_unique<UVec2Buffer>(800, 450);
+        outlineBuffer2 = std::make_unique<UVec2Buffer>(800, 450);
         outlineShader = std::make_unique<OutlineShader>();
+        outlineShaderJump = std::make_unique<OutlineShaderJump>();
+        outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
 #endif
 
 
@@ -274,10 +281,12 @@ namespace Vox
 #ifdef EDITOR
                 pickBuffer.reset();
                 pickBuffer = std::make_unique<PickBuffer>(viewportWidth, viewportHeight);
-#endif
 
                 outlineBuffer.reset();
                 outlineBuffer = std::make_unique<UVec2Buffer>(viewportWidth, viewportHeight);
+                outlineBuffer2.reset();
+                outlineBuffer2 = std::make_unique<UVec2Buffer>(viewportWidth, viewportHeight);
+#endif
 
                 glViewport(0, 0, viewportWidth, viewportHeight);
             }
@@ -349,6 +358,8 @@ namespace Vox
         glClear(GL_DEPTH_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glDisable(GL_DEPTH_TEST);
+
         pickShader->Enable();
         pickShader->SetCamera(currentCamera);
         glBindVertexArray(meshVao);
@@ -357,6 +368,7 @@ namespace Vox
         {
             val.Render(pickShader.get());
         }
+        glEnable(GL_DEPTH_TEST);
     }
 #endif
     
@@ -418,6 +430,7 @@ namespace Vox
 
     void Renderer::RenderOutline()
     {
+        constexpr int outlineWidth = 2;
         glBindVertexArray(quad->GetVaoId());
         glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outlineBuffer->GetFramebufferId());
@@ -425,6 +438,32 @@ namespace Vox
         outlineShader->Enable();
         pickBuffer->ActivateTextures(0);
         outlineShader->SetTextureSize(outlineBuffer->GetSize());
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        UVec2Buffer* inBuffer = outlineBuffer.get();
+        UVec2Buffer* outBuffer = outlineBuffer2.get();
+
+        for (int floodWidth = NextPowerOfTwo(outlineWidth); floodWidth; floodWidth = floodWidth >> 1)
+        {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, inBuffer->GetFramebufferId());
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outBuffer->GetFramebufferId());
+
+            outlineShaderJump->Enable();
+            outlineShaderJump->SetWidth(floodWidth);
+            inBuffer->ActivateTextures(0);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            std::swap(inBuffer, outBuffer);
+        }
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, inBuffer->GetFramebufferId());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
+
+        outlineShaderDistance->Enable();
+        outlineShaderDistance->SetOutlineColor({1.0f, 0.039f, 0.4f});
+        inBuffer->ActivateTextures(0);
+        deferredFramebuffer->ActivateTextures(1);
+        outlineShaderDistance->SetWidth(outlineWidth);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 

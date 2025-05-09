@@ -10,7 +10,7 @@ namespace Vox
 		SimpleFramebuffer(int width, int height);
 		~SimpleFramebuffer();
 
-		void ActivateTextures() const;
+		void ActivateTextures(unsigned int offset) const;
 
 		unsigned int GetFramebufferId() const;
 

@@ -22,4 +22,6 @@ namespace Vox
 	}
 
 	int FloorMultiple(float x, unsigned int multiple);
+
+    unsigned int NextPowerOfTwo(unsigned int value);
 }

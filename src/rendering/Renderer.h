@@ -17,6 +17,11 @@
 
 namespace Vox
 {
+    class OutlineShaderDistance;
+    class OutlineShaderJump;
+}
+namespace Vox
+{
     class OutlineShader;
 }
 namespace Vox
@@ -130,16 +135,19 @@ namespace Vox
 
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<SimpleFramebuffer> deferredFramebuffer;
-	    std::unique_ptr<UVec2Buffer> outlineBuffer;
-		
 		std::unique_ptr<DeferredShader> deferredShader;
 		std::unique_ptr<GBufferShader> gBufferShader;
-	    std::unique_ptr<OutlineShader> outlineShader;
 
 #ifdef EDITOR
 		std::unique_ptr<PickBuffer> pickBuffer;
 		std::unique_ptr<PickShader> pickShader;
 		std::unique_ptr<PickContainer> pickContainer;
+
+	    std::unique_ptr<UVec2Buffer> outlineBuffer;
+	    std::unique_ptr<UVec2Buffer> outlineBuffer2;
+	    std::unique_ptr<OutlineShader> outlineShader;
+	    std::unique_ptr<OutlineShaderJump> outlineShaderJump;
+	    std::unique_ptr<OutlineShaderDistance> outlineShaderDistance;
 #endif
 		
 		unsigned int meshVao;

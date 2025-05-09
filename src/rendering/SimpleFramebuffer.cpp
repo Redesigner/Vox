@@ -68,12 +68,12 @@ namespace Vox
 		glDeleteFramebuffers(1, &framebuffer);
 	}
 
-	void SimpleFramebuffer::ActivateTextures() const
+	void SimpleFramebuffer::ActivateTextures(const unsigned int offset) const
 	{
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + offset);
 		glBindTexture(GL_TEXTURE_2D, colorTexture);
 
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE1 + offset);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
 	}
 
