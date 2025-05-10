@@ -10,6 +10,7 @@
 
 #include "PickContainer.h"
 #include "buffers/frame_buffers/PickBuffer.h"
+#include "buffers/frame_buffers/StencilBuffer.h"
 #include "buffers/frame_buffers/UVec2Buffer.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -20,17 +21,17 @@
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/FullscreenQuad.h"
-#include "rendering/SimpleFramebuffer.h"
 #include "rendering/buffers/ArrayTexture.h"
 #include "rendering/buffers/RenderTexture.h"
+#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 #include "rendering/buffers/frame_buffers/GBuffer.h"
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
-#include "shaders/pixel_shaders/OutlineShader.h"
-#include "shaders/pixel_shaders/OutlineShaderDistance.h"
-#include "shaders/pixel_shaders/OutlineShaderJump.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
+#include "shaders/pixel_shaders/outline_shaders/OutlineShader.h"
+#include "shaders/pixel_shaders/outline_shaders/OutlineShaderDistance.h"
+#include "shaders/pixel_shaders/outline_shaders/OutlineShaderJump.h"
 
 namespace Vox
 {
@@ -71,16 +72,20 @@ namespace Vox
         CreateSkeletalMeshVao();
         CreateVoxelVao();
 
-        gBuffer = std::make_unique<GBuffer>(800, 450);
-        deferredFramebuffer = std::make_unique<SimpleFramebuffer>(800, 450);
+        constexpr int defaultWidth = 800;
+        constexpr int defaultHeight = 450;
+
+        gBuffer = std::make_unique<GBuffer>(defaultWidth, defaultHeight);
+        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(defaultWidth, defaultHeight);
         
 #ifdef EDITOR
-        pickBuffer = std::make_unique<PickBuffer>(800, 450);
+        pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
         pickShader = std::make_unique<PickShader>();
         pickContainer = std::make_unique<PickContainer>();
 
-        outlineBuffer = std::make_unique<UVec2Buffer>(800, 450);
-        outlineBuffer2 = std::make_unique<UVec2Buffer>(800, 450);
+        stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
+        outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
+        outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineShader = std::make_unique<OutlineShader>();
         outlineShaderJump = std::make_unique<OutlineShaderJump>();
         outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
@@ -106,7 +111,7 @@ namespace Vox
 
     void Renderer::Render(Editor* editor)
     {
-        UpdateViewportDimensions(editor);
+        CheckViewportDimensions(editor);
         currentCamera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
         glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
 
@@ -133,19 +138,6 @@ namespace Vox
         editor->Draw(deferredFramebuffer.get());
         SDL_GL_SwapWindow(mainWindow);
     }
-
-    //void Renderer::LoadTestModel(std::string path)
-    //{
-    //    if (IsModelValid(testModel))
-    //    {
-    //        UnloadModel(testModel);
-    //    }
-    //    testModel = LoadModel(path.c_str());
-    //    for (int i = 0; i < testModel.materialCount; ++i)
-    //    {
-    //        testModel.materials[i].shader = gBufferShader;
-    //    }
-    //}
 
     Ref<Camera> Renderer::CreateCamera()
     {
@@ -258,44 +250,48 @@ namespace Vox
     }
 #endif
 
-    void Renderer::UpdateViewportDimensions(const Editor* editor)
+    void Renderer::CheckViewportDimensions(const Editor* editor)
     {
         // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
         const glm::vec2 editorViewportSize = editor->GetViewportDimensions();
         if (viewportTexture)
         {
-            int viewportWidth = static_cast<int>(editorViewportSize.x);
-            int viewportHeight = static_cast<int>(editorViewportSize.y);
+            const int viewportWidth = static_cast<int>(editorViewportSize.x);
+            const int viewportHeight = static_cast<int>(editorViewportSize.y);
             if (viewportTexture->GetWidth() != viewportWidth || viewportTexture->GetHeight() != viewportHeight)
             {
-                VoxLog(Display, Rendering, "Resizing GBuffer and Viewport texture to '({}, {})'", viewportWidth, viewportHeight);
-                viewportTexture.reset();
-                viewportTexture = std::make_unique<RenderTexture>(viewportWidth, viewportHeight);
-
-                // @TODO: add resize method?
-                gBuffer.reset();
-                gBuffer = std::make_unique<GBuffer>(viewportWidth, viewportHeight);
-                
-                deferredFramebuffer.reset();
-                deferredFramebuffer = std::make_unique<SimpleFramebuffer>(viewportWidth, viewportHeight);
-#ifdef EDITOR
-                pickBuffer.reset();
-                pickBuffer = std::make_unique<PickBuffer>(viewportWidth, viewportHeight);
-
-                outlineBuffer.reset();
-                outlineBuffer = std::make_unique<UVec2Buffer>(viewportWidth, viewportHeight);
-                outlineBuffer2.reset();
-                outlineBuffer2 = std::make_unique<UVec2Buffer>(viewportWidth, viewportHeight);
-#endif
-
-                glViewport(0, 0, viewportWidth, viewportHeight);
+                ResizeBuffers(viewportWidth, viewportHeight);
             }
         }
         else
         {
-            // viewportTexture = std::make_unique<RenderTexture>(static_cast<int>(editorViewportSize.x), static_cast<int>(editorViewportSize.y));
             viewportTexture = std::make_unique<RenderTexture>(800, 450);
         }
+    }
+
+    void Renderer::ResizeBuffers(int width, int height)
+    {
+        VoxLog(Display, Rendering, "Resizing GBuffer and Viewport texture to '({}, {})'", width, height);
+
+        glViewport(0, 0, width, height);
+        viewportTexture.reset();
+        viewportTexture = std::make_unique<RenderTexture>(width, height);
+
+        gBuffer.reset();
+        gBuffer = std::make_unique<GBuffer>(width, height);
+
+        deferredFramebuffer.reset();
+        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(width, height);
+
+#ifdef EDITOR
+        pickBuffer.reset();
+        pickBuffer = std::make_unique<PickBuffer>(width, height);
+
+        outlineBuffer.reset();
+        outlineBuffer = std::make_unique<UVec2Buffer>(width, height);
+        outlineBuffer2.reset();
+        outlineBuffer2 = std::make_unique<UVec2Buffer>(width, height);
+#endif
     }
 
     void Renderer::RenderGBuffer()
@@ -443,13 +439,13 @@ namespace Vox
         UVec2Buffer* inBuffer = outlineBuffer.get();
         UVec2Buffer* outBuffer = outlineBuffer2.get();
 
-        for (int floodWidth = NextPowerOfTwo(outlineWidth); floodWidth; floodWidth = floodWidth >> 1)
+        for (unsigned int floodWidth = NextPowerOfTwo(outlineWidth); floodWidth; floodWidth = floodWidth >> 1)
         {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, inBuffer->GetFramebufferId());
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outBuffer->GetFramebufferId());
 
             outlineShaderJump->Enable();
-            outlineShaderJump->SetWidth(floodWidth);
+            outlineShaderJump->SetWidth(static_cast<int>(floodWidth));
             inBuffer->ActivateTextures(0);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

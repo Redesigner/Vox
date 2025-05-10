@@ -15,7 +15,7 @@ namespace Vox
 	class Object;
 	class World;
 	class TestObject;
-	class SimpleFramebuffer;
+	class ColorDepthFramebuffer;
 
 	class Editor
 	{
@@ -30,7 +30,7 @@ namespace Vox
 
 		Editor();
 
-		void Draw(const SimpleFramebuffer* viewportRenderTexture);
+		void Draw(const ColorDepthFramebuffer* viewportRenderTexture);
 		
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		

@@ -8,13 +8,13 @@
 #include "core/math/Math.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
-#include "rendering/SimpleFramebuffer.h"
+#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
 
-    void Editor::Draw(const SimpleFramebuffer* viewportRenderTexture)
+    void Editor::Draw(const ColorDepthFramebuffer* viewportRenderTexture)
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();

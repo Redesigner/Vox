@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 
 #include "core/logging/Logging.h"
-#include "rendering/SimpleFramebuffer.h"
+#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 
 namespace Vox
 {
@@ -33,7 +33,7 @@ namespace Vox
             GL_FRAMEBUFFER_COMPLETE)
         {
             VoxLog(Error, Rendering, "Failed to create renderTexture: {}",
-                SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
+                ColorDepthFramebuffer::GetFramebufferStatusString(framebufferStatus));
         }
     }
 

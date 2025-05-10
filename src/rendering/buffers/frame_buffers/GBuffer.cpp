@@ -6,7 +6,7 @@
 #include <fmt/core.h>
 
 #include "core/logging/Logging.h"
-#include "rendering/SimpleFramebuffer.h"
+#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 #include "rendering/buffers/frame_buffers/Framebuffer.h"
 
 namespace Vox
@@ -33,9 +33,7 @@ namespace Vox
 
         AttachDepthBuffer();
 
-        GLenum buffersToDraw[5] = {
-            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4
-        };
+        constexpr GLenum buffersToDraw[5] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
         glDrawBuffers(5, buffersToDraw);
 
         // VoxLog(Display, Rendering, "Position {}, Normal {}, AlbedoSpec {}, Depth {}", positionTexture, normalTexture, albedoTexture, depthTexture);

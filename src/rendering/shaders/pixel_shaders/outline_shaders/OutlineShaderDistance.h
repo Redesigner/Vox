@@ -26,8 +26,8 @@ namespace Vox
 
         UniformLocations uniformLocations;
 
-        static inline std::string vertLocation = "assets/shaders/outlineFill.vert";
-        static inline std::string fragLocation = "assets/shaders/outlineDistance.frag";
+        static inline std::string vertLocation = "assets/shaders/outline/outlineFill.vert";
+        static inline std::string fragLocation = "assets/shaders/outline/outlineDistance.frag";
     };
 
 } // Vox

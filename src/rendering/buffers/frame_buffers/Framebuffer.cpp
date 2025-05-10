@@ -4,7 +4,6 @@
 #include <cassert>
 
 #include "core/logging/Logging.h"
-#include "rendering/SimpleFramebuffer.h"
 
 namespace Vox
 {
@@ -33,6 +32,41 @@ namespace Vox
         return {width, height};
     }
 
+    int Framebuffer::GetWidth() const
+    {
+        return width;
+    }
+
+    int Framebuffer::GetHeight() const
+    {
+        return height;
+    }
+
+    std::string Framebuffer::GetFramebufferStatusString(const unsigned int framebufferStatus)
+    {
+        switch (framebufferStatus)
+        {
+        case GL_FRAMEBUFFER_UNDEFINED:
+            return "GL_FRAMEBUFFER_UNDEFINED";
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+            return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+            return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            return "GL_FRAMEBUFFER_UNSUPPORTED";
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            return "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+            return "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
+        default:
+            return "UNKNOWN";
+        }
+    }
+
     void Framebuffer::CreateFrameBuffer()
     {
         if (width == 0 || height == 0)
@@ -45,8 +79,8 @@ namespace Vox
         glBindFramebuffer(GL_FRAMEBUFFER, framebufferId); // Bind the new FBO
     }
 
-    void Framebuffer::BindTexture(unsigned int textureId, unsigned int attachment, GLint internalFormat, GLenum format,
-                                  GLenum type) const
+    void Framebuffer::BindTexture(const unsigned int textureId, const unsigned int attachment,
+        const GLint internalFormat, const GLenum format, const GLenum type) const
     {
         assert(attachment < GL_MAX_COLOR_ATTACHMENTS);
 
@@ -68,10 +102,10 @@ namespace Vox
 
     bool Framebuffer::CheckStatus()
     {
-        if (GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER); framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+        if (const GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER); framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
         {
             VoxLog(Error, Rendering, "Failed to create FrameBuffer: {}",
-                   SimpleFramebuffer::GetFramebufferStatusString(framebufferStatus));
+                   GetFramebufferStatusString(framebufferStatus));
             return false;
         }
         VoxLog(Display, Rendering, "Successfully created FrameBuffer.");

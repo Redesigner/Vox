@@ -17,6 +17,10 @@
 
 namespace Vox
 {
+    class StencilBuffer;
+}
+namespace Vox
+{
     class OutlineShaderDistance;
     class OutlineShaderJump;
 }
@@ -48,7 +52,7 @@ namespace Vox
 	class DebugRenderer;
 	class DeferredShader;
 	class Editor;
-	class SimpleFramebuffer;
+	class ColorDepthFramebuffer;
 	class FullscreenQuad;
 	class GBuffer;
 	class PhysicsServer;
@@ -103,7 +107,9 @@ namespace Vox
 #endif
 
 	private:
-		void UpdateViewportDimensions(const Editor* editor);
+		void CheckViewportDimensions(const Editor* editor);
+
+        void ResizeBuffers(int width, int height);
 
 		void RenderGBuffer();
 
@@ -134,7 +140,7 @@ namespace Vox
 		void CreateVoxelVao();
 
 		std::unique_ptr<GBuffer> gBuffer;
-		std::unique_ptr<SimpleFramebuffer> deferredFramebuffer;
+		std::unique_ptr<ColorDepthFramebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
 		std::unique_ptr<GBufferShader> gBufferShader;
 
@@ -143,6 +149,7 @@ namespace Vox
 		std::unique_ptr<PickShader> pickShader;
 		std::unique_ptr<PickContainer> pickContainer;
 
+        std::unique_ptr<StencilBuffer> stencilBuffer;
 	    std::unique_ptr<UVec2Buffer> outlineBuffer;
 	    std::unique_ptr<UVec2Buffer> outlineBuffer2;
 	    std::unique_ptr<OutlineShader> outlineShader;
@@ -150,33 +157,32 @@ namespace Vox
 	    std::unique_ptr<OutlineShaderDistance> outlineShaderDistance;
 #endif
 		
-		unsigned int meshVao;
 
 		std::unique_ptr<PixelShader> skeletalMeshShader, skyShader, debugLineShader, debugTriangleShader;
-		int skeletalModelMatrixLocation, skeletalViewMatrixLocation, skeletalProjectionMatrixLocation;
-		int skeletalAlbedoLocation, skeletalRoughnessLocation;
-		int debugLineMatrixLocation, debugTriangleMatrixLocation = 0;
-		unsigned int skeletalMeshVao;
+		int skeletalModelMatrixLocation = -1, skeletalViewMatrixLocation = -1, skeletalProjectionMatrixLocation = -1,
+	        skeletalAlbedoLocation = -1, skeletalRoughnessLocation = -1;
+		int debugLineMatrixLocation, debugTriangleMatrixLocation = -1;
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
 		std::unique_ptr<VoxelShader> voxelShader;
 		DynamicObjectContainer<VoxelMesh> voxelMeshes;
 		ComputeShader voxelGenerationShader;
-		unsigned int voxelMeshVao;
+
+		unsigned int meshVao = 0, voxelMeshVao = 0, skeletalMeshVao = 0;
 
 		// A container holding all of our meshes to be retrieved later
 		std::unordered_map<std::string, MeshInstanceContainer> uploadedModels;
-
 		std::unordered_map<std::string, SkeletalModel> uploadedSkeletalModels;
 
+#ifdef EDITOR
 	    std::vector<Ref<MeshInstance>> outlinedMeshes;
+#endif
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;
 
-		Ref<Camera> currentCamera;
-
 		ObjectContainer<Camera> cameras;
+		Ref<Camera> currentCamera;
 
 		SDL_Window* mainWindow;
 

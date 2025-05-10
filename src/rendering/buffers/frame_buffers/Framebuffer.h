@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <GL/glew.h>
 #include <glm/vec2.hpp>
+#include <string>
 
 namespace Vox
 {
@@ -10,9 +11,14 @@ namespace Vox
         Framebuffer(int width, int height);
         ~Framebuffer();
 
-        unsigned int GetFramebufferId() const;
+        [[nodiscard]] unsigned int GetFramebufferId() const;
 
         [[nodiscard]] glm::ivec2 GetSize() const;
+
+        [[nodiscard]] int GetWidth() const;
+        [[nodiscard]] int GetHeight() const;
+
+        static std::string GetFramebufferStatusString(unsigned int framebufferStatus);
         
     protected:
         void CreateFrameBuffer();

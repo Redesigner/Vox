@@ -2,7 +2,7 @@
 // Created by steph on 5/8/2025.
 //
 #pragma once
-#include "mesh_shaders/MeshShader.h"
+#include "../mesh_shaders/MeshShader.h"
 
 namespace Vox {
 
@@ -23,8 +23,8 @@ namespace Vox {
 
         UniformLocations uniformLocations;
 
-        static inline std::string vertLocation = "assets/shaders/outlineFill.vert";
-        static inline std::string fragLocation = "assets/shaders/outlineFill.frag";
+        static inline std::string vertLocation = "assets/shaders/outline/outlineFill.vert";
+        static inline std::string fragLocation = "assets/shaders/outline/outlineFill.frag";
     };
 
 } // Vox
