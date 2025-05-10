@@ -17,6 +17,7 @@
 
 namespace Vox
 {
+    class StencilShader;
     class StencilBuffer;
 }
 namespace Vox
@@ -91,6 +92,9 @@ namespace Vox
 
 		bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
 
+	    void AddMeshOutline(const Ref<MeshInstance>& mesh);
+	    void ClearMeshOutlines();
+
 		Ref<MeshInstance> CreateMeshInstance(const std::string& meshName);
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
@@ -150,13 +154,14 @@ namespace Vox
 		std::unique_ptr<PickContainer> pickContainer;
 
         std::unique_ptr<StencilBuffer> stencilBuffer;
+	    std::unique_ptr<StencilShader> stencilShader;
+
 	    std::unique_ptr<UVec2Buffer> outlineBuffer;
 	    std::unique_ptr<UVec2Buffer> outlineBuffer2;
 	    std::unique_ptr<OutlineShader> outlineShader;
 	    std::unique_ptr<OutlineShaderJump> outlineShaderJump;
 	    std::unique_ptr<OutlineShaderDistance> outlineShaderDistance;
 #endif
-		
 
 		std::unique_ptr<PixelShader> skeletalMeshShader, skyShader, debugLineShader, debugTriangleShader;
 		int skeletalModelMatrixLocation = -1, skeletalViewMatrixLocation = -1, skeletalProjectionMatrixLocation = -1,

@@ -158,6 +158,8 @@ target_sources(Vox PRIVATE
 	"src/rendering/shaders/pixel_shaders/mesh_shaders/MeshShader.h"
 	"src/rendering/shaders/pixel_shaders/mesh_shaders/PickShader.cpp"
 	"src/rendering/shaders/pixel_shaders/mesh_shaders/PickShader.h"
+	"src/rendering/shaders/pixel_shaders/mesh_shaders/StencilShader.cpp"
+	"src/rendering/shaders/pixel_shaders/mesh_shaders/StencilShader.h"
 	"src/rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.cpp"
 	"src/rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
 	"src/rendering/skeletal_mesh/Animation.cpp"

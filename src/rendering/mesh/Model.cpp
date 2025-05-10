@@ -12,18 +12,18 @@
 
 namespace Vox
 {
-	Model::Model(std::string filepath)
+	Model::Model(const std::string& filepath)
 	{
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
 		tinygltf::Model model;
-		bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
+		loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
 
 		// Buffer our data into opengl
 		// One GL buffer corresponds to a bufferview
 		bufferIds = std::vector<unsigned int>(model.bufferViews.size(), 0);
-		glCreateBuffers(model.bufferViews.size(), bufferIds.data());
+		glCreateBuffers(static_cast<int>(model.bufferViews.size()), bufferIds.data());
 		for (int i = 0; i < model.bufferViews.size(); ++i)
 		{
 			tinygltf::BufferView bufferView = model.bufferViews[i];
@@ -33,7 +33,10 @@ namespace Vox
 		for (const tinygltf::Material& material : model.materials)
 		{
 			const std::vector<double>& color = material.pbrMetallicRoughness.baseColorFactor;
-			materials.emplace_back(glm::vec4(color[0], color[1], color[2], color[3]), material.pbrMetallicRoughness.roughnessFactor, material.pbrMetallicRoughness.metallicFactor);
+			materials.emplace_back(
+			    glm::vec4(color[0], color[1], color[2], color[3]),
+			    static_cast<float>(material.pbrMetallicRoughness.roughnessFactor),
+			    static_cast<float>(material.pbrMetallicRoughness.metallicFactor));
 		}
 
 		// initialize all our nodes, since we access them by index
@@ -79,7 +82,7 @@ namespace Vox
 				auto uvBuffer = primitive.attributes.find("TEXCOORD_0");
 				if (uvBuffer == primitive.attributes.end())
 				{
-					VoxLog(Error, Rendering, "GLTF model does not have a texcoord attribute.");
+					VoxLog(Error, Rendering, "GLTF model does not have a tex coord attribute.");
 					break;
 				}
 
@@ -89,7 +92,7 @@ namespace Vox
 				const unsigned int normalBufferId = bufferIds[model.accessors[normalBuffer->second].bufferView];
 				const unsigned int uvBufferId = bufferIds[model.accessors[uvBuffer->second].bufferView];
 				Primitive& newPrimitive = primitives.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
-				newMesh.emplace_back(primitives.size() - 1); // Store the primitive index so our nodes can find it later
+				newMesh.emplace_back(static_cast<unsigned int>(primitives.size() - 1)); // Store the primitive index so our nodes can find it later
 			}
 		}
 
@@ -127,10 +130,24 @@ namespace Vox
 			glBindVertexBuffer(1, primitive.GetNormalBuffer(), 0, sizeof(float) * 3);
 			glBindVertexBuffer(2, primitive.GetUVBuffer(), 0, sizeof(float) * 2);
 
-			// @TODO: use glDrawElementsInstanced instead?
 			glDrawElements(GL_TRIANGLES, static_cast<int>(primitive.GetVertexCount()), primitive.GetComponentType(), nullptr);
 		}
 	}
+
+    void Model::Render(const MeshShader* shader, const glm::mat4x4& rootMatrix) const
+    {
+	    for (const Primitive& primitive : primitives)
+	    {
+	        shader->SetModelMatrix(rootMatrix * primitive.GetTransform());
+
+	        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.GetIndexBuffer());
+	        glBindVertexBuffer(0, primitive.GetPositionBuffer(), 0, sizeof(float) * 3);
+	        glBindVertexBuffer(1, primitive.GetNormalBuffer(), 0, sizeof(float) * 3);
+	        glBindVertexBuffer(2, primitive.GetUVBuffer(), 0, sizeof(float) * 2);
+
+	        glDrawElements(GL_TRIANGLES, static_cast<int>(primitive.GetVertexCount()), primitive.GetComponentType(), nullptr);
+	    }
+    }
 
 #ifdef EDITOR
 	void Model::Render(const PickShader* shader, const int objectId, const glm::mat4x4& rootMatrix)
@@ -141,7 +158,7 @@ namespace Vox
 			shader->SetModelMatrix(rootMatrix * primitive.GetTransform());
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.GetIndexBuffer());
 			glBindVertexBuffer(0, primitive.GetPositionBuffer(), 0, sizeof(float) * 3);
-			glDrawElements(GL_TRIANGLES, primitive.GetVertexCount(), primitive.GetComponentType(), nullptr);
+			glDrawElements(GL_TRIANGLES, static_cast<int>(primitive.GetVertexCount()), primitive.GetComponentType(), nullptr);
 		}
 	}
 #endif

@@ -13,6 +13,8 @@ namespace Vox
         StencilBuffer(int width, int height);
         ~StencilBuffer();
 
+        void ActivateTextures(unsigned int offset) const;
+
     private:
         unsigned int stencil = 0;
     };

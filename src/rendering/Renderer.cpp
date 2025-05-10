@@ -29,6 +29,7 @@
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
+#include "shaders/pixel_shaders/mesh_shaders/StencilShader.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShader.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderDistance.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderJump.h"
@@ -84,6 +85,8 @@ namespace Vox
         pickContainer = std::make_unique<PickContainer>();
 
         stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
+        stencilShader = std::make_unique<StencilShader>();
+
         outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineShader = std::make_unique<OutlineShader>();
@@ -182,6 +185,19 @@ namespace Vox
 
         uploadedSkeletalModels.emplace(alias, relativeFilePath);
         return true;
+    }
+
+    void Renderer::AddMeshOutline(const Ref<MeshInstance>& mesh)
+    {
+        if (std::find(outlinedMeshes.begin(), outlinedMeshes.end(), mesh) == outlinedMeshes.end())
+        {
+            outlinedMeshes.emplace_back(mesh);
+        }
+    }
+
+    void Renderer::ClearMeshOutlines()
+    {
+        outlinedMeshes.clear();
     }
 
     Ref<MeshInstance> Renderer::CreateMeshInstance(const std::string& meshName)
@@ -286,6 +302,8 @@ namespace Vox
 #ifdef EDITOR
         pickBuffer.reset();
         pickBuffer = std::make_unique<PickBuffer>(width, height);
+        stencilBuffer.reset();
+        stencilBuffer = std::make_unique<StencilBuffer>(width, height);
 
         outlineBuffer.reset();
         outlineBuffer = std::make_unique<UVec2Buffer>(width, height);
@@ -426,13 +444,22 @@ namespace Vox
 
     void Renderer::RenderOutline()
     {
+        stencilShader->Enable();
+        stencilShader->SetCamera(currentCamera);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
+        glClear(GL_COLOR_BUFFER_BIT);
+        for (const Ref<MeshInstance>& mesh : outlinedMeshes)
+        {
+            mesh->GetMeshOwner()->RenderInstance(stencilShader.get(), *mesh);
+        }
+
         constexpr int outlineWidth = 2;
         glBindVertexArray(quad->GetVaoId());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outlineBuffer->GetFramebufferId());
 
         outlineShader->Enable();
-        pickBuffer->ActivateTextures(0);
+        stencilBuffer->ActivateTextures(0);
         outlineShader->SetTextureSize(outlineBuffer->GetSize());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

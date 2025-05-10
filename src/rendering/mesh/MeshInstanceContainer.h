@@ -10,7 +10,8 @@
 
 namespace Vox
 {
-	class Model;
+    class MeshShader;
+    class Model;
 	class PickShader;
 	class Shader;
 
@@ -22,6 +23,8 @@ namespace Vox
 		bool LoadMesh(const std::string& filepath);
 
 		void Render(const GBufferShader* shader);
+
+	    void RenderInstance(const MeshShader* shader, const MeshInstance& meshInstance) const;
 
 #ifdef EDITOR
 		void Render(const PickShader* shader);

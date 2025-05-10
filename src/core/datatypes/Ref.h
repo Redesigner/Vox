@@ -35,8 +35,8 @@ namespace Vox
 			container->IncrementRefCount({index, id});
 		}
 
-		Ref(Ref&& other)
-			:container(other.container), index(other.index), id(other.id)
+		Ref(Ref&& other) noexcept
+            :container(other.container), index(other.index), id(other.id)
 		{
 		}
 
@@ -70,9 +70,22 @@ namespace Vox
 			return container->Get(index, id);
 		}
 
+	    T& operator*() const
+		{
+		    T* t = container->Get(index, id);
+		    assert(t != nullptr);
+            // ReSharper disable once CppDFANullDereference
+            return *t;
+		}
+
 		explicit operator bool() const
 		{
 			return container != nullptr;
+		}
+
+	    bool operator ==(const Ref& other) const
+		{
+		    return container == other.container && index == other.index && id == other.id;
 		}
 
 	private:

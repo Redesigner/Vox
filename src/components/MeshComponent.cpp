@@ -18,7 +18,10 @@ namespace Vox
         mesh = ServiceLocator::GetRenderer()->CreateMeshInstance(meshName);
 
 #ifdef EDITOR
-        mesh->RegisterCallback(std::bind(&MeshComponent::Clicked, this, std::placeholders::_1));
+        mesh->RegisterCallback([this](const glm::ivec2 position)
+        {
+            this->Clicked(position);
+        });
 #endif
     }
 
@@ -35,6 +38,7 @@ namespace Vox
 #ifdef EDITOR
     void MeshComponent::Clicked(glm::ivec2 position)
     {
+        ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
         ServiceLocator::GetEditorService()->GetEditor()->SelectObject(this);
         VoxLog(Display, Game, "'{}' clicked!", GetDisplayName());
     }

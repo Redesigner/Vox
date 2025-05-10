@@ -13,7 +13,8 @@
 
 namespace Vox
 {
-	class PickShader;
+    class MeshShader;
+    class PickShader;
 }
 
 namespace Vox
@@ -34,13 +35,15 @@ namespace Vox
 	class Model
 	{
 	public:
-		Model(std::string filepath);
+		Model(const std::string& filepath);
 		~Model();
 
 		Model(const Model&) = delete;
 		Model& operator=(Model&&) = delete;
 
 		void Render(const GBufferShader* shader, const glm::mat4x4& rootMatrix);
+
+        void Render(const MeshShader* shader, const glm::mat4x4& rootMatrix) const;
 
 #ifdef EDITOR
 		void Render(const PickShader* shader, int objectId, const glm::mat4x4& rootMatrix);

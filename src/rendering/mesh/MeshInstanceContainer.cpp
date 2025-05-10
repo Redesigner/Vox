@@ -33,6 +33,11 @@ namespace Vox
 		}
 	}
 
+    void MeshInstanceContainer::RenderInstance(const MeshShader* shader, const MeshInstance& meshInstance) const
+    {
+	    model->Render(shader, meshInstance.GetTransform());
+    }
+
 #ifdef EDITOR
 	void MeshInstanceContainer::Render(const PickShader* shader)
 	{
