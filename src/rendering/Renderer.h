@@ -15,50 +15,29 @@
 #include "rendering/skeletal_mesh/SkeletalModel.h"
 #include "shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
 
-namespace Vox
-{
-    class StencilShader;
-    class StencilBuffer;
-}
-namespace Vox
-{
-    class OutlineShaderDistance;
-    class OutlineShaderJump;
-}
-namespace Vox
-{
-    class OutlineShader;
-}
-namespace Vox
-{
-    class UVec2Buffer;
-}
-namespace Vox
-{
-	class PickContainer;
-}
-
-namespace Vox
-{
-	class PickShader;
-	class PickBuffer;
-}
-
 struct SDL_Window;
-
 namespace Vox
 {
 	class ArrayTexture;
 	class Camera;
+	class ColorDepthFramebuffer;
 	class DebugRenderer;
 	class DeferredShader;
 	class Editor;
-	class ColorDepthFramebuffer;
 	class FullscreenQuad;
 	class GBuffer;
 	class PhysicsServer;
+	class PickBuffer;
+	class PickContainer;
+	class PickShader;
 	class RenderTexture;
 	class VoxelShader;
+    class OutlineShader;
+    class OutlineShaderDistance;
+    class OutlineShaderJump;
+    class StencilBuffer;
+    class StencilShader;
+    class UVec2Buffer;
 
 	class Renderer
 	{
@@ -92,8 +71,11 @@ namespace Vox
 
 		bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
 
+#ifdef EDITOR
 	    void AddMeshOutline(const Ref<MeshInstance>& mesh);
+
 	    void ClearMeshOutlines();
+#endif
 
 		Ref<MeshInstance> CreateMeshInstance(const std::string& meshName);
 
@@ -121,8 +103,10 @@ namespace Vox
 
 #ifdef EDITOR
 		void RenderPickBuffer();
+
+	    void RenderOutline();
 #endif
-		
+
 		void UpdateVoxelMeshes();
 
 		void RenderVoxelMeshes();
@@ -132,8 +116,6 @@ namespace Vox
 		void RenderSky();
 
 		void RenderDebugShapes();
-
-	    void RenderOutline();
 
 		static void CopyViewportToTexture(const RenderTexture& texture);
 

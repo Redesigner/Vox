@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "core/objects/Object.h"
 #include "core/objects/component/Component.h"
-#include "components/SceneComponent.h"
+#include "game_objects/components/SceneComponent.h"
 
 
 namespace  Vox

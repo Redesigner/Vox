@@ -17,8 +17,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
 
-#include "character/Character.h"
-#include "components/MeshComponent.h"
+#include "game_objects/actors/character/Character.h"
+#include "game_objects/components/MeshComponent.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"

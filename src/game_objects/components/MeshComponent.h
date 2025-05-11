@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "components/SceneComponent.h"
+#include "game_objects/components/SceneComponent.h"
 #include "core/datatypes/Ref.h"
 
 namespace Vox

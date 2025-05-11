@@ -1,14 +1,15 @@
 target_sources(Vox PRIVATE
 	"src/Vox.cpp"
 	"src/Vox.h"
-	"src/character/Character.cpp"
-	"src/character/Character.h"  
-	"src/components/CameraComponent.cpp"
-	"src/components/CameraComponent.h"
-	"src/components/MeshComponent.cpp"
-	"src/components/MeshComponent.h"
-	"src/components/SceneComponent.cpp"
-	"src/components/SceneComponent.h"
+
+	"src/game_objects/actors/character/Character.cpp"
+	"src/game_objects/actors/character/Character.h"
+	"src/game_objects/components/CameraComponent.cpp"
+	"src/game_objects/components/CameraComponent.h"
+	"src/game_objects/components/MeshComponent.cpp"
+	"src/game_objects/components/MeshComponent.h"
+	"src/game_objects/components/SceneComponent.cpp"
+	"src/game_objects/components/SceneComponent.h"
 
 	"src/core/concepts/Concepts.h"
 	"src/core/config/Config.cpp"

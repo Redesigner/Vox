@@ -187,9 +187,10 @@ namespace Vox
         return true;
     }
 
+#ifdef EDITOR
     void Renderer::AddMeshOutline(const Ref<MeshInstance>& mesh)
     {
-        if (std::find(outlinedMeshes.begin(), outlinedMeshes.end(), mesh) == outlinedMeshes.end())
+        if (std::ranges::find(outlinedMeshes, mesh) == outlinedMeshes.end())
         {
             outlinedMeshes.emplace_back(mesh);
         }
@@ -199,6 +200,7 @@ namespace Vox
     {
         outlinedMeshes.clear();
     }
+#endif
 
     Ref<MeshInstance> Renderer::CreateMeshInstance(const std::string& meshName)
     {
@@ -442,6 +444,7 @@ namespace Vox
         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
     }
 
+#ifdef EDITOR
     void Renderer::RenderOutline()
     {
         stencilShader->Enable();
@@ -489,6 +492,7 @@ namespace Vox
         outlineShaderDistance->SetWidth(outlineWidth);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
+#endif
 
     void Renderer::RenderSky()
     {
