@@ -20,17 +20,17 @@ namespace Vox
 	{
 	public:
 		Character();
+        ~Character();
 
 		void Update();
 
 	private:
 		Ref<CharacterController> characterController;
-		Ref<MeshInstance> meshInstance;
-		Ref<Camera> camera;
 		Ref<SpringArm> springArm;
 	    std::weak_ptr<CameraComponent> cameraComponent;
 
-		glm::quat rotation;
-		glm::vec3 position;
+        std::function<void(bool)> jumpCallback;
+
+	    IMPLEMENT_OBJECT(Character)
 	};
 }

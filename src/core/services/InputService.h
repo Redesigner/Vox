@@ -34,19 +34,19 @@ namespace Vox
 		void PollEvents();
 
 
-		void RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
+		const KeyboardEventCallback& RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
 
-		void UnregisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
-
-
-		void RegisterMouseMotionCallback(MouseMotionEventCallback callback);
-
-		void UnregisterMouseMotionCallback(MouseMotionEventCallback callback);
+		void UnregisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback);
 
 
-		void RegisterMouseClickCallback(const MouseClickEventCallback& callback);
+		const MouseMotionEventCallback& RegisterMouseMotionCallback(MouseMotionEventCallback callback);
 
-		void UnregisterMouseClickCallback(MouseClickEventCallback callback);
+		void UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback);
+
+
+		const MouseClickEventCallback& RegisterMouseClickCallback(MouseClickEventCallback callback);
+
+		void UnregisterMouseClickCallback(const MouseClickEventCallback& callback);
 
 
 		glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;

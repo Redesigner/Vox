@@ -14,6 +14,7 @@ namespace Vox
 	}
 
 	Transform::Transform(const glm::mat4x4& matrix)
+	    :position({0.0f}), rotation({0.0f}), scale({1.0f})
 	{
 		glm::vec3 skew;
 		glm::vec4 perspective;
@@ -33,6 +34,7 @@ namespace Vox
 	}
 
 	ModelTransform::ModelTransform(const glm::mat4x4& matrix)
+        :position({0.0f}), rotation(), scale({1.0f})
 	{
 		glm::vec3 skew;
 		glm::vec4 perspective;

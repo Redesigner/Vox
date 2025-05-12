@@ -19,6 +19,7 @@
 
 #include "game_objects/actors/character/Character.h"
 #include "game_objects/components/MeshComponent.h"
+#include "game_objects/components/CameraComponent.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -118,8 +119,6 @@ int main()
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
-        Character character = Character();
-
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
         for (int x = -16; x < 16; ++x)
@@ -158,9 +157,11 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<Character>();
 
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
@@ -170,6 +171,7 @@ int main()
         nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();
         testWorld->CreateObject<TestObject>();
         testWorld->CreateObject("Test Actor");
+        Character* character = testWorld->CreateObject<Character>();
         std::string objectString = serializedObject.dump(4);
 
         VoxLog(Display, Game, "{}", objectString);
@@ -227,7 +229,7 @@ int main()
         while (!ServiceLocator::GetInputService()->ShouldCloseWindow())
         {
             ServiceLocator::GetInputService()->PollEvents();
-            character.Update();
+            character->Update();
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;
