@@ -15,12 +15,12 @@ namespace Vox
         }
     }
 
-    const std::vector<std::unique_ptr<Component>>& Actor::GetComponents() const
+    const std::vector<std::shared_ptr<Component>>& Actor::GetComponents() const
     {
         return components;
     }
 
-    const std::vector<std::unique_ptr<SceneComponent>>& Actor::GetAttachedComponents() const
+    const std::vector<std::shared_ptr<SceneComponent>>& Actor::GetAttachedComponents() const
     {
         return attachedComponents;
     }
@@ -54,15 +54,6 @@ namespace Vox
         return transform;
     }
 
-    void Actor::RegisterComponent(std::unique_ptr<Component> component)
-    {
-        components.emplace_back(std::move(component));
-    }
-
-    void Actor::AttachComponent(std::unique_ptr<SceneComponent> component)
-    {
-        attachedComponents.emplace_back(std::move(component));
-    }
 
     void Actor::UpdateChildTransforms() const
     {

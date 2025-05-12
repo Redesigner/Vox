@@ -1,6 +1,7 @@
 ﻿#include "TestActor.h"
 
 #include "core/objects/component/Component.h"
+#include "core/objects/component/TestComponent.h"
 #include "game_objects/components/MeshComponent.h"
 
 namespace Vox
@@ -9,6 +10,7 @@ namespace Vox
     {
         displayName = fmt::format("{}_Default", classDisplayName);
 
-        AttachComponent(Component::Create<MeshComponent>(this, "witch"));
+        AttachComponent<MeshComponent>("witch");
+        RegisterComponent<TestComponent>();
     }
 }

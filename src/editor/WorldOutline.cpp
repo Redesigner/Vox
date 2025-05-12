@@ -50,7 +50,7 @@ namespace Vox
                     }
                 }
                 
-                for (const std::unique_ptr<Component>& component : actor->GetComponents())
+                for (const std::shared_ptr<Component>& component : actor->GetComponents())
                 {
                     if (ImGui::Selectable(fmt::format("\t{}", component->GetDisplayName()).c_str()))
                     {

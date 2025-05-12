@@ -4,6 +4,7 @@
 
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
+#include "game_objects/components/CameraComponent.h"
 #include "physics/CharacterController.h"
 #include "physics/PhysicsServer.h"
 #include "physics/SpringArm.h"
@@ -23,6 +24,8 @@ namespace Vox
 		camera = ServiceLocator::GetRenderer()->CreateCamera();
 
 		ServiceLocator::GetRenderer()->SetCurrentCamera(camera);
+
+        cameraComponent = AttachComponent<CameraComponent>();
 
 		position = glm::vec3(0.0f);
 		rotation = glm::quat(0.0f, 0.0f, 0.0f, 0.0f);

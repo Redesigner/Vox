@@ -10,14 +10,14 @@ namespace Vox
     class Component : public Object
     {
     public:
-        Actor* GetParent() const;
+        [[nodiscard]] Actor* GetParent() const;
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
         template <class T, typename... Args>
-        static std::unique_ptr<T> Create(Actor* parent, Args&&... args) requires Derived<T, Component>
+        static std::shared_ptr<T> Create(Actor* parent, Args&&... args) requires Derived<T, Component>
         {
-            std::unique_ptr<T> result = std::make_unique<T>(std::forward<Args>(args)...);
+            std::shared_ptr<T> result = std::make_shared<T>(std::forward<Args>(args)...);
             result->parent = parent;
             return result;
         }

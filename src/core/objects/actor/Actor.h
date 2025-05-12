@@ -15,9 +15,9 @@ namespace  Vox
 
         void PropertyChanged(const Property& property) override;
 
-        [[nodiscard]] const std::vector<std::unique_ptr<Component>>& GetComponents() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Component>>& GetComponents() const;
         
-        [[nodiscard]] const std::vector<std::unique_ptr<SceneComponent>>& GetAttachedComponents() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<SceneComponent>>& GetAttachedComponents() const;
 
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);
@@ -27,18 +27,26 @@ namespace  Vox
         [[nodiscard]] const Transform& GetTransform() const;
         
     protected:
-        void RegisterComponent(std::unique_ptr<Component> component);
+        template <typename T, typename... Args>
+        std::weak_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
+        {
+            return std::static_pointer_cast<T>(components.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
+        }
 
-        void AttachComponent(std::unique_ptr<SceneComponent> component);
+        template <typename T, typename... Args>
+        std::weak_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
+        {
+            return std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
+        }
     
     private:
         void UpdateChildTransforms() const;
         
         Transform transform;
 
-        std::vector<std::unique_ptr<Component>> components;
+        std::vector<std::shared_ptr<Component>> components;
 
-        std::vector<std::unique_ptr<SceneComponent>> attachedComponents;
+        std::vector<std::shared_ptr<SceneComponent>> attachedComponents;
         
         IMPLEMENT_OBJECT(Actor)
     };
