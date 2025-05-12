@@ -18,7 +18,7 @@ namespace Vox
 		Ref(ObjectContainer<T>* container, std::pair<size_t, int> id)
 			:container(container), index(id.first), id(id.second)
 		{
-			container->IncrementRefCount(id);
+			container->IncrementRefCount({id});
 		}
 
 		~Ref()
@@ -38,6 +38,7 @@ namespace Vox
 		Ref(Ref&& other) noexcept
             :container(other.container), index(other.index), id(other.id)
 		{
+		    other.container = nullptr;
 		}
 
 		Ref& operator =(const Ref& other)

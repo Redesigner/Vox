@@ -39,6 +39,7 @@ namespace Vox
 
     unsigned int PickContainer::RegisterCallback(Callback callback)
     {
+        VoxLog(Display, Input, "Registering click callback for object {}", counter);
         callbacks.emplace(counter, std::move(callback));
         return counter++;
     }
@@ -47,6 +48,7 @@ namespace Vox
     {
         if (const auto result = callbacks.find(key); result != callbacks.end())
         {
+            VoxLog(Display, Input, "Unregistering click callback for object '{}'", key);
             callbacks.erase(result);
         }
     }

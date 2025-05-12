@@ -9,15 +9,26 @@
 namespace Vox
 {
     MeshInstance::MeshInstance(MeshInstanceContainer* meshOwner)
-        :meshOwner(meshOwner)
+        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner)
     {
-        transform = glm::identity<glm::mat4x4>();
     }
 
     MeshInstance::~MeshInstance()
     {
 #ifdef EDITOR
-        ServiceLocator::GetRenderer()->GetPickContainer()->UnregisterCallback(pickId);
+        if (pickId != 0)
+        {
+            ServiceLocator::GetRenderer()->GetPickContainer()->UnregisterCallback(pickId);
+        }
+#endif
+    }
+
+    MeshInstance::MeshInstance(MeshInstance&& other) noexcept
+        :transform(other.transform), meshOwner(other.meshOwner)
+    {
+#ifdef EDITOR
+        pickId = other.pickId;
+        other.pickId = 0;
 #endif
     }
 

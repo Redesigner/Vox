@@ -17,8 +17,10 @@ namespace Vox
 	struct MeshInstance
 	{
 	public:
-		MeshInstance(MeshInstanceContainer* meshOwner);
+		explicit MeshInstance(MeshInstanceContainer* meshOwner);
 		~MeshInstance();
+
+	    MeshInstance(MeshInstance&& other) noexcept;
 		
 		void SetTransform(glm::mat4x4 transformIn);
 
