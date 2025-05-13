@@ -28,13 +28,13 @@ namespace  Vox
         
     protected:
         template <typename T, typename... Args>
-        std::weak_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
+        std::shared_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
         {
             return std::static_pointer_cast<T>(components.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
         }
 
         template <typename T, typename... Args>
-        std::weak_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
+        std::shared_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
         {
             return std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
         }

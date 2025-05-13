@@ -1,7 +1,11 @@
 #include "Character.h"
 
 #include <glm/ext/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 
+#include "core/logging/Logging.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "game_objects/components/CameraComponent.h"
@@ -22,10 +26,9 @@ namespace Vox
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 
 	    auto mesh = AttachComponent<MeshComponent>("witch");
-	    mesh.lock()->SetPosition({0.0f, -1.5f, 0.0f});
+	    mesh->SetPosition({0.0f, -1.5f, 0.0f});
         cameraComponent = AttachComponent<CameraComponent>();
-	    std::shared_ptr<CameraComponent> updatedCameraComponent = cameraComponent.lock();
-        updatedCameraComponent->Activate();
+        cameraComponent->Activate();
 
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())
@@ -33,27 +36,42 @@ namespace Vox
 				characterController->AddImpulse(JPH::Vec3(0.0f, 6.0f, 0.0f));
 			}
 			});
+
+	    mouseLookCallback = ServiceLocator::GetInputService()->RegisterMouseMotionCallback([this](int xMotion, int yMotion)
+        {
+	        RotateCamera(xMotion, yMotion);
+        });
 	}
 
     Character::~Character()
     {
 	    ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_SPACE, jumpCallback);
+	    ServiceLocator::GetInputService()->UnregisterMouseMotionCallback(mouseLookCallback);
     }
 
     void Character::Update()
 	{
-		glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-        std::shared_ptr<CameraComponent> updatedCamera = cameraComponent.lock();
-	    float yaw = updatedCamera->GetWorldTransform().rotation.y;
-		float cos = std::cosf(yaw);
-		float sin = std::sinf(yaw);
+		const glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(
+		    Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D)
+		    );
+        float pitch, yaw, roll;
+	    glm::extractEulerAngleYXZ(cameraComponent->GetWorldTransform().GetMatrix(), yaw, pitch, roll);
+		const float cos = std::cosf(-yaw);
+        const float sin = std::sinf(-yaw);
 		characterController->requestedVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
 		characterController->requestedVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * -4.0f);
 
-		const JPH::Quat characterRotation = characterController->GetRotation();
-		const auto characterQuat = glm::quat(characterRotation.GetX(), characterRotation.GetY(), characterRotation.GetZ(), characterRotation.GetW());
-		glm::mat4x4 rotation = glm::toMat4(characterQuat);
+	    VoxLog(Display, Game, "Camera yaw is '{} rad', '{} deg'", yaw, glm::degrees(yaw));
 		SetPosition(Vector3From(characterController->GetPosition()));
-	    updatedCamera->Update();
+	    cameraComponent->Update();
 	}
+
+    void Character::RotateCamera(const int x, const int y) const
+    {
+	    glm::vec3 rotation = cameraComponent->GetLocalTransform().rotation;
+	    rotation.x += static_cast<float>(y) / 500.0f;
+	    rotation.x = std::clamp(rotation.x, -1.5f, 1.5f);
+	    rotation.y += static_cast<float>(x) / 500.0f;
+	    cameraComponent->SetRotation(rotation);
+    }
 }

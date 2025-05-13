@@ -36,7 +36,7 @@ namespace Vox
     {
         const Transform& worldTransform = GetWorldTransform();
         camera->SetPosition(worldTransform.position);
-        camera->SetRotation(worldTransform.rotation);
+        camera->SetRotation(-worldTransform.rotation);
     }
 
     void CameraComponent::Update()

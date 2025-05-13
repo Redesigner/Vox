@@ -24,7 +24,7 @@ namespace Vox
     private:
         IMPLEMENT_OBJECT(CameraComponent)
 
-        float armLength = 1.0f;
+        float armLength = 5.0f;
 
         Ref<Camera> camera;
     };

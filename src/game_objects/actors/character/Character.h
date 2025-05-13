@@ -20,15 +20,18 @@ namespace Vox
 	{
 	public:
 		Character();
-        ~Character();
+        ~Character() override;
 
 		void Update();
 
 	private:
+        void RotateCamera(int x, int y) const;
+
 		Ref<CharacterController> characterController;
-	    std::weak_ptr<CameraComponent> cameraComponent;
+	    std::shared_ptr<CameraComponent> cameraComponent;
 
         std::function<void(bool)> jumpCallback;
+	    std::function<void(int x, int y)> mouseLookCallback;
 
 	    IMPLEMENT_OBJECT(Character)
 	};
