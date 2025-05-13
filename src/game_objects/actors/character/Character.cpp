@@ -1,21 +1,16 @@
 #include "Character.h"
 
-#include <glm/ext/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 #undef GLM_ENABLE_EXPERIMENTAL
 
-#include "core/logging/Logging.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "game_objects/components/CameraComponent.h"
 #include "game_objects/components/MeshComponent.h"
 #include "physics/CharacterController.h"
 #include "physics/PhysicsServer.h"
-#include "physics/SpringArm.h"
 #include "physics/TypeConversions.h"
-#include "rendering/Camera.h"
-#include "rendering/mesh/MeshInstance.h"
 #include "rendering/Renderer.h"
 
 
@@ -61,7 +56,6 @@ namespace Vox
 		characterController->requestedVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
 		characterController->requestedVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * -4.0f);
 
-	    VoxLog(Display, Game, "Camera yaw is '{} rad', '{} deg'", yaw, glm::degrees(yaw));
 		SetPosition(Vector3From(characterController->GetPosition()));
 	    cameraComponent->Update();
 	}

@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include "SceneComponent.h"
 #include "core/datatypes/Ref.h"
+#include "rendering/Camera.h"
 
 namespace Vox
 {
-    class Camera;
-
     class CameraComponent : public SceneComponent
     {
     public:

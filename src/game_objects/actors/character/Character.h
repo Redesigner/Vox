@@ -10,7 +10,6 @@
 
 namespace Vox
 {
-	class Camera;
     class CameraComponent;
 	class CharacterController;
 	struct MeshInstance;
