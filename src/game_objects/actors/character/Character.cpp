@@ -20,11 +20,12 @@ namespace Vox
 	Character::Character()
 	{
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
-		springArm = ServiceLocator::GetPhysicsServer()->CreateSpringArm(characterController);
 
-	    AttachComponent<MeshComponent>("witch");
+	    auto mesh = AttachComponent<MeshComponent>("witch");
+	    mesh.lock()->SetPosition({0.0f, -1.5f, 0.0f});
         cameraComponent = AttachComponent<CameraComponent>();
-        cameraComponent.lock()->Activate();
+	    std::shared_ptr<CameraComponent> updatedCameraComponent = cameraComponent.lock();
+        updatedCameraComponent->Activate();
 
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())
@@ -42,17 +43,17 @@ namespace Vox
     void Character::Update()
 	{
 		glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D));
-		float yaw = cameraComponent.lock()->GetLocalTransform().rotation.y;
+        std::shared_ptr<CameraComponent> updatedCamera = cameraComponent.lock();
+	    float yaw = updatedCamera->GetWorldTransform().rotation.y;
 		float cos = std::cosf(yaw);
 		float sin = std::sinf(yaw);
 		characterController->requestedVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
 		characterController->requestedVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * -4.0f);
 
-		glm::vec3 controllerPosition = glm::vec3(Vector3From(characterController->GetPosition()));
-		controllerPosition.y -= 1.25f;
-		JPH::Quat characterRotation = characterController->GetRotation();
-		glm::quat characterQuat = glm::quat(characterRotation.GetX(), characterRotation.GetY(), characterRotation.GetZ(), characterRotation.GetW());
+		const JPH::Quat characterRotation = characterController->GetRotation();
+		const auto characterQuat = glm::quat(characterRotation.GetX(), characterRotation.GetY(), characterRotation.GetZ(), characterRotation.GetW());
 		glm::mat4x4 rotation = glm::toMat4(characterQuat);
-		SetPosition(controllerPosition);
+		SetPosition(Vector3From(characterController->GetPosition()));
+	    updatedCamera->Update();
 	}
 }

@@ -14,6 +14,7 @@
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Renderer/DebugRenderer.h>
 
+#include "TypeConversions.h"
 #include "core/logging/Logging.h"
 #include "rendering/DebugRenderer.h"
 
@@ -235,7 +236,8 @@ namespace Vox
 		if (physicsSystem.GetNarrowPhaseQuery().CastRay(rayCast, rayCastResult))
 		{
 			resultOut.hitBody = rayCastResult.mBodyID;
-			resultOut.impactPoint = origin + direction * rayCastResult.mFraction;
+			resultOut.impactPoint = origin + direction * rayCastResult.mFraction;\
+		    resultOut.percentage = rayCastResult.mFraction;
 
 			BodyLockRead lock = BodyLockRead(physicsSystem.GetBodyLockInterfaceNoLock(), rayCastResult.mBodyID);
 			if (lock.Succeeded())
@@ -251,4 +253,9 @@ namespace Vox
 		}
 		return false;
 	}
+
+    bool PhysicsServer::RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut)
+    {
+        return RayCast(Vec3From(origin), Vec3From(direction), resultOut);
+    }
 }

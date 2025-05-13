@@ -9,11 +9,12 @@ namespace Vox
 	struct RayCastResultNormal
 	{
 		RayCastResultNormal();
-		RayCastResultNormal(JPH::BodyID hitBody, JPH::Vec3 origin, JPH::Vec3 impactNormal, JPH::Vec3 impactPoint);
+		RayCastResultNormal(JPH::BodyID hitBody, JPH::Vec3 origin, JPH::Vec3 impactNormal, JPH::Vec3 impactPoint, float percentage);
 
 		JPH::BodyID hitBody;
 		JPH::Vec3 origin;
 		JPH::Vec3 impactNormal;
 		JPH::Vec3 impactPoint;
+	    float percentage;
 	};
 }

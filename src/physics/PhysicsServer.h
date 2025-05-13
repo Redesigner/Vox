@@ -46,7 +46,7 @@ namespace Vox
 		DynamicRef<VoxelBody> CreateVoxelBody();
 
 		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut);
-
+        bool RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut);
 
 		// Character Controller functions
 		Ref<CharacterController> CreateCharacterController(float radius, float halfHeight);

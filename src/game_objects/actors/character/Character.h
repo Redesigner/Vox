@@ -26,7 +26,6 @@ namespace Vox
 
 	private:
 		Ref<CharacterController> characterController;
-		Ref<SpringArm> springArm;
 	    std::weak_ptr<CameraComponent> cameraComponent;
 
         std::function<void(bool)> jumpCallback;

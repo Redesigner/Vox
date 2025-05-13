@@ -11,12 +11,20 @@ namespace Vox
     public:
         CameraComponent();
 
-        void Activate() const;
+        void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
         void OnTransformUpdated() override;
 
+        void Update();
+
+        void Activate() const;
+
+        void SetArmLength(float length);
+
     private:
         IMPLEMENT_OBJECT(CameraComponent)
+
+        float armLength = 1.0f;
 
         Ref<Camera> camera;
     };

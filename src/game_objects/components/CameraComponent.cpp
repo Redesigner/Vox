@@ -1,6 +1,9 @@
 ﻿#include "CameraComponent.h"
 
+#include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
+#include "physics/PhysicsServer.h"
+#include "physics/TypeConversions.h"
 #include "rendering/Camera.h"
 #include "rendering/Renderer.h"
 
@@ -13,9 +16,20 @@ namespace Vox
         camera = ServiceLocator::GetRenderer()->CreateCamera();
     }
 
+    void CameraComponent::BuildProperties(std::vector<Property>& propertiesInOut)
+    {
+        SceneComponent::BuildProperties(propertiesInOut);
+        REGISTER_PROPERTY(float, armLength);
+    }
+
     void CameraComponent::Activate() const
     {
         ServiceLocator::GetRenderer()->SetCurrentCamera(camera);
+    }
+
+    void CameraComponent::SetArmLength(float length)
+    {
+        armLength = length;
     }
 
     void CameraComponent::OnTransformUpdated()
@@ -23,5 +37,20 @@ namespace Vox
         const Transform& worldTransform = GetWorldTransform();
         camera->SetPosition(worldTransform.position);
         camera->SetRotation(worldTransform.rotation);
+    }
+
+    void CameraComponent::Update()
+    {
+        RayCastResultNormal rayCastResult;
+        const glm::vec3 start = GetWorldTransform().position;
+        const glm::vec3 forward = GetWorldTransform().GetForwardVector();
+        if (ServiceLocator::GetPhysicsServer()->RayCast(start, forward * armLength, rayCastResult))
+        {
+            camera->SetPosition(Vector3From(rayCastResult.impactPoint));
+        }
+        else
+        {
+            camera->SetPosition(start + forward * armLength);
+        }
     }
 }

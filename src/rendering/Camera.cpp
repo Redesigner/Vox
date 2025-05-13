@@ -4,6 +4,8 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include "core/logging/Logging.h"
+
 const double CAMERA_CULL_DISTANCE_NEAR = 0.01;
 const double CAMERA_CULL_DISTANCE_FAR = 1000.0;
 
@@ -122,7 +124,7 @@ void Vox::Camera::SetTarget(glm::vec3 targetPosition)
 
 void Vox::Camera::UpdatePositionMatrix()
 {
-	positionMatrix = glm::translate(glm::mat4x4(1.0f), { -position.x, -position.y, -position.z });
+	positionMatrix = glm::translate(glm::identity<glm::mat4x4>(), { -position.x, -position.y, -position.z });
 	UpdateViewMatrix();
 }
 
@@ -135,7 +137,9 @@ void Vox::Camera::UpdateRotationMatrix()
 
 void Vox::Camera::UpdateViewMatrix()
 {
-	viewMatrix = useLookAt ? glm::lookAt(position, target, {0.0f, 1.0f, 0.0f}) : positionMatrix * rotationMatrix;
+	viewMatrix = useLookAt ?
+        glm::lookAt(position, target, {0.0f, 1.0f, 0.0f}) :
+        rotationMatrix * positionMatrix;
 	UpdateViewProjectionMatrix();
 }
 

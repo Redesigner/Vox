@@ -21,11 +21,23 @@ namespace Vox
 		glm::quat rotationQuat;
 		decompose(matrix, scale, rotationQuat, position, skew, perspective);
 		rotation = glm::eulerAngles(rotationQuat);
-	};
+	}
+
+    bool Transform::operator==(const Transform& other) const
+    {
+        return position == other.position && rotation == other.rotation && scale == other.scale;
+    };
+
+    glm::vec3 Transform::GetForwardVector() const
+    {
+        return glm::toMat4(glm::quat(rotation)) * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    }
 
 	glm::mat4x4 Transform::GetMatrix() const
 	{
-		return glm::scale(glm::translate(glm::identity<glm::mat4x4>(), position) * glm::toMat4(glm::quat(rotation)), scale);
+		return glm::scale(
+		    glm::translate(glm::identity<glm::mat4x4>(), position) * glm::toMat4(glm::quat(rotation)),
+		    scale);
 	}
 
 	ModelTransform::ModelTransform()

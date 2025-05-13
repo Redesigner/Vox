@@ -13,9 +13,13 @@ namespace Vox
 		Transform();
 		explicit  Transform(const glm::mat4x4& matrix);
 
+	    bool operator ==(const Transform& other) const;
+
 		glm ::vec3 position{};
 		glm::vec3 rotation{};
 		glm::vec3 scale{};
+
+	    [[nodiscard]] glm::vec3 GetForwardVector() const;
 
 		glm::mat4x4 GetMatrix() const;
 	};

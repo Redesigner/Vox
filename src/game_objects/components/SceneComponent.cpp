@@ -19,26 +19,38 @@ namespace Vox
 
     void SceneComponent::UpdateParentTransform(const Transform& transform)
     {
-        worldTransform = Transform(transform.GetMatrix() * localTransform.GetMatrix());
-        OnTransformUpdated();
+        if (worldTransform != transform)
+        {
+            worldTransform = Transform(transform.GetMatrix() * localTransform.GetMatrix());
+            OnTransformUpdated();
+        }
     }
 
     void SceneComponent::SetPosition(const glm::vec3 position)
     {
-        localTransform.position = position;
-        UpdateTransform();
+        if (localTransform.position != position)
+        {
+            localTransform.position = position;
+            UpdateTransform();
+        }
     }
 
     void SceneComponent::SetRotation(const glm::vec3 rotation)
     {
-        localTransform.rotation = rotation;
-        UpdateTransform();
+        if (localTransform.rotation != rotation)
+        {
+            localTransform.rotation = rotation;
+            UpdateTransform();
+        }
     }
 
     void SceneComponent::SetScale(const glm::vec3 scale)
     {
-        localTransform.scale = scale;
-        UpdateTransform();
+        if (localTransform.scale != scale)
+        {
+            localTransform.scale = scale;
+            UpdateTransform();
+        }
     }
 
     void SceneComponent::SetTransform(const Transform& transformIn)

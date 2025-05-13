@@ -27,20 +27,29 @@ namespace Vox
 
     void Actor::SetPosition(const glm::vec3 position)
     {
-        transform.position = position;
-        UpdateChildTransforms();
+        if (transform.position != position)
+        {
+            transform.position = position;
+            UpdateChildTransforms();
+        }
     }
 
     void Actor::SetRotation(const glm::vec3 rotation)
     {
-        transform.rotation = rotation;
-        UpdateChildTransforms();
+        if (transform.rotation != rotation)
+        {
+            transform.rotation = rotation;
+            UpdateChildTransforms();
+        }
     }
 
     void Actor::SetScale(glm::vec3 scale)
     {
-        transform.scale = scale;
-        UpdateChildTransforms();
+        if (transform.scale != scale)
+        {
+            transform.scale = scale;
+            UpdateChildTransforms();
+        }
     }
 
     void Actor::SetTransform(const Transform& transformIn)
