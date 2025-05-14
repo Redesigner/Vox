@@ -44,7 +44,7 @@ namespace Vox
 	    ServiceLocator::GetInputService()->UnregisterMouseMotionCallback(mouseLookCallback);
     }
 
-    void Character::Update()
+    void Character::Tick(float deltaTime)
 	{
 		const glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(
 		    Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D)
@@ -57,7 +57,8 @@ namespace Vox
 		characterController->requestedVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * -4.0f);
 
 		SetPosition(Vector3From(characterController->GetPosition()));
-	    cameraComponent->Update();
+
+	    Actor::Tick(deltaTime);
 	}
 
     void Character::RotateCamera(const int x, const int y) const

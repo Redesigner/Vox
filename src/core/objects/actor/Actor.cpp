@@ -58,11 +58,18 @@ namespace Vox
         UpdateChildTransforms();
     }
 
+    void Actor::Tick(float deltaTime)
+    {
+        for (auto& tickableComponent : tickableComponents)
+        {
+            tickableComponent->Tick(deltaTime);
+        }
+    }
+
     const Transform& Actor::GetTransform() const
     {
         return transform;
     }
-
 
     void Actor::UpdateChildTransforms() const
     {

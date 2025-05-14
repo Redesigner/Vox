@@ -46,6 +46,8 @@ namespace Vox
 
 		void SelectObject(Object* object);
 
+	    Object* GetSelectedObject() const;
+
 		static ImFont* GetFont_GitLab18();
 		static ImFont* GetFont_GitLab24();
 

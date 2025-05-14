@@ -7,6 +7,9 @@
 
 namespace Vox
 {
+    class Actor;
+    class Tickable;
+
     class World
     {
     public:
@@ -15,15 +18,24 @@ namespace Vox
         template <typename T, class... Args>
         T* CreateObject(Args&&... args) requires Derived<T, Object>
         {
-            return static_cast<T*>(objects.emplace_back( new T(std::forward<Args>(args)...)));
+            T* newObject = static_cast<T*>(objects.emplace_back( new T(std::forward<Args>(args)...)));
+            InsertCheckTickable(newObject);
+            return newObject;
         }
 
         Object* CreateObject(const std::string& className);
 
+        void Tick(float deltaTime);
+
         ~World();
         
     private:
+        void InsertCheckTickable(Object* object);
+
+        void RegisterTickable(Tickable* tickable);
+
         //@TODO: proper heap allocator here
         std::vector<Object*> objects;
+        std::vector<Tickable*> actorsToTick;
     };
 }

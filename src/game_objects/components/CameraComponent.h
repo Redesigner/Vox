@@ -1,11 +1,12 @@
 ﻿#pragma once
 #include "SceneComponent.h"
 #include "core/datatypes/Ref.h"
+#include "core/objects/Tickable.h"
 #include "rendering/Camera.h"
 
 namespace Vox
 {
-    class CameraComponent : public SceneComponent
+    class CameraComponent : public SceneComponent, public Tickable
     {
     public:
         CameraComponent();
@@ -14,7 +15,7 @@ namespace Vox
 
         void OnTransformUpdated() override;
 
-        void Update();
+        void Tick(float deltaTime);
 
         void Activate() const;
 

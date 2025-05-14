@@ -21,7 +21,7 @@ namespace Vox
 		Character();
         ~Character() override;
 
-		void Update();
+		void Tick(float deltaTime) override;
 
 	private:
         void RotateCamera(int x, int y) const;

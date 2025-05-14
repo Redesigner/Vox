@@ -229,7 +229,7 @@ int main()
         while (!ServiceLocator::GetInputService()->ShouldCloseWindow())
         {
             ServiceLocator::GetInputService()->PollEvents();
-            character->Update();
+            testWorld->Tick(1 / 60.0f);
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;

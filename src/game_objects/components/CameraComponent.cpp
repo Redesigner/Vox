@@ -39,14 +39,14 @@ namespace Vox
         camera->SetRotation(-worldTransform.rotation);
     }
 
-    void CameraComponent::Update()
+    void CameraComponent::Tick(float deltaTime)
     {
         RayCastResultNormal rayCastResult;
         const glm::vec3 start = GetWorldTransform().position;
         const glm::vec3 forward = GetWorldTransform().GetForwardVector();
         if (ServiceLocator::GetPhysicsServer()->RayCast(start, forward * armLength, rayCastResult))
         {
-            camera->SetPosition(Vector3From(rayCastResult.impactPoint));
+            camera->SetPosition(start + forward * armLength * rayCastResult.percentage * 0.95f);
         }
         else
         {

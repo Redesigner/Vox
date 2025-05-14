@@ -1,5 +1,6 @@
 ﻿#include "World.h"
 
+#include "core/objects/Tickable.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 
@@ -19,6 +20,14 @@ namespace Vox
         return nullptr;
     }
 
+    void World::Tick(float deltaTime)
+    {
+        for (Tickable* tickable : actorsToTick)
+        {
+            tickable->Tick(deltaTime);
+        }
+    }
+
     World::~World()
     {
         for (Object* object : objects)
@@ -26,5 +35,18 @@ namespace Vox
             delete object;
         }
         objects.clear();
+    }
+
+    void World::InsertCheckTickable(Object* object)
+    {
+        if (const auto tickable = dynamic_cast<Tickable*>(object))
+        {
+            RegisterTickable(tickable);
+        }
+    }
+
+    void World::RegisterTickable(Tickable* tickable)
+    {
+        actorsToTick.push_back(tickable);
     }
 }
