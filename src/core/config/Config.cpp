@@ -44,29 +44,30 @@ namespace Vox
 		}
 
 		json configJson = json::parse(configString);
-		int64_t* x = configJson["window"]["x"].get_ptr<json::number_integer_t*>();
-		int64_t* y = configJson["window"]["y"].get_ptr<json::number_integer_t*>();
-
-		int64_t* w = configJson["window"]["w"].get_ptr<json::number_integer_t*>();
-		int64_t* h = configJson["window"]["h"].get_ptr<json::number_integer_t*>();
-
-		bool* configWindowMaximized = configJson["window"]["maximized"].get_ptr<bool*>();
-
-		if (x && y)
-		{
-			windowPosition = glm::ivec2(*x, *y);
-		}
-
-		if (w && h)
-		{
-			windowSize = glm::ivec2(*w, *h);
-		}
-
-
-		if (configWindowMaximized)
-		{
-			windowMaximized = *configWindowMaximized;
-		}
+	    if (configJson.contains("window"))
+	    {
+	        json& window = configJson["window"];
+	        if (window.contains("x") && window["y"].is_number())
+	        {
+	            windowPosition.x = window["x"];
+	        }
+	        if (window.contains("y") && window["y"].is_number())
+	        {
+	            windowPosition.y = window["y"];
+	        }
+	        if (window.contains("w") && window["w"].is_number())
+	        {
+	            windowSize.x = window["w"];
+	        }
+	        if (window.contains("h") && window["h"].is_number())
+	        {
+	            windowSize.y = window["h"];
+	        }
+	        if (window.contains("maximized") && window["maximized"].is_boolean())
+	        {
+	            windowMaximized = window["maximized"];
+	        }
+	    }
 	}
 
 	void VoxConfig::Write()
@@ -85,7 +86,6 @@ namespace Vox
 		configJson["window"]["h"] = windowSize.y;
 		configJson["window"]["maximized"] = windowMaximized;
 
-		int test = configJson["window"]["h"];
 		std::string configString = configJson.dump(4);
 		SDL_WriteIO(configStream, configString.c_str(), configString.size());
 		SDL_CloseIO(configStream);
