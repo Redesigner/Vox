@@ -14,6 +14,7 @@ namespace Vox
 {
 	class Object;
 	class World;
+    class WorldOutline;
 	class TestObject;
 	class ColorDepthFramebuffer;
 
@@ -29,6 +30,7 @@ namespace Vox
 		};
 
 		Editor();
+	    ~Editor();
 
 		void Draw(const ColorDepthFramebuffer* viewportRenderTexture);
 		
@@ -65,6 +67,7 @@ namespace Vox
 		bool drawAssetViewer = false;
 
 		std::unique_ptr<Console> console;
+	    std::unique_ptr<WorldOutline> worldOutline;
 		
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };

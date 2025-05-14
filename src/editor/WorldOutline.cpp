@@ -15,10 +15,7 @@ namespace Vox
         {
             for (Object* object : world->GetObjects())
             {
-                if (DrawObject(object))
-                {
-                    currentlySelectedObject = object;
-                }
+                DrawObject(object);
             }
         }
         ImGui::End();
@@ -34,17 +31,25 @@ namespace Vox
         currentlySelectedObject = object;
     }
 
-    bool WorldOutline::DrawObject(Object* object)
+    void WorldOutline::DrawObject(Object* object)
     {
-        bool result = false;
-        ImGuiTreeNodeFlags flags = object == currentlySelectedObject ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None;
-        if (ImGui::TreeNodeEx(fmt::format("{} {}", object->GetClassDisplayName(), object->GetDisplayName()).c_str(), flags))
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+        if (object == currentlySelectedObject)
+        {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+        const bool itemExpanded = ImGui::TreeNodeEx(fmt::format("{} {}", object->GetClassDisplayName(), object->GetDisplayName()).c_str(), flags);
+        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+        {
+            currentlySelectedObject = object;
+        }
+        if (itemExpanded)
         {
             if (const Actor* actor = dynamic_cast<Actor*>(object))
             {
                 for (const auto& sceneComponent : actor->GetAttachedComponents())
                 {
-                    if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str()))
+                    if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str(), sceneComponent.get() == currentlySelectedObject))
                     {
                         currentlySelectedObject = sceneComponent.get();
                     }
@@ -52,7 +57,9 @@ namespace Vox
                 
                 for (const std::shared_ptr<Component>& component : actor->GetComponents())
                 {
-                    if (ImGui::Selectable(fmt::format("\t{}", component->GetDisplayName()).c_str()))
+                    if (ImGui::Selectable(
+                        fmt::format("\t{}", component->GetDisplayName()).c_str(),
+                        component.get() == currentlySelectedObject))
                     {
                         currentlySelectedObject = component.get();
                     }
@@ -60,7 +67,5 @@ namespace Vox
             }
             ImGui::TreePop();
         }
-        result = ImGui::IsItemClicked();
-        return result;
     }
 }

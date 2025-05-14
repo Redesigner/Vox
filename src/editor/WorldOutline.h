@@ -6,21 +6,19 @@ namespace Vox
     class Object;
     class World;
 
-    //@TODO: make this not static
-    
     class WorldOutline
     {
     public:
-        static void Draw(World* world);
+        void Draw(World* world);
 
-        static Object* GetSelectedObject();
+        Object* GetSelectedObject();
 
-        static void SetSelectedObject(Object* object);
+        void SetSelectedObject(Object* object);
 
     private:
-        static bool DrawObject(Object* object);
+        void DrawObject(Object* object);
 
-        inline static Object* currentlySelectedObject = nullptr;
+        Object* currentlySelectedObject = nullptr;
     };
 }
 
