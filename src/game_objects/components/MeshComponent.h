@@ -9,7 +9,6 @@ namespace Vox
     {
     public:
         MeshComponent();
-
         explicit MeshComponent(const std::string& meshName);
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;

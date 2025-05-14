@@ -21,7 +21,7 @@ namespace Vox
 		loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
 
 		// Buffer our data into opengl
-		// One GL buffer corresponds to a bufferview
+		// One GL buffer corresponds to a buffer view
 		bufferIds = std::vector<unsigned int>(model.bufferViews.size(), 0);
 		glCreateBuffers(static_cast<int>(model.bufferViews.size()), bufferIds.data());
 		for (int i = 0; i < model.bufferViews.size(); ++i)
@@ -48,7 +48,7 @@ namespace Vox
 			newNode.localTransform = CalculateNodeTransform(node);
 			newNode.children = node.children;
 			newNode.mesh = node.mesh;
-			for (int child : node.children)
+			for (const int child : node.children)
 			{
 				// nodes can only be children of one node, so they should only ever be visited once
 				nodes[child].root = false;
@@ -91,7 +91,7 @@ namespace Vox
 				const unsigned int positionBufferId = bufferIds[model.accessors[positionBuffer->second].bufferView];
 				const unsigned int normalBufferId = bufferIds[model.accessors[normalBuffer->second].bufferView];
 				const unsigned int uvBufferId = bufferIds[model.accessors[uvBuffer->second].bufferView];
-				Primitive& newPrimitive = primitives.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
+				primitives.emplace_back(indexCount, model.accessors[primitive.indices].componentType, primitive.material, indexBufferId, positionBufferId, normalBufferId, uvBufferId);
 				newMesh.emplace_back(static_cast<unsigned int>(primitives.size() - 1)); // Store the primitive index so our nodes can find it later
 			}
 		}
@@ -105,7 +105,7 @@ namespace Vox
 			}
 		}
 
-		size_t separatorLocation = filepath.rfind('/') + 1;
+		const size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
 
@@ -150,8 +150,8 @@ namespace Vox
     }
 
 #ifdef EDITOR
-	void Model::Render(const PickShader* shader, const int objectId, const glm::mat4x4& rootMatrix)
-	{
+	void Model::Render(const PickShader* shader, unsigned const int objectId, const glm::mat4x4& rootMatrix) const
+    {
 		for (const auto& primitive : primitives)
 		{
 			shader->SetObjectId(objectId);
@@ -163,8 +163,8 @@ namespace Vox
 	}
 #endif
 
-	ModelTransform Model::CalculateNodeTransform(const tinygltf::Node& node) const
-	{
+	ModelTransform Model::CalculateNodeTransform(const tinygltf::Node& node)
+    {
 		ModelTransform transform;
 		if (node.matrix.empty())
 		{
@@ -175,7 +175,12 @@ namespace Vox
 
 			if (node.rotation.size() == 4)
 			{
-				transform.rotation = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+				transform.rotation = glm::quat(
+				    static_cast<float>(node.rotation[3]),
+				    static_cast<float>(node.rotation[0]),
+				    static_cast<float>(node.rotation[1]),
+				    static_cast<float>(node.rotation[2])
+				);
 			}
 
 			if (node.scale.size() == 3)
@@ -196,7 +201,7 @@ namespace Vox
 		return transform;
 	}
 
-	void Model::UpdateTransforms(unsigned int nodeIndex, glm::mat4x4 transform)
+	void Model::UpdateTransforms(unsigned int nodeIndex, const glm::mat4x4& transform)
 	{
 		if (nodeIndex >= nodes.size())
 		{
@@ -207,15 +212,15 @@ namespace Vox
 		node.globalTransform = transform * node.localTransform.GetMatrix();
 		if (node.mesh >= 0)
 		{
-			for (int primitiveIndex : meshes[node.mesh])
+			for (const unsigned int primitiveIndex : meshes[node.mesh])
 			{
 				primitives[primitiveIndex].SetTransform(node.globalTransform);
 			}
 		}
 
-		for (int nodeIndex : node.children)
+		for (const int childIndex : node.children)
 		{
-			UpdateTransforms(nodeIndex, node.globalTransform);
+			UpdateTransforms(childIndex, node.globalTransform);
 		}
 	}
 }

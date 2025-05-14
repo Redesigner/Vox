@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -21,30 +20,31 @@ namespace tinygltf
 
 namespace Vox
 {
+    class GBufferShader;
 	class Shader;
 
 	class SkeletalModel
 	{
 	public:
-		SkeletalModel(std::string filepath);
+		explicit SkeletalModel(const std::string& filepath);
 		~SkeletalModel();
 
 		SkeletalModel(const SkeletalModel&) = delete;
 		SkeletalModel& operator=(SkeletalModel&&) = delete;
 
-		void Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation);
+		void Render(GBufferShader* shader, glm::mat4x4 transform);
 
 		// @TODO: use something faster than string here
 		void SetAnimation(std::string animationName , float time);
 
-		const std::unordered_map<std::string, Animation>& GetAnimations() const;
+		[[nodiscard]] const std::unordered_map<std::string, Animation>& GetAnimations() const;
 
 	private:
-		ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;
+		[[nodiscard]] ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;
 
 		void UpdateTransforms(unsigned int node, glm::mat4x4 transform);
 
-		std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model) const;
+		[[nodiscard]] std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model) const;
 
 		std::vector<unsigned int> bufferIds;
 
@@ -66,7 +66,7 @@ namespace Vox
 
 		std::vector<int> joints;
 
-		static const unsigned int maxMatrixCount = 64;
+		static constexpr unsigned int maxMatrixCount = 64;
 
 		float currentAnimTime = 0.0f;
 	};

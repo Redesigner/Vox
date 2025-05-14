@@ -14,6 +14,7 @@
 #include "rendering/shaders/pixel_shaders/PixelShader.h"
 #include "rendering/skeletal_mesh/SkeletalModel.h"
 #include "shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
 struct SDL_Window;
 namespace Vox
@@ -79,13 +80,15 @@ namespace Vox
 
 		Ref<MeshInstance> CreateMeshInstance(const std::string& meshName);
 
+	    Ref<SkeletalMeshInstance> CreateSkeletalMeshInstance(const std::string& meshName);
+
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
 		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
 
 		[[nodiscard]] const std::unordered_map<std::string, MeshInstanceContainer>& GetMeshes() const;
 
-		[[nodiscard]] const std::unordered_map<std::string, SkeletalModel>& GetSkeletalMeshes() const;
+		[[nodiscard]] const std::unordered_map<std::string, SkeletalMeshInstanceContainer>& GetSkeletalMeshes() const;
 
 #ifdef EDITOR
 		[[nodiscard]] PickContainer* GetPickContainer() const;
@@ -128,7 +131,7 @@ namespace Vox
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<ColorDepthFramebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
-		std::unique_ptr<GBufferShader> gBufferShader;
+		std::unique_ptr<GBufferShader> gBufferShader, gBufferShaderSkeleton;
 
 #ifdef EDITOR
 		std::unique_ptr<PickBuffer> pickBuffer;
@@ -145,9 +148,7 @@ namespace Vox
 	    std::unique_ptr<OutlineShaderDistance> outlineShaderDistance;
 #endif
 
-		std::unique_ptr<PixelShader> skeletalMeshShader, skyShader, debugLineShader, debugTriangleShader;
-		int skeletalModelMatrixLocation = -1, skeletalViewMatrixLocation = -1, skeletalProjectionMatrixLocation = -1,
-	        skeletalAlbedoLocation = -1, skeletalRoughnessLocation = -1;
+		std::unique_ptr<PixelShader> skyShader, debugLineShader, debugTriangleShader;
 		int debugLineMatrixLocation, debugTriangleMatrixLocation = -1;
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
@@ -159,7 +160,7 @@ namespace Vox
 
 		// A container holding all of our meshes to be retrieved later
 		std::unordered_map<std::string, MeshInstanceContainer> uploadedModels;
-		std::unordered_map<std::string, SkeletalModel> uploadedSkeletalModels;
+		std::unordered_map<std::string, SkeletalMeshInstanceContainer> uploadedSkeletalModels;
 
 #ifdef EDITOR
 	    std::vector<Ref<MeshInstance>> outlinedMeshes;

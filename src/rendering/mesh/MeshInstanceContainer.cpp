@@ -1,6 +1,8 @@
 #include "MeshInstanceContainer.h"
 
 #include "core/logging/Logging.h"
+#include "core/services/FileIOService.h"
+#include "core/services/ServiceLocator.h"
 #include "rendering/shaders/Shader.h"
 
 namespace Vox
@@ -18,7 +20,7 @@ namespace Vox
 			return false;
 		}
 
-		model = std::make_unique<Model>(filepath);
+		model = std::make_unique<Model>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + filepath);
 		return true;
 	}
 

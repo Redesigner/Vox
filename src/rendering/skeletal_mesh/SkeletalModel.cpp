@@ -10,33 +10,35 @@
 
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
 
 namespace Vox
 {
-	SkeletalModel::SkeletalModel(std::string filepath)
+	SkeletalModel::SkeletalModel(const std::string& filepath)
 	{
 		tinygltf::TinyGLTF loader;
 		std::string err;
 		std::string warn;
 		tinygltf::Model model;
-		bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
+	    matrixBuffer = 0;
+		loader.LoadBinaryFromFile(&model, &err, &warn, filepath);
 
 		std::vector<unsigned int> meshBuffers = GetMeshBuffers(model);
 		// Dump our buffer ids here, so we can grab them in order from the buffered data
 		std::vector<unsigned int> tempBufferLookup = std::vector<unsigned int>(model.bufferViews.size());
 
 		bufferIds = std::vector<unsigned int>(meshBuffers.size(), 0);
-		glCreateBuffers(meshBuffers.size(), bufferIds.data());
+		glCreateBuffers(static_cast<int>(meshBuffers.size()), bufferIds.data());
 		for (int i = 0; i < meshBuffers.size(); ++i)
 		{
 			tempBufferLookup[meshBuffers[i]] = bufferIds[i];
 			tinygltf::BufferView bufferView = model.bufferViews[meshBuffers[i]];
-			glNamedBufferData(bufferIds[i], bufferView.byteLength, model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
+			glNamedBufferData(bufferIds[i], static_cast<int>(bufferView.byteLength), model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
 		// Allocate space for up to 'maxMatrixCount' matrix objects in our UBO
 		glCreateBuffers(1, &matrixBuffer);
-		glNamedBufferStorage(matrixBuffer, sizeof(glm::mat4x4) * maxMatrixCount, 0, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(matrixBuffer, sizeof(glm::mat4x4) * maxMatrixCount, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 		for (const tinygltf::Animation& animation : model.animations)
 		{
@@ -45,9 +47,9 @@ namespace Vox
 
 		// Log our loaded animation names
 		std::string animationNames;
-		for (const std::pair<std::string, Animation>& animation : animations)
+		for (const auto& [name, animation] : animations)
 		{
-			animationNames.append(fmt::format("[{} : {}s]", animation.first, animation.second.GetDuration()));
+			animationNames.append(fmt::format("[{} : {}s]", name, animation.GetDuration()));
 			//if (animation != *--animations.end())
 			{
 				animationNames.append(", ");
@@ -180,21 +182,21 @@ namespace Vox
 			}
 		}
 
-		for (int node : rootNodes)
+		for (const unsigned int node : rootNodes)
 		{
 			UpdateTransforms(node, glm::identity<glm::mat4x4>());
 		}
 
-		size_t separatorLocation = filepath.rfind('/') + 1;
+		const size_t separatorLocation = filepath.rfind('/') + 1;
 		VoxLog(Display, Rendering, "Successfully loaded model '{}' with {} primitives.", filepath.substr(separatorLocation, filepath.size() - separatorLocation), primitives.size());
 	}
 
 	SkeletalModel::~SkeletalModel()
 	{
-		glDeleteBuffers(bufferIds.size(), bufferIds.data());
+		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	void SkeletalModel::Render(Shader& shader, unsigned int modelUniformLocation, glm::mat4x4 transform, unsigned int colorUniformLocation, unsigned int roughnessUniformLocation)
+	void SkeletalModel::Render(GBufferShader* shader, glm::mat4x4 transform)
 	{
 		//SetAnimation("Translate", currentAnimTime);
 		//SetAnimation("Rotate", currentAnimTime);
@@ -204,11 +206,8 @@ namespace Vox
 
 		for (const SkeletalPrimitive& primitive : primitives)
 		{
-			const PBRMaterial& material = materials[primitive.materialIndex];
-			shader.SetUniformColor(colorUniformLocation, material.albedo);
-			shader.SetUniformFloat(roughnessUniformLocation, material.roughness);
-
-			shader.SetUniformMatrix(modelUniformLocation, transform);
+		    shader->SetMaterial(materials[primitive.materialIndex]);
+			shader->SetModelMatrix(transform);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.indexBuffer);
 			glBindVertexBuffer(0, primitive.positionBuffer, 0, sizeof(float) * 3);
@@ -239,7 +238,7 @@ namespace Vox
 		Animation& animation = animationLookup->second;
 		animation.ApplyToNodes(nodes, time);
 
-		for (int node : rootNodes)
+		for (const unsigned int node : rootNodes)
 		{
 			UpdateTransforms(node, glm::identity<glm::mat4x4>());
 		}

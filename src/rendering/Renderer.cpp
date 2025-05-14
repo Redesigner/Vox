@@ -33,6 +33,7 @@
 #include "shaders/pixel_shaders/outline_shaders/OutlineShader.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderDistance.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderJump.h"
+#include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
 namespace Vox
 {
@@ -47,19 +48,14 @@ namespace Vox
 
         quad = std::make_unique<FullscreenQuad>();
 
-        skeletalMeshShader = std::make_unique<PixelShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
-        skeletalModelMatrixLocation = skeletalMeshShader->GetUniformLocation("matModel");
-        skeletalViewMatrixLocation = skeletalMeshShader->GetUniformLocation("matView");
-        skeletalProjectionMatrixLocation = skeletalMeshShader->GetUniformLocation("matProjection");
-        skeletalRoughnessLocation = skeletalMeshShader->GetUniformLocation("materialRoughness");
-        skeletalAlbedoLocation = skeletalMeshShader->GetUniformLocation("materialAlbedo");
-        const unsigned int matrixBufferLocation = glGetUniformBlockIndex(skeletalMeshShader->GetId(), "data");
-        glUniformBlockBinding(skeletalMeshShader->GetId(), matrixBufferLocation, 0);
-
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
-        gBufferShader = std::make_unique<GBufferShader>();
-        
+        gBufferShader = std::make_unique<GBufferShader>("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+        gBufferShaderSkeleton = std::make_unique<GBufferShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
+
+        const unsigned int matrixBufferLocation = glGetUniformBlockIndex(gBufferShaderSkeleton->GetId(), "data");
+        glUniformBlockBinding(gBufferShaderSkeleton->GetId(), matrixBufferLocation, 0);
+
         skyShader = std::make_unique<PixelShader>("assets/shaders/sky.vert", "assets/shaders/sky.frag");
         debugTriangleShader = std::make_unique<PixelShader>("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
         debugLineShader = std::make_unique<PixelShader>("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
@@ -183,7 +179,8 @@ namespace Vox
             return false;
         }
 
-        uploadedSkeletalModels.emplace(alias, relativeFilePath);
+        auto newSkeletalMeshInstance = uploadedSkeletalModels.emplace(alias, 8);
+        newSkeletalMeshInstance.first->second.LoadMesh(relativeFilePath);
         return true;
     }
 
@@ -208,6 +205,18 @@ namespace Vox
         if (mesh == uploadedModels.end())
         {
             VoxLog(Error, Rendering, "No mesh with name '{}' exists. Make sure to call 'UploadModel' first.", meshName);
+            return {};
+        }
+
+        return mesh->second.CreateMeshInstance();
+    }
+
+    Ref<SkeletalMeshInstance> Renderer::CreateSkeletalMeshInstance(const std::string& meshName)
+    {
+        const auto mesh = uploadedSkeletalModels.find(meshName);
+        if (mesh == uploadedSkeletalModels.end())
+        {
+            VoxLog(Error, Rendering, "No skeletal mesh with name '{}' exists. Make sure to call 'UploadModel' first.", meshName);
             return {};
         }
 
@@ -251,7 +260,7 @@ namespace Vox
         return uploadedModels;
     }
 
-    const std::unordered_map<std::string, SkeletalModel>& Renderer::GetSkeletalMeshes() const
+    const std::unordered_map<std::string, SkeletalMeshInstanceContainer>& Renderer::GetSkeletalMeshes() const
     {
         return uploadedSkeletalModels;
     }
@@ -331,14 +340,13 @@ namespace Vox
             val.Render(gBufferShader.get());
         }
 
-        skeletalMeshShader->Enable();
-        Vox::PixelShader::SetUniformMatrix(skeletalViewMatrixLocation, currentCamera->GetViewMatrix());
-        Vox::PixelShader::SetUniformMatrix(skeletalProjectionMatrixLocation, currentCamera->GetProjectionMatrix());
+        gBufferShaderSkeleton->Enable();
+        gBufferShaderSkeleton->SetCamera(currentCamera);
         glBindVertexArray(skeletalMeshVao);
 
-        for (auto& val : uploadedSkeletalModels | std::views::values)
+        for (SkeletalMeshInstanceContainer& val : uploadedSkeletalModels | std::views::values)
         {
-            val.Render(*skeletalMeshShader, skeletalModelMatrixLocation, glm::translate(glm::identity<glm::mat4x4>(), glm::vec3(0.0f, 1.0f, 0.0f)), skeletalAlbedoLocation, skeletalRoughnessLocation);
+            val.Render(gBufferShaderSkeleton.get());
         }
 
         UpdateVoxelMeshes();

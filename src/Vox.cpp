@@ -32,6 +32,7 @@
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
+#include "game_objects/components/SkeletalMeshComponent.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
 #include "rendering/Camera.h"
@@ -115,8 +116,8 @@ int main()
 
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
-        ServiceLocator::GetRenderer()->UploadModel("witch", "../../../assets/models/witch.glb");
-        ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "../../../assets/models/scorpion.glb");
+        ServiceLocator::GetRenderer()->UploadModel("witch", "witch.glb");
+        ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
         Voxel defaultVoxel = Voxel();
@@ -161,6 +162,7 @@ int main()
 
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};

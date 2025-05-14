@@ -15,7 +15,7 @@ namespace Vox
     public:
         PickShader();
 
-        void SetObjectId(int objectId) const;
+        void SetObjectId(unsigned int objectId) const;
 
     private:
         UniformLocations uniformLocations;

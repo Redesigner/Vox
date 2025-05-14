@@ -8,6 +8,8 @@ target_sources(Vox PRIVATE
 	"src/game_objects/components/CameraComponent.h"
 	"src/game_objects/components/MeshComponent.cpp"
 	"src/game_objects/components/MeshComponent.h"
+	"src/game_objects/components/SkeletalMeshComponent.cpp"
+	"src/game_objects/components/SkeletalMeshComponent.h"
 	"src/game_objects/components/SceneComponent.cpp"
 	"src/game_objects/components/SceneComponent.h"
 
@@ -169,6 +171,10 @@ target_sources(Vox PRIVATE
 	"src/rendering/skeletal_mesh/AnimationChannel.h"
 	"src/rendering/skeletal_mesh/SkeletalModel.cpp"
 	"src/rendering/skeletal_mesh/SkeletalModel.h"
+	"src/rendering/skeletal_mesh/SkeletalMeshInstance.cpp"
+	"src/rendering/skeletal_mesh/SkeletalMeshInstance.h"
+	"src/rendering/skeletal_mesh/SkeletalMeshInstanceContainer.cpp"
+	"src/rendering/skeletal_mesh/SkeletalMeshInstanceContainer.h"
 	"src/rendering/skeletal_mesh/SkeletalPrimitive.h"
 
 	"src/voxel/CollisionOctree.cpp"

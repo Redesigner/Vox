@@ -15,14 +15,11 @@ namespace Vox
         };
         
     public:
-        GBufferShader();
+        GBufferShader(const std::string& vertLocation, const std::string& fragLocation);
 
         void SetMaterial(const PBRMaterial& material) const;
 
     private:
         UniformLocations uniformLocations;
-
-        static inline std::string vertLocation = "assets/shaders/gBuffer.vert";
-        static inline std::string fragLocation = "assets/shaders/gBuffer.frag";
     };
 }

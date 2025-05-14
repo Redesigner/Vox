@@ -1,8 +1,7 @@
 #include "AssetDisplayWindow.h"
 
+#include <ranges>
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_sdl3.h>
 
 #include "core/services/ServiceLocator.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
@@ -42,8 +41,10 @@ namespace Vox
 			ImGui::TreePop();
 		}
 	}
-	void AssetDisplayWindow::DrawSkeletalMeshData(const std::pair<const std::string, SkeletalModel>& mesh)
-	{
+
+    void AssetDisplayWindow::DrawSkeletalMeshData(
+        const std::pair<const std::string, SkeletalMeshInstanceContainer>& mesh)
+    {
 		if (ImGui::TreeNode(mesh.first.c_str()))
 		{
 			if (ImGui::TreeNode("Animations"))

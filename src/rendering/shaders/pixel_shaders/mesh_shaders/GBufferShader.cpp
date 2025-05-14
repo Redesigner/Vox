@@ -1,11 +1,10 @@
 ﻿#include "GBufferShader.h"
 
-#include "rendering/Camera.h"
 #include "rendering/PBRMaterial.h"
 
 namespace Vox
 {
-    GBufferShader::GBufferShader()
+    GBufferShader::GBufferShader(const std::string& vertLocation, const std::string& fragLocation)
         :MeshShader(vertLocation, fragLocation)
     {
         uniformLocations.roughness = GetUniformLocation("materialRoughness");

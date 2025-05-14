@@ -8,9 +8,6 @@
 namespace Vox
 {
     class MeshInstanceContainer;
-}
-namespace Vox
-{
 	/**
 	 * @brief A struct that contains all the information to draw a separate instance of a mesh
 	 */

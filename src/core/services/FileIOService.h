@@ -6,9 +6,13 @@ namespace Vox
     class FileIOService
     {
     public:
-        const std::string& GetRootPath() const;
+        FileIOService();
+
+        [[nodiscard]] const std::string& GetRootPath() const;
+        [[nodiscard]] const std::string& GetAssetPath() const;
         
     private:
-        std::string rootPath = "../../../";
+        std::string rootPath;
+        std::string assetPath;
     };
 }

@@ -10,7 +10,7 @@ namespace Vox
         uniformLocations.objectId = GetUniformLocation("objectId");
     }
 
-    void PickShader::SetObjectId(int objectId) const
+    void PickShader::SetObjectId(const unsigned int objectId) const
     {
         SetUniformUint(uniformLocations.objectId, objectId);
     }
