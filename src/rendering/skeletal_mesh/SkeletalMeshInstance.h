@@ -31,12 +31,12 @@ namespace Vox
 #endif
 
         void SetAnimationTime(float time);
-
         void SetAnimationIndex(unsigned int index);
+        void SetLooping(bool looping);
 
-        float GetAnimationTime() const;
-
-        unsigned int GetAnimationIndex() const;
+        [[nodiscard]] float GetAnimationTime() const;
+        [[nodiscard]] unsigned int GetAnimationIndex() const;
+        [[nodiscard]] bool GetLooping() const;
 
     private:
         glm::mat4x4 transform;
@@ -44,6 +44,8 @@ namespace Vox
         SkeletalMeshInstanceContainer* meshOwner;
 
         unsigned int animationIndex;
+
+        bool loopAnimation;
 
         float currentAnimationTime;
 

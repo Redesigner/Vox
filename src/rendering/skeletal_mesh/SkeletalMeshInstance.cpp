@@ -15,7 +15,7 @@
 namespace Vox
 {
     SkeletalMeshInstance::SkeletalMeshInstance(SkeletalMeshInstanceContainer* meshOwner)
-        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner), animationIndex(0), currentAnimationTime(0.0f)
+        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner), animationIndex(0), currentAnimationTime(0.0f), loopAnimation(true)
     {
     }
 
@@ -30,7 +30,8 @@ namespace Vox
     }
 
     SkeletalMeshInstance::SkeletalMeshInstance(SkeletalMeshInstance&& other) noexcept
-        :transform(other.transform), meshOwner(other.meshOwner), animationIndex(0), currentAnimationTime(0.0f)
+        :transform(other.transform), meshOwner(other.meshOwner), animationIndex(other.animationIndex),
+        loopAnimation(other.loopAnimation), currentAnimationTime(other.currentAnimationTime)
     {
 #ifdef EDITOR
         pickId = other.pickId;
@@ -65,7 +66,7 @@ namespace Vox
     }
 #endif
 
-    void SkeletalMeshInstance::SetAnimationTime(const float time)
+    void SkeletalMeshInstance::SetAnimationTime(float time)
     {
         if (animationIndex >= meshOwner->GetAnimations().size())
         {
@@ -73,7 +74,21 @@ namespace Vox
             return;
         }
         const Animation& currentAnimation = meshOwner->GetAnimations().at(animationIndex);
-        currentAnimationTime = std::clamp(time, 0.0f, currentAnimation.GetDuration());
+        float duration = currentAnimation.GetDuration();
+
+        if (duration == 0.0f)
+        {
+            return;
+        }
+
+        if (loopAnimation)
+        {
+            if (time >= duration)
+            {
+                time = std::fmod(time, duration);
+            }
+        }
+        currentAnimationTime = std::clamp(time, 0.0f, duration);
     }
 
     void SkeletalMeshInstance::SetAnimationIndex(const unsigned int index)
@@ -91,6 +106,11 @@ namespace Vox
         }
     }
 
+    void SkeletalMeshInstance::SetLooping(bool looping)
+    {
+        loopAnimation = looping;
+    }
+
     float SkeletalMeshInstance::GetAnimationTime() const
     {
         return currentAnimationTime;
@@ -99,5 +119,10 @@ namespace Vox
     unsigned int SkeletalMeshInstance::GetAnimationIndex() const
     {
         return animationIndex;
+    }
+
+    bool SkeletalMeshInstance::GetLooping() const
+    {
+        return loopAnimation;
     }
 }

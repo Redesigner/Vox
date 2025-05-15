@@ -37,6 +37,8 @@ namespace Vox
 
         REGISTER_PROPERTY(float, animationTime);
         REGISTER_PROPERTY(unsigned int, animationIndex);
+        REGISTER_PROPERTY(bool, loop);
+        REGISTER_PROPERTY(bool, playing);
     }
 
     void SkeletalMeshComponent::PropertyChanged(const Property& property)
@@ -46,22 +48,29 @@ namespace Vox
         if (property.GetValuePtr<float>(this) == &animationTime)
         {
             mesh->SetAnimationTime(animationTime);
-            //animationTime = mesh->GetAnimationTime();
             return;
         }
         if (property.GetValuePtr<unsigned int>(this) == &animationIndex)
         {
             mesh->SetAnimationIndex(animationIndex);
-            //animationIndex = mesh->GetAnimationIndex();
+            return;
+        }
+        if (property.GetValuePtr<bool>(this) == &loop)
+        {
+            mesh->SetLooping(loop);
             return;
         }
     }
 
     void SkeletalMeshComponent::Tick(float DeltaTime)
     {
-        animationTime += DeltaTime;
-        mesh->SetAnimationTime(animationTime);
+        if (playing)
+        {
+            animationTime += DeltaTime;
+            mesh->SetAnimationTime(animationTime);
+        }
         animationTime = mesh->GetAnimationTime();
+        animationIndex = mesh->GetAnimationIndex();
     }
 
     void SkeletalMeshComponent::OnTransformUpdated()

@@ -40,6 +40,8 @@ namespace Vox
 
         unsigned int animationIndex;
         float animationTime;
+        bool loop;
+        bool playing;
     };
 
 }
