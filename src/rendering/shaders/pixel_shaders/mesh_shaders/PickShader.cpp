@@ -4,7 +4,7 @@
 
 namespace Vox
 {
-    PickShader::PickShader()
+    PickShader::PickShader(const std::string& vertLocation, const std::string& fragLocation)
         :MeshShader(vertLocation, fragLocation)
     {
         uniformLocations.objectId = GetUniformLocation("objectId");

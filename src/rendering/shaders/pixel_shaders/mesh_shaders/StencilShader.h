@@ -11,6 +11,7 @@ namespace Vox
     {
     public:
         StencilShader();
+        StencilShader(const std::string& vertLocation, const std::string& fragLocation);
 
     private:
         static inline std::string vertLocation = "assets/shaders/stencil.vert";

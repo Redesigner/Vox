@@ -11,6 +11,7 @@
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
 {
@@ -218,7 +219,50 @@ namespace Vox
 		}
 	}
 
-	void SkeletalModel::SetAnimation(unsigned int animationIndex, float time)
+    void SkeletalModel::Render(const MeshShader* shader, const glm::mat4x4& transform, unsigned int animationIndex,
+        float animationTime)
+    {
+	    SetAnimation(animationIndex, animationTime);
+
+	    glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
+
+	    for (const SkeletalPrimitive& primitive : primitives)
+	    {
+	        shader->SetModelMatrix(transform);
+
+	        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.indexBuffer);
+	        glBindVertexBuffer(0, primitive.positionBuffer, 0, sizeof(float) * 3);
+	        glBindVertexBuffer(1, primitive.normalBuffer, 0, sizeof(float) * 3);
+	        glBindVertexBuffer(2, primitive.uvBuffer, 0, sizeof(float) * 2);
+	        glBindVertexBuffer(3, primitive.jointsBuffer, 0, sizeof(unsigned char) * 4);
+	        glBindVertexBuffer(4, primitive.weightsBuffer, 0, sizeof(float) * 4);
+
+	        glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, nullptr);
+	    }
+    }
+
+#ifdef EDITOR
+    void SkeletalModel::Render(const PickShader* shader, const glm::mat4x4& transform, unsigned int objectId,
+        unsigned int animationIndex, float animationTime)
+    {
+	    for (const SkeletalPrimitive& primitive : primitives)
+	    {
+	        shader->SetModelMatrix(transform);
+            shader->SetObjectId(objectId);
+
+	        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive.indexBuffer);
+	        glBindVertexBuffer(0, primitive.positionBuffer, 0, sizeof(float) * 3);
+	        glBindVertexBuffer(1, primitive.normalBuffer, 0, sizeof(float) * 3);
+	        glBindVertexBuffer(2, primitive.uvBuffer, 0, sizeof(float) * 2);
+	        glBindVertexBuffer(3, primitive.jointsBuffer, 0, sizeof(unsigned char) * 4);
+	        glBindVertexBuffer(4, primitive.weightsBuffer, 0, sizeof(float) * 4);
+
+	        glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, nullptr);
+	    }
+    }
+#endif
+
+    void SkeletalModel::SetAnimation(unsigned int animationIndex, float time)
 	{
 	    if (animationIndex >= animations.size())
 	    {

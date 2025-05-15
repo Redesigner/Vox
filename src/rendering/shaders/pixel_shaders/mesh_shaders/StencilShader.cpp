@@ -10,4 +10,9 @@ namespace Vox
         :MeshShader(vertLocation, fragLocation)
     {
     }
+
+    StencilShader::StencilShader(const std::string& vertLocation, const std::string& fragLocation)
+        :MeshShader(vertLocation, fragLocation)
+    {
+    }
 } // Vox

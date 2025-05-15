@@ -80,7 +80,7 @@ namespace Vox
         else
         {
             editor->SelectObject(this);
-            //ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
+            ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
         }
     }
 #endif

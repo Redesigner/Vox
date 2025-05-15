@@ -74,6 +74,7 @@ namespace Vox
 
 #ifdef EDITOR
 	    void AddMeshOutline(const Ref<MeshInstance>& mesh);
+	    void AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh);
 
 	    void ClearMeshOutlines();
 #endif
@@ -107,7 +108,7 @@ namespace Vox
 #ifdef EDITOR
 		void RenderPickBuffer();
 
-	    void RenderOutline();
+	    void RenderOutline() const;
 #endif
 
 		void UpdateVoxelMeshes();
@@ -135,14 +136,13 @@ namespace Vox
 
 #ifdef EDITOR
 		std::unique_ptr<PickBuffer> pickBuffer;
-		std::unique_ptr<PickShader> pickShader;
+		std::unique_ptr<PickShader> pickShader, pickShaderSkeleton;
 		std::unique_ptr<PickContainer> pickContainer;
 
         std::unique_ptr<StencilBuffer> stencilBuffer;
-	    std::unique_ptr<StencilShader> stencilShader;
+	    std::unique_ptr<StencilShader> stencilShader, stencilShaderSkeleton;
 
-	    std::unique_ptr<UVec2Buffer> outlineBuffer;
-	    std::unique_ptr<UVec2Buffer> outlineBuffer2;
+	    std::unique_ptr<UVec2Buffer> outlineBuffer, outlineBuffer2;
 	    std::unique_ptr<OutlineShader> outlineShader;
 	    std::unique_ptr<OutlineShaderJump> outlineShaderJump;
 	    std::unique_ptr<OutlineShaderDistance> outlineShaderDistance;
@@ -164,6 +164,7 @@ namespace Vox
 
 #ifdef EDITOR
 	    std::vector<Ref<MeshInstance>> outlinedMeshes;
+	    std::vector<Ref<SkeletalMeshInstance>> outlinedSkeletalMeshes;
 #endif
 
 		LightUniformLocations lightUniformLocations;

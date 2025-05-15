@@ -13,14 +13,11 @@ namespace Vox
         };
         
     public:
-        PickShader();
+        PickShader(const std::string& vertLocation, const std::string& fragLocation);
 
         void SetObjectId(unsigned int objectId) const;
 
     private:
         UniformLocations uniformLocations;
-
-        static inline std::string vertLocation = "assets/shaders/pickBuffer.vert";
-        static inline std::string fragLocation = "assets/shaders/pickBuffer.frag";
     };
 }

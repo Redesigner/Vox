@@ -77,14 +77,17 @@ namespace Vox
         
 #ifdef EDITOR
         pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
-        pickShader = std::make_unique<PickShader>();
+        pickShader = std::make_unique<PickShader>("assets/shaders/pickBuffer.vert", "assets/shaders/pickBuffer.frag");
+        pickShaderSkeleton = std::make_unique<PickShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/pickBuffer.frag");
         pickContainer = std::make_unique<PickContainer>();
 
         stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
         stencilShader = std::make_unique<StencilShader>();
+        stencilShaderSkeleton = std::make_unique<StencilShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/stencil.frag");
 
         outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
+
         outlineShader = std::make_unique<OutlineShader>();
         outlineShaderJump = std::make_unique<OutlineShaderJump>();
         outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
@@ -193,9 +196,18 @@ namespace Vox
         }
     }
 
+    void Renderer::AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh)
+    {
+        if (std::ranges::find(outlinedSkeletalMeshes, mesh) == outlinedSkeletalMeshes.end())
+        {
+            outlinedSkeletalMeshes.emplace_back(mesh);
+        }
+    }
+
     void Renderer::ClearMeshOutlines()
     {
         outlinedMeshes.clear();
+        outlinedSkeletalMeshes.clear();
     }
 #endif
 
@@ -382,8 +394,6 @@ namespace Vox
         glClear(GL_DEPTH_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDisable(GL_DEPTH_TEST);
-
         pickShader->Enable();
         pickShader->SetCamera(currentCamera);
         glBindVertexArray(meshVao);
@@ -392,7 +402,15 @@ namespace Vox
         {
             val.Render(pickShader.get());
         }
-        glEnable(GL_DEPTH_TEST);
+
+        pickShaderSkeleton->Enable();
+        pickShaderSkeleton->SetCamera(currentCamera);
+        glBindVertexArray(skeletalMeshVao);
+
+        for (auto& val : uploadedSkeletalModels | std::views::values)
+        {
+            val.Render(pickShader.get());
+        }
     }
 #endif
     
@@ -453,13 +471,23 @@ namespace Vox
     }
 
 #ifdef EDITOR
-    void Renderer::RenderOutline()
+    void Renderer::RenderOutline() const
     {
-        stencilShader->Enable();
-        stencilShader->SetCamera(currentCamera);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
         glClear(GL_COLOR_BUFFER_BIT);
+
+        stencilShader->Enable();
+        stencilShader->SetCamera(currentCamera);
+        glBindVertexArray(meshVao);
         for (const Ref<MeshInstance>& mesh : outlinedMeshes)
+        {
+            mesh->GetMeshOwner()->RenderInstance(stencilShader.get(), *mesh);
+        }
+
+        stencilShaderSkeleton->Enable();
+        stencilShaderSkeleton->SetCamera(currentCamera);
+        glBindVertexArray(skeletalMeshVao);
+        for (const auto& mesh : outlinedSkeletalMeshes)
         {
             mesh->GetMeshOwner()->RenderInstance(stencilShader.get(), *mesh);
         }

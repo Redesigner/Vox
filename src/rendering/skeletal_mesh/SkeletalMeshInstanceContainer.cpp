@@ -42,12 +42,26 @@ namespace Vox
     void SkeletalMeshInstanceContainer::RenderInstance(const MeshShader* shader,
         const SkeletalMeshInstance& meshInstance) const
     {
+        model->Render(shader, meshInstance.GetTransform(), meshInstance.GetAnimationIndex(), meshInstance.GetAnimationTime());
     }
 
     const std::vector<Animation>& SkeletalMeshInstanceContainer::GetAnimations() const
     {
         return model->GetAnimations();
     }
+
+#ifdef EDITOR
+    void SkeletalMeshInstanceContainer::Render(const PickShader* shader)
+    {
+        for (std::optional<SkeletalMeshInstance>& meshInstance : meshInstances)
+        {
+            if (meshInstance.has_value())
+            {
+                model->Render(shader, meshInstance->GetTransform(), meshInstance->GetPickId(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
+            }
+        }
+    }
+#endif
 
     Ref<SkeletalMeshInstance> SkeletalMeshInstanceContainer::CreateMeshInstance()
     {
