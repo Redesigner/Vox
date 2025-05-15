@@ -19,6 +19,11 @@ namespace Vox
         return displayName;
     }
 
+    void Object::SetName(const std::string& name)
+    {
+        displayName = name;
+    }
+
     nlohmann::ordered_json Object::Serialize()
     {
         using json = nlohmann::ordered_json;

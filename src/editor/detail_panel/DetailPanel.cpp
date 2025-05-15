@@ -57,6 +57,11 @@ namespace Vox
                 propertyChanged = TransformDetailPanel::Draw(property.GetFriendlyName().c_str(), transform);
                 break;
             }
+        case PropertyType::_uint:
+            {
+                propertyChanged = ImGui::InputScalar(property.GetFriendlyName().c_str(), ImGuiDataType_U32, property.GetValuePtr<unsigned int>(object));
+                break;
+            }
         }
 
         if (propertyChanged)

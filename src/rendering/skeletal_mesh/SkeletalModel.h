@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <glm/mat4x4.hpp>
@@ -32,19 +31,20 @@ namespace Vox
 		SkeletalModel(const SkeletalModel&) = delete;
 		SkeletalModel& operator=(SkeletalModel&&) = delete;
 
-		void Render(GBufferShader* shader, glm::mat4x4 transform);
+		void Render(const GBufferShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime);
 
-		// @TODO: use something faster than string here
-		void SetAnimation(std::string animationName , float time);
+		void SetAnimation(unsigned int animationIndex, float time);
 
-		[[nodiscard]] const std::unordered_map<std::string, Animation>& GetAnimations() const;
+	    bool GetAnimationIndex(const std::string& animationName, unsigned int& animationIndexOut) const;
+
+		[[nodiscard]] const std::vector<Animation>& GetAnimations() const;
 
 	private:
-		[[nodiscard]] ModelTransform CalculateNodeTransform(const tinygltf::Node& node) const;
+		[[nodiscard]] static ModelTransform CalculateNodeTransform(const tinygltf::Node& node);
 
-		void UpdateTransforms(unsigned int node, glm::mat4x4 transform);
+		void UpdateTransforms(unsigned int node, const glm::mat4x4& transform);
 
-		[[nodiscard]] std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model) const;
+		[[nodiscard]] static std::vector<unsigned int> GetMeshBuffers(const tinygltf::Model& model);
 
 		std::vector<unsigned int> bufferIds;
 
@@ -57,7 +57,7 @@ namespace Vox
 
 		std::vector<PBRMaterial> materials;
 
-		std::unordered_map<std::string, Animation> animations;
+		std::vector<Animation> animations;
 
 		std::vector<ModelNode> nodes;
 		std::vector<unsigned int> rootNodes;
@@ -67,7 +67,5 @@ namespace Vox
 		std::vector<int> joints;
 
 		static constexpr unsigned int maxMatrixCount = 64;
-
-		float currentAnimTime = 0.0f;
 	};
 }

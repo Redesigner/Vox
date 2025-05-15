@@ -13,6 +13,9 @@ namespace Vox
     SkeletalMeshComponent::SkeletalMeshComponent()
     {
         DEFAULT_DISPLAY_NAME()
+
+        animationTime = 0.0f;
+        animationIndex = 0;
     }
 
     SkeletalMeshComponent::SkeletalMeshComponent(const std::string& meshName)
@@ -31,6 +34,34 @@ namespace Vox
     void SkeletalMeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         SceneComponent::BuildProperties(propertiesInOut);
+
+        REGISTER_PROPERTY(float, animationTime);
+        REGISTER_PROPERTY(unsigned int, animationIndex);
+    }
+
+    void SkeletalMeshComponent::PropertyChanged(const Property& property)
+    {
+        SceneComponent::PropertyChanged(property);
+
+        if (property.GetValuePtr<float>(this) == &animationTime)
+        {
+            mesh->SetAnimationTime(animationTime);
+            //animationTime = mesh->GetAnimationTime();
+            return;
+        }
+        if (property.GetValuePtr<unsigned int>(this) == &animationIndex)
+        {
+            mesh->SetAnimationIndex(animationIndex);
+            //animationIndex = mesh->GetAnimationIndex();
+            return;
+        }
+    }
+
+    void SkeletalMeshComponent::Tick(float DeltaTime)
+    {
+        animationTime += DeltaTime;
+        mesh->SetAnimationTime(animationTime);
+        animationTime = mesh->GetAnimationTime();
     }
 
     void SkeletalMeshComponent::OnTransformUpdated()

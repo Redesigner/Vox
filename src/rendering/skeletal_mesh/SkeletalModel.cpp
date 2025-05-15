@@ -42,14 +42,14 @@ namespace Vox
 
 		for (const tinygltf::Animation& animation : model.animations)
 		{
-			animations.try_emplace(animation.name, animation, model);
+			animations.emplace_back(animation, model);
 		}
 
 		// Log our loaded animation names
 		std::string animationNames;
-		for (const auto& [name, animation] : animations)
+		for (const auto& animation : animations)
 		{
-			animationNames.append(fmt::format("[{} : {}s]", name, animation.GetDuration()));
+			animationNames.append(fmt::format("[{} : {}s]", animation.GetName(), animation.GetDuration()));
 			//if (animation != *--animations.end())
 			{
 				animationNames.append(", ");
@@ -166,8 +166,8 @@ namespace Vox
 
 				// There are a couple layers of indirection going on here:
 				// All of our openGL buffer ids are stored in bufferIds
-				// TempBufferLookup simulates the buffer view list, since bufferviews are ordered and
-				// accessors retrieve these bufferviews by index
+				// TempBufferLookup simulates the buffer view list, since buffer views are ordered and
+				// accessors retrieve these buffer views by index
 				SkeletalPrimitive& newPrimitive = primitives.emplace_back();
 				newPrimitive.vertexCount = model.accessors[primitive.indices].count;
 				newPrimitive.indexBuffer = tempBufferLookup[model.accessors[primitive.indices].bufferView];
@@ -196,11 +196,9 @@ namespace Vox
 		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	void SkeletalModel::Render(GBufferShader* shader, glm::mat4x4 transform)
+	void SkeletalModel::Render(const GBufferShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime)
 	{
-		//SetAnimation("Translate", currentAnimTime);
-		//SetAnimation("Rotate", currentAnimTime);
-		SetAnimation("StingerShot", currentAnimTime);
+		SetAnimation(animationIndex, animationTime);
 
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, matrixBuffer, 0, nodes.size() * sizeof(glm::mat4x4));
 
@@ -216,27 +214,18 @@ namespace Vox
 			glBindVertexBuffer(3, primitive.jointsBuffer, 0, sizeof(unsigned char) * 4);
 			glBindVertexBuffer(4, primitive.weightsBuffer, 0, sizeof(float) * 4);
 
-			glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, 0);
-		}
-
-		currentAnimTime += 1.0f / 60.0f;
-		if (currentAnimTime >= 2.5f)
-		{
-			currentAnimTime = 0.0f;
+			glDrawElements(GL_TRIANGLES, primitive.vertexCount, primitive.componentType, nullptr);
 		}
 	}
 
-	void SkeletalModel::SetAnimation(std::string animationName, float time)
+	void SkeletalModel::SetAnimation(unsigned int animationIndex, float time)
 	{
-		auto animationLookup = animations.find(animationName);
-		if (animationLookup == animations.end())
-		{
-			VoxLog(Warning, Rendering, "Could not find animation '{}'", animationName);
-			return;
-		}
-
-		Animation& animation = animationLookup->second;
-		animation.ApplyToNodes(nodes, time);
+	    if (animationIndex >= animations.size())
+	    {
+            VoxLog(Error, Rendering, "Could not find animation at index '{}' for mesh.", animationIndex);
+	        return;
+	    }
+		animations[animationIndex].ApplyToNodes(nodes, time);
 
 		for (const unsigned int node : rootNodes)
 		{
@@ -253,13 +242,25 @@ namespace Vox
 		glNamedBufferSubData(matrixBuffer, 0, transforms.size() * sizeof(glm::mat4x4), transforms.data());
 	}
 
-	const std::unordered_map<std::string, Animation>& SkeletalModel::GetAnimations() const
+    bool SkeletalModel::GetAnimationIndex(const std::string& animationName, unsigned int& animationIndexOut) const
+    {
+	    auto animationLookup = std::ranges::find_if(animations.begin(), animations.end(),
+	        [animationName](const Animation& animation) { return animation.GetName() == animationName; });
+	    if (animationLookup == animations.end())
+	    {
+	        return false;
+	    }
+	    animationIndexOut = std::distance(animations.begin(), animationLookup);
+	    return true;
+    }
+
+    const std::vector<Animation>& SkeletalModel::GetAnimations() const
 	{
 		return animations;
 	}
 
-	ModelTransform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node) const
-	{
+	ModelTransform SkeletalModel::CalculateNodeTransform(const tinygltf::Node& node)
+    {
 		ModelTransform transform;
 		if (node.matrix.empty())
 		{
@@ -291,7 +292,7 @@ namespace Vox
 		return transform;
 	}
 
-	void SkeletalModel::UpdateTransforms(unsigned int nodeIndex, glm::mat4x4 transform)
+	void SkeletalModel::UpdateTransforms(const unsigned int nodeIndex, const glm::mat4x4& transform)
 	{
 		if (nodeIndex >= nodes.size())
 		{
@@ -301,17 +302,17 @@ namespace Vox
 		ModelNode& node = nodes[nodeIndex];
 		node.globalTransform = transform * node.localTransform.GetMatrix();
 
-		for (int nodeIndex : node.children)
+		for (const int updatedNodeIndex : node.children)
 		{
-			UpdateTransforms(nodeIndex, node.globalTransform);
+			UpdateTransforms(updatedNodeIndex, node.globalTransform);
 		}
 	}
 
 	// Calculate which bufferViews from the model need to be uploaded to the GPU
 	// this should only be primitive attributes -- bufferViews used in animation
 	// should be stored on the CPU instead
-	std::vector<unsigned int> SkeletalModel::GetMeshBuffers(const tinygltf::Model& model) const
-	{
+	std::vector<unsigned int> SkeletalModel::GetMeshBuffers(const tinygltf::Model& model)
+    {
 		std::vector<unsigned int> meshBuffers;
 
 		for (const tinygltf::Mesh& mesh : model.meshes)

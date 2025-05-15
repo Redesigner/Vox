@@ -13,9 +13,10 @@ namespace Vox
     struct SkeletalMeshInstance
     {
         explicit SkeletalMeshInstance(SkeletalMeshInstanceContainer* meshOwner);
+        SkeletalMeshInstance(SkeletalMeshInstance&& other) noexcept;
+
         ~SkeletalMeshInstance();
 
-        SkeletalMeshInstance(SkeletalMeshInstance&& other) noexcept;
 
         void SetTransform(const glm::mat4x4& transformIn);
 
@@ -29,10 +30,23 @@ namespace Vox
         [[nodiscard]] unsigned int GetPickId() const;
 #endif
 
-        private:
+        void SetAnimationTime(float time);
+
+        void SetAnimationIndex(unsigned int index);
+
+        float GetAnimationTime() const;
+
+        unsigned int GetAnimationIndex() const;
+
+    private:
         glm::mat4x4 transform;
 
         SkeletalMeshInstanceContainer* meshOwner;
+
+        unsigned int animationIndex;
+
+        float currentAnimationTime;
+
 
 #ifdef EDITOR
         unsigned int pickId = 0;

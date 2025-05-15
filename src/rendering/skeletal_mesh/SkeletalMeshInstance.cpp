@@ -4,8 +4,10 @@
 
 #include "SkeletalMeshInstance.h"
 
+#include <algorithm>
 #include <glm/ext/matrix_transform.hpp>
 
+#include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
@@ -13,7 +15,7 @@
 namespace Vox
 {
     SkeletalMeshInstance::SkeletalMeshInstance(SkeletalMeshInstanceContainer* meshOwner)
-        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner)
+        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner), animationIndex(0), currentAnimationTime(0.0f)
     {
     }
 
@@ -28,7 +30,7 @@ namespace Vox
     }
 
     SkeletalMeshInstance::SkeletalMeshInstance(SkeletalMeshInstance&& other) noexcept
-        :transform(other.transform), meshOwner(other.meshOwner)
+        :transform(other.transform), meshOwner(other.meshOwner), animationIndex(0), currentAnimationTime(0.0f)
     {
 #ifdef EDITOR
         pickId = other.pickId;
@@ -62,4 +64,40 @@ namespace Vox
         return pickId;
     }
 #endif
+
+    void SkeletalMeshInstance::SetAnimationTime(const float time)
+    {
+        if (animationIndex >= meshOwner->GetAnimations().size())
+        {
+            VoxLog(Error, Rendering, "Attempted to set animationIndex to an out-of-bounds value.");
+            return;
+        }
+        const Animation& currentAnimation = meshOwner->GetAnimations().at(animationIndex);
+        currentAnimationTime = std::clamp(time, 0.0f, currentAnimation.GetDuration());
+    }
+
+    void SkeletalMeshInstance::SetAnimationIndex(const unsigned int index)
+    {
+        if (index >= meshOwner->GetAnimations().size())
+        {
+            VoxLog(Error, Rendering, "Attempted to set animationIndex to an out-of-bounds value.");
+            return;
+        }
+
+        if (animationIndex != index)
+        {
+            currentAnimationTime = std::min(currentAnimationTime, meshOwner->GetAnimations().at(index).GetDuration());
+            animationIndex = index;
+        }
+    }
+
+    float SkeletalMeshInstance::GetAnimationTime() const
+    {
+        return currentAnimationTime;
+    }
+
+    unsigned int SkeletalMeshInstance::GetAnimationIndex() const
+    {
+        return animationIndex;
+    }
 }

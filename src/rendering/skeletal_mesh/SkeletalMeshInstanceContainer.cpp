@@ -34,7 +34,7 @@ namespace Vox
         {
             if (meshInstance.has_value())
             {
-                model->Render(shader, meshInstance->GetTransform());
+                model->Render(shader, meshInstance->GetTransform(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
             }
         }
     }
@@ -44,7 +44,7 @@ namespace Vox
     {
     }
 
-    const std::unordered_map<std::string, Animation>& SkeletalMeshInstanceContainer::GetAnimations() const
+    const std::vector<Animation>& SkeletalMeshInstanceContainer::GetAnimations() const
     {
         return model->GetAnimations();
     }

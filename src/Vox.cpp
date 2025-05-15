@@ -172,7 +172,12 @@ int main()
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();
         testWorld->CreateObject<TestObject>();
-        testWorld->CreateObject("Test Actor");
+        //testWorld->CreateObject("Test Actor");
+        testWorld->CreateObject<TestActor>();
+        TestActor* testActor2 = testWorld->CreateObject<TestActor>();
+        testActor2->SetName("Test actor 2");
+        testActor2->SetPosition({-2.0f, 0.0f, 0.0f});
+
         Character* character = testWorld->CreateObject<Character>();
         std::string objectString = serializedObject.dump(4);
 

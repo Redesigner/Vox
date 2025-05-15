@@ -29,7 +29,7 @@ namespace Vox
 
         void RenderInstance(const MeshShader* shader, const SkeletalMeshInstance& meshInstance) const;
 
-        [[nodiscard]] const std::unordered_map<std::string, Animation>& GetAnimations() const;
+        [[nodiscard]] const std::vector<Animation>& GetAnimations() const;
 
 #ifdef EDITOR
         void Render(const PickShader* shader);

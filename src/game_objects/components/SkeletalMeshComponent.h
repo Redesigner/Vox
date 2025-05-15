@@ -5,13 +5,14 @@
 #pragma once
 #include "SceneComponent.h"
 #include "core/datatypes/Ref.h"
+#include "core/objects/Tickable.h"
 #include "rendering/skeletal_mesh/SkeletalMeshInstance.h"
 
 namespace Vox
 {
     struct SkeletalMeshInstance;
 
-    class SkeletalMeshComponent : public SceneComponent
+    class SkeletalMeshComponent : public SceneComponent, public Tickable
     {
     public:
         SkeletalMeshComponent();
@@ -19,8 +20,13 @@ namespace Vox
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
+        void PropertyChanged(const Property& property) override;
+
+        void Tick(float DeltaTime) override;
+
     protected:
         void OnTransformUpdated() override;
+
 
     private:
 
@@ -31,6 +37,9 @@ namespace Vox
         IMPLEMENT_OBJECT(SkeletalMeshComponent)
 
         Ref<SkeletalMeshInstance> mesh;
+
+        unsigned int animationIndex;
+        float animationTime;
     };
 
 }

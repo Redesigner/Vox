@@ -51,7 +51,7 @@ namespace Vox
 			{
 				for (const auto& animation : mesh.second.GetAnimations())
 				{
-					ImGui::Text("%s : '%fs'", animation.first.c_str(), animation.second.GetDuration());
+					ImGui::Text("%s : '%fs'", animation.GetName().c_str(), animation.GetDuration());
 				}
 				ImGui::TreePop();
 			}

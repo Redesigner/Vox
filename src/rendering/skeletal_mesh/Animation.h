@@ -23,7 +23,10 @@ namespace Vox
 
 		void ApplyToNodes(std::vector<ModelNode>& nodes, float time);
 
+	    const std::string& GetName() const;
+
 	private:
+	    std::string name;
 		std::vector<AnimationChannel> channels;
 		float duration;
 	};

@@ -55,6 +55,8 @@ namespace Vox
 
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
 
+        void SetName(const std::string& name);
+
         nlohmann::ordered_json Serialize();
         
     protected:

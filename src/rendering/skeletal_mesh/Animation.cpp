@@ -11,6 +11,7 @@ namespace Vox
 	Animation::Animation(const tinygltf::Animation& animation, tinygltf::Model& model)
 	{
 		duration = 0.0f;
+	    name = animation.name;
 		for (const tinygltf::AnimationChannel& channel : animation.channels)
 		{
 			AnimationChannel& animationChannel = channels.emplace_back(model, animation, channel);
@@ -30,4 +31,9 @@ namespace Vox
 			animationChannel.ApplyToNode(nodes, time);
 		}
 	}
+
+    const std::string& Animation::GetName() const
+    {
+        return name;
+    }
 }
