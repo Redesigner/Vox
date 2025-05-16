@@ -35,6 +35,8 @@ namespace Vox
 		[[nodiscard]] unsigned int GetPickId() const;
 #endif
 
+	    bool visible;
+
 	private:
 		glm::mat4x4 transform;
 	    std::vector<PBRMaterial> materials;

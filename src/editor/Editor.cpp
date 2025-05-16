@@ -5,10 +5,13 @@
 #include <imgui_impl_sdl3.h>
 
 #include "core/math/Math.h"
+#include "core/objects/ObjectClass.h"
+#include "core/objects/actor/Actor.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
 #include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
+#include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
 {
@@ -16,6 +19,16 @@ namespace Vox
 
     void Editor::Draw(const ColorDepthFramebuffer* viewportRenderTexture)
     {
+        if (gizmo)
+        {
+            if (SceneComponent* component = dynamic_cast<SceneComponent*>(worldOutline->GetSelectedObject()))
+            {
+                gizmo->SetTransform(component->GetWorldTransform());
+                gizmo->Update();
+                Transform newTransform = Transform(glm::inverse(component->GetParent()->GetTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
+                component->SetTransform(newTransform);
+            }
+        }
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
@@ -209,6 +222,23 @@ namespace Vox
     void Editor::SelectObject(Object* object)
     {
         worldOutline->SetSelectedObject(object);
+        if (!object)
+        {
+            gizmo->SetVisible(false);
+            return;
+        }
+
+        if (SceneComponent* component = dynamic_cast<SceneComponent*>(object))
+        {
+            gizmo->SetVisible(true);
+            gizmo->SetTransform(component->GetWorldTransform());
+        }
+    }
+
+    void Editor::InitializeGizmos()
+    {
+        gizmo = std::make_unique<Gizmo>();
+        gizmo->SetVisible(false);
     }
 
     Object* Editor::GetSelectedObject() const
@@ -230,6 +260,7 @@ namespace Vox
     {
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
+        gizmo = nullptr;
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);

@@ -18,8 +18,15 @@ namespace Vox
     {
     public:
         Gizmo();
+        ~Gizmo();
+
+        void SetTransform(const Transform& transform);
 
         void Update();
+
+        void SetVisible(bool visible);
+
+        [[nodiscard]] Transform GetTransform() const;
 
     private:
         enum SelectedAxis : char
@@ -30,13 +37,11 @@ namespace Vox
             NoneSelected
         };
 
-        void MouseMoved(int x, int y);
+        void MouseMoved();
 
         void SetTransforms();
 
         void MouseReleased();
-
-        void UpdateScreenSpaceVector(glm::vec3 axis);
 
         /**
          * @brief Get the vector of the click in world space
@@ -50,15 +55,12 @@ namespace Vox
 
         Ref<MeshInstance> xArrowMesh, yArrowMesh, zArrowMesh;
 
-        glm::ivec2 clickLocation;
-
-        glm::vec2 axisScreenSpaceVector;
-
         SelectedAxis selectedAxis = NoneSelected;
 
         PBRMaterial red, green, blue, yellow;
 
         std::function<void()> mouseReleaseCallback;
+        std::function<void(int, int)> mouseMotionCallback;
     };
 
 } // Vox

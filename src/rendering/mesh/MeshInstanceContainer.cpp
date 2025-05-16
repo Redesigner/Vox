@@ -30,7 +30,7 @@ namespace Vox
 	{
 		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
-			if (meshInstance.has_value())
+			if (meshInstance.has_value() && meshInstance->visible)
 			{
 				model->Render(shader, meshInstance->GetTransform(), meshInstance->GetMaterials());
 			}

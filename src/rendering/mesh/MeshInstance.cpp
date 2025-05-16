@@ -10,7 +10,7 @@
 namespace Vox
 {
     MeshInstance::MeshInstance(MeshInstanceContainer* meshOwner, const std::vector<PBRMaterial>& materials)
-        :transform(glm::identity<glm::mat4x4>()), materials(materials), meshOwner(meshOwner)
+        :visible(true), transform(glm::identity<glm::mat4x4>()), materials(materials), meshOwner(meshOwner)
     {
     }
 
@@ -25,7 +25,7 @@ namespace Vox
     }
 
     MeshInstance::MeshInstance(MeshInstance&& other) noexcept
-        :transform(other.transform), materials(other.materials), meshOwner(other.meshOwner)
+        :visible(other.visible), transform(other.transform), materials(other.materials), meshOwner(other.meshOwner)
     {
 #ifdef EDITOR
         pickId = other.pickId;

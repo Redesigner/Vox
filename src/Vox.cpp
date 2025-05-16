@@ -38,7 +38,6 @@
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
-#include "rendering/gizmos/Gizmo.h"
 #include "voxel/VoxelChunk.h"
 
 int main()
@@ -122,6 +121,8 @@ int main()
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
+        ServiceLocator::GetEditorService()->GetEditor()->InitializeGizmos();
+
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
         for (int x = -16; x < 16; ++x)
@@ -167,25 +168,15 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
-        Gizmo testGizmo = Gizmo();
-
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
 
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
-        nlohmann::ordered_json serializedObject = testWorld->CreateObject<TestObjectChild>()->Serialize();
-        testWorld->CreateObject<TestObject>();
         //testWorld->CreateObject("Test Actor");
         testWorld->CreateObject<TestActor>();
-        TestActor* testActor2 = testWorld->CreateObject<TestActor>();
-        testActor2->SetName("Test actor 2");
-        testActor2->SetPosition({-2.0f, 0.0f, 0.0f});
 
         Character* character = testWorld->CreateObject<Character>();
-        std::string objectString = serializedObject.dump(4);
-
-        VoxLog(Display, Game, "{}", objectString);
         
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk](int x, int y) {
             float xViewport, yViewport;
@@ -241,7 +232,6 @@ int main()
         {
             ServiceLocator::GetInputService()->PollEvents();
             testWorld->Tick(1 / 60.0f);
-            testGizmo.Update();
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;

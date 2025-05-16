@@ -16,4 +16,19 @@ namespace Vox
     {
         return properties;
     }
+
+    Property* ObjectClass::GetPropertyByType(PropertyType type) const
+    {
+        const auto result = std::ranges::find_if(properties, [type](const Property& property)
+        {
+            return property.GetType() == type;
+        });
+
+        if (result == properties.end())
+        {
+            return nullptr;
+        }
+
+        return result._Ptr;
+    }
 }

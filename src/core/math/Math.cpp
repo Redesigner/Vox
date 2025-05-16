@@ -25,6 +25,7 @@ namespace Vox
         return ++value;
     }
 
+    // this formula comes courtesy of https://underdisc.net/blog/6_gizmos/index.html
     glm::vec3 ClosestPoint(const glm::vec3& originA, const glm::vec3& directionA,
         const glm::vec3& originB, const glm::vec3& directionB)
     {

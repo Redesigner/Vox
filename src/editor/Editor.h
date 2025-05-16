@@ -12,7 +12,8 @@ struct ImFont;
 
 namespace Vox
 {
-	class Object;
+    class Gizmo;
+    class Object;
 	class World;
     class WorldOutline;
 	class TestObject;
@@ -48,6 +49,8 @@ namespace Vox
 
 		void SelectObject(Object* object);
 
+	    void InitializeGizmos();
+
 	    Object* GetSelectedObject() const;
 
 		static ImFont* GetFont_GitLab18();
@@ -68,6 +71,7 @@ namespace Vox
 
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;
+	    std::unique_ptr<Gizmo> gizmo;
 		
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };

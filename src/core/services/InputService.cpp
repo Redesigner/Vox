@@ -78,14 +78,11 @@ namespace Vox
 
     void InputService::UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback)
     {
-        for (int i = 0; i < mouseMotionEventCallbacks.size(); ++i)
+        auto target = callback.target<void(int, int)>();
+        std::erase_if(mouseMotionEventCallbacks, [target](const MouseMotionEventCallback& motionCallback)
         {
-            if (mouseMotionEventCallbacks[i].target<void(bool)>() == callback.target<void(bool)>())
-            {
-                mouseMotionEventCallbacks.erase(mouseMotionEventCallbacks.begin() + i);
-                return;
-            }
-        }
+           return motionCallback.target<void(int, int)>() == target;
+        });
     }
 
     const MouseMotionEventCallback& InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
