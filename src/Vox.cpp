@@ -38,6 +38,7 @@
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
+#include "rendering/gizmos/Gizmo.h"
 #include "voxel/VoxelChunk.h"
 
 int main()
@@ -117,6 +118,7 @@ int main()
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "witch.glb");
+        ServiceLocator::GetRenderer()->UploadModel("gizmoArrow", "gizmoArrow.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
@@ -164,6 +166,8 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
+
+        Gizmo testGizmo = Gizmo();
 
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
@@ -237,6 +241,7 @@ int main()
         {
             ServiceLocator::GetInputService()->PollEvents();
             testWorld->Tick(1 / 60.0f);
+            testGizmo.Update();
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;

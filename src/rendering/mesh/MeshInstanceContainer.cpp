@@ -1,5 +1,7 @@
 #include "MeshInstanceContainer.h"
 
+#include <algorithm>
+
 #include "core/logging/Logging.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
@@ -30,7 +32,7 @@ namespace Vox
 		{
 			if (meshInstance.has_value())
 			{
-				model->Render(shader, meshInstance->GetTransform());
+				model->Render(shader, meshInstance->GetTransform(), meshInstance->GetMaterials());
 			}
 		}
 	}
@@ -55,11 +57,14 @@ namespace Vox
 
 	Ref<MeshInstance> MeshInstanceContainer::CreateMeshInstance()
 	{
-		return {&meshInstances, meshInstances.Create(this)};
+		return {&meshInstances, meshInstances.Create(this, model->GetMaterials())};
 	}
 
 	size_t MeshInstanceContainer::GetInstanceCount() const
 	{
-		return meshInstances.size();
+		return std::ranges::count_if(meshInstances, [](const std::optional<MeshInstance>& meshInstance)
+        {
+            return meshInstance.has_value();
+        });
 	}
 }

@@ -27,8 +27,7 @@ namespace Vox
     }
 
     InputService::~InputService()
-    {
-    }
+    = default;
 
     void InputService::PollEvents()
     {
@@ -96,14 +95,25 @@ namespace Vox
 
     void InputService::UnregisterMouseClickCallback(const MouseClickEventCallback& callback)
     {
-        for (int i = 0; i < mouseClickEventCallbacks.size(); ++i)
+        auto target = callback.target<void(int, int)>();
+        std::erase_if(mouseClickEventCallbacks, [target](const MouseClickEventCallback& clickCallback)
         {
-            if (mouseClickEventCallbacks[i].target<void(bool)>() == callback.target<void(bool)>())
-            {
-                mouseClickEventCallbacks.erase(mouseClickEventCallbacks.begin() + i);
-                return;
-            }
-        }
+           return clickCallback.target<void(int, int)>() == target;
+        });
+    }
+
+    const MouseReleaseEventCallback& InputService::RegisterMouseReleaseCallback(MouseReleaseEventCallback callback)
+    {
+        return mouseReleaseEventCallbacks.emplace_back(std::move(callback));
+    }
+
+    void InputService::UnregisterMouseReleaseCallback(const MouseReleaseEventCallback& callback)
+    {
+        auto target = callback.target<void()>();
+        std::erase_if(mouseReleaseEventCallbacks, [target](const MouseReleaseEventCallback& clickCallback)
+        {
+           return clickCallback.target<void()>() == target;
+        });
     }
 
     glm::vec2 InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
@@ -117,6 +127,13 @@ namespace Vox
             result.y /= length;
         }
         return result;
+    }
+
+    glm::vec2 InputService::GetMousePosition() const
+    {
+        float x, y;
+        SDL_GetMouseState(&x, &y);
+        return {x, y};
     }
 
     bool Vox::InputService::ShouldCloseWindow() const
@@ -201,9 +218,14 @@ namespace Vox
             return;
         }
 
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        {
+            HandleMouseButtonReleaseEvent(event->button);
+            return;
+        }
         default:
         {
-            return;
+
         }
         }
     }
@@ -265,10 +287,22 @@ namespace Vox
     {
         if (mouseEvent.button == SDL_BUTTON_LEFT)
         {
-            VoxLog(Display, Input, "Mouse clicked at position({}, {})", mouseEvent.x, mouseEvent.y);
+            // VoxLog(Display, Input, "Mouse clicked at position({}, {})", mouseEvent.x, mouseEvent.y);
             for (MouseClickEventCallback& callback : mouseClickEventCallbacks)
             {
                 callback(mouseEvent.x, mouseEvent.y);
+            }
+        }
+    }
+
+    void InputService::HandleMouseButtonReleaseEvent(SDL_MouseButtonEvent& mouseEvent)
+    {
+        if (mouseEvent.button == SDL_BUTTON_LEFT)
+        {
+            // VoxLog(Display, Input, "Mouse released at position({}, {})", mouseEvent.x, mouseEvent.y);
+            for (MouseReleaseEventCallback& callback : mouseReleaseEventCallbacks)
+            {
+                callback();
             }
         }
     }

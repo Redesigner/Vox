@@ -4,6 +4,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "Vox.h"
+#include "rendering/PBRMaterial.h"
 
 namespace Vox
 {
@@ -13,28 +14,32 @@ namespace Vox
 	 */
 	struct MeshInstance
 	{
-	public:
-		explicit MeshInstance(MeshInstanceContainer* meshOwner);
+		explicit MeshInstance(MeshInstanceContainer* meshOwner, const std::vector<PBRMaterial>& materials);
 		~MeshInstance();
 
 	    MeshInstance(MeshInstance&& other) noexcept;
-		
-		void SetTransform(glm::mat4x4 transformIn);
 
 		[[nodiscard]] glm::mat4x4 GetTransform() const;
 
 	    [[nodiscard]] MeshInstanceContainer* GetMeshOwner() const;
 
+	    [[nodiscard]] const std::vector<PBRMaterial>& GetMaterials() const;
+
+		void SetTransform(glm::mat4x4 transformIn);
+
+	    void SetMaterial(unsigned int index, const PBRMaterial& material);
+
 #ifdef EDITOR
-		void RegisterCallback(std::function<void(glm::ivec2)> callback);
+		void RegisterClickCallback(std::function<void(glm::ivec2)> callback);
 
 		[[nodiscard]] unsigned int GetPickId() const;
 #endif
 
 	private:
 		glm::mat4x4 transform;
-
+	    std::vector<PBRMaterial> materials;
 	    MeshInstanceContainer* meshOwner;
+
 
 #ifdef EDITOR
 		unsigned int pickId = 0;

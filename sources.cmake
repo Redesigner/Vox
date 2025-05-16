@@ -129,6 +129,8 @@ target_sources(Vox PRIVATE
 	"src/rendering/buffers/RenderTexture.h"
 	"src/rendering/buffers/Texture.cpp"
 	"src/rendering/buffers/Texture.h"
+	"src/rendering/gizmos/Gizmo.cpp"
+	"src/rendering/gizmos/Gizmo.h"
 	"src/rendering/mesh/MeshInstance.cpp"
 	"src/rendering/mesh/MeshInstance.h"
 	"src/rendering/mesh/MeshInstanceContainer.cpp"

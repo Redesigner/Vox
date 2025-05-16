@@ -30,6 +30,10 @@ namespace Vox
 			glNamedBufferData(bufferIds[i], static_cast<GLsizei>(bufferView.byteLength), model.buffers[bufferView.buffer].data.data() + bufferView.byteOffset, GL_STATIC_DRAW);
 		}
 
+	    if (model.materials.empty())
+	    {
+	        materials.emplace_back(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f), 1.0f, 1.0f);
+	    }
 		for (const tinygltf::Material& material : model.materials)
 		{
 			const std::vector<double>& color = material.pbrMetallicRoughness.baseColorFactor;
@@ -114,14 +118,14 @@ namespace Vox
 		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	void Model::Render(const GBufferShader* shader, const glm::mat4x4& rootMatrix)
-	{
+	void Model::Render(const GBufferShader* shader, const glm::mat4x4& rootMatrix, const std::vector<PBRMaterial>& materialInstances) const
+    {
 		// Assume our VAO is already bound?
 		// Render primitives one at a time;
 
 		for (const Primitive& primitive : primitives)
 		{
-			PBRMaterial& material = materials[primitive.GetMaterialIndex()];
+			const PBRMaterial& material = materialInstances.at(primitive.GetMaterialIndex());
 			shader->SetMaterial(material);
 			shader->SetModelMatrix(rootMatrix * primitive.GetTransform());
 
@@ -147,6 +151,11 @@ namespace Vox
 
 	        glDrawElements(GL_TRIANGLES, static_cast<int>(primitive.GetVertexCount()), primitive.GetComponentType(), nullptr);
 	    }
+    }
+
+    const std::vector<PBRMaterial>& Model::GetMaterials() const
+    {
+        return materials;
     }
 
 #ifdef EDITOR

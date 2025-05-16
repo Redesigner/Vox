@@ -18,7 +18,7 @@ namespace Vox
         mesh = ServiceLocator::GetRenderer()->CreateMeshInstance(meshName);
 
 #ifdef EDITOR
-        mesh->RegisterCallback([this](const glm::ivec2 position)
+        mesh->RegisterClickCallback([this](const glm::ivec2 position)
         {
             this->Clicked(position);
         });

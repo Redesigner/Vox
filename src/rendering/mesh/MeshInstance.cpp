@@ -2,14 +2,15 @@
 
 #include <glm/ext/matrix_transform.hpp>
 
+#include "core/logging/Logging.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
 
 namespace Vox
 {
-    MeshInstance::MeshInstance(MeshInstanceContainer* meshOwner)
-        :transform(glm::identity<glm::mat4x4>()), meshOwner(meshOwner)
+    MeshInstance::MeshInstance(MeshInstanceContainer* meshOwner, const std::vector<PBRMaterial>& materials)
+        :transform(glm::identity<glm::mat4x4>()), materials(materials), meshOwner(meshOwner)
     {
     }
 
@@ -24,7 +25,7 @@ namespace Vox
     }
 
     MeshInstance::MeshInstance(MeshInstance&& other) noexcept
-        :transform(other.transform), meshOwner(other.meshOwner)
+        :transform(other.transform), materials(other.materials), meshOwner(other.meshOwner)
     {
 #ifdef EDITOR
         pickId = other.pickId;
@@ -37,6 +38,18 @@ namespace Vox
         transform = transformIn;
     }
 
+    void MeshInstance::SetMaterial(unsigned int index, const PBRMaterial& material)
+    {
+        // Consider making this an assert instead?
+        if (index >= materials.size())
+        {
+            VoxLog(Warning, Rendering, "Cannot set materials, material at index '{}' is out of bounds.", index);
+            return;
+        }
+
+        materials.at(index) = material;
+    }
+
     glm::mat4x4 MeshInstance::GetTransform() const
     {
         return transform;
@@ -47,8 +60,13 @@ namespace Vox
         return meshOwner;
     }
 
+    const std::vector<PBRMaterial>& MeshInstance::GetMaterials() const
+    {
+        return materials;
+    }
+
 #ifdef EDITOR
-    void MeshInstance::RegisterCallback(std::function<void(glm::ivec2)> callback)
+    void MeshInstance::RegisterClickCallback(std::function<void(glm::ivec2)> callback)
     {
         pickId = ServiceLocator::GetRenderer()->GetPickContainer()->RegisterCallback(std::move(callback));
     }

@@ -24,6 +24,7 @@ namespace Vox
 	using KeyboardEventCallback = std::function<void(bool)>;
 	using MouseMotionEventCallback = std::function<void(int, int)>;
 	using MouseClickEventCallback = std::function<void(int, int)>;
+    using MouseReleaseEventCallback = std::function<void()>;
 
 	class InputService
 	{
@@ -35,29 +36,31 @@ namespace Vox
 
 
 		const KeyboardEventCallback& RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
-
 		void UnregisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback);
 
 
 		const MouseMotionEventCallback& RegisterMouseMotionCallback(MouseMotionEventCallback callback);
-
 		void UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback);
 
 
 		const MouseClickEventCallback& RegisterMouseClickCallback(MouseClickEventCallback callback);
-
 		void UnregisterMouseClickCallback(const MouseClickEventCallback& callback);
 
+	    const MouseReleaseEventCallback& RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
+		void UnregisterMouseReleaseCallback(const MouseReleaseEventCallback& callback);
 
-		glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
 
-		bool ShouldCloseWindow() const;
+		[[nodiscard]] glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
+
+	    [[nodiscard]] glm::vec2 GetMousePosition() const;
+
+		[[nodiscard]] bool ShouldCloseWindow() const;
 
 		void ToggleCursorLock();
 
-		bool IsWindowFullscreen() const;
+		[[nodiscard]] bool IsWindowFullscreen() const;
 
-		bool IsWindowMaximized() const;
+		[[nodiscard]] bool IsWindowMaximized() const;
 
 	private:
 		void HandleEvent(SDL_Event* event);
@@ -68,6 +71,8 @@ namespace Vox
 
 		void HandleMouseButtonEvent(SDL_MouseButtonEvent& mouseEvent);
 
+	    void HandleMouseButtonReleaseEvent(SDL_MouseButtonEvent& mouseEvent);
+
 		void ExecuteCallbacks(SDL_Scancode scancode, bool pressed);
 
 		void ToggleFullscreen();
@@ -75,6 +80,7 @@ namespace Vox
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
 		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
 		std::vector<MouseClickEventCallback> mouseClickEventCallbacks;
+	    std::vector<MouseReleaseEventCallback> mouseReleaseEventCallbacks;
 
 		// @TODO: move window logic and variables to a separate wrapper class?
 		bool windowClosed = false;

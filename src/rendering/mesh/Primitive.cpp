@@ -1,11 +1,14 @@
 #include "Primitive.h"
 
+#include <glm/ext/matrix_transform.hpp>
+
 namespace Vox
 {
-	Primitive::Primitive(unsigned int vertexCount, unsigned int componentType, unsigned int materialIndex,
+	Primitive::Primitive(unsigned int vertexCount, unsigned int componentType, int materialIndex,
 		unsigned int indexBuffer,unsigned int positionBuffer, unsigned int normalBuffer, unsigned int uvBuffer)
-		:vertexCount(vertexCount), componentType(componentType), materialIndex(materialIndex),
-			indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer)
+		:vertexCount(vertexCount), componentType(componentType), materialIndex(materialIndex >= 0 ? materialIndex : 0),
+		indexBuffer(indexBuffer), positionBuffer(positionBuffer), normalBuffer(normalBuffer), uvBuffer(uvBuffer),
+        transform(glm::identity<glm::mat4x4>())
 	{
 	}
 
