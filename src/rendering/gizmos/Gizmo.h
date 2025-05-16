@@ -38,6 +38,13 @@ namespace Vox
 
         void UpdateScreenSpaceVector(glm::vec3 axis);
 
+        /**
+         * @brief Get the vector of the click in world space
+         * @return a pair of vectors, where first is the click's location in world space
+         * and second is the click's direction
+         */
+        static std::pair<glm::vec3, glm::vec3> GetClickVector();
+
         Transform transform;
         Transform originalTransform;
 

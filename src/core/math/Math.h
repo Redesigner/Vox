@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
 #include "core/concepts/Concepts.h"
 
 namespace Vox
@@ -24,4 +26,7 @@ namespace Vox
 	int FloorMultiple(float x, unsigned int multiple);
 
     unsigned int NextPowerOfTwo(unsigned int value);
+
+    glm::vec3 ClosestPoint(const glm::vec3& originA, const glm::vec3& directionA,
+        const glm::vec3& originB, const glm::vec3& directionB);
 }

@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_inverse.inl>
 
 #include "core/logging/Logging.h"
+#include "core/math/Math.h"
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
@@ -86,52 +87,35 @@ namespace Vox
 
     void Gizmo::MouseMoved(const int x, const int y)
     {
-        glm::vec3 axis;
-        switch (selectedAxis)
-        {
-        case XSelected:
-            axis = {1.0f, 0.0f, 0.0f};
-            break;
-        case YSelected:
-            axis = {0.0f, 1.0f, 0.0f};
-            break;
-        case ZSelected:
-            axis = {0.0f, 0.0f, 1.0f};
-            break;
-        case NoneSelected:
-            break;
-        }
-        Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
-        glm::mat4x4 worldToScreen = camera->GetViewProjectionMatrix();
-        glm::mat4x4 screenToWorld = glm::inverseTranspose(worldToScreen);
+        auto click = GetClickVector();
 
-        const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
-        glm::vec2 mouseLocationViewport;
-        ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(
-            mouseLocationViewport.x, mouseLocationViewport.y,
-            static_cast<unsigned int>(mouseLocationPixels.x), static_cast<unsigned int>(mouseLocationPixels.y)
-        );
-        glm::vec4 gizmoLocationScreen =  worldToScreen * glm::vec4(transform.position + axis, 1.0f);
-        gizmoLocationScreen /= gizmoLocationScreen.w;
-        glm::vec4 mouseLocationWorld = glm::vec4(mouseLocationViewport, gizmoLocationScreen.z, 1.0f) * screenToWorld;
-        mouseLocationWorld /= mouseLocationWorld.w;
-
-        const float distance = glm::dot(axisScreenSpaceVector, glm::vec2(x, y)) * 0.01f;
         switch (selectedAxis)
         {
         case XSelected:
         {
-            transform.position.x = mouseLocationWorld.x - 1.0f;
+            const glm::vec3 intersection = ClosestPoint(
+                originalTransform.position + glm::vec3(1.0f, 0.0f, 0.0f), {1.0f, 0.0f, 0.0f},
+                click.first, click.second
+            );
+            transform.position.x = intersection.x - 1.0f;
             break;
         }
         case YSelected:
         {
-            transform.position.y = mouseLocationWorld.y - 1.0f;
+            const glm::vec3 intersection = ClosestPoint(
+                originalTransform.position + glm::vec3(0.0f, 1.0f, 0.0f), {0.0f, 1.0f, 0.0f},
+                click.first, click.second
+            );
+            transform.position.y = intersection.y - 1.0f;
             break;
         }
         case ZSelected:
         {
-            transform.position.z = mouseLocationWorld.z - 1.0f;
+            const glm::vec3 intersection = ClosestPoint(
+                originalTransform.position + glm::vec3(0.0f, 0.0f, 1.0f), {0.0f, 0.0f, 1.0f},
+                click.first, click.second
+            );
+            transform.position.z = intersection.z - 1.0f;
             break;
         }
         default: break;
@@ -189,5 +173,25 @@ namespace Vox
         axisScreenSpaceVector.x *= -1.0f;
         VoxLog(Display, Input, "Gizmo clicked at '({:.2f}, {:.2f})", origin2D.x, origin2D.y);
         VoxLog(Display, Input, "Gizmo clicked, screen space vector '({:.2f}, {:.2f})", axisScreenSpaceVector.x, axisScreenSpaceVector.y);
+    }
+
+    std::pair<glm::vec3, glm::vec3> Gizmo::GetClickVector()
+    {
+        Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
+        glm::mat4x4 worldToScreen = camera->GetViewProjectionMatrix();
+        glm::mat4x4 screenToWorld = glm::inverseTranspose(worldToScreen);
+
+        const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
+        glm::vec2 mouseLocationViewport;
+        ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(
+            mouseLocationViewport.x, mouseLocationViewport.y,
+            static_cast<unsigned int>(mouseLocationPixels.x), static_cast<unsigned int>(mouseLocationPixels.y)
+        );
+        glm::vec4 mouseLocationWorldOrigin = glm::vec4(mouseLocationViewport, -1.0f, 1.0f) * screenToWorld;
+        glm::vec4 mouseLocationWorldEnd = glm::vec4(mouseLocationViewport, 1.0f, 1.0f) * screenToWorld;
+        mouseLocationWorldOrigin /= mouseLocationWorldOrigin.w; // affine
+        mouseLocationWorldEnd /= mouseLocationWorldEnd.w;
+        glm::vec3 delta = mouseLocationWorldEnd - mouseLocationWorldOrigin;
+        return {mouseLocationWorldOrigin, glm::normalize(delta)};
     }
 } // Vox
