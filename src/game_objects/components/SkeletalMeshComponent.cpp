@@ -81,16 +81,7 @@ namespace Vox
 #ifdef EDITOR
     void SkeletalMeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetRenderer()->ClearMeshOutlines();
-        if (Editor* editor = ServiceLocator::GetEditorService()->GetEditor(); editor->GetSelectedObject() == this)
-        {
-            editor->SelectObject(nullptr);
-        }
-        else
-        {
-            editor->SelectObject(this);
-            ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
-        }
+        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(this);
     }
 
     void SkeletalMeshComponent::Select()

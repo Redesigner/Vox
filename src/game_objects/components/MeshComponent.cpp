@@ -38,16 +38,7 @@ namespace Vox
 #ifdef EDITOR
     void MeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetRenderer()->ClearMeshOutlines();
-        if (Editor* editor = ServiceLocator::GetEditorService()->GetEditor(); editor->GetSelectedObject() == this)
-        {
-            editor->SelectObject(nullptr);
-        }
-        else
-        {
-            editor->SelectObject(this);
-            ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
-        }
+        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(this);
     }
 
     void MeshComponent::Select()

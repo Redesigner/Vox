@@ -6,6 +6,7 @@
 #include "core/objects/World.h"
 #include "core/objects/actor/Actor.h"
 #include "core/objects/component/Component.h"
+#include "rendering/Renderer.h"
 #include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
@@ -61,6 +62,12 @@ namespace Vox
 
     void WorldOutline::SetSelectedObject(Object* object)
     {
+        ServiceLocator::GetRenderer()->ClearMeshOutlines();
+        if (object == currentlySelectedObject)
+        {
+            object = nullptr;
+        }
+
         currentlySelectedObject = object;
         if (!object)
         {
@@ -68,13 +75,14 @@ namespace Vox
             return;
         }
 
-        if (const SceneComponent* component = dynamic_cast<SceneComponent*>(object))
+        if (const auto component = dynamic_cast<SceneComponent*>(object))
         {
             gizmo->SetVisible(true);
+            component->Select();
             gizmo->SetTransform(component->GetWorldTransform());
         }
 
-        if (const Actor* actor = dynamic_cast<Actor*>(object))
+        if (const auto actor = dynamic_cast<Actor*>(object))
         {
             gizmo->SetVisible(true);
             actor->Select();
