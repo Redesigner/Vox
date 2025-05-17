@@ -66,6 +66,16 @@ namespace Vox
         }
     }
 
+#ifdef EDITOR
+    void Actor::Select() const
+    {
+        for (const std::shared_ptr<SceneComponent>& component : attachedComponents)
+        {
+            component->Select();
+        }
+    }
+#endif
+
     const Transform& Actor::GetTransform() const
     {
         return transform;

@@ -19,16 +19,6 @@ namespace Vox
 
     void Editor::Draw(const ColorDepthFramebuffer* viewportRenderTexture)
     {
-        if (gizmo)
-        {
-            if (SceneComponent* component = dynamic_cast<SceneComponent*>(worldOutline->GetSelectedObject()))
-            {
-                gizmo->SetTransform(component->GetWorldTransform());
-                gizmo->Update();
-                Transform newTransform = Transform(glm::inverse(component->GetParent()->GetTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
-                component->SetTransform(newTransform);
-            }
-        }
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
@@ -220,26 +210,14 @@ namespace Vox
         //}
     }
 
-    void Editor::SelectObject(Object* object)
+    void Editor::SelectObject(Object* object) const
     {
         worldOutline->SetSelectedObject(object);
-        if (!object)
-        {
-            gizmo->SetVisible(false);
-            return;
-        }
-
-        if (SceneComponent* component = dynamic_cast<SceneComponent*>(object))
-        {
-            gizmo->SetVisible(true);
-            gizmo->SetTransform(component->GetWorldTransform());
-        }
     }
 
     void Editor::InitializeGizmos()
     {
-        gizmo = std::make_unique<Gizmo>();
-        gizmo->SetVisible(false);
+        worldOutline->InitializeGizmos();
     }
 
     Object* Editor::GetSelectedObject() const
@@ -261,7 +239,6 @@ namespace Vox
     {
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
-        gizmo = nullptr;
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);

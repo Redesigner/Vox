@@ -425,6 +425,8 @@ namespace Vox
             val.Render(pickShader.get());
         }
 
+        pickShader->Enable();
+        glBindVertexArray(meshVao);
         glClear(GL_DEPTH_BUFFER_BIT);
         for (const Ref<MeshInstance>& meshInstance : overlayMeshes)
         {

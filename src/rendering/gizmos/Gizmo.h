@@ -57,7 +57,7 @@ namespace Vox
 
         SelectedAxis selectedAxis = NoneSelected;
 
-        PBRMaterial red, green, blue, yellow;
+        PBRMaterial red, green, blue, selected;
 
         std::function<void()> mouseReleaseCallback;
         std::function<void(int, int)> mouseMotionCallback;

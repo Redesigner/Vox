@@ -6,8 +6,6 @@ namespace Vox
     class SceneComponent : public Component
     {
     public:
-
-        
         void PropertyChanged(const Property& property) override;
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
@@ -26,9 +24,13 @@ namespace Vox
 
         [[nodiscard]] Transform GetWorldTransform() const;
 
+#ifdef EDITOR
+        virtual void Select() {}
+#endif
+
     protected:
         virtual void OnTransformUpdated() {}
-        
+
     private:
         void UpdateTransform();
         

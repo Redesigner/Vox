@@ -17,10 +17,10 @@
 namespace Vox
 {
     Gizmo::Gizmo()
-        :red({1.0f, 0.1f, 0.0f, 1.0f}, 0.0f, 0.0f),
-        green({0.0f, 1.0f, 0.0f, 1.0f}, 0.0f, 0.0f),
-        blue({0.0f, 0.0f, 1.0f, 1.0f}, 0.0f, 0.0f),
-        yellow({1.0f, 1.0f, 0.0f, 1.0f}, 0.0f, 0.0f)
+        :red({1.0f, 0.25f, 0.25f, 1.0f}, 0.0f, 0.0f),
+        green({0.25f, 1.0f, 0.25f, 1.0f}, 0.0f, 0.0f),
+        blue({0.25f, 0.25f, 1.0f, 1.0f}, 0.0f, 0.0f),
+        selected({0.8f, 0.8f, 0.95f, 1.0f}, 0.0f, 0.0f)
     {
         xArrowMesh = ServiceLocator::GetRenderer()->CreateMeshInstance("gizmoArrow");
         yArrowMesh = ServiceLocator::GetRenderer()->CreateMeshInstance("gizmoArrow");
@@ -49,19 +49,19 @@ namespace Vox
 
         xArrowMesh->RegisterClickCallback([this](const glm::ivec2 position)
         {
-            xArrowMesh->SetMaterial(0, yellow);
+            xArrowMesh->SetMaterial(0, selected);
             selectedAxis = XSelected;
         });
 
         yArrowMesh->RegisterClickCallback([this](const glm::ivec2 position)
         {
-            yArrowMesh->SetMaterial(0, yellow);
+            yArrowMesh->SetMaterial(0, selected);
             selectedAxis = YSelected;
         });
 
         zArrowMesh->RegisterClickCallback([this](const glm::ivec2 position)
         {
-            zArrowMesh->SetMaterial(0, yellow);
+            zArrowMesh->SetMaterial(0, selected);
             selectedAxis = ZSelected;
         });
     }

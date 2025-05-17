@@ -92,5 +92,10 @@ namespace Vox
             ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
         }
     }
+
+    void SkeletalMeshComponent::Select()
+    {
+        ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
+    }
 #endif
 }

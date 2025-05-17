@@ -27,6 +27,10 @@ namespace  Vox
 
         void Tick(float deltaTime) override;
 
+#ifdef EDITOR
+        void Select() const;
+#endif
+
         [[nodiscard]] const Transform& GetTransform() const;
         
     protected:

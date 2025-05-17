@@ -37,9 +37,9 @@ namespace Vox
 		
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		
-		glm::vec2 GetViewportDimensions() const;
+		[[nodiscard]] glm::vec2 GetViewportDimensions() const;
 		
-		Box GetViewportBox() const;
+		[[nodiscard]] Box GetViewportBox() const;
 		
 		bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
@@ -47,11 +47,11 @@ namespace Vox
 		
 		void SetWorld(const std::shared_ptr<World>& world);
 
-		void SelectObject(Object* object);
+		void SelectObject(Object* object) const;
 
 	    void InitializeGizmos();
 
-	    Object* GetSelectedObject() const;
+	    [[nodiscard]] Object* GetSelectedObject() const;
 
 		static ImFont* GetFont_GitLab18();
 		static ImFont* GetFont_GitLab24();
@@ -71,8 +71,7 @@ namespace Vox
 
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;
-	    std::unique_ptr<Gizmo> gizmo;
-		
+
 		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
 		Box viewportBox{ 0, 0, 800, 450 };
 

@@ -20,6 +20,8 @@ namespace Vox
 
 #ifdef EDITOR
         void Clicked(glm::ivec2 position);
+
+        void Select() override;
 #endif
 
         IMPLEMENT_OBJECT(MeshComponent)
