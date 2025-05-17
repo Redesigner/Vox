@@ -173,10 +173,9 @@ int main()
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
 
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
-        //testWorld->CreateObject("Test Actor");
-        testWorld->CreateObject<TestActor>();
+        testWorld->CreateObject("Test Actor");
 
-        std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
+        testWorld->CreateObject<Character>();
         
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk](int x, int y) {
             float xViewport, yViewport;

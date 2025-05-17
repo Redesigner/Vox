@@ -15,7 +15,9 @@ namespace Vox
     {
         if (const ObjectClass* objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
-            return objects.emplace_back(objectClass->GetConstructor()());
+            auto result = objects.emplace_back(objectClass->GetConstructor()());
+            InsertCheckTickable(result);
+            return result;
         }
         return nullptr;
     }
