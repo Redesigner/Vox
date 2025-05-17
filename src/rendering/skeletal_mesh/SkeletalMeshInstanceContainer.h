@@ -13,7 +13,7 @@
 
 namespace Vox
 {
-    class GBufferShader;
+    class MaterialShader;
     class MeshShader;
     class PickShader;
     class SkeletalModel;
@@ -25,7 +25,7 @@ namespace Vox
 
         bool LoadMesh(const std::string& filepath);
 
-        void Render(GBufferShader* shader);
+        void Render(MaterialShader* shader);
 
         void RenderInstance(const MeshShader* shader, const SkeletalMeshInstance& meshInstance) const;
 

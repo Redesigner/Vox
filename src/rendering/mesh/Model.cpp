@@ -7,7 +7,7 @@
 
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
-#include "rendering/shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
@@ -118,7 +118,7 @@ namespace Vox
 		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	void Model::Render(const GBufferShader* shader, const glm::mat4x4& rootMatrix, const std::vector<PBRMaterial>& materialInstances) const
+	void Model::Render(const MaterialShader* shader, const glm::mat4x4& rootMatrix, const std::vector<PBRMaterial>& materialInstances) const
     {
 		// Assume our VAO is already bound?
 		// Render primitives one at a time;

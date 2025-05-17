@@ -6,6 +6,7 @@
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/shaders/Shader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 
 namespace Vox
 {
@@ -26,7 +27,7 @@ namespace Vox
 		return true;
 	}
 
-	void MeshInstanceContainer::Render(const GBufferShader* shader)
+	void MeshInstanceContainer::Render(const MaterialShader* shader)
 	{
 		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
@@ -42,17 +43,28 @@ namespace Vox
 	    model->Render(shader, meshInstance.GetTransform());
     }
 
+    void MeshInstanceContainer::RenderInstance(const MaterialShader* shader, const MeshInstance& meshInstance) const
+    {
+	    model->Render(shader, meshInstance.GetTransform(), meshInstance.GetMaterials());
+    }
+
 #ifdef EDITOR
 	void MeshInstanceContainer::Render(const PickShader* shader)
 	{
 		for (std::optional<MeshInstance>& meshInstance : meshInstances)
 		{
-			if (meshInstance.has_value())
+			if (meshInstance.has_value() && meshInstance->visible)
 			{
 				model->Render(shader, meshInstance->GetPickId(), meshInstance->GetTransform());
 			}
 		}
 	}
+
+    void MeshInstanceContainer::RenderInstance(const PickShader* shader, const MeshInstance& meshInstance) const
+    {
+	    model->Render(shader, meshInstance.GetPickId(), meshInstance.GetTransform());
+
+    }
 #endif
 
 	Ref<MeshInstance> MeshInstanceContainer::CreateMeshInstance()

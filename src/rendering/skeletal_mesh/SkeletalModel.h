@@ -20,7 +20,7 @@ namespace tinygltf
 namespace Vox
 {
 	class Shader;
-    class GBufferShader;
+    class MaterialShader;
     class MeshShader;
     class PickShader;
 
@@ -33,7 +33,7 @@ namespace Vox
 		SkeletalModel(const SkeletalModel&) = delete;
 		SkeletalModel& operator=(SkeletalModel&&) = delete;
 
-		void Render(const GBufferShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime);
+		void Render(const MaterialShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime);
 
 		void Render(const MeshShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime);
 

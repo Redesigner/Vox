@@ -22,12 +22,16 @@ namespace Vox
 
 		bool LoadMesh(const std::string& filepath);
 
-		void Render(const GBufferShader* shader);
+		void Render(const MaterialShader* shader);
 
 	    void RenderInstance(const MeshShader* shader, const MeshInstance& meshInstance) const;
 
+	    void RenderInstance(const MaterialShader* shader, const MeshInstance& meshInstance) const;
+
 #ifdef EDITOR
 		void Render(const PickShader* shader);
+
+	    void RenderInstance(const PickShader* shader, const MeshInstance& meshInstance) const;
 #endif
 
 		Ref<MeshInstance> CreateMeshInstance();

@@ -10,7 +10,7 @@
 
 #include "core/logging/Logging.h"
 #include "rendering/shaders/Shader.h"
-#include "rendering/shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "rendering/shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/PickShader.h"
 
 namespace Vox
@@ -197,7 +197,7 @@ namespace Vox
 		glDeleteBuffers(static_cast<int>(bufferIds.size()), bufferIds.data());
 	}
 
-	void SkeletalModel::Render(const GBufferShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime)
+	void SkeletalModel::Render(const MaterialShader* shader, const glm::mat4x4& transform, unsigned int animationIndex, float animationTime)
 	{
 		SetAnimation(animationIndex, animationTime);
 

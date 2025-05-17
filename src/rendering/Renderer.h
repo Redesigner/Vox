@@ -13,7 +13,7 @@
 #include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/pixel_shaders/PixelShader.h"
 #include "rendering/skeletal_mesh/SkeletalModel.h"
-#include "shaders/pixel_shaders/mesh_shaders/GBufferShader.h"
+#include "shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 #include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
 struct SDL_Window;
@@ -94,6 +94,10 @@ namespace Vox
 #ifdef EDITOR
 		[[nodiscard]] PickContainer* GetPickContainer() const;
 		[[nodiscard]] PickBuffer* GetPickBuffer() const;
+
+	    void RegisterOverlayMesh(const Ref<MeshInstance>& meshInstance);
+
+	    void ClearOverlays();
 #endif
 
 	private:
@@ -109,6 +113,8 @@ namespace Vox
 		void RenderPickBuffer();
 
 	    void RenderOutline() const;
+
+	    void RenderOverlay() const;
 #endif
 
 		void UpdateVoxelMeshes();
@@ -132,9 +138,11 @@ namespace Vox
 		std::unique_ptr<GBuffer> gBuffer;
 		std::unique_ptr<ColorDepthFramebuffer> deferredFramebuffer;
 		std::unique_ptr<DeferredShader> deferredShader;
-		std::unique_ptr<GBufferShader> gBufferShader, gBufferShaderSkeleton;
+		std::unique_ptr<MaterialShader> gBufferShader, gBufferShaderSkeleton;
 
 #ifdef EDITOR
+        std::unique_ptr<MaterialShader> overlayShader;
+
 		std::unique_ptr<PickBuffer> pickBuffer;
 		std::unique_ptr<PickShader> pickShader, pickShaderSkeleton;
 		std::unique_ptr<PickContainer> pickContainer;
@@ -166,6 +174,8 @@ namespace Vox
 	    std::vector<Ref<MeshInstance>> outlinedMeshes;
 	    std::vector<Ref<SkeletalMeshInstance>> outlinedSkeletalMeshes;
 #endif
+
+        std::vector<Ref<MeshInstance>> overlayMeshes;
 
 		LightUniformLocations lightUniformLocations;
 		Light testLight;

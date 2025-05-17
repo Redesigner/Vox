@@ -136,6 +136,7 @@ namespace Vox
 
         xOut = clickX - viewportBox.left;
         yOut = clickY - viewportBox.top;
+        VoxLog(Display, Input, "Mouse clicked at '({}, {})'px, remapped to '({}, {})px", clickX, clickY, xOut, yOut);
         return true;
     }
 

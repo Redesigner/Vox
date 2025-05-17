@@ -50,8 +50,8 @@ namespace Vox
 
         voxelShader = std::make_unique<VoxelShader>();
         deferredShader = std::make_unique<DeferredShader>();
-        gBufferShader = std::make_unique<GBufferShader>("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
-        gBufferShaderSkeleton = std::make_unique<GBufferShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
+        gBufferShader = std::make_unique<MaterialShader>("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+        gBufferShaderSkeleton = std::make_unique<MaterialShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
 
         const unsigned int matrixBufferLocation = glGetUniformBlockIndex(gBufferShaderSkeleton->GetId(), "data");
         glUniformBlockBinding(gBufferShaderSkeleton->GetId(), matrixBufferLocation, 0);
@@ -76,6 +76,8 @@ namespace Vox
         deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(defaultWidth, defaultHeight);
         
 #ifdef EDITOR
+        overlayShader = std::make_unique<MaterialShader>("assets/shaders/forwardMaterial.vert", "assets/shaders/forwardMaterial.frag");
+
         pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
         pickShader = std::make_unique<PickShader>("assets/shaders/pickBuffer.vert", "assets/shaders/pickBuffer.frag");
         pickShaderSkeleton = std::make_unique<PickShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/pickBuffer.frag");
@@ -125,6 +127,7 @@ namespace Vox
 #ifdef EDITOR
         RenderPickBuffer();
         RenderOutline();
+        RenderOverlay();
 #endif
 
         int width, height;
@@ -287,6 +290,16 @@ namespace Vox
     {
         return pickBuffer.get();
     }
+
+    void Renderer::RegisterOverlayMesh(const Ref<MeshInstance>& meshInstance)
+    {
+        overlayMeshes.emplace_back(meshInstance);
+    }
+
+    void Renderer::ClearOverlays()
+    {
+        overlayMeshes.clear();
+    }
 #endif
 
     void Renderer::CheckViewportDimensions(const Editor* editor)
@@ -411,6 +424,12 @@ namespace Vox
         {
             val.Render(pickShader.get());
         }
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+        for (const Ref<MeshInstance>& meshInstance : overlayMeshes)
+        {
+            meshInstance->GetMeshOwner()->RenderInstance(pickShader.get(), *meshInstance);
+        }
     }
 #endif
     
@@ -527,6 +546,18 @@ namespace Vox
         deferredFramebuffer->ActivateTextures(1);
         outlineShaderDistance->SetWidth(outlineWidth);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+
+    void Renderer::RenderOverlay() const
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glBindVertexArray(meshVao);
+        overlayShader->Enable();
+        overlayShader->SetCamera(currentCamera);
+        for (const Ref<MeshInstance>& mesh : overlayMeshes)
+        {
+            mesh->GetMeshOwner()->RenderInstance(overlayShader.get(), *mesh);
+        }
     }
 #endif
 

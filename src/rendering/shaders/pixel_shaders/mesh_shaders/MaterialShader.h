@@ -6,7 +6,7 @@ namespace Vox
     class Camera;
     struct PBRMaterial;
 
-    class GBufferShader : public MeshShader
+    class MaterialShader : public MeshShader
     {
         struct UniformLocations
         {
@@ -15,7 +15,7 @@ namespace Vox
         };
         
     public:
-        GBufferShader(const std::string& vertLocation, const std::string& fragLocation);
+        MaterialShader(const std::string& vertLocation, const std::string& fragLocation);
 
         void SetMaterial(const PBRMaterial& material) const;
 

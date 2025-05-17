@@ -28,7 +28,7 @@ namespace Vox
         return true;
     }
 
-    void SkeletalMeshInstanceContainer::Render(GBufferShader* shader)
+    void SkeletalMeshInstanceContainer::Render(MaterialShader* shader)
     {
         for (std::optional<SkeletalMeshInstance>& meshInstance : meshInstances)
         {

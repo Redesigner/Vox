@@ -30,6 +30,10 @@ namespace Vox
         yArrowMesh->SetMaterial(0, green);
         zArrowMesh->SetMaterial(0, blue);
 
+        xArrowMesh->visible = false;
+        yArrowMesh->visible = false;
+        zArrowMesh->visible = false;
+
         transform.position = {0.0f, 4.0f, 0.0f};
         SetTransforms();
 
@@ -87,9 +91,16 @@ namespace Vox
 
     void Gizmo::SetVisible(const bool visible)
     {
-        xArrowMesh->visible = visible;
-        yArrowMesh->visible = visible;
-        zArrowMesh->visible = visible;
+        if (visible)
+        {
+            ServiceLocator::GetRenderer()->RegisterOverlayMesh(xArrowMesh);
+            ServiceLocator::GetRenderer()->RegisterOverlayMesh(yArrowMesh);
+            ServiceLocator::GetRenderer()->RegisterOverlayMesh(zArrowMesh);
+        }
+        else
+        {
+            ServiceLocator::GetRenderer()->ClearOverlays();
+        }
     }
 
     Transform Gizmo::GetTransform() const
