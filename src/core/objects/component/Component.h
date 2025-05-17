@@ -21,7 +21,10 @@ namespace Vox
             result->parent = parent;
             return result;
         }
-        
+
+    protected:
+        [[nodiscard]] virtual std::weak_ptr<Component> GetWeakThis() const;
+
     private:
         Actor* parent = nullptr;
         

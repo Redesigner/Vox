@@ -10,14 +10,15 @@ namespace Vox
     class ObjectClass
     {
     public:
-        ObjectClass(std::function<Object*()> constructor, std::vector<Property> properties);
+        using Constructor = std::function<std::shared_ptr<Object>()>;
+        ObjectClass(Constructor constructor, std::vector<Property> properties);
 
-        [[nodiscard]] std::function<Object*()> GetConstructor() const;
+        [[nodiscard]] std::function<std::shared_ptr<Object>()> GetConstructor() const;
         [[nodiscard]] const std::vector<Property>& GetProperties() const;
         [[nodiscard]] Property* GetPropertyByType(PropertyType type) const;
         
     private:
-        std::function<Object*()> constructor;
+        std::function<std::shared_ptr<Object>()> constructor;
         std::vector<Property> properties;
     };
 }

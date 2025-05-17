@@ -25,7 +25,7 @@ namespace Vox
             const unsigned int key = ServiceLocator::GetRenderer()->GetPickBuffer()->GetValue(viewX, viewY);
             if (key == 0)
             {
-                ServiceLocator::GetEditorService()->GetEditor()->SelectObject(nullptr);
+                ServiceLocator::GetEditorService()->GetEditor()->SelectObject(std::weak_ptr<Object>());
                 ServiceLocator::GetRenderer()->ClearMeshOutlines();
                 return;
             }

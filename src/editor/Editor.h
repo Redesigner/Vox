@@ -47,11 +47,11 @@ namespace Vox
 		
 		void SetWorld(const std::shared_ptr<World>& world);
 
-		void SelectObject(Object* object) const;
+		void SelectObject(std::weak_ptr<Object> object) const;
 
 	    void InitializeGizmos();
 
-	    [[nodiscard]] Object* GetSelectedObject() const;
+	    [[nodiscard]] std::weak_ptr<Object> GetSelectedObject() const;
 
 		static ImFont* GetFont_GitLab18();
 		static ImFont* GetFont_GitLab24();

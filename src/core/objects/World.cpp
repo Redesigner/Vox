@@ -6,12 +6,12 @@
 
 namespace Vox
 {
-    const std::vector<Object*>& World::GetObjects() const
+    const std::vector<std::shared_ptr<Object>>& World::GetObjects() const
     {
         return objects;
     }
 
-    Object* World::CreateObject(const std::string& className)
+    std::shared_ptr<Object> World::CreateObject(const std::string& className)
     {
         if (const ObjectClass* objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
@@ -28,18 +28,28 @@ namespace Vox
         }
     }
 
-    World::~World()
+    void World::DestroyObject(const std::shared_ptr<Object>& object)
     {
-        for (Object* object : objects)
+        std::erase_if(objects, [object](const std::shared_ptr<Object>& ownedObject)
         {
-            delete object;
+           return ownedObject == object;
+        });
+
+        if (auto* tickable = dynamic_cast<Tickable*>(object.get()))
+        {
+            std::erase_if(actorsToTick, [tickable](const Tickable* tickableObject)
+            {
+               return tickable == tickableObject;
+            });
         }
-        objects.clear();
     }
 
-    void World::InsertCheckTickable(Object* object)
+    World::~World()
+    = default;
+
+    void World::InsertCheckTickable(const std::shared_ptr<Object>& object)
     {
-        if (const auto tickable = dynamic_cast<Tickable*>(object))
+        if (const auto tickable = dynamic_cast<Tickable*>(object.get()))
         {
             RegisterTickable(tickable);
         }

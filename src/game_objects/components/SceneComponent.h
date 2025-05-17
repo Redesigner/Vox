@@ -31,6 +31,8 @@ namespace Vox
     protected:
         virtual void OnTransformUpdated() {}
 
+        [[nodiscard]] std::weak_ptr<Component> GetWeakThis() const override;
+
     private:
         void UpdateTransform();
         

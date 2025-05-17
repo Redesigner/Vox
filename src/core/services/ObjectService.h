@@ -18,7 +18,11 @@ namespace Vox
             std::vector<Property> properties;
             T defaultObject = T();
             defaultObject.BuildProperties(properties);
-            T::SetObjectClass(RegisterObjectClass(defaultObject.GetClassDisplayName(), ObjectClass(T::template GetConstructor<T>(), properties)));
+            T::SetObjectClass(
+                RegisterObjectClass(defaultObject.GetClassDisplayName(),
+                    ObjectClass(T::template GetConstructor<T>(), properties)
+                )
+            );
         }
 
         /// Register an object class, skipping if the class is already registered

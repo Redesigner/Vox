@@ -176,7 +176,7 @@ int main()
         //testWorld->CreateObject("Test Actor");
         testWorld->CreateObject<TestActor>();
 
-        Character* character = testWorld->CreateObject<Character>();
+        std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
         
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk](int x, int y) {
             float xViewport, yViewport;

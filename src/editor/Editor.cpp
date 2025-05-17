@@ -72,9 +72,9 @@ namespace Vox
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
 
-            if (worldOutline->GetSelectedObject())
+            if (!worldOutline->GetSelectedObject().expired())
             {
-                DetailPanel::Draw(worldOutline->GetSelectedObject());
+                DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
             }
 
             if (!currentWorld.expired())
@@ -210,9 +210,9 @@ namespace Vox
         //}
     }
 
-    void Editor::SelectObject(Object* object) const
+    void Editor::SelectObject(std::weak_ptr<Object> object) const
     {
-        worldOutline->SetSelectedObject(object);
+        worldOutline->SetSelectedObject(std::move(object));
     }
 
     void Editor::InitializeGizmos()
@@ -220,7 +220,7 @@ namespace Vox
         worldOutline->InitializeGizmos();
     }
 
-    Object* Editor::GetSelectedObject() const
+    std::weak_ptr<Object> Editor::GetSelectedObject() const
     {
         return worldOutline->GetSelectedObject();
     }

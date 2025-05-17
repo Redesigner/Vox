@@ -13,29 +13,31 @@ namespace Vox
     class World
     {
     public:
-        [[nodiscard]] const std::vector<Object*>& GetObjects() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetObjects() const;
 
         template <typename T, class... Args>
-        T* CreateObject(Args&&... args) requires Derived<T, Object>
+        std::shared_ptr<T> CreateObject(Args&&... args) requires Derived<T, Object>
         {
-            T* newObject = static_cast<T*>(objects.emplace_back( new T(std::forward<Args>(args)...)));
+            std::shared_ptr<T> newObject = std::static_pointer_cast<T>(objects.emplace_back( std::make_shared<T>(std::forward<Args>(args)...)));
             InsertCheckTickable(newObject);
             return newObject;
         }
 
-        Object* CreateObject(const std::string& className);
+        std::shared_ptr<Object> CreateObject(const std::string& className);
 
         void Tick(float deltaTime);
+
+        void DestroyObject(const std::shared_ptr<Object>& object);
 
         ~World();
         
     private:
-        void InsertCheckTickable(Object* object);
+        void InsertCheckTickable(const std::shared_ptr<Object>& object);
 
         void RegisterTickable(Tickable* tickable);
 
         //@TODO: proper heap allocator here
-        std::vector<Object*> objects;
+        std::vector<std::shared_ptr<Object>> objects;
         std::vector<Tickable*> actorsToTick;
     };
 }

@@ -15,20 +15,22 @@ namespace Vox
 
         void InitializeGizmos();
 
-        void Draw(const World* world);
+        void Draw(World* world);
 
-        void UpdateGizmos() const;
+        void UpdateGizmos();
 
-        Object* GetSelectedObject() const;
+        [[nodiscard]] std::weak_ptr<Object> GetSelectedObject() const;
 
-        void SetSelectedObject(Object* object);
+        void SetSelectedObject(const std::weak_ptr<Object>& object);
 
     private:
-        void DrawObject(Object* object);
+        void DrawObject(const std::shared_ptr<Object>& object);
 
-        Object* currentlySelectedObject = nullptr;
+        std::weak_ptr<Object> currentlySelectedObject;
 
         std::unique_ptr<Gizmo> gizmo;
+
+        World* tempWorld;
     };
 }
 

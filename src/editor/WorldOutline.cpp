@@ -6,6 +6,7 @@
 #include "core/objects/World.h"
 #include "core/objects/actor/Actor.h"
 #include "core/objects/component/Component.h"
+#include "core/services/InputService.h"
 #include "rendering/Renderer.h"
 #include "rendering/gizmos/Gizmo.h"
 
@@ -13,7 +14,16 @@ namespace Vox
 {
     WorldOutline::WorldOutline()
     {
+        tempWorld = nullptr;
         gizmo = nullptr;
+
+        ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_DELETE, [this](bool pressed)
+        {
+            if (pressed)
+            {
+                tempWorld->DestroyObject(currentlySelectedObject.lock());
+            }
+        });
     }
 
     void WorldOutline::InitializeGizmos()
@@ -21,11 +31,12 @@ namespace Vox
         gizmo = std::make_unique<Gizmo>();
     }
 
-    void WorldOutline::Draw(const World* world)
+    void WorldOutline::Draw(World* world)
     {
+        tempWorld = world;
         if (ImGui::Begin("World Outline"))
         {
-            for (Object* object : world->GetObjects())
+            for (const auto& object : world->GetObjects())
             {
                 DrawObject(object);
             }
@@ -34,11 +45,18 @@ namespace Vox
         UpdateGizmos();
     }
 
-    void WorldOutline::UpdateGizmos() const
+    void WorldOutline::UpdateGizmos()
     {
+        if (currentlySelectedObject.expired())
+        {
+            SetSelectedObject(std::weak_ptr<Object>());
+            return;
+        }
+
         if (gizmo)
         {
-            if (auto* component = dynamic_cast<SceneComponent*>(currentlySelectedObject))
+            Object* object = currentlySelectedObject.lock().get();
+            if (auto* component = dynamic_cast<SceneComponent*>(object))
             {
                 gizmo->SetTransform(component->GetWorldTransform());
                 gizmo->Update();
@@ -46,7 +64,7 @@ namespace Vox
                 component->SetTransform(newTransform);
             }
 
-            if (auto* actor = dynamic_cast<Actor*>(currentlySelectedObject))
+            if (auto* actor = dynamic_cast<Actor*>(object))
             {
                 gizmo->SetTransform(actor->GetTransform());
                 gizmo->Update();
@@ -55,34 +73,36 @@ namespace Vox
         }
     }
 
-    Object* WorldOutline::GetSelectedObject() const
+    std::weak_ptr<Object> WorldOutline::GetSelectedObject() const
     {
         return currentlySelectedObject;
     }
 
-    void WorldOutline::SetSelectedObject(Object* object)
+    void WorldOutline::SetSelectedObject(const std::weak_ptr<Object>& object)
     {
         ServiceLocator::GetRenderer()->ClearMeshOutlines();
-        if (object == currentlySelectedObject)
+        if (object.lock() == currentlySelectedObject.lock())
         {
-            object = nullptr;
+            currentlySelectedObject.reset();
         }
 
         currentlySelectedObject = object;
-        if (!object)
+        if (object.expired())
         {
             gizmo->SetVisible(false);
             return;
         }
 
-        if (const auto component = dynamic_cast<SceneComponent*>(object))
+        Object* localObject = object.lock().get();
+
+        if (const auto component = dynamic_cast<SceneComponent*>(localObject))
         {
             gizmo->SetVisible(true);
             component->Select();
             gizmo->SetTransform(component->GetWorldTransform());
         }
 
-        if (const auto actor = dynamic_cast<Actor*>(object))
+        if (const auto actor = dynamic_cast<Actor*>(localObject))
         {
             gizmo->SetVisible(true);
             actor->Select();
@@ -90,10 +110,10 @@ namespace Vox
         }
     }
 
-    void WorldOutline::DrawObject(Object* object)
+    void WorldOutline::DrawObject(const std::shared_ptr<Object>& object)
     {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
-        if (object == currentlySelectedObject)
+        if (object == currentlySelectedObject.lock())
         {
             flags |= ImGuiTreeNodeFlags_Selected;
         }
@@ -104,13 +124,13 @@ namespace Vox
         }
         if (itemExpanded)
         {
-            if (const Actor* actor = dynamic_cast<Actor*>(object))
+            if (const Actor* actor = dynamic_cast<Actor*>(object.get()))
             {
                 for (const auto& sceneComponent : actor->GetAttachedComponents())
                 {
-                    if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str(), sceneComponent.get() == currentlySelectedObject))
+                    if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str(), sceneComponent == currentlySelectedObject.lock()))
                     {
-                        SetSelectedObject(sceneComponent.get());
+                        SetSelectedObject(sceneComponent);
                     }
                 }
                 
@@ -118,9 +138,9 @@ namespace Vox
                 {
                     if (ImGui::Selectable(
                         fmt::format("\t{}", component->GetDisplayName()).c_str(),
-                        component.get() == currentlySelectedObject))
+                        component == currentlySelectedObject.lock()))
                     {
-                        SetSelectedObject(component.get());
+                        SetSelectedObject(component);
                     }
                 }
             }

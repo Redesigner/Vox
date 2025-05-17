@@ -38,7 +38,7 @@ namespace Vox
 #ifdef EDITOR
     void MeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(this);
+        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(GetWeakThis());
     }
 
     void MeshComponent::Select()

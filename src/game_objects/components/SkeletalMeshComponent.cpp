@@ -81,7 +81,7 @@ namespace Vox
 #ifdef EDITOR
     void SkeletalMeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(this);
+        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(GetWeakThis());
     }
 
     void SkeletalMeshComponent::Select()

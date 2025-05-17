@@ -18,12 +18,12 @@ namespace Vox
 
 	void ServiceLocator::InitServices(SDL_Window* window)
 	{
-		editorService = new EditorService();
 		fileIoService = new FileIOService();
 		inputService = new InputService(window);
 		objectService = new ObjectService();
 		physicsServer = new PhysicsServer();
 		renderer = new Renderer(window);
+		editorService = new EditorService();
 	}
 
 	void ServiceLocator::DeleteServices()

@@ -38,9 +38,9 @@ namespace Vox
         Object& operator =(Object&&) = delete;
         
         template <typename T>
-        static std::function<T*()> GetConstructor() requires Derived<T, Object>
+        static std::function<std::shared_ptr<T>()> GetConstructor() requires Derived<T, Object>
         {
-            return [] { return new T; };
+            return [] { return std::make_shared<T>(); };
         }
 
         [[nodiscard]] const std::vector<Property>& GetProperties() const;

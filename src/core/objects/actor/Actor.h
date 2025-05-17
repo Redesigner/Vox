@@ -16,6 +16,9 @@ namespace  Vox
 
         void PropertyChanged(const Property& property) override;
 
+        std::weak_ptr<Component> GetWeakChild(const Component* component) const;
+        std::weak_ptr<Component> GetWeakChild(const SceneComponent* component) const;
+
         [[nodiscard]] const std::vector<std::shared_ptr<Component>>& GetComponents() const;
         
         [[nodiscard]] const std::vector<std::shared_ptr<SceneComponent>>& GetAttachedComponents() const;

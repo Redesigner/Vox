@@ -2,12 +2,12 @@
 
 namespace Vox
 {
-    ObjectClass::ObjectClass(std::function<Object*()> constructor, std::vector<Property> properties)
+    ObjectClass::ObjectClass(std::function<std::shared_ptr<Object>()> constructor, std::vector<Property> properties)
         :constructor(std::move(constructor)), properties(std::move(properties))
     {
     }
 
-    std::function<Object*()> ObjectClass::GetConstructor() const
+    std::function<std::shared_ptr<Object>()> ObjectClass::GetConstructor() const
     {
         return constructor;
     }
