@@ -4,18 +4,33 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
 
+#include "ClassList.h"
+#include "EditorViewport.h"
 #include "core/math/Math.h"
 #include "core/objects/ObjectClass.h"
-#include "core/objects/actor/Actor.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
-#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 #include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
+
+    Editor::Editor()
+    {
+        console = std::make_unique<Console>();
+        worldOutline = std::make_unique<WorldOutline>();
+        viewport = std::make_unique<EditorViewport>();
+
+        const ImGuiIO& io = ImGui::GetIO();
+        gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
+        gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
+        gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
+    }
+
+    Editor::~Editor()
+    = default;
 
     void Editor::Draw(const ColorDepthFramebuffer* viewportRenderTexture)
     {
@@ -23,41 +38,12 @@ namespace Vox
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
         {
-#ifdef IMGUI_HAS_VIEWPORT
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->GetWorkPos());
-            ImGui::SetNextWindowSize(viewport->GetWorkSize());
-            ImGui::SetNextWindowViewport(viewport->ID);
-#else 
-             ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-#endif
-            bool windowOpen = true;
             ImGui::PushFont(gitLabSans14);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
-            ImGui::Begin("Main Window", &windowOpen, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-            ImGui::SetScrollY(0);
-            
-            const ImVec2 dimensions = ImGui::GetContentRegionAvail();
-            const ImVec2 bottomRight = ImGui::GetContentRegionMax();
-            viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
-            viewportBox = Box(
-                static_cast<int>(bottomRight.x - dimensions.x),
-                static_cast<int>(bottomRight.y - dimensions.y),
-                static_cast<int>(bottomRight.x),
-                static_cast<int>(bottomRight.y));
-            ImGui::Image(viewportRenderTexture->GetTextureId(),
-                ImVec2(static_cast<float>(viewportRenderTexture->GetWidth()), static_cast<float>(viewportRenderTexture->GetHeight())),
-                {0, 1}, {1, 0});
-            if (ImGui::IsItemHovered())
-            {
-                ImGui::SetNextFrameWantCaptureMouse(false);
-            }
-            
-            DrawToolbar();
+            viewport->Draw(viewportRenderTexture);
+
+            //DrawToolbar();
+
             if (console)
             {
                 console->Draw();
@@ -68,10 +54,6 @@ namespace Vox
                 AssetDisplayWindow::Draw(&drawAssetViewer);
             }
 
-            ImGui::End();
-            ImGui::PopStyleColor();
-            ImGui::PopStyleVar(2);
-
             if (!worldOutline->GetSelectedObject().expired())
             {
                 DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
@@ -81,7 +63,9 @@ namespace Vox
             {
                 worldOutline->Draw(currentWorld.lock().get());
             }
-            
+
+            ClassList::Draw();
+
             ImGui::PopFont();
         }
         ImGui::Render();
@@ -91,43 +75,6 @@ namespace Vox
     void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
     {
         onGLTFOpened = function;
-    }
-
-    glm::vec2 Editor::GetViewportDimensions() const
-    {
-        return viewportDimensions;
-    }
-
-    Editor::Box Editor::GetViewportBox() const
-    {
-        return viewportBox;
-    }
-
-    bool Editor::GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const
-    {
-        if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
-            clickX < viewportBox.left || clickX > viewportBox.right)
-        {
-            return false;
-        }
-
-        xOut = RemapRange(clickX, viewportBox.left, viewportBox.right, -1.0f, 1.0f);
-        yOut = RemapRange(clickY, viewportBox.top, viewportBox.bottom, 1.0f, -1.0f);
-        return true;
-    }
-
-    bool Editor::GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const
-    {
-        if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
-            clickX < viewportBox.left || clickX > viewportBox.right)
-        {
-            return false;
-        }
-
-        xOut = clickX - viewportBox.left;
-        yOut = clickY - viewportBox.top;
-        VoxLog(Display, Input, "Mouse clicked at '({}, {})'px, remapped to '({}, {})px", clickX, clickY, xOut, yOut);
-        return true;
     }
 
     void Editor::SetWorld(const std::shared_ptr<World>& world)
@@ -194,7 +141,7 @@ namespace Vox
         }
         ImGui::PopStyleVar();
     }
-    
+
 
     void Editor::openGLTF()
     {
@@ -210,9 +157,9 @@ namespace Vox
         //}
     }
 
-    void Editor::SelectObject(std::weak_ptr<Object> object) const
+    void Editor::SelectObject(const std::weak_ptr<Object>& object) const
     {
-        worldOutline->SetSelectedObject(std::move(object));
+        worldOutline->SetSelectedObject(object);
     }
 
     void Editor::InitializeGizmos()
@@ -220,35 +167,16 @@ namespace Vox
         worldOutline->InitializeGizmos();
     }
 
+    EditorViewport* Editor::GetViewport() const
+    {
+        return viewport.get();
+    }
+
     std::weak_ptr<Object> Editor::GetSelectedObject() const
     {
         return worldOutline->GetSelectedObject();
     }
 
-    Editor::Box::Box()
-        :left(0), top(0), right(0), bottom(0)
-    {
-    }
-
-    Editor::Box::Box(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom)
-        :left(left), top(top), right(right), bottom(bottom)
-    {
-    }
-
-    Editor::Editor()
-    {
-        console = std::make_unique<Console>();
-        worldOutline = std::make_unique<WorldOutline>();
-
-        const ImGuiIO& io = ImGui::GetIO();
-        gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
-        gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
-        gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
-    }
-
-    Editor::~Editor()
-    {
-    }
 
     ImFont* Editor::gitLabSans14 = nullptr;
     ImFont* Editor::gitLabSans18 = nullptr;

@@ -17,13 +17,17 @@ namespace Vox
         const float consoleHeight = ImGui::GetTextLineHeightWithSpacing() * 8;
         const float tabHeight = ImGui::GetTextLineHeightWithSpacing() * 2.0f;
         constexpr float toolbarSize = 5.0f;
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight - tabHeight - toolbarSize);
+        // ImGui::SetCursorPosY(ImGui::GetCursorPosY() - consoleHeight - tabHeight - toolbarSize);
         ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
-        if (ImGui::BeginChild("Console", ImVec2(-FLT_MIN, ImGui::GetWindowHeight() - ImGui::GetCursorPosY()), ImGuiChildFlags_Borders))
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+        if (ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration))
         {
             DrawTabs();
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
-            if (ImGui::BeginChild("ConsoleEntries", ImVec2(-FLT_MIN, ImGui::GetWindowHeight() - ImGui::GetCursorPosY()), ImGuiChildFlags_Borders))
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0f, 15.0f));
+            if (ImGui::BeginChild("ConsoleEntries", ImVec2(-FLT_MIN, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding))
             {
                 std::vector<size_t> validEntries = Logger::GetEntriesFilteredByIndex(filter);
                 const std::vector<LogEntry>& entries = Logger::GetEntries();
@@ -39,10 +43,12 @@ namespace Vox
                 }
             }
             ImGui::EndChild();
+            ImGui::PopStyleVar(1);
             ImGui::PopStyleColor();
         }
-        ImGui::PopStyleVar(1);
-        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar(3);
+        ImGui::End();
     }
 
     void Console::DrawTabs()

@@ -36,7 +36,11 @@ namespace Vox
             RegisterObjectClass<T>();
         }
 
-        const ObjectClass* GetObjectClass(const std::string& objectClassId) const;
+        [[nodiscard]] const ObjectClass* GetObjectClass(const std::string& objectClassId) const;
+
+        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetBegin() const;
+        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetEnd() const;
+
 
     private:
         std::unordered_map<std::string, ObjectClass> classRegistry;

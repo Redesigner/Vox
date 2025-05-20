@@ -6,6 +6,7 @@
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
+#include "editor/EditorViewport.h"
 
 namespace Vox
 {
@@ -17,7 +18,7 @@ namespace Vox
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](int x, int y)
         {
             unsigned int viewX, viewY;
-             if (!ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(viewX, viewY,x, y))
+             if (!ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(viewX, viewY,x, y))
              {
                  return;
              }

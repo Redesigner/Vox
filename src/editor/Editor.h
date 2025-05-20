@@ -8,6 +8,11 @@
 
 #include "editor/Console.h"
 
+namespace Vox
+{
+    class EditorViewport;
+}
+
 struct ImFont;
 
 namespace Vox
@@ -22,14 +27,6 @@ namespace Vox
 	class Editor
 	{
 	public:
-		struct Box
-		{
-			Box();
-			Box(unsigned int left, unsigned int top, unsigned int right, unsigned int bottom);
-
-			unsigned int left, top, right, bottom;
-		};
-
 		Editor();
 	    ~Editor();
 
@@ -37,24 +34,18 @@ namespace Vox
 		
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		
-		[[nodiscard]] glm::vec2 GetViewportDimensions() const;
-		
-		[[nodiscard]] Box GetViewportBox() const;
-		
-		bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
-
-		bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
-		
 		void SetWorld(const std::shared_ptr<World>& world);
 
-		void SelectObject(std::weak_ptr<Object> object) const;
+		void SelectObject(const std::weak_ptr<Object>& object) const;
 
 	    void InitializeGizmos();
 
+	    [[nodiscard]] EditorViewport* GetViewport() const;
+
 	    [[nodiscard]] std::weak_ptr<Object> GetSelectedObject() const;
 
-		static ImFont* GetFont_GitLab18();
-		static ImFont* GetFont_GitLab24();
+		[[nodiscard]] static ImFont* GetFont_GitLab18();
+		[[nodiscard]] static ImFont* GetFont_GitLab24();
 
 	private:
 		void DrawToolbar();
@@ -69,11 +60,9 @@ namespace Vox
 
 		bool drawAssetViewer = false;
 
+	    std::unique_ptr<EditorViewport> viewport;
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;
-
-		glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
-		Box viewportBox{ 0, 0, 800, 450 };
 
 		std::weak_ptr<World> currentWorld;
 		

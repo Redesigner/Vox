@@ -17,6 +17,7 @@
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
+#include "editor/EditorViewport.h"
 #include "physics/PhysicsServer.h"
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
@@ -305,7 +306,7 @@ namespace Vox
     void Renderer::CheckViewportDimensions(const Editor* editor)
     {
         // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
-        const glm::vec2 editorViewportSize = editor->GetViewportDimensions();
+        const glm::vec2 editorViewportSize = editor->GetViewport()->GetDimensions();
         if (viewportTexture)
         {
             const int viewportWidth = static_cast<int>(editorViewportSize.x);

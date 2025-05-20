@@ -20,4 +20,14 @@ namespace Vox
         }
         return &iterator->second;
     }
+
+    std::unordered_map<std::string, ObjectClass>::const_iterator ObjectService::GetBegin() const
+    {
+        return classRegistry.cbegin();
+    }
+
+    std::unordered_map<std::string, ObjectClass>::const_iterator ObjectService::GetEnd() const
+    {
+        return classRegistry.cend();
+    }
 }

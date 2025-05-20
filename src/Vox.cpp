@@ -32,6 +32,7 @@
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
+#include "editor/EditorViewport.h"
 #include "game_objects/components/SkeletalMeshComponent.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
@@ -185,7 +186,7 @@ int main()
                 return;
             }
 
-            if (ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(xViewport, yViewport, x, y))
+            if (ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
                 glm::vec4 rayStartViewport = glm::vec4(xViewport, yViewport, -1.0f, 1.0f);
                 glm::vec4 rayEndViewport = glm::vec4(xViewport, yViewport, 1.0f, 1.0f);

@@ -11,6 +11,7 @@
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
+#include "editor/EditorViewport.h"
 #include "rendering/Camera.h"
 #include "rendering/Renderer.h"
 
@@ -190,7 +191,7 @@ namespace Vox
 
         const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
         glm::vec2 mouseLocationViewport;
-        ServiceLocator::GetEditorService()->GetEditor()->GetClickViewportSpace(
+        ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(
             mouseLocationViewport.x, mouseLocationViewport.y,
             static_cast<unsigned int>(mouseLocationPixels.x), static_cast<unsigned int>(mouseLocationPixels.y)
         );
