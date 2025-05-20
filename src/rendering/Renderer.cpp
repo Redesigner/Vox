@@ -15,6 +15,7 @@
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/services/EditorService.h"
+#include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
@@ -29,6 +30,8 @@
 #include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
+#include "shaders/pixel_shaders/DebugShader.h"
+#include "shaders/pixel_shaders/SkyShader.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
 #include "shaders/pixel_shaders/mesh_shaders/StencilShader.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShader.h"
@@ -49,57 +52,12 @@ namespace Vox
 
         quad = std::make_unique<FullscreenQuad>();
 
-        voxelShader = std::make_unique<VoxelShader>();
-        deferredShader = std::make_unique<DeferredShader>();
-        gBufferShader = std::make_unique<MaterialShader>("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
-        gBufferShaderSkeleton = std::make_unique<MaterialShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
-
-        const unsigned int matrixBufferLocation = glGetUniformBlockIndex(gBufferShaderSkeleton->GetId(), "data");
-        glUniformBlockBinding(gBufferShaderSkeleton->GetId(), matrixBufferLocation, 0);
-
-        skyShader = std::make_unique<PixelShader>("assets/shaders/sky.vert", "assets/shaders/sky.frag");
-        debugTriangleShader = std::make_unique<PixelShader>("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
-        debugLineShader = std::make_unique<PixelShader>("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
-
-        debugTriangleMatrixLocation = debugTriangleShader->GetUniformLocation("viewProjection");
-        debugLineMatrixLocation = debugLineShader->GetUniformLocation("viewProjection");
-
-        voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
-
         CreateMeshVao();
         CreateSkeletalMeshVao();
         CreateVoxelVao();
 
-        constexpr int defaultWidth = 800;
-        constexpr int defaultHeight = 450;
-
-        gBuffer = std::make_unique<GBuffer>(defaultWidth, defaultHeight);
-        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(defaultWidth, defaultHeight);
-        
-#ifdef EDITOR
-        overlayShader = std::make_unique<MaterialShader>("assets/shaders/forwardMaterial.vert", "assets/shaders/forwardMaterial.frag");
-
-        pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
-        pickShader = std::make_unique<PickShader>("assets/shaders/pickBuffer.vert", "assets/shaders/pickBuffer.frag");
-        pickShaderSkeleton = std::make_unique<PickShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/pickBuffer.frag");
-        pickContainer = std::make_unique<PickContainer>();
-
-        stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
-        stencilShader = std::make_unique<StencilShader>();
-        stencilShaderSkeleton = std::make_unique<StencilShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/stencil.frag");
-
-        outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
-        outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
-
-        outlineShader = std::make_unique<OutlineShader>();
-        outlineShaderJump = std::make_unique<OutlineShaderJump>();
-        outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
-#endif
-
-
-        skyShader->Enable();
-        Vox::PixelShader::SetUniformInt(skyShader->GetUniformLocation("color"), 0);
-        Vox::PixelShader::SetUniformInt(skyShader->GetUniformLocation("depth"), 1);
+        GenerateBuffers();
+        LoadDefaultShaders();
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
@@ -167,27 +125,25 @@ namespace Vox
 
     bool Renderer::UploadModel(std::string alias, const std::string& relativeFilePath)
     {
-        if (uploadedModels.contains(alias))
+        if (uploadedMeshes.contains(alias))
         {
             VoxLog(Warning, Rendering, "Failed to upload model '{}'. A model already exists with that name.", alias);
             return false;
         }
 
-        auto newMeshInstance = uploadedModels.emplace(alias, 8);
-        newMeshInstance.first->second.LoadMesh(relativeFilePath);
+        uploadedMeshes.emplace(alias, std::make_shared<Model>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + relativeFilePath));
         return true;
     }
 
     bool Renderer::UploadSkeletalModel(std::string alias, const std::string& relativeFilePath)
     {
-        if (uploadedSkeletalModels.contains(alias))
+        if (uploadedSkeletalMeshes.contains(alias))
         {
             VoxLog(Warning, Rendering, "Failed to upload skeletal model '{}'. A model already exists with that name.", alias);
             return false;
         }
 
-        auto newSkeletalMeshInstance = uploadedSkeletalModels.emplace(alias, 8);
-        newSkeletalMeshInstance.first->second.LoadMesh(relativeFilePath);
+        uploadedSkeletalMeshes.emplace(alias, std::make_shared<SkeletalModel>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + relativeFilePath));
         return true;
     }
 
@@ -214,30 +170,6 @@ namespace Vox
         outlinedSkeletalMeshes.clear();
     }
 #endif
-
-    Ref<MeshInstance> Renderer::CreateMeshInstance(const std::string& meshName)
-    {
-        const auto mesh = uploadedModels.find(meshName);
-        if (mesh == uploadedModels.end())
-        {
-            VoxLog(Error, Rendering, "No mesh with name '{}' exists. Make sure to call 'UploadModel' first.", meshName);
-            return {};
-        }
-
-        return mesh->second.CreateMeshInstance();
-    }
-
-    Ref<SkeletalMeshInstance> Renderer::CreateSkeletalMeshInstance(const std::string& meshName)
-    {
-        const auto mesh = uploadedSkeletalModels.find(meshName);
-        if (mesh == uploadedSkeletalModels.end())
-        {
-            VoxLog(Error, Rendering, "No skeletal mesh with name '{}' exists. Make sure to call 'UploadModel' first.", meshName);
-            return {};
-        }
-
-        return mesh->second.CreateMeshInstance();
-    }
 
     std::string Renderer::GetGlDebugTypeString(const unsigned int errorCode)
     {
@@ -271,14 +203,14 @@ namespace Vox
         return {&voxelMeshes, voxelMeshes.Create(position)};
     }
 
-    const std::unordered_map<std::string, MeshInstanceContainer>& Renderer::GetMeshes() const
+    const std::unordered_map<std::string, std::shared_ptr<Model>>& Renderer::GetMeshes() const
     {
-        return uploadedModels;
+        return uploadedMeshes;
     }
 
-    const std::unordered_map<std::string, SkeletalMeshInstanceContainer>& Renderer::GetSkeletalMeshes() const
+    const std::unordered_map<std::string, std::shared_ptr<SkeletalModel>>& Renderer::GetSkeletalMeshes() const
     {
-        return uploadedSkeletalModels;
+        return uploadedSkeletalMeshes;
     }
 
 #ifdef EDITOR
@@ -302,6 +234,55 @@ namespace Vox
         overlayMeshes.clear();
     }
 #endif
+
+    void Renderer::GenerateBuffers()
+    {
+        constexpr int defaultWidth = 800;
+        constexpr int defaultHeight = 450;
+
+        gBuffer = std::make_unique<GBuffer>(defaultWidth, defaultHeight);
+        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(defaultWidth, defaultHeight);
+
+#ifdef EDITOR
+        pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
+        stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
+        outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
+        outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
+#endif
+    }
+
+    void Renderer::LoadDefaultShaders()
+    {
+        voxelShader = std::make_unique<VoxelShader>();
+        deferredShader = std::make_unique<DeferredShader>();
+        gBufferShader = std::make_unique<MaterialShader>("assets/shaders/gBuffer.vert", "assets/shaders/gBuffer.frag");
+        gBufferShaderSkeleton = std::make_unique<MaterialShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/gBuffer.frag");
+
+        const unsigned int matrixBufferLocation = glGetUniformBlockIndex(gBufferShaderSkeleton->GetId(), "data");
+        glUniformBlockBinding(gBufferShaderSkeleton->GetId(), matrixBufferLocation, 0);
+
+        skyShader = std::make_unique<SkyShader>();
+        debugTriangleShader = std::make_unique<DebugShader>("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
+        debugLineShader = std::make_unique<DebugShader>("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
+
+        voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
+
+#ifdef EDITOR
+        overlayShader = std::make_unique<MaterialShader>("assets/shaders/forwardMaterial.vert", "assets/shaders/forwardMaterial.frag");
+
+        pickShader = std::make_unique<PickShader>("assets/shaders/pickBuffer.vert", "assets/shaders/pickBuffer.frag");
+        pickShaderSkeleton = std::make_unique<PickShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/pickBuffer.frag");
+        pickContainer = std::make_unique<PickContainer>();
+
+        stencilShader = std::make_unique<StencilShader>();
+        stencilShaderSkeleton = std::make_unique<StencilShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/stencil.frag");
+
+
+        outlineShader = std::make_unique<OutlineShader>();
+        outlineShaderJump = std::make_unique<OutlineShaderJump>();
+        outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
+#endif
+    }
 
     void Renderer::CheckViewportDimensions(const Editor* editor)
     {
@@ -361,7 +342,7 @@ namespace Vox
         
         glBindVertexArray(meshVao);
 
-        for (auto& val : uploadedModels | std::views::values)
+        for (auto& val : uploadedMeshes | std::views::values)
         {
             val.Render(gBufferShader.get());
         }
@@ -370,7 +351,7 @@ namespace Vox
         gBufferShaderSkeleton->SetCamera(currentCamera);
         glBindVertexArray(skeletalMeshVao);
 
-        for (SkeletalMeshInstanceContainer& val : uploadedSkeletalModels | std::views::values)
+        for (SkeletalMeshInstanceContainer& val : uploadedSkeletalMeshes | std::views::values)
         {
             val.Render(gBufferShaderSkeleton.get());
         }
@@ -412,7 +393,7 @@ namespace Vox
         pickShader->SetCamera(currentCamera);
         glBindVertexArray(meshVao);
 
-        for (auto& val : uploadedModels | std::views::values)
+        for (auto& val : uploadedMeshes | std::views::values)
         {
             val.Render(pickShader.get());
         }
@@ -421,7 +402,7 @@ namespace Vox
         pickShaderSkeleton->SetCamera(currentCamera);
         glBindVertexArray(skeletalMeshVao);
 
-        for (auto& val : uploadedSkeletalModels | std::views::values)
+        for (auto& val : uploadedSkeletalMeshes | std::views::values)
         {
             val.Render(pickShader.get());
         }
@@ -481,14 +462,14 @@ namespace Vox
         physicsServer->RenderDebugShapes();
 
         glEnable(GL_DEPTH_TEST);
-        debugLineShader->Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferLines();
-        PixelShader::SetUniformMatrix(debugLineMatrixLocation, currentCamera->GetViewProjectionMatrix());
+        debugLineShader->Enable();
+        debugLineShader->SetCamera(currentCamera);
         glDrawArrays(GL_LINES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetLineVertexCount()));
 
-        debugTriangleShader->Enable();
         physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-        PixelShader::SetUniformMatrix(debugTriangleMatrixLocation, currentCamera->GetViewProjectionMatrix());
+        debugTriangleShader->Enable();
+        debugTriangleShader->SetCamera(currentCamera);
         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
     }
 
@@ -570,10 +551,7 @@ namespace Vox
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
 
         skyShader->Enable();
-        const glm::mat4x4 cameraRotation = currentCamera->GetRotationMatrix();
-        const glm::mat4x4 projection = currentCamera->GetProjectionMatrix();
-        const glm::mat4x4 matrix = glm::inverse(projection * cameraRotation);
-        PixelShader::SetUniformMatrix(skyShader->GetUniformLocation("cameraWorldSpace"), matrix);
+        skyShader->SetCamera(currentCamera);
         // deferredFramebuffer->ActivateTextures();
         glBindVertexArray(quad->GetVaoId());
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -653,4 +631,25 @@ namespace Vox
         glEnableVertexAttribArray(2);
         glEnableVertexAttribArray(3);
     }
+
+    std::shared_ptr<Model> Renderer::GetMesh(const std::string& name) const
+    {
+        const auto& result = uploadedMeshes.find(name);
+        if (result == uploadedMeshes.end())
+        {
+            return {};
+        }
+
+        return result->second;
+    }
+
+    std::shared_ptr<SkeletalModel> Renderer::GetSkeletalMesh(const std::string& name) const
+    {
+        const auto& result = uploadedSkeletalMeshes.find(name);
+        if (result == uploadedSkeletalMeshes.end())
+        {
+            return {};
+        }
+
+        return result->second;    }
 }

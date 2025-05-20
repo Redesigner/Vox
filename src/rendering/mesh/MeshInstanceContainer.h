@@ -18,9 +18,7 @@ namespace Vox
 	class MeshInstanceContainer
 	{
 	public:
-		explicit MeshInstanceContainer(size_t size);
-
-		bool LoadMesh(const std::string& filepath);
+		MeshInstanceContainer(size_t size, const std::shared_ptr<Model>& mesh);
 
 		void Render(const MaterialShader* shader);
 
@@ -39,7 +37,7 @@ namespace Vox
 		[[nodiscard]] size_t GetInstanceCount() const;
 
 	private:
-		std::unique_ptr<Model> model;
+		std::shared_ptr<Model> mesh;
 		ObjectContainer<MeshInstance> meshInstances;
 	};
 }
