@@ -5,6 +5,8 @@
 #pragma once
 #include <glm/vec2.hpp>
 
+#include "core/objects/World.h"
+
 namespace Vox
 {
     class ColorDepthFramebuffer;
@@ -21,7 +23,7 @@ namespace Vox
     {
     public:
 
-        void Draw(const ColorDepthFramebuffer* texture);
+        void Draw(const ColorDepthFramebuffer* texture, World* world);
 
         bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 

@@ -7,6 +7,7 @@
 #include <imgui.h>
 
 #include "core/math/Math.h"
+#include "core/services/EditorService.h"
 #include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 
 namespace Vox
@@ -21,7 +22,7 @@ namespace Vox
     {
     }
 
-    void EditorViewport::Draw(const ColorDepthFramebuffer* texture)
+    void EditorViewport::Draw(const ColorDepthFramebuffer* texture, World* world)
     {
 #ifdef IMGUI_HAS_VIEWPORT
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -59,6 +60,16 @@ namespace Vox
             if (ImGui::IsItemHovered())
             {
                 ImGui::SetNextFrameWantCaptureMouse(false);
+            }
+
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("OBJECT_CLASS_NAME"))
+                {
+                    const char* objectClassName = static_cast<const char*>(payload->Data);
+                    world->CreateObject(std::string(objectClassName));
+                }
+                ImGui::EndDragDropTarget();
             }
         }
         ImGui::End();

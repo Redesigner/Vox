@@ -20,6 +20,11 @@ namespace Vox
                 [](const std::pair<std::string, ObjectClass>& entry)
                 {
                     ImGui::Text(entry.first.c_str());
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                    {
+                        ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", entry.first.data(), entry.first.size() + 1);
+                        ImGui::EndDragDropSource();
+                    }
                 });
         }
         ImGui::End();

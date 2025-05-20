@@ -40,7 +40,7 @@ namespace Vox
         {
             ImGui::PushFont(gitLabSans14);
 
-            viewport->Draw(viewportRenderTexture);
+            viewport->Draw(viewportRenderTexture, currentWorld.lock().get());
 
             //DrawToolbar();
 
