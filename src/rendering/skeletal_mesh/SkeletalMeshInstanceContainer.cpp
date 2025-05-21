@@ -11,20 +11,20 @@
 
 namespace Vox
 {
-    SkeletalMeshInstanceContainer::SkeletalMeshInstanceContainer(size_t size)
-        :meshInstances(size)
+    SkeletalMeshInstanceContainer::SkeletalMeshInstanceContainer(SceneRenderer* owner, const size_t size, const std::shared_ptr<SkeletalModel>& mesh)
+        :owner(owner), mesh(mesh), meshInstances(size)
     {
     }
 
     bool SkeletalMeshInstanceContainer::LoadMesh(const std::string& filepath)
     {
-        if (model)
+        if (mesh)
         {
             VoxLog(Error, Rendering, "Failed to load mesh to SkeletalMeshInstanceContainer - the container already has a mesh loaded.");
             return false;
         }
 
-        model = std::make_unique<SkeletalModel>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + filepath);
+        mesh = std::make_unique<SkeletalModel>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + filepath);
         return true;
     }
 
@@ -34,7 +34,7 @@ namespace Vox
         {
             if (meshInstance.has_value())
             {
-                model->Render(shader, meshInstance->GetTransform(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
+                mesh->Render(shader, meshInstance->GetTransform(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
             }
         }
     }
@@ -42,12 +42,12 @@ namespace Vox
     void SkeletalMeshInstanceContainer::RenderInstance(const MeshShader* shader,
         const SkeletalMeshInstance& meshInstance) const
     {
-        model->Render(shader, meshInstance.GetTransform(), meshInstance.GetAnimationIndex(), meshInstance.GetAnimationTime());
+        mesh->Render(shader, meshInstance.GetTransform(), meshInstance.GetAnimationIndex(), meshInstance.GetAnimationTime());
     }
 
     const std::vector<Animation>& SkeletalMeshInstanceContainer::GetAnimations() const
     {
-        return model->GetAnimations();
+        return mesh->GetAnimations();
     }
 
 #ifdef EDITOR
@@ -57,7 +57,7 @@ namespace Vox
         {
             if (meshInstance.has_value())
             {
-                model->Render(shader, meshInstance->GetTransform(), meshInstance->GetPickId(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
+                mesh->Render(shader, meshInstance->GetTransform(), meshInstance->GetPickId(), meshInstance->GetAnimationIndex(), meshInstance->GetAnimationTime());
             }
         }
     }
@@ -66,5 +66,10 @@ namespace Vox
     Ref<SkeletalMeshInstance> SkeletalMeshInstanceContainer::CreateMeshInstance()
     {
 		return {&meshInstances, meshInstances.Create(this)};
+    }
+
+    SceneRenderer* SkeletalMeshInstanceContainer::GetOwner() const
+    {
+        return owner;
     }
 } // Vox

@@ -2,9 +2,9 @@
 
 namespace Vox
 {
-    TestComponent::TestComponent()
+    TestComponent::TestComponent(Actor* parent)
+        :Component(parent)
     {
-        DEFAULT_DISPLAY_NAME()
     }
 
     void TestComponent::BuildProperties(std::vector<Property>& propertiesInOut)

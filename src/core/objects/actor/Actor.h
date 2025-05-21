@@ -8,10 +8,13 @@
 namespace  Vox
 {
     class Component;
+    class World;
 
     class Actor : public Object, public Tickable
     {
     public:
+        explicit Actor(World* world);
+
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
         void PropertyChanged(const Property& property) override;
@@ -30,12 +33,14 @@ namespace  Vox
 
         void Tick(float deltaTime) override;
 
+        [[nodiscard]] World* GetWorld() const;
+
 #ifdef EDITOR
         void Select() const;
 #endif
 
         [[nodiscard]] const Transform& GetTransform() const;
-        
+
     protected:
         template <typename T, typename... Args>
         std::shared_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
@@ -69,6 +74,8 @@ namespace  Vox
         std::vector<std::shared_ptr<SceneComponent>> attachedComponents;
 
         std::vector<std::shared_ptr<Tickable>> tickableComponents;
+
+        World* world;
 
         IMPLEMENT_OBJECT(Actor)
     };

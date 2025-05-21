@@ -12,12 +12,13 @@
 
 namespace Vox
 {
+    class SceneRenderer;
     struct MeshInstance;
 
     class Gizmo
     {
     public:
-        Gizmo();
+        Gizmo(SceneRenderer* scene);
         ~Gizmo();
 
         void SetTransform(const Transform& transform);
@@ -48,7 +49,7 @@ namespace Vox
          * @return a pair of vectors, where first is the click's location in world space
          * and second is the click's direction
          */
-        static std::pair<glm::vec3, glm::vec3> GetClickVector();
+        std::pair<glm::vec3, glm::vec3> GetClickVector();
 
         Transform transform;
         Transform originalTransform;

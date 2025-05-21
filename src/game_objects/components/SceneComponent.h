@@ -6,6 +6,8 @@ namespace Vox
     class SceneComponent : public Component
     {
     public:
+        SceneComponent(Actor* parent);
+
         void PropertyChanged(const Property& property) override;
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;

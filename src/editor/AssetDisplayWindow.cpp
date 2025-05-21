@@ -15,7 +15,7 @@ namespace Vox
 		{
 			if (ImGui::CollapsingHeader("Static Meshes"))
 			{
-				for (const std::pair<const std::string, MeshInstanceContainer>& mesh : ServiceLocator::GetRenderer()->GetMeshes())
+				for (const auto& mesh : ServiceLocator::GetRenderer()->GetMeshes())
 				{
 					DrawMeshData(mesh);
 				}
@@ -32,26 +32,23 @@ namespace Vox
 		ImGui::End();
 	}
 
-	void AssetDisplayWindow::DrawMeshData(const std::pair<const std::string, MeshInstanceContainer>& mesh)
+	void AssetDisplayWindow::DrawMeshData(const std::pair<const std::string, std::shared_ptr<Model>>& mesh)
 	{
 		if (ImGui::TreeNode(mesh.first.c_str()))
 		{
-			ImGui::Text("Instances: '%i'", mesh.second.GetInstanceCount());
-
 			ImGui::TreePop();
 		}
 	}
 
-    void AssetDisplayWindow::DrawSkeletalMeshData(
-        const std::pair<const std::string, SkeletalMeshInstanceContainer>& mesh)
+    void AssetDisplayWindow::DrawSkeletalMeshData(const std::pair<const std::string, std::shared_ptr<SkeletalModel>>& mesh)
     {
 		if (ImGui::TreeNode(mesh.first.c_str()))
 		{
 			if (ImGui::TreeNode("Animations"))
 			{
-				for (const auto& animation : mesh.second.GetAnimations())
+				for (const auto& animation : mesh.second->GetAnimations())
 				{
-					ImGui::Text("%s : '%fs'", animation.GetName().c_str(), animation.GetDuration());
+					ImGui::Text("%s : '%.2fs'", animation.GetName().c_str(), animation.GetDuration());
 				}
 				ImGui::TreePop();
 			}

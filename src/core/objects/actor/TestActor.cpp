@@ -7,7 +7,8 @@
 
 namespace Vox
 {
-    TestActor::TestActor()
+    TestActor::TestActor(World* world)
+        :Actor(world)
     {
         displayName = fmt::format("{}_Default", classDisplayName);
 

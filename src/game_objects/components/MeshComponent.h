@@ -5,11 +5,13 @@
 
 namespace Vox
 {
+    class World;
+
     class MeshComponent : public SceneComponent
     {
     public:
-        MeshComponent();
-        explicit MeshComponent(const std::string& meshName);
+        MeshComponent(Actor* parent);
+        MeshComponent(Actor* parent, const std::string& meshName);
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 

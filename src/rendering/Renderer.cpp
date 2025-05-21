@@ -56,16 +56,11 @@ namespace Vox
         CreateSkeletalMeshVao();
         CreateVoxelVao();
 
-        GenerateBuffers();
         LoadDefaultShaders();
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
-        voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
-
-        lightUniformLocations = LightUniformLocations(deferredShader.get());
-        testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
-    }
+        voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);}
 
     Renderer::~Renderer()
     {
@@ -74,32 +69,7 @@ namespace Vox
 
     void Renderer::Render(Editor* editor)
     {
-        CheckViewportDimensions(editor);
-        currentCamera->SetAspectRatio(viewportTexture->GetHeight() == 0 ? 1 : viewportTexture->GetWidth() / viewportTexture->GetHeight());
-        glViewport(0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight());
-
-        RenderGBuffer();
-        RenderDeferred();
-        RenderSky();
-        // RenderDebugShapes();
-
-#ifdef EDITOR
-        RenderPickBuffer();
-        RenderOutline();
-        RenderOverlay();
-#endif
-
-        int width, height;
-        SDL_GetWindowSizeInPixels(mainWindow, &width, &height);
-
-        glBlitNamedFramebuffer(deferredFramebuffer->GetFramebufferId(), 0,
-            0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
-            0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        // Make sure that our viewport size matches the window size when drawing with imgui
-        // glViewport(0, 0, width, height);
-        // glViewport(0, 0, 800, 450);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        editor->Draw(deferredFramebuffer.get());
+        editor->Draw();
         SDL_GL_SwapWindow(mainWindow);
     }
 
@@ -111,16 +81,6 @@ namespace Vox
         // newCamera->SetAspectRatio(viewportTexture->GetAspectRatio());
         newCamera->SetFovY(45.0f);
         return newCamera;
-    }
-
-    Ref<Camera> Renderer::GetCurrentCamera() const
-    {
-        return currentCamera;
-    }
-
-    void Renderer::SetCurrentCamera(const Ref<Camera>& camera)
-    {
-        currentCamera = camera;
     }
 
     bool Renderer::UploadModel(std::string alias, const std::string& relativeFilePath)
@@ -146,30 +106,6 @@ namespace Vox
         uploadedSkeletalMeshes.emplace(alias, std::make_shared<SkeletalModel>(ServiceLocator::GetFileIoService()->GetAssetPath() + "models/" + relativeFilePath));
         return true;
     }
-
-#ifdef EDITOR
-    void Renderer::AddMeshOutline(const Ref<MeshInstance>& mesh)
-    {
-        if (std::ranges::find(outlinedMeshes, mesh) == outlinedMeshes.end())
-        {
-            outlinedMeshes.emplace_back(mesh);
-        }
-    }
-
-    void Renderer::AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh)
-    {
-        if (std::ranges::find(outlinedSkeletalMeshes, mesh) == outlinedSkeletalMeshes.end())
-        {
-            outlinedSkeletalMeshes.emplace_back(mesh);
-        }
-    }
-
-    void Renderer::ClearMeshOutlines()
-    {
-        outlinedMeshes.clear();
-        outlinedSkeletalMeshes.clear();
-    }
-#endif
 
     std::string Renderer::GetGlDebugTypeString(const unsigned int errorCode)
     {
@@ -213,44 +149,6 @@ namespace Vox
         return uploadedSkeletalMeshes;
     }
 
-#ifdef EDITOR
-    PickContainer* Renderer::GetPickContainer() const
-    {
-        return pickContainer.get();
-    }
-
-    PickBuffer* Renderer::GetPickBuffer() const
-    {
-        return pickBuffer.get();
-    }
-
-    void Renderer::RegisterOverlayMesh(const Ref<MeshInstance>& meshInstance)
-    {
-        overlayMeshes.emplace_back(meshInstance);
-    }
-
-    void Renderer::ClearOverlays()
-    {
-        overlayMeshes.clear();
-    }
-#endif
-
-    void Renderer::GenerateBuffers()
-    {
-        constexpr int defaultWidth = 800;
-        constexpr int defaultHeight = 450;
-
-        gBuffer = std::make_unique<GBuffer>(defaultWidth, defaultHeight);
-        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(defaultWidth, defaultHeight);
-
-#ifdef EDITOR
-        pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
-        stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
-        outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
-        outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
-#endif
-    }
-
     void Renderer::LoadDefaultShaders()
     {
         voxelShader = std::make_unique<VoxelShader>();
@@ -282,279 +180,6 @@ namespace Vox
         outlineShaderJump = std::make_unique<OutlineShaderJump>();
         outlineShaderDistance = std::make_unique<OutlineShaderDistance>();
 #endif
-    }
-
-    void Renderer::CheckViewportDimensions(const Editor* editor)
-    {
-        // Resize our render texture if it's the wrong size, so we get a 1:1 resolution for the editor viewport
-        const glm::vec2 editorViewportSize = editor->GetViewport()->GetDimensions();
-        if (viewportTexture)
-        {
-            const int viewportWidth = static_cast<int>(editorViewportSize.x);
-            const int viewportHeight = static_cast<int>(editorViewportSize.y);
-            if (viewportTexture->GetWidth() != viewportWidth || viewportTexture->GetHeight() != viewportHeight)
-            {
-                ResizeBuffers(viewportWidth, viewportHeight);
-            }
-        }
-        else
-        {
-            viewportTexture = std::make_unique<RenderTexture>(800, 450);
-        }
-    }
-
-    void Renderer::ResizeBuffers(int width, int height)
-    {
-        VoxLog(Display, Rendering, "Resizing GBuffer and Viewport texture to '({}, {})'", width, height);
-
-        glViewport(0, 0, width, height);
-        viewportTexture.reset();
-        viewportTexture = std::make_unique<RenderTexture>(width, height);
-
-        gBuffer.reset();
-        gBuffer = std::make_unique<GBuffer>(width, height);
-
-        deferredFramebuffer.reset();
-        deferredFramebuffer = std::make_unique<ColorDepthFramebuffer>(width, height);
-
-#ifdef EDITOR
-        pickBuffer.reset();
-        pickBuffer = std::make_unique<PickBuffer>(width, height);
-        stencilBuffer.reset();
-        stencilBuffer = std::make_unique<StencilBuffer>(width, height);
-
-        outlineBuffer.reset();
-        outlineBuffer = std::make_unique<UVec2Buffer>(width, height);
-        outlineBuffer2.reset();
-        outlineBuffer2 = std::make_unique<UVec2Buffer>(width, height);
-#endif
-    }
-
-    void Renderer::RenderGBuffer()
-    {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        gBufferShader->Enable();
-        gBufferShader->SetCamera(currentCamera);
-        
-        glBindVertexArray(meshVao);
-
-        for (auto& val : uploadedMeshes | std::views::values)
-        {
-            val.Render(gBufferShader.get());
-        }
-
-        gBufferShaderSkeleton->Enable();
-        gBufferShaderSkeleton->SetCamera(currentCamera);
-        glBindVertexArray(skeletalMeshVao);
-
-        for (SkeletalMeshInstanceContainer& val : uploadedSkeletalMeshes | std::views::values)
-        {
-            val.Render(gBufferShaderSkeleton.get());
-        }
-
-        UpdateVoxelMeshes();
-        RenderVoxelMeshes();
-    }
-
-    void Renderer::RenderDeferred()
-    {
-        glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
-            0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(),
-            0, 0, viewportTexture->GetWidth(), viewportTexture->GetHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
-        deferredShader->Enable();
-        // shader->SetCameraPosition(camera.position);
-        testLight.UpdateLightValues(deferredShader.get(), lightUniformLocations);
-        gBuffer->ActivateTextures(0);
-        deferredShader->SetCameraPosition(currentCamera->GetPosition());
-        glBindVertexArray(quad->GetVaoId());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glEnable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-    }
-
-#ifdef EDITOR
-    void Renderer::RenderPickBuffer()
-    {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, pickBuffer->GetFramebufferId());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        pickShader->Enable();
-        pickShader->SetCamera(currentCamera);
-        glBindVertexArray(meshVao);
-
-        for (auto& val : uploadedMeshes | std::views::values)
-        {
-            val.Render(pickShader.get());
-        }
-
-        pickShaderSkeleton->Enable();
-        pickShaderSkeleton->SetCamera(currentCamera);
-        glBindVertexArray(skeletalMeshVao);
-
-        for (auto& val : uploadedSkeletalMeshes | std::views::values)
-        {
-            val.Render(pickShader.get());
-        }
-
-        pickShader->Enable();
-        glBindVertexArray(meshVao);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        for (const Ref<MeshInstance>& meshInstance : overlayMeshes)
-        {
-            meshInstance->GetMeshOwner()->RenderInstance(pickShader.get(), *meshInstance);
-        }
-    }
-#endif
-    
-    void Renderer::UpdateVoxelMeshes()
-    {
-        voxelGenerationShader.Enable();
-        for (const std::pair<size_t, int>& index : voxelMeshes.GetDiryIndices())
-        {
-            if (VoxelMesh* mesh = voxelMeshes.Get(index.first, index.second))
-            {
-                VoxLog(Display, Rendering, "Updating voxel mesh...");
-                mesh->Regenerate();
-            }
-        }
-        voxelMeshes.ClearDirty();
-    }
-
-    void Renderer::RenderVoxelMeshes()
-    {
-        glBindVertexArray(voxelMeshVao);
-        voxelShader->Enable();
-        voxelShader->SetCamera(currentCamera);
-        voxelShader->SetArrayTexture(voxelTextures.get());
-
-        for (std::optional<VoxelMesh>& voxelMesh : voxelMeshes)
-        {
-            if (voxelMesh.has_value())
-            {
-                RenderVoxelMesh(voxelMesh.value());
-            }
-        }
-    }
-
-    void Renderer::RenderVoxelMesh(VoxelMesh& voxelMesh) const
-    {
-        glBindVertexBuffer(0, voxelMesh.GetMeshId(), 0, sizeof(float) * 16);
-        voxelShader->SetModelMatrix(voxelMesh.GetTransform());
-        glDrawArrays(GL_TRIANGLES, 0, 16384);
-    }
-
-    void Renderer::RenderDebugShapes()
-    {
-        PhysicsServer* physicsServer = ServiceLocator::GetPhysicsServer();
-
-        // Fill the debug renderer with our shapes
-        physicsServer->RenderDebugShapes();
-
-        glEnable(GL_DEPTH_TEST);
-        physicsServer->GetDebugRenderer()->BindAndBufferLines();
-        debugLineShader->Enable();
-        debugLineShader->SetCamera(currentCamera);
-        glDrawArrays(GL_LINES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetLineVertexCount()));
-
-        physicsServer->GetDebugRenderer()->BindAndBufferTriangles();
-        debugTriangleShader->Enable();
-        debugTriangleShader->SetCamera(currentCamera);
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
-    }
-
-#ifdef EDITOR
-    void Renderer::RenderOutline() const
-    {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        stencilShader->Enable();
-        stencilShader->SetCamera(currentCamera);
-        glBindVertexArray(meshVao);
-        for (const Ref<MeshInstance>& mesh : outlinedMeshes)
-        {
-            mesh->GetMeshOwner()->RenderInstance(stencilShader.get(), *mesh);
-        }
-
-        stencilShaderSkeleton->Enable();
-        stencilShaderSkeleton->SetCamera(currentCamera);
-        glBindVertexArray(skeletalMeshVao);
-        for (const auto& mesh : outlinedSkeletalMeshes)
-        {
-            mesh->GetMeshOwner()->RenderInstance(stencilShader.get(), *mesh);
-        }
-
-        constexpr int outlineWidth = 2;
-        glBindVertexArray(quad->GetVaoId());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outlineBuffer->GetFramebufferId());
-
-        outlineShader->Enable();
-        stencilBuffer->ActivateTextures(0);
-        outlineShader->SetTextureSize(outlineBuffer->GetSize());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        UVec2Buffer* inBuffer = outlineBuffer.get();
-        UVec2Buffer* outBuffer = outlineBuffer2.get();
-
-        for (unsigned int floodWidth = NextPowerOfTwo(outlineWidth); floodWidth; floodWidth = floodWidth >> 1)
-        {
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, inBuffer->GetFramebufferId());
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, outBuffer->GetFramebufferId());
-
-            outlineShaderJump->Enable();
-            outlineShaderJump->SetWidth(static_cast<int>(floodWidth));
-            inBuffer->ActivateTextures(0);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-            std::swap(inBuffer, outBuffer);
-        }
-
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, inBuffer->GetFramebufferId());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
-
-        outlineShaderDistance->Enable();
-        outlineShaderDistance->SetOutlineColor({1.0f, 0.039f, 0.4f});
-        inBuffer->ActivateTextures(0);
-        deferredFramebuffer->ActivateTextures(1);
-        outlineShaderDistance->SetWidth(outlineWidth);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
-
-    void Renderer::RenderOverlay() const
-    {
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glBindVertexArray(meshVao);
-        overlayShader->Enable();
-        overlayShader->SetCamera(currentCamera);
-        for (const Ref<MeshInstance>& mesh : overlayMeshes)
-        {
-            mesh->GetMeshOwner()->RenderInstance(overlayShader.get(), *mesh);
-        }
-    }
-#endif
-
-    void Renderer::RenderSky()
-    {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
-
-        skyShader->Enable();
-        skyShader->SetCamera(currentCamera);
-        // deferredFramebuffer->ActivateTextures();
-        glBindVertexArray(quad->GetVaoId());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
     void Renderer::CopyViewportToTexture(const RenderTexture& texture)

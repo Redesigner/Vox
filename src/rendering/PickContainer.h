@@ -8,6 +8,7 @@
 
 namespace Vox
 {
+    class SceneRenderer;
     class PickBuffer;
 }
 
@@ -17,10 +18,10 @@ namespace Vox
     
     class PickContainer
     {
-        using Callback = std::function<void(glm::ivec2)>;
+    using Callback = std::function<void(glm::ivec2)>;
 
     public:
-        PickContainer();
+        PickContainer(SceneRenderer* owner, PickBuffer* attachedBuffer);
 
         unsigned int RegisterCallback(Callback callback);
 
@@ -28,7 +29,11 @@ namespace Vox
 
     private:
         std::unordered_map<unsigned int, Callback> callbacks;
-        
+
+        SceneRenderer* owner;
+
+        PickBuffer* attachedBuffer;
+
         unsigned int counter;
     };
 }

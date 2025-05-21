@@ -1,15 +1,19 @@
 ﻿#include "CameraComponent.h"
 
 #include "core/logging/Logging.h"
+#include "core/objects/World.h"
+#include "core/objects/actor/Actor.h"
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
 #include "rendering/Camera.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
-    CameraComponent::CameraComponent()
+    CameraComponent::CameraComponent(Actor* parent)
+        :SceneComponent(parent)
     {
         DEFAULT_DISPLAY_NAME();
 
@@ -24,7 +28,7 @@ namespace Vox
 
     void CameraComponent::Activate() const
     {
-        ServiceLocator::GetRenderer()->SetCurrentCamera(camera);
+        GetParent()->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
     }
 
     void CameraComponent::SetArmLength(float length)

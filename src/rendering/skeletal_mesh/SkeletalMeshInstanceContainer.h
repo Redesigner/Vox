@@ -13,6 +13,7 @@
 
 namespace Vox
 {
+    class SceneRenderer;
     class MaterialShader;
     class MeshShader;
     class PickShader;
@@ -21,7 +22,7 @@ namespace Vox
     class SkeletalMeshInstanceContainer
     {
     public:
-        explicit SkeletalMeshInstanceContainer(size_t size);
+        SkeletalMeshInstanceContainer(SceneRenderer* owner, size_t size, const std::shared_ptr<SkeletalModel>& mesh);
 
         bool LoadMesh(const std::string& filepath);
 
@@ -39,8 +40,11 @@ namespace Vox
 
         [[nodiscard]] size_t GetInstanceCount() const;
 
+        [[nodiscard]] SceneRenderer* GetOwner() const;
+
     private:
-        std::unique_ptr<SkeletalModel> model;
+        SceneRenderer* owner;
+        std::shared_ptr<SkeletalModel> mesh;
         ObjectContainer<SkeletalMeshInstance> meshInstances;
     };
 }

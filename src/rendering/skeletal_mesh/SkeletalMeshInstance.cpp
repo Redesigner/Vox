@@ -8,9 +8,9 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "core/logging/Logging.h"
-#include "core/services/ServiceLocator.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
@@ -24,7 +24,7 @@ namespace Vox
 #ifdef EDITOR
         if (pickId != 0)
         {
-            ServiceLocator::GetRenderer()->GetPickContainer()->UnregisterCallback(pickId);
+            GetMeshOwner()->GetOwner()->GetPickContainer()->UnregisterCallback(pickId);
         }
 #endif
     }
@@ -57,7 +57,7 @@ namespace Vox
 #ifdef EDITOR
     void SkeletalMeshInstance::RegisterCallback(std::function<void(glm::ivec2)> callback)
     {
-        pickId = ServiceLocator::GetRenderer()->GetPickContainer()->RegisterCallback(std::move(callback));
+        pickId = GetMeshOwner()->GetOwner()->GetPickContainer()->RegisterCallback(std::move(callback));
     }
 
     unsigned int SkeletalMeshInstance::GetPickId() const

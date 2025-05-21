@@ -2,6 +2,11 @@
 
 namespace Vox
 {
+    Actor::Actor(World* world)
+        :world(world)
+    {
+    }
+
     void Actor::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         REGISTER_PROPERTY(Transform, transform)
@@ -94,6 +99,11 @@ namespace Vox
         {
             tickableComponent->Tick(deltaTime);
         }
+    }
+
+    World* Actor::GetWorld() const
+    {
+        return world;
     }
 
 #ifdef EDITOR

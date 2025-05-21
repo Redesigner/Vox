@@ -15,15 +15,20 @@
 
 namespace Vox
 {
-    class VoxelMesh;
-    class Renderer;
-    class UVec2Buffer;
-    class StencilBuffer;
-    class PickBuffer;
-    class RenderTexture;
+    class PickContainer;
+}
+
+namespace Vox
+{
+    class Camera;
     class ColorDepthFramebuffer;
     class GBuffer;
-    class Camera;
+    class PickBuffer;
+    class RenderTexture;
+    class Renderer;
+    class StencilBuffer;
+    class UVec2Buffer;
+    class VoxelMesh;
 }
 
 namespace Vox
@@ -32,12 +37,34 @@ namespace Vox
      * @brief A renderer for holding all the resources related to a 3D world
      * this contains all meshes and framebuffers
      */
-    class WorldRenderer
+    class SceneRenderer
     {
     public:
-        WorldRenderer();
+        SceneRenderer();
 
         void Draw();
+
+        Ref<MeshInstance> CreateMeshInstance(const std::string& meshName);
+
+        Ref<SkeletalMeshInstance> CreateSkeletalMeshInstance(const std::string& meshName);
+
+        [[nodiscard]] Ref<Camera> GetCurrentCamera() const;
+
+        void SetCurrentCamera(const Ref<Camera>& camera);
+
+#ifdef EDITOR
+        [[nodiscard]] PickContainer* GetPickContainer() const;
+
+        void AddMeshOutline(const Ref<MeshInstance>& mesh);
+
+        void AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh);
+
+        void RegisterOverlayMesh(const Ref<MeshInstance>& mesh);
+
+        void ClearMeshOutlines();
+
+        void ClearOverlays();
+#endif
 
     private:
         void DrawGBuffer();
@@ -79,6 +106,7 @@ namespace Vox
         std::unique_ptr<PickBuffer> pickBuffer;
         std::unique_ptr<StencilBuffer> stencilBuffer;
         std::unique_ptr<UVec2Buffer> outlineBuffer, outlineBuffer2;
+        std::unique_ptr<PickContainer> pickContainer;
 #endif
 
         // MESH INSTANCES

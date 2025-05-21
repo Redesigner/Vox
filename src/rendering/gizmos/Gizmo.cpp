@@ -6,7 +6,6 @@
 
 #include <glm/gtc/matrix_inverse.inl>
 
-#include "core/logging/Logging.h"
 #include "core/math/Math.h"
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
@@ -14,18 +13,19 @@
 #include "editor/EditorViewport.h"
 #include "rendering/Camera.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
-    Gizmo::Gizmo()
+    Gizmo::Gizmo(SceneRenderer* scene)
         :red({1.0f, 0.25f, 0.25f, 1.0f}, 0.0f, 0.0f),
         green({0.25f, 1.0f, 0.25f, 1.0f}, 0.0f, 0.0f),
         blue({0.25f, 0.25f, 1.0f, 1.0f}, 0.0f, 0.0f),
         selected({0.8f, 0.8f, 0.95f, 1.0f}, 0.0f, 0.0f)
     {
-        xArrowMesh = ServiceLocator::GetRenderer()->CreateMeshInstance("gizmoArrow");
-        yArrowMesh = ServiceLocator::GetRenderer()->CreateMeshInstance("gizmoArrow");
-        zArrowMesh = ServiceLocator::GetRenderer()->CreateMeshInstance("gizmoArrow");
+        xArrowMesh = scene->CreateMeshInstance("gizmoArrow");
+        yArrowMesh = scene->CreateMeshInstance("gizmoArrow");
+        zArrowMesh = scene->CreateMeshInstance("gizmoArrow");
 
         xArrowMesh->SetMaterial(0, red);
         yArrowMesh->SetMaterial(0, green);
@@ -92,15 +92,17 @@ namespace Vox
 
     void Gizmo::SetVisible(const bool visible)
     {
+        SceneRenderer* scene = xArrowMesh->GetMeshOwner()->GetOwner();
+
         if (visible)
         {
-            ServiceLocator::GetRenderer()->RegisterOverlayMesh(xArrowMesh);
-            ServiceLocator::GetRenderer()->RegisterOverlayMesh(yArrowMesh);
-            ServiceLocator::GetRenderer()->RegisterOverlayMesh(zArrowMesh);
+            scene->RegisterOverlayMesh(xArrowMesh);
+            scene->RegisterOverlayMesh(yArrowMesh);
+            scene->RegisterOverlayMesh(zArrowMesh);
         }
         else
         {
-            ServiceLocator::GetRenderer()->ClearOverlays();
+            scene->ClearOverlays();
         }
     }
 
@@ -185,10 +187,11 @@ namespace Vox
 
     std::pair<glm::vec3, glm::vec3> Gizmo::GetClickVector()
     {
-        Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
+        Ref<Camera> camera = xArrowMesh->GetMeshOwner()->GetOwner()->GetCurrentCamera();
         glm::mat4x4 worldToScreen = camera->GetViewProjectionMatrix();
         glm::mat4x4 screenToWorld = glm::inverseTranspose(worldToScreen);
 
+        // This won't work right now!
         const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
         glm::vec2 mouseLocationViewport;
         ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(

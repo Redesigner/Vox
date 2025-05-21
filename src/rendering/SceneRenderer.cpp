@@ -1,10 +1,11 @@
-#include "WorldRenderer.h"
+#include "SceneRenderer.h"
 
 #include <ranges>
 #include <GL/glew.h>
 
 #include "Camera.h"
 #include "DebugRenderer.h"
+#include "PickContainer.h"
 #include "core/math/Math.h"
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
@@ -27,13 +28,13 @@
 
 namespace Vox
 {
-    WorldRenderer::WorldRenderer()
+    SceneRenderer::SceneRenderer()
     {
         GenerateBuffers();
         lightUniformLocations = LightUniformLocations(GetRenderer()->GetDeferredShader());
     }
 
-    void WorldRenderer::Draw()
+    void SceneRenderer::Draw()
     {
         glViewport(0, 0, viewportSize.x, viewportSize.y);
 
@@ -48,7 +49,50 @@ namespace Vox
 #endif
     }
 
-    void WorldRenderer::DrawGBuffer()
+    Ref<MeshInstance> SceneRenderer::CreateMeshInstance(const std::string& meshName)
+    {
+        // Check to see if we already have meshes in this scene with this model name
+        if (const auto& meshInstanceContainer = meshInstances.find(meshName); meshInstanceContainer != meshInstances.end())
+        {
+            return meshInstanceContainer->second.CreateMeshInstance();
+        }
+
+        if (const std::shared_ptr<Model> mesh = GetRenderer()->GetMesh(meshName))
+        {
+            auto [meshInstanceContainer, success] = meshInstances.emplace(meshName, std::move(MeshInstanceContainer(this, 8, mesh)));
+            return meshInstanceContainer->second.CreateMeshInstance();
+        }
+
+        return {};
+    }
+
+    Ref<SkeletalMeshInstance> SceneRenderer::CreateSkeletalMeshInstance(const std::string& meshName)
+    {
+        if (const auto& skeletalMeshInstanceContainer = skeletalMeshInstances.find(meshName); skeletalMeshInstanceContainer != skeletalMeshInstances.end())
+        {
+            return skeletalMeshInstanceContainer->second.CreateMeshInstance();
+        }
+
+        if (const std::shared_ptr<SkeletalModel> mesh = GetRenderer()->GetSkeletalMesh(meshName))
+        {
+            auto [skeletalMeshInstanceContainer, success] = skeletalMeshInstances.emplace(meshName, std::move(SkeletalMeshInstanceContainer(this, 8, mesh)));
+            return skeletalMeshInstanceContainer->second.CreateMeshInstance();
+        }
+
+        return {};
+    }
+
+    Ref<Camera> SceneRenderer::GetCurrentCamera() const
+    {
+        return currentCamera;
+    }
+
+    void SceneRenderer::SetCurrentCamera(const Ref<Camera>& camera)
+    {
+        currentCamera = camera;
+    }
+
+    void SceneRenderer::DrawGBuffer()
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
@@ -79,7 +123,7 @@ namespace Vox
         DrawVoxels();
     }
 
-    void WorldRenderer::DrawDeferredPass()
+    void SceneRenderer::DrawDeferredPass()
     {
         glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
             0, 0, gBuffer->GetWidth(), deferredFramebuffer->GetHeight(),
@@ -102,7 +146,7 @@ namespace Vox
     }
 
 #ifdef EDITOR
-    void WorldRenderer::DrawPickBuffer()
+    void SceneRenderer::DrawPickBuffer()
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, pickBuffer->GetFramebufferId());
         glBindFramebuffer(GL_READ_FRAMEBUFFER, pickBuffer->GetFramebufferId());
@@ -138,7 +182,7 @@ namespace Vox
         }
     }
 
-    void WorldRenderer::DrawOutline() const
+    void SceneRenderer::DrawOutline() const
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
         glClear(GL_COLOR_BUFFER_BIT);
@@ -201,7 +245,7 @@ namespace Vox
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    void WorldRenderer::DrawOverlay() const
+    void SceneRenderer::DrawOverlay() const
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         GetRenderer()->BindMeshVao();
@@ -215,7 +259,7 @@ namespace Vox
     }
 #endif
 
-    void WorldRenderer::DrawVoxels()
+    void SceneRenderer::DrawVoxels()
     {
         GetRenderer()->BindVoxelMeshVao();
         const VoxelShader* voxelShader = GetRenderer()->GetVoxelMeshShader();
@@ -234,7 +278,7 @@ namespace Vox
         }
     }
 
-    void WorldRenderer::DrawSky() const
+    void SceneRenderer::DrawSky() const
     {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
@@ -246,7 +290,7 @@ namespace Vox
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    void WorldRenderer::DrawDebugShapes() const
+    void SceneRenderer::DrawDebugShapes() const
     {
         PhysicsServer* physicsServer = ServiceLocator::GetPhysicsServer();
 
@@ -270,7 +314,7 @@ namespace Vox
         glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(physicsServer->GetDebugRenderer()->GetTriangleVertexCount()));
     }
 
-    void WorldRenderer::UpdateVoxels()
+    void SceneRenderer::UpdateVoxels()
     {
         GetRenderer()->GetVoxelGenerationShader()->Enable();
         for (const auto& [index, snd] : voxelMeshes.GetDiryIndices())
@@ -283,7 +327,7 @@ namespace Vox
         voxelMeshes.ClearDirty();
     }
 
-    void WorldRenderer::GenerateBuffers()
+    void SceneRenderer::GenerateBuffers()
     {
         constexpr int defaultWidth = 800;
         constexpr int defaultHeight = 450;
@@ -293,13 +337,14 @@ namespace Vox
 
 #ifdef EDITOR
         pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
+        pickContainer = std::make_unique<PickContainer>(this, pickBuffer.get());
         stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
         outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
 #endif
     }
 
-    void WorldRenderer::ConditionalResizeFramebuffers()
+    void SceneRenderer::ConditionalResizeFramebuffers()
     {
         if (gBuffer->GetWidth() != viewportSize.x || gBuffer->GetHeight() != viewportSize.y)
         {
@@ -325,8 +370,42 @@ namespace Vox
         }
     }
 
-    Renderer* WorldRenderer::GetRenderer() const
+    Renderer* SceneRenderer::GetRenderer() const
     {
         return ServiceLocator::GetRenderer();
     }
+
+#ifdef EDITOR
+    PickContainer* SceneRenderer::GetPickContainer() const
+    {
+        return pickContainer.get();
+    }
+
+    void SceneRenderer::AddMeshOutline(const Ref<MeshInstance>& mesh)
+    {
+        outlinedMeshes.emplace_back(mesh);
+    }
+
+    void SceneRenderer::AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh)
+    {
+        outlinedSkeletalMeshes.emplace_back(mesh);
+    }
+
+    void SceneRenderer::RegisterOverlayMesh(const Ref<MeshInstance>& mesh)
+    {
+        overlayMeshes.emplace_back(mesh);
+    }
+
+    void SceneRenderer::ClearMeshOutlines()
+    {
+        outlinedMeshes.clear();
+        outlinedSkeletalMeshes.clear();
+    }
+
+    void SceneRenderer::ClearOverlays()
+    {
+        overlayMeshes.clear();
+    }
+#endif
+
 } // Vox

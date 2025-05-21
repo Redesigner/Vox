@@ -10,13 +10,14 @@
 
 namespace Vox
 {
+    class World;
     struct SkeletalMeshInstance;
 
     class SkeletalMeshComponent : public SceneComponent, public Tickable
     {
     public:
         SkeletalMeshComponent();
-        explicit SkeletalMeshComponent(const std::string& meshName);
+        explicit SkeletalMeshComponent(Actor* parent, const std::string& meshName);
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 

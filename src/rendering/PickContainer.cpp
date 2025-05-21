@@ -2,6 +2,7 @@
 #include "PickContainer.h"
 
 #include "Renderer.h"
+#include "SceneRenderer.h"
 #include "buffers/frame_buffers/PickBuffer.h"
 #include "core/services/EditorService.h"
 #include "core/services/InputService.h"
@@ -10,7 +11,8 @@
 
 namespace Vox
 {
-    PickContainer::PickContainer()
+    PickContainer::PickContainer(SceneRenderer* owner, PickBuffer* attachedBuffer)
+        :owner(owner), attachedBuffer(attachedBuffer)
     {
         callbacks = {};
         counter = 1;
@@ -23,11 +25,11 @@ namespace Vox
                  return;
              }
             
-            const unsigned int key = ServiceLocator::GetRenderer()->GetPickBuffer()->GetValue(viewX, viewY);
+            const unsigned int key = this->attachedBuffer->GetValue(viewX, viewY);
             if (key == 0)
             {
                 ServiceLocator::GetEditorService()->GetEditor()->SelectObject(std::weak_ptr<Object>());
-                ServiceLocator::GetRenderer()->ClearMeshOutlines();
+                this->owner->ClearMeshOutlines();
                 return;
             }
             

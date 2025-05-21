@@ -3,6 +3,7 @@
 #include "core/objects/Tickable.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
@@ -44,6 +45,11 @@ namespace Vox
                return tickable == tickableObject;
             });
         }
+    }
+
+    std::shared_ptr<SceneRenderer> World::GetRenderer() const
+    {
+        return renderer;
     }
 
     World::~World()

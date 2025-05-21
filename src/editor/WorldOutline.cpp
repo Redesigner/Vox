@@ -8,6 +8,7 @@
 #include "core/objects/component/Component.h"
 #include "core/services/InputService.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 #include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
@@ -28,7 +29,7 @@ namespace Vox
 
     void WorldOutline::InitializeGizmos()
     {
-        gizmo = std::make_unique<Gizmo>();
+        gizmo = std::make_unique<Gizmo>(tempWorld->GetRenderer().get());
     }
 
     void WorldOutline::Draw(World* world)
@@ -80,7 +81,7 @@ namespace Vox
 
     void WorldOutline::SetSelectedObject(const std::weak_ptr<Object>& object)
     {
-        ServiceLocator::GetRenderer()->ClearMeshOutlines();
+        tempWorld->GetRenderer()->ClearMeshOutlines();
         if (object.lock() == currentlySelectedObject.lock())
         {
             currentlySelectedObject.reset();

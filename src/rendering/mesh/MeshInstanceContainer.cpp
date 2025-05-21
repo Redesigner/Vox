@@ -2,16 +2,13 @@
 
 #include <algorithm>
 
-#include "core/logging/Logging.h"
-#include "core/services/FileIOService.h"
-#include "core/services/ServiceLocator.h"
+#include "rendering/SceneRenderer.h"
 #include "rendering/shaders/Shader.h"
-#include "rendering/shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 
 namespace Vox
 {
-    MeshInstanceContainer::MeshInstanceContainer(const size_t size, const std::shared_ptr<Model>& mesh)
-        :meshInstances(size), mesh(mesh)
+    MeshInstanceContainer::MeshInstanceContainer(SceneRenderer* owner, const size_t size, const std::shared_ptr<Model>& mesh)
+        :owner(owner), mesh(mesh), meshInstances(size)
     {
     }
 
@@ -52,6 +49,11 @@ namespace Vox
     {
 	    mesh->Render(shader, meshInstance.GetPickId(), meshInstance.GetTransform());
 
+    }
+
+    SceneRenderer* MeshInstanceContainer::GetOwner() const
+    {
+        return owner;
     }
 #endif
 

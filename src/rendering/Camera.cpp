@@ -3,19 +3,25 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 
 #include "core/logging/Logging.h"
 
-const double CAMERA_CULL_DISTANCE_NEAR = 0.01;
-const double CAMERA_CULL_DISTANCE_FAR = 1000.0;
+constexpr double CAMERA_CULL_DISTANCE_NEAR = 0.01;
+constexpr double CAMERA_CULL_DISTANCE_FAR = 1000.0;
 
 Vox::Camera::Camera()
+    :position({0.0f}), rotation({0.0f}), fovY(45.0f)
 {
+    positionMatrix = {};
+    viewMatrix = {};
+    projectionMatrix = {};
+
 	UpdateViewMatrix();
 	UpdateProjectionMatrix();
 }
 
-void Vox::Camera::SetPosition(glm::vec3 position)
+void Vox::Camera::SetPosition(const glm::vec3 position)
 {
 	if (this->position == position)
 	{
@@ -83,14 +89,14 @@ void Vox::Camera::SetFovY(double fovY)
 	UpdateProjectionMatrix();
 }
 
-void Vox::Camera::SetAspectRatio(double asepctRatio)
+void Vox::Camera::SetAspectRatio(double aspectRatioIn)
 {
-	if (this->aspectRatio == aspectRatio)
+	if (aspectRatio == aspectRatioIn)
 	{
 		return;
 	}
 
-	this->aspectRatio = asepctRatio;
+	aspectRatio = aspectRatioIn;
 	UpdateProjectionMatrix();
 }
 

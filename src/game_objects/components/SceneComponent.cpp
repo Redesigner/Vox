@@ -4,6 +4,11 @@
 
 namespace Vox
 {
+    SceneComponent::SceneComponent(Actor* parent)
+        :Component(parent)
+    {
+    }
+
     void SceneComponent::PropertyChanged(const Property& property)
     {
         if (property.GetValuePtr<Transform>(this) == &localTransform)

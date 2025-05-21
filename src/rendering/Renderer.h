@@ -16,6 +16,11 @@
 #include "shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
 #include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
+namespace Vox
+{
+    class SceneRenderer;
+}
+
 struct SDL_Window;
 namespace Vox
 {
@@ -54,15 +59,13 @@ namespace Vox
 		Renderer& operator =(const Renderer& other) = delete;
 		Renderer& operator =(Renderer&& other) = delete;
 
+#ifdef EDITOR
 		void Render(Editor* editor);
-
-		// void LoadTestModel(std::string path);
+#elif
+	    void Render();
+#endif
 
 		Ref<Camera> CreateCamera();
-
-		[[nodiscard]] Ref<Camera> GetCurrentCamera() const;
-
-		void SetCurrentCamera(const Ref<Camera>& camera);
 
 		/**
 		 * @brief Uploads a glTF model to the GPU
@@ -74,13 +77,6 @@ namespace Vox
 
 		bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
 
-#ifdef EDITOR
-	    void AddMeshOutline(const Ref<MeshInstance>& mesh);
-	    void AddMeshOutline(const Ref<SkeletalMeshInstance>& mesh);
-
-	    void ClearMeshOutlines();
-#endif
-
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
 		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
@@ -89,15 +85,11 @@ namespace Vox
 
 		[[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<SkeletalModel>>& GetSkeletalMeshes() const;
 
-#ifdef EDITOR
-		[[nodiscard]] PickContainer* GetPickContainer() const;
-		[[nodiscard]] PickBuffer* GetPickBuffer() const;
 
-	    void RegisterOverlayMesh(const Ref<MeshInstance>& meshInstance);
+	    [[nodiscard]] std::shared_ptr<Model> GetMesh(const std::string& name) const;
 
-	    void ClearOverlays();
+	    [[nodiscard]] std::shared_ptr<SkeletalModel> GetSkeletalMesh(const std::string& name) const;
 
-#endif
 	    //WORLD RENDERER NECESSARY METHODS
 	    MaterialShader* GetGBufferShader() const;
 	    void BindMeshVao();
@@ -133,35 +125,7 @@ namespace Vox
 #endif
 
 	private:
-	    void GenerateBuffers();
-
 	    void LoadDefaultShaders();
-
-		void CheckViewportDimensions(const Editor* editor);
-
-        void ResizeBuffers(int width, int height);
-
-		void RenderGBuffer();
-
-		void RenderDeferred();
-
-#ifdef EDITOR
-		void RenderPickBuffer();
-
-	    void RenderOutline() const;
-
-	    void RenderOverlay() const;
-#endif
-
-		void UpdateVoxelMeshes();
-
-		void RenderVoxelMeshes();
-
-		void RenderVoxelMesh(VoxelMesh& voxelMesh) const;
-
-		void RenderSky();
-
-		void RenderDebugShapes();
 
 		static void CopyViewportToTexture(const RenderTexture& texture);
 
@@ -170,20 +134,6 @@ namespace Vox
 		void CreateSkeletalMeshVao();
 
 		void CreateVoxelVao();
-
-	    [[nodiscard]] std::shared_ptr<Model> GetMesh(const std::string& name) const;
-	    [[nodiscard]] std::shared_ptr<SkeletalModel> GetSkeletalMesh(const std::string& name) const;
-
-	    // BUFFERS
-		std::unique_ptr<GBuffer> gBuffer;
-		std::unique_ptr<ColorDepthFramebuffer> deferredFramebuffer;
-		std::unique_ptr<RenderTexture> viewportTexture;
-
-#ifdef EDITOR
-		std::unique_ptr<PickBuffer> pickBuffer;
-        std::unique_ptr<StencilBuffer> stencilBuffer;
-	    std::unique_ptr<UVec2Buffer> outlineBuffer, outlineBuffer2;
-#endif
 
 	    // SHADERS
 		std::unique_ptr<DeferredShader> deferredShader;
@@ -195,7 +145,6 @@ namespace Vox
 		std::unique_ptr<SkyShader> skyShader;
 	    std::unique_ptr<DebugShader> debugLineShader, debugTriangleShader;
 #ifdef EDITOR
-
 		std::unique_ptr<PickShader> pickShader, pickShaderSkeleton;
 		std::unique_ptr<PickContainer> pickContainer;
 
@@ -208,7 +157,6 @@ namespace Vox
 #endif
 
 		std::unique_ptr<ArrayTexture> voxelTextures;
-		DynamicObjectContainer<VoxelMesh> voxelMeshes;
 
 		unsigned int meshVao = 0, voxelMeshVao = 0, skeletalMeshVao = 0;
 
@@ -216,23 +164,12 @@ namespace Vox
 		std::unordered_map<std::string, std::shared_ptr<Model>> uploadedMeshes;
 		std::unordered_map<std::string, std::shared_ptr<SkeletalModel>> uploadedSkeletalMeshes;
 
-#ifdef EDITOR
-	    std::vector<Ref<MeshInstance>> outlinedMeshes;
-	    std::vector<Ref<SkeletalMeshInstance>> outlinedSkeletalMeshes;
-        std::vector<Ref<MeshInstance>> overlayMeshes;
-#endif
-
-		ObjectContainer<Camera> cameras;
-
-	    // OTHERS
-		LightUniformLocations lightUniformLocations;
-		Light testLight;
-
-		Ref<Camera> currentCamera;
-
 		SDL_Window* mainWindow;
 
 		std::unique_ptr<FullscreenQuad> quad;
 
+#ifndef EDITOR
+	    std::unique_ptr<WorldRenderer> worldRenderer;
+#endif
 	};
 }

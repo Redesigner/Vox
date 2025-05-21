@@ -4,24 +4,30 @@
 
 #include "SkeletalMeshComponent.h"
 
+#include "core/objects/World.h"
+#include "core/objects/actor/Actor.h"
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
     SkeletalMeshComponent::SkeletalMeshComponent()
+        :SceneComponent(nullptr)
     {
         DEFAULT_DISPLAY_NAME()
 
         animationTime = 0.0f;
         animationIndex = 0;
+        loop = true;
+        playing = true;
     }
 
-    SkeletalMeshComponent::SkeletalMeshComponent(const std::string& meshName)
+    SkeletalMeshComponent::SkeletalMeshComponent(Actor* parent, const std::string& meshName)
         :SkeletalMeshComponent()
     {
-        mesh = ServiceLocator::GetRenderer()->CreateSkeletalMeshInstance(meshName);
+        mesh = GetParent()->GetWorld()->GetRenderer()->CreateSkeletalMeshInstance(meshName);
 
 #ifdef EDITOR
         mesh->RegisterCallback([this](const glm::ivec2 position)
@@ -86,7 +92,7 @@ namespace Vox
 
     void SkeletalMeshComponent::Select()
     {
-        ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
+        GetParent()->GetWorld()->GetRenderer()->AddMeshOutline(mesh);
     }
 #endif
 }

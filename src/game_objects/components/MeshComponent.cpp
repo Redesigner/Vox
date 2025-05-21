@@ -1,21 +1,25 @@
 ﻿#include "MeshComponent.h"
 
 #include "core/logging/Logging.h"
+#include "core/objects/World.h"
+#include "core/objects/actor/Actor.h"
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
-    MeshComponent::MeshComponent()
+    MeshComponent::MeshComponent(Actor* parent)
+        :SceneComponent(parent)
     {
         DEFAULT_DISPLAY_NAME()
     }
 
-    MeshComponent::MeshComponent(const std::string& meshName)
-        :MeshComponent()
+    MeshComponent::MeshComponent(Actor* parent, const std::string& meshName)
+        :MeshComponent(parent)
     {
-        mesh = ServiceLocator::GetRenderer()->CreateMeshInstance(meshName);
+        mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshName);
 
 #ifdef EDITOR
         mesh->RegisterClickCallback([this](const glm::ivec2 position)
@@ -43,7 +47,7 @@ namespace Vox
 
     void MeshComponent::Select()
     {
-        ServiceLocator::GetRenderer()->AddMeshOutline(mesh);
+        GetParent()->GetWorld()->GetRenderer()->AddMeshOutline(mesh);
     }
 #endif
 }

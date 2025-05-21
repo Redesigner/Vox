@@ -4,6 +4,11 @@
 
 namespace Vox
 {
+    Component::Component(Actor* parent)
+        :parent(parent)
+    {
+    }
+
     Actor* Component::GetParent() const
     {
         return parent;

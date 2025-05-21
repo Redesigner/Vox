@@ -12,13 +12,14 @@ namespace Vox
 {
     class CameraComponent;
 	class CharacterController;
-	struct MeshInstance;
 	class SpringArm;
+    class World;
+	struct MeshInstance;
 
 	class Character : public Actor
 	{
 	public:
-		Character();
+		explicit Character(World* world);
         ~Character() override;
 
 		void Tick(float deltaTime) override;
