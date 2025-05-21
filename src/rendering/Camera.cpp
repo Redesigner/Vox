@@ -11,14 +11,14 @@ constexpr double CAMERA_CULL_DISTANCE_NEAR = 0.01;
 constexpr double CAMERA_CULL_DISTANCE_FAR = 1000.0;
 
 Vox::Camera::Camera()
-    :position({0.0f}), rotation({0.0f}), fovY(45.0f)
+    :positionMatrix(glm::identity<glm::mat4x4>()), rotationMatrix(glm::identity<glm::mat4x4>())
 {
-    positionMatrix = {};
-    viewMatrix = {};
-    projectionMatrix = {};
+    UpdateViewMatrix();
+    UpdateProjectionMatrix();
+}
 
-	UpdateViewMatrix();
-	UpdateProjectionMatrix();
+Vox::Camera::~Camera()
+{
 }
 
 void Vox::Camera::SetPosition(const glm::vec3 position)

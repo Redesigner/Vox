@@ -64,9 +64,6 @@ namespace Vox
 #elif
 	    void Render();
 #endif
-
-		Ref<Camera> CreateCamera();
-
 		/**
 		 * @brief Uploads a glTF model to the GPU
 		 * @param alias the name to identify the model by
@@ -79,8 +76,6 @@ namespace Vox
 
 		static std::string GetGlDebugTypeString(unsigned int errorCode);
 
-		DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 position);
-
 		[[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<Model>>& GetMeshes() const;
 
 		[[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<SkeletalModel>>& GetSkeletalMeshes() const;
@@ -90,38 +85,38 @@ namespace Vox
 
 	    [[nodiscard]] std::shared_ptr<SkeletalModel> GetSkeletalMesh(const std::string& name) const;
 
-	    //WORLD RENDERER NECESSARY METHODS
-	    MaterialShader* GetGBufferShader() const;
-	    void BindMeshVao();
+	    // SCENE RENDERER NECESSARY METHODS
+	    [[nodiscard]] MaterialShader* GetGBufferShader() const;
+	    void BindMeshVao() const;
 
-	    MaterialShader* GetGBufferShaderSkeleton() const;
-	    void BindSkeletalMeshVao();
+	    [[nodiscard]] MaterialShader* GetGBufferShaderSkeleton() const;
+	    void BindSkeletalMeshVao() const;
 
-	    DeferredShader* GetDeferredShader() const;
-	    void BindQuadVao();
+	    [[nodiscard]] DeferredShader* GetDeferredShader() const;
+	    void BindQuadVao() const;
 
-	    SkyShader* GetSkyShader() const;
+	    [[nodiscard]] SkyShader* GetSkyShader() const;
 
-	    VoxelShader* GetVoxelMeshShader() const;
-	    ComputeShader* GetVoxelGenerationShader() const;
-	    ArrayTexture* GetVoxelTexture() const;
-	    void BindVoxelMeshVao();
+	    [[nodiscard]] VoxelShader* GetVoxelMeshShader() const;
+	    [[nodiscard]] const ComputeShader* GetVoxelGenerationShader() const;
+	    [[nodiscard]] ArrayTexture* GetVoxelTextures() const;
+	    void BindVoxelMeshVao() const;
 
-	    DebugShader* GetDebugLineShader() const;
-	    DebugShader* GetDebugTriangleShader() const;
+	    [[nodiscard]] DebugShader* GetDebugLineShader() const;
+	    [[nodiscard]] DebugShader* GetDebugTriangleShader() const;
 
 #ifdef EDITOR
-	    PickShader* GetPickShader() const;
-	    PickShader* GetPickShaderSkeleton() const;
+	    [[nodiscard]] PickShader* GetPickShader() const;
+	    [[nodiscard]] PickShader* GetPickShaderSkeleton() const;
 
-	    StencilShader* GetStencilShader() const;
-	    StencilShader* GetStencilShaderSkeleton() const;
+	    [[nodiscard]] StencilShader* GetStencilShader() const;
+	    [[nodiscard]] StencilShader* GetStencilShaderSkeleton() const;
 
-	    OutlineShader* GetOutlineShader() const;
-	    OutlineShaderDistance* GetOutlineShaderDistance() const;
-	    OutlineShaderJump* GetOutlineShaderJump() const;
+	    [[nodiscard]] OutlineShader* GetOutlineShader() const;
+	    [[nodiscard]] OutlineShaderDistance* GetOutlineShaderDistance() const;
+	    [[nodiscard]] OutlineShaderJump* GetOutlineShaderJump() const;
 
-	    MaterialShader* GetOverlayShader() const;
+	    [[nodiscard]] MaterialShader* GetOverlayShader() const;
 #endif
 
 	private:
@@ -169,7 +164,7 @@ namespace Vox
 		std::unique_ptr<FullscreenQuad> quad;
 
 #ifndef EDITOR
-	    std::unique_ptr<WorldRenderer> worldRenderer;
+	    std::unique_ptr<SceneRenderer> sceneRenderer;
 #endif
 	};
 }

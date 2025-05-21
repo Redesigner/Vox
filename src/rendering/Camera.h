@@ -9,6 +9,7 @@ namespace Vox
 	{
 	public:
 		Camera();
+	    ~Camera();
 
 		void SetPosition(glm::vec3 position);
 		void SetPosition(float x, float y, float z);

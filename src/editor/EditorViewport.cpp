@@ -8,6 +8,7 @@
 
 #include "core/math/Math.h"
 #include "core/services/EditorService.h"
+#include "rendering/SceneRenderer.h"
 #include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 
 namespace Vox
@@ -22,7 +23,10 @@ namespace Vox
     {
     }
 
-    void EditorViewport::Draw(const ColorDepthFramebuffer* texture, World* world)
+    EditorViewport::EditorViewport()
+    = default;
+
+    void EditorViewport::Draw(const std::shared_ptr<World>& world)
     {
 #ifdef IMGUI_HAS_VIEWPORT
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -30,8 +34,8 @@ namespace Vox
         ImGui::SetNextWindowSize(viewport->GetWorkSize());
         ImGui::SetNextWindowViewport(viewport->ID);
 #else
-        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-        ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+        // ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        // ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 #endif
         bool windowOpen = true;
 
@@ -39,8 +43,8 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
 
-        if (ImGui::Begin("Main Window", &windowOpen,
-            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus))
+        if (ImGui::Begin("Main Window", &windowOpen/*,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus*/))
         {
             ImGui::SetScrollY(0);
             const ImVec2 dimensions = ImGui::GetContentRegionAvail();
@@ -54,6 +58,7 @@ namespace Vox
                 static_cast<int>(bottomRight.y)
             );
 
+            ColorDepthFramebuffer* texture = world->GetRenderer()->GetTexture();
             ImGui::Image(texture->GetTextureId(),
                 ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())),
                 {0, 1}, {1, 0});

@@ -3,31 +3,20 @@
 #include <GL/glew.h>
 #include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_video.h>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/mat4x4.hpp>
 #include <ranges>
 #include <utility>
 
 #include "PickContainer.h"
-#include "buffers/frame_buffers/PickBuffer.h"
-#include "buffers/frame_buffers/StencilBuffer.h"
-#include "buffers/frame_buffers/UVec2Buffer.h"
 #include "core/logging/Logging.h"
-#include "core/math/Math.h"
 #include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
 #include "physics/PhysicsServer.h"
-#include "rendering/Camera.h"
-#include "rendering/DebugRenderer.h"
 #include "rendering/FullscreenQuad.h"
 #include "rendering/buffers/ArrayTexture.h"
 #include "rendering/buffers/RenderTexture.h"
-#include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
-#include "rendering/buffers/frame_buffers/GBuffer.h"
-#include "rendering/mesh/MeshInstance.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
 #include "shaders/pixel_shaders/DebugShader.h"
@@ -37,7 +26,6 @@
 #include "shaders/pixel_shaders/outline_shaders/OutlineShader.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderDistance.h"
 #include "shaders/pixel_shaders/outline_shaders/OutlineShaderJump.h"
-#include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
 namespace Vox
 {
@@ -69,18 +57,13 @@ namespace Vox
 
     void Renderer::Render(Editor* editor)
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        int x, y;
+        SDL_GetWindowSizeInPixels(mainWindow, &x, &y);
+        glViewport(0, 0, x, y);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         editor->Draw();
         SDL_GL_SwapWindow(mainWindow);
-    }
-
-    Ref<Camera> Renderer::CreateCamera()
-    {
-        Ref<Camera> newCamera = Ref<Camera>(&cameras, cameras.Create());
-        newCamera->SetPosition(0.0f, 0.0f, 0.0f);
-        newCamera->SetRotation(0.0f, 0.0f, 0.0f);
-        // newCamera->SetAspectRatio(viewportTexture->GetAspectRatio());
-        newCamera->SetFovY(45.0f);
-        return newCamera;
     }
 
     bool Renderer::UploadModel(std::string alias, const std::string& relativeFilePath)
@@ -134,11 +117,6 @@ namespace Vox
         }
     }
 
-    DynamicRef<VoxelMesh> Renderer::CreateVoxelMesh(glm::ivec2 position)
-    {
-        return {&voxelMeshes, voxelMeshes.Create(position)};
-    }
-
     const std::unordered_map<std::string, std::shared_ptr<Model>>& Renderer::GetMeshes() const
     {
         return uploadedMeshes;
@@ -170,7 +148,6 @@ namespace Vox
 
         pickShader = std::make_unique<PickShader>("assets/shaders/pickBuffer.vert", "assets/shaders/pickBuffer.frag");
         pickShaderSkeleton = std::make_unique<PickShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/pickBuffer.frag");
-        pickContainer = std::make_unique<PickContainer>();
 
         stencilShader = std::make_unique<StencilShader>();
         stencilShaderSkeleton = std::make_unique<StencilShader>("assets/shaders/skeletalMesh.vert", "assets/shaders/stencil.frag");
@@ -276,5 +253,111 @@ namespace Vox
             return {};
         }
 
-        return result->second;    }
+        return result->second;
+    }
+
+    MaterialShader* Renderer::GetGBufferShader() const
+    {
+        return gBufferShader.get();
+    }
+
+    void Renderer::BindMeshVao() const
+    {
+        glBindVertexArray(meshVao);
+    }
+
+    MaterialShader* Renderer::GetGBufferShaderSkeleton() const
+    {
+        return gBufferShaderSkeleton.get();
+    }
+
+    void Renderer::BindSkeletalMeshVao() const
+    {
+        glBindVertexArray(skeletalMeshVao);
+    }
+
+    DeferredShader* Renderer::GetDeferredShader() const
+    {
+        return deferredShader.get();
+    }
+
+    void Renderer::BindQuadVao() const
+    {
+        glBindVertexArray(quad->GetVaoId());
+    }
+
+    SkyShader* Renderer::GetSkyShader() const
+    {
+        return skyShader.get();
+    }
+
+    VoxelShader* Renderer::GetVoxelMeshShader() const
+    {
+        return voxelShader.get();
+    }
+
+    const ComputeShader* Renderer::GetVoxelGenerationShader() const
+    {
+        return &voxelGenerationShader;
+    }
+
+    ArrayTexture* Renderer::GetVoxelTextures() const
+    {
+        return voxelTextures.get();
+    }
+
+    void Renderer::BindVoxelMeshVao() const
+    {
+        glBindVertexArray(voxelMeshVao);
+    }
+
+    DebugShader* Renderer::GetDebugLineShader() const
+    {
+        return debugLineShader.get();
+    }
+
+    DebugShader* Renderer::GetDebugTriangleShader() const
+    {
+        return debugTriangleShader.get();
+    }
+
+    PickShader* Renderer::GetPickShader() const
+    {
+        return pickShader.get();
+    }
+
+    PickShader* Renderer::GetPickShaderSkeleton() const
+    {
+        return pickShaderSkeleton.get();
+    }
+
+    StencilShader* Renderer::GetStencilShader() const
+    {
+        return stencilShader.get();
+    }
+
+    StencilShader* Renderer::GetStencilShaderSkeleton() const
+    {
+        return stencilShaderSkeleton.get();
+    }
+
+    OutlineShader* Renderer::GetOutlineShader() const
+    {
+        return outlineShader.get();
+    }
+
+    OutlineShaderDistance* Renderer::GetOutlineShaderDistance() const
+    {
+        return outlineShaderDistance.get();
+    }
+
+    OutlineShaderJump* Renderer::GetOutlineShaderJump() const
+    {
+        return outlineShaderJump.get();
+    }
+
+    MaterialShader* Renderer::GetOverlayShader() const
+    {
+        return overlayShader.get();
+    }
 }

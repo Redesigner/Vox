@@ -13,7 +13,7 @@ namespace Vox
         WorldOutline();
         ~WorldOutline() = default;
 
-        void InitializeGizmos();
+        void InitializeGizmos(World* world);
 
         void Draw(World* world);
 

@@ -13,8 +13,8 @@
 
 namespace Vox
 {
-    SkeletalMeshComponent::SkeletalMeshComponent()
-        :SceneComponent(nullptr)
+    SkeletalMeshComponent::SkeletalMeshComponent(Actor* parent)
+        :SceneComponent(parent)
     {
         DEFAULT_DISPLAY_NAME()
 
@@ -25,8 +25,13 @@ namespace Vox
     }
 
     SkeletalMeshComponent::SkeletalMeshComponent(Actor* parent, const std::string& meshName)
-        :SkeletalMeshComponent()
+        :SkeletalMeshComponent(parent)
     {
+        if (parent == nullptr || parent->GetWorld() == nullptr)
+        {
+            return;
+        }
+
         mesh = GetParent()->GetWorld()->GetRenderer()->CreateSkeletalMeshInstance(meshName);
 
 #ifdef EDITOR
@@ -70,6 +75,12 @@ namespace Vox
 
     void SkeletalMeshComponent::Tick(float DeltaTime)
     {
+        // @TODO: this is just a temp fix
+        if (!mesh)
+        {
+            return;
+        }
+
         if (playing)
         {
             animationTime += DeltaTime;

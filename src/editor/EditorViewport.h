@@ -22,8 +22,9 @@ namespace Vox
     class EditorViewport
     {
     public:
+        EditorViewport();
 
-        void Draw(const ColorDepthFramebuffer* texture, World* world);
+        void Draw(const std::shared_ptr<World>& world);
 
         bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 

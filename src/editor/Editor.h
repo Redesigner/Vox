@@ -30,7 +30,7 @@ namespace Vox
 		Editor();
 	    ~Editor();
 
-		void Draw(const ColorDepthFramebuffer* viewportRenderTexture);
+		void Draw();
 		
 		void BindOnGLTFOpened(std::function<void(std::string)> function);
 		
@@ -38,7 +38,7 @@ namespace Vox
 
 		void SelectObject(const std::weak_ptr<Object>& object) const;
 
-	    void InitializeGizmos();
+	    void InitializeGizmos(World* world);
 
 	    [[nodiscard]] EditorViewport* GetViewport() const;
 
@@ -60,7 +60,7 @@ namespace Vox
 
 		bool drawAssetViewer = false;
 
-	    std::unique_ptr<EditorViewport> viewport;
+	    std::unique_ptr<EditorViewport> primaryViewport;
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;
 

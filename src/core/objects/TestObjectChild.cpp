@@ -2,7 +2,8 @@
 
 namespace Vox
 {
-    TestObjectChild::TestObjectChild()
+    TestObjectChild::TestObjectChild(Object* parent)
+        :TestObject(parent)
     {
         displayName = fmt::format("{}_Default", TestObjectChild::classDisplayName);
     }

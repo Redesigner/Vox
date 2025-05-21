@@ -21,7 +21,7 @@ namespace Vox
     {
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
-        viewport = std::make_unique<EditorViewport>();
+        primaryViewport = std::make_unique<EditorViewport>();
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
@@ -32,7 +32,7 @@ namespace Vox
     Editor::~Editor()
     = default;
 
-    void Editor::Draw(const ColorDepthFramebuffer* viewportRenderTexture)
+    void Editor::Draw()
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
@@ -40,7 +40,7 @@ namespace Vox
         {
             ImGui::PushFont(gitLabSans14);
 
-            viewport->Draw(viewportRenderTexture, currentWorld.lock().get());
+            primaryViewport->Draw(currentWorld.lock());
 
             //DrawToolbar();
 
@@ -162,14 +162,14 @@ namespace Vox
         worldOutline->SetSelectedObject(object);
     }
 
-    void Editor::InitializeGizmos()
+    void Editor::InitializeGizmos(World* world)
     {
-        worldOutline->InitializeGizmos();
+        worldOutline->InitializeGizmos(world);
     }
 
     EditorViewport* Editor::GetViewport() const
     {
-        return viewport.get();
+        return primaryViewport.get();
     }
 
     std::weak_ptr<Object> Editor::GetSelectedObject() const

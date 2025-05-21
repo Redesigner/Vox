@@ -52,6 +52,11 @@ namespace Vox
         return renderer;
     }
 
+    World::World()
+    {
+        renderer = std::make_shared<SceneRenderer>();
+    }
+
     World::~World()
     = default;
 

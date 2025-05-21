@@ -19,6 +19,12 @@ namespace Vox
     MeshComponent::MeshComponent(Actor* parent, const std::string& meshName)
         :MeshComponent(parent)
     {
+        // @TODO: this is just a temp fix
+        if (parent == nullptr || parent->GetWorld() == nullptr)
+        {
+            return;
+        }
+
         mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshName);
 
 #ifdef EDITOR
@@ -36,6 +42,11 @@ namespace Vox
     
     void MeshComponent::OnTransformUpdated()
     {
+        // @TODO: this is just a temp fix
+        if (!mesh)
+        {
+            return;
+        }
         mesh->SetTransform(GetWorldTransform().GetMatrix());
     }
 

@@ -8,7 +8,7 @@ namespace Vox
     class TestObject : public Object
     {
     public:
-        TestObject();
+        TestObject(Object* parent);
         
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         

@@ -27,9 +27,9 @@ namespace Vox
         });
     }
 
-    void WorldOutline::InitializeGizmos()
+    void WorldOutline::InitializeGizmos(World* world)
     {
-        gizmo = std::make_unique<Gizmo>(tempWorld->GetRenderer().get());
+        gizmo = std::make_unique<Gizmo>(world->GetRenderer().get());
     }
 
     void WorldOutline::Draw(World* world)

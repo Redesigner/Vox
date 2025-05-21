@@ -16,7 +16,7 @@ namespace Vox
         void RegisterObjectClass() requires Derived<T, Object>
         {
             std::vector<Property> properties;
-            T defaultObject = T();
+            T defaultObject = T(nullptr);
             defaultObject.BuildProperties(properties);
             T::SetObjectClass(
                 RegisterObjectClass(defaultObject.GetClassDisplayName(),

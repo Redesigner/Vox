@@ -13,7 +13,8 @@
 
 namespace Vox
 {
-	class Renderer;
+    class SceneRenderer;
+    class Renderer;
 	class PhysicsServer;
 	class VoxelMesh;
 
@@ -21,7 +22,7 @@ namespace Vox
 	{
 	public:
 		// @TODO: Change how our dependency is injected here? We need this to create our mesh, not for any other reason
-		VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, Renderer* renderer);
+		VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, SceneRenderer* renderer);
 
 		void SetVoxel(glm::uvec3 voxelPosition, Voxel voxel);
 

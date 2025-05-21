@@ -39,6 +39,7 @@
 #include "rendering/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
+#include "rendering/SceneRenderer.h"
 #include "voxel/VoxelChunk.h"
 
 int main()
@@ -113,7 +114,10 @@ int main()
 
         std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
 
-        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), ServiceLocator::GetRenderer());
+        std::shared_ptr<World> testWorld = std::make_shared<World>();
+        ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
+
+        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), testWorld->GetRenderer().get());
 
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
@@ -122,7 +126,7 @@ int main()
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
-        ServiceLocator::GetEditorService()->GetEditor()->InitializeGizmos();
+        ServiceLocator::GetEditorService()->GetEditor()->InitializeGizmos(testWorld.get());
 
         Voxel defaultVoxel = Voxel();
         defaultVoxel.materialId = 1;
@@ -156,8 +160,6 @@ int main()
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });
-
-        std::shared_ptr<World> testWorld = std::make_shared<World>();
         
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
@@ -178,9 +180,9 @@ int main()
 
         testWorld->CreateObject<Character>();
         
-        ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk](int x, int y) {
+        ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;
-            Ref<Camera> camera = ServiceLocator::GetRenderer()->GetCurrentCamera();
+            Ref<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
             if (!camera)
             {
                 return;
@@ -207,9 +209,9 @@ int main()
                     const unsigned int gridSize = 1;
                     const JPH::Vec3 voxelEstimate = raycastResult.impactPoint - raycastResult.impactNormal / static_cast<float>(2 * gridSize);
                     JPH::Vec3 voxelPosition = JPH::Vec3(
-                        FloorMultiple(voxelEstimate.GetX(), gridSize),
-                        FloorMultiple(voxelEstimate.GetY(), gridSize),
-                        FloorMultiple(voxelEstimate.GetZ(), gridSize)
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetX(), gridSize)),
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetY(), gridSize)),
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetZ(), gridSize))
                     );
                     //debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, 0.0f), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, gridSize), JPH::Color::sRed, 5.0f);
                     //debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, gridSize), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, 0.0f), JPH::Color::sRed, 5.0f);
@@ -232,6 +234,7 @@ int main()
         {
             ServiceLocator::GetInputService()->PollEvents();
             testWorld->Tick(1 / 60.0f);
+            testWorld->GetRenderer()->Draw();
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;

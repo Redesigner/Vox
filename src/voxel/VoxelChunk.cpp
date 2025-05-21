@@ -2,10 +2,11 @@
 
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
+#include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
-	VoxelChunk::VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, Renderer* renderer)
+	VoxelChunk::VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, SceneRenderer* renderer)
 		:chunkLocation(chunkLocation)
 	{
 		mesh = renderer->CreateVoxelMesh(chunkLocation);

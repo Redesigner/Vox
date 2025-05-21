@@ -8,15 +8,12 @@
 #include <unordered_map>
 
 #include "Light.h"
+#include "rendering/Camera.h"
 #include "core/datatypes/DynamicObjectContainer.h"
+#include "core/datatypes/DynamicRef.h"
 #include "core/datatypes/Ref.h"
 #include "mesh/MeshInstanceContainer.h"
 #include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
-
-namespace Vox
-{
-    class PickContainer;
-}
 
 namespace Vox
 {
@@ -24,15 +21,13 @@ namespace Vox
     class ColorDepthFramebuffer;
     class GBuffer;
     class PickBuffer;
+    class PickContainer;
     class RenderTexture;
     class Renderer;
     class StencilBuffer;
     class UVec2Buffer;
     class VoxelMesh;
-}
 
-namespace Vox
-{
     /**
      * @brief A renderer for holding all the resources related to a 3D world
      * this contains all meshes and framebuffers
@@ -41,6 +36,7 @@ namespace Vox
     {
     public:
         SceneRenderer();
+        ~SceneRenderer();
 
         void Draw();
 
@@ -48,9 +44,15 @@ namespace Vox
 
         Ref<SkeletalMeshInstance> CreateSkeletalMeshInstance(const std::string& meshName);
 
+        DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 chunkLocation);
+
+        [[nodiscard]] Ref<Camera> CreateCamera();
+
         [[nodiscard]] Ref<Camera> GetCurrentCamera() const;
 
         void SetCurrentCamera(const Ref<Camera>& camera);
+
+        [[nodiscard]] ColorDepthFramebuffer* GetTexture() const;
 
 #ifdef EDITOR
         [[nodiscard]] PickContainer* GetPickContainer() const;
@@ -113,6 +115,7 @@ namespace Vox
         std::unordered_map<std::string, MeshInstanceContainer> meshInstances;
         std::unordered_map<std::string, SkeletalMeshInstanceContainer> skeletalMeshInstances;
         DynamicObjectContainer<VoxelMesh> voxelMeshes;
+        ObjectContainer<Camera> cameras;
 
         Light testLight;
         LightUniformLocations lightUniformLocations;

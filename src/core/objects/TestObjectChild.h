@@ -12,7 +12,7 @@ namespace Vox
     class TestObjectChild : public TestObject
     {
     public:
-        TestObjectChild();
+        TestObjectChild(Object* parent);
         
         //void doSomething() override {};
         

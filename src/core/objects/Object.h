@@ -40,7 +40,7 @@ namespace Vox
         template <typename T>
         static std::function<std::shared_ptr<T>()> GetConstructor() requires Derived<T, Object>
         {
-            return [] { return std::make_shared<T>(); };
+            return [] { return std::make_shared<T>(nullptr); };
         }
 
         [[nodiscard]] const std::vector<Property>& GetProperties() const;

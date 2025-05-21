@@ -3,18 +3,19 @@
 #include <ranges>
 #include <GL/glew.h>
 
-#include "Camera.h"
-#include "DebugRenderer.h"
-#include "PickContainer.h"
 #include "core/math/Math.h"
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
+#include "rendering/Camera.h"
+#include "rendering/DebugRenderer.h"
+#include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
 #include "rendering/buffers/frame_buffers/ColorDepthFramebuffer.h"
 #include "rendering/buffers/frame_buffers/GBuffer.h"
 #include "rendering/buffers/frame_buffers/PickBuffer.h"
 #include "rendering/buffers/frame_buffers/StencilBuffer.h"
 #include "rendering/buffers/frame_buffers/UVec2Buffer.h"
+#include "rendering/mesh/VoxelMesh.h"
 #include "rendering/skeletal_mesh/SkeletalMeshInstanceContainer.h"
 #include "shaders/pixel_shaders/DebugShader.h"
 #include "shaders/pixel_shaders/DeferredShader.h"
@@ -32,11 +33,18 @@ namespace Vox
     {
         GenerateBuffers();
         lightUniformLocations = LightUniformLocations(GetRenderer()->GetDeferredShader());
+        viewportSize = {400, 400};
+        currentCamera = CreateCamera();
+    }
+
+    SceneRenderer::~SceneRenderer()
+    {
     }
 
     void SceneRenderer::Draw()
     {
         glViewport(0, 0, viewportSize.x, viewportSize.y);
+        currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : viewportSize.x / viewportSize.y);
 
         DrawGBuffer();
         DrawDeferredPass();
@@ -80,6 +88,20 @@ namespace Vox
         }
 
         return {};
+    }
+
+    DynamicRef<VoxelMesh> SceneRenderer::CreateVoxelMesh(glm::ivec2 chunkLocation)
+    {
+        return {&voxelMeshes, voxelMeshes.Create(chunkLocation)};
+    }
+
+    Ref<Camera> SceneRenderer::CreateCamera()
+    {
+        Ref newCamera = {&cameras, cameras.Create()};
+        newCamera->SetPosition(0.0f, 0.0f, 0.0f);
+        newCamera->SetRotation(0.0f, 0.0f, 0.0f);
+        newCamera->SetFovY(45.0f);
+        return newCamera;
     }
 
     Ref<Camera> SceneRenderer::GetCurrentCamera() const
@@ -265,7 +287,7 @@ namespace Vox
         const VoxelShader* voxelShader = GetRenderer()->GetVoxelMeshShader();
         voxelShader->Enable();
         voxelShader->SetCamera(currentCamera);
-        voxelShader->SetArrayTexture(GetRenderer()->GetVoxelTexture());
+        voxelShader->SetArrayTexture(GetRenderer()->GetVoxelTextures());
 
         for (std::optional<VoxelMesh>& voxelMesh : voxelMeshes)
         {

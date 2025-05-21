@@ -17,7 +17,10 @@ namespace Vox
     {
         DEFAULT_DISPLAY_NAME();
 
-        camera = ServiceLocator::GetRenderer()->CreateCamera();
+        if (parent && parent->GetWorld())
+        {
+            camera = parent->GetWorld()->GetRenderer()->CreateCamera();
+        }
     }
 
     void CameraComponent::BuildProperties(std::vector<Property>& propertiesInOut)
@@ -28,7 +31,16 @@ namespace Vox
 
     void CameraComponent::Activate() const
     {
+        if (!camera)
+        {
+            return;
+        }
         GetParent()->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
+    }
+
+    ColorDepthFramebuffer* SceneRenderer::GetTexture() const
+    {
+        return deferredFramebuffer.get();
     }
 
     void CameraComponent::SetArmLength(float length)
@@ -38,6 +50,11 @@ namespace Vox
 
     void CameraComponent::OnTransformUpdated()
     {
+        // @TODO: this is just a temp fix
+        if (!camera)
+        {
+            return;
+        }
         const Transform& worldTransform = GetWorldTransform();
         camera->SetPosition(worldTransform.position);
         camera->SetRotation(-worldTransform.rotation);
@@ -45,6 +62,11 @@ namespace Vox
 
     void CameraComponent::Tick(float deltaTime)
     {
+        // @TODO: this is just a temp fix
+        if (!camera)
+        {
+            return;
+        }
         RayCastResultNormal rayCastResult;
         const glm::vec3 start = GetWorldTransform().position;
         const glm::vec3 forward = GetWorldTransform().GetForwardVector();
