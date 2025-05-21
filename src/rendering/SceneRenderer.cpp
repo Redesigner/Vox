@@ -44,7 +44,7 @@ namespace Vox
     {
         ConditionalResizeFramebuffers();
         glViewport(0, 0, viewportSize.x, viewportSize.y);
-        currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : viewportSize.x / viewportSize.y);
+        currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y));
 
         DrawGBuffer();
         DrawDeferredPass();
