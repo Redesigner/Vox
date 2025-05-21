@@ -30,19 +30,19 @@
 namespace Vox
 {
     SceneRenderer::SceneRenderer()
+        :viewportSize({400, 400})
     {
         GenerateBuffers();
+        testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
         lightUniformLocations = LightUniformLocations(GetRenderer()->GetDeferredShader());
-        viewportSize = {400, 400};
         currentCamera = CreateCamera();
     }
 
-    SceneRenderer::~SceneRenderer()
-    {
-    }
+    SceneRenderer::~SceneRenderer() = default;
 
     void SceneRenderer::Draw()
     {
+        ConditionalResizeFramebuffers();
         glViewport(0, 0, viewportSize.x, viewportSize.y);
         currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : viewportSize.x / viewportSize.y);
 
@@ -114,6 +114,16 @@ namespace Vox
         currentCamera = camera;
     }
 
+    ColorDepthFramebuffer* SceneRenderer::GetTexture() const
+    {
+        return deferredFramebuffer.get();
+    }
+
+    void SceneRenderer::SetSize(unsigned int x, unsigned int y)
+    {
+        viewportSize = {x, y};
+    }
+
     void SceneRenderer::DrawGBuffer()
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gBuffer->GetFramebufferId());
@@ -148,8 +158,9 @@ namespace Vox
     void SceneRenderer::DrawDeferredPass()
     {
         glBlitNamedFramebuffer(gBuffer->GetFramebufferId(), deferredFramebuffer->GetFramebufferId(),
-            0, 0, gBuffer->GetWidth(), deferredFramebuffer->GetHeight(),
-            0, 0, gBuffer->GetWidth(), deferredFramebuffer->GetHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            0, 0, gBuffer->GetWidth(), gBuffer->GetHeight(),
+            0, 0, deferredFramebuffer->GetWidth(), deferredFramebuffer->GetHeight(),
+            GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);

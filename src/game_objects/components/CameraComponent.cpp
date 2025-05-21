@@ -38,11 +38,6 @@ namespace Vox
         GetParent()->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
     }
 
-    ColorDepthFramebuffer* SceneRenderer::GetTexture() const
-    {
-        return deferredFramebuffer.get();
-    }
-
     void CameraComponent::SetArmLength(float length)
     {
         armLength = length;

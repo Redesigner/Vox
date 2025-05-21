@@ -76,6 +76,10 @@ namespace Vox
                 }
                 ImGui::EndDragDropTarget();
             }
+
+            const ImVec2 min = ImGui::GetWindowContentRegionMin();
+            const ImVec2 max = ImGui::GetWindowContentRegionMax();
+            world->GetRenderer()->SetSize(max.x - min.x, max.y - min.y);
         }
         ImGui::End();
         ImGui::PopStyleColor();

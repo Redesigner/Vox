@@ -54,6 +54,8 @@ namespace Vox
 
         [[nodiscard]] ColorDepthFramebuffer* GetTexture() const;
 
+        void SetSize(unsigned int x, unsigned int y);
+
 #ifdef EDITOR
         [[nodiscard]] PickContainer* GetPickContainer() const;
 
