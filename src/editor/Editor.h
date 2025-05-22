@@ -3,7 +3,7 @@
 #include <functional>
 #include <string>
 
-#include <glm/vec2.hpp>
+#include <imgui.h>
 #include <memory>
 
 #include "editor/Console.h"
@@ -46,6 +46,9 @@ namespace Vox
 
 		[[nodiscard]] static ImFont* GetFont_GitLab18();
 		[[nodiscard]] static ImFont* GetFont_GitLab24();
+
+	    static ImVec4 lightBgColor;
+
 
 	private:
 		void DrawToolbar();

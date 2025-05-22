@@ -43,7 +43,7 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
 
-        if (ImGui::Begin("Main Window", &windowOpen/*,
+        if (ImGui::BeginChild("Main Viewport", ImVec2(0, 0), 0 /*,
             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus*/))
         {
             ImGui::SetScrollY(0);
@@ -79,9 +79,9 @@ namespace Vox
 
             const ImVec2 min = ImGui::GetWindowContentRegionMin();
             const ImVec2 max = ImGui::GetWindowContentRegionMax();
-            world->GetRenderer()->SetSize(max.x - min.x, max.y - min.y);
+            world->GetRenderer()->SetSize(static_cast<int>(max.x - min.x), static_cast<int>(max.y - min.y));
         }
-        ImGui::End();
+        ImGui::EndChild();
         ImGui::PopStyleColor();
         ImGui::PopStyleVar(2);
     }

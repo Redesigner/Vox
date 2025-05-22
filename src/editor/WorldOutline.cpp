@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 
+#include "Editor.h"
 #include "core/objects/Object.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/Actor.h"
@@ -35,14 +36,20 @@ namespace Vox
     void WorldOutline::Draw(World* world)
     {
         tempWorld = world;
-        if (ImGui::Begin("World Outline"))
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
+        if (ImGui::BeginTabBar("WorldOutlineTabs"))
         {
-            for (const auto& object : world->GetObjects())
+            if (ImGui::BeginTabItem("World Outline"))
             {
-                DrawObject(object);
+                for (const auto& object : world->GetObjects())
+                {
+                    DrawObject(object);
+                }
             }
+            ImGui::EndTabItem();
         }
-        ImGui::End();
+        ImGui::EndTabBar();
+        ImGui::PopStyleColor();
         UpdateGizmos();
     }
 

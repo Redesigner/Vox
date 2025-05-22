@@ -22,7 +22,7 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        if (ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration))
+        if (ImGui::BeginChild("Console", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration))
         {
             DrawTabs();
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
@@ -48,7 +48,7 @@ namespace Vox
         }
         ImGui::PopStyleColor();
         ImGui::PopStyleVar(3);
-        ImGui::End();
+        ImGui::EndChild();
     }
 
     void Console::DrawTabs()

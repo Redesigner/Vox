@@ -14,19 +14,23 @@ namespace Vox
 {
     void ClassList::Draw()
     {
-        if (ImGui::Begin("Classes"))
+        if (ImGui::BeginTabBar("ClassesTabs"))
         {
-            std::for_each(ServiceLocator::GetObjectService()->GetBegin(), ServiceLocator::GetObjectService()->GetEnd(),
-                [](const std::pair<std::string, ObjectClass>& entry)
-                {
-                    ImGui::Text(entry.first.c_str());
-                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            if (ImGui::BeginTabItem("Classes"))
+            {
+                std::for_each(ServiceLocator::GetObjectService()->GetBegin(), ServiceLocator::GetObjectService()->GetEnd(),
+                    [](const std::pair<std::string, ObjectClass>& entry)
                     {
-                        ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", entry.first.data(), entry.first.size() + 1);
-                        ImGui::EndDragDropSource();
-                    }
-                });
+                        ImGui::Selectable(entry.first.c_str());
+                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+                        {
+                            ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", entry.first.data(), entry.first.size() + 1);
+                            ImGui::EndDragDropSource();
+                        }
+                    });
+            }
+            ImGui::EndTabItem();
         }
-        ImGui::End();
+        ImGui::EndTabBar();
     }
 } // Vox

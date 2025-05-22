@@ -32,42 +32,82 @@ namespace Vox
     Editor::~Editor()
     = default;
 
+    ImVec4 Editor::lightBgColor = ImVec4(ImColor(80, 80, 80));
+
     void Editor::Draw()
     {
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
         {
+#ifdef IMGUI_HAS_VIEWPORT
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->GetWorkPos());
+            ImGui::SetNextWindowSize(viewport->GetWorkSize());
+            ImGui::SetNextWindowViewport(viewport->ID);
+#else
+            ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+            ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+#endif
+
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(ImColor(38, 38, 38)));
+            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImGui::PushFont(gitLabSans14);
 
-            primaryViewport->Draw(currentWorld.lock());
-
-            //DrawToolbar();
-
-            if (console)
+            if (ImGui::Begin("Main", nullptr,
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize /*| ImGuiWindowFlags_MenuBar*/ | ImGuiWindowFlags_NoBringToFrontOnFocus))
             {
-                console->Draw();
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+                ImGui::BeginChild("MainUpper", ImVec2(0, 400), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
+                {
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 4.0f);
+                    constexpr ImGuiChildFlags flags = ImGuiChildFlags_AlwaysUseWindowPadding;
+                    ImGui::BeginChild("MainClassList", ImVec2(100, 0), flags | ImGuiChildFlags_ResizeX);
+                    ClassList::Draw();
+                    ImGui::EndChild();
+
+                    ImGui::SameLine();
+                    ImGui::BeginChild("MainViewport", ImVec2(400, 0), flags | ImGuiChildFlags_ResizeX);
+                    primaryViewport->Draw(currentWorld.lock());
+                    ImGui::EndChild();
+
+                    ImGui::SameLine();
+                    ImGui::BeginChild("MainWorldOutline", ImVec2(0, 0), flags);
+                    if (!currentWorld.expired())
+                    {
+                        worldOutline->Draw(currentWorld.lock().get());
+                    }
+                    ImGui::EndChild();
+                    ImGui::PopStyleVar(2);
+                }
+                ImGui::EndChild();
+                ImGui::BeginChild("MainBottomTab", ImVec2(0, 0));
+                if (console)
+                {
+                    console->Draw();
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleVar();
             }
+            ImGui::End();
 
             if (drawAssetViewer)
             {
                 AssetDisplayWindow::Draw(&drawAssetViewer);
             }
+            //DrawToolbar();
 
             if (!worldOutline->GetSelectedObject().expired())
             {
                 DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
             }
-
-            if (!currentWorld.expired())
-            {
-                worldOutline->Draw(currentWorld.lock().get());
-            }
-
-            ClassList::Draw();
-
-            ImGui::PopFont();
         }
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(2);
+        ImGui::PopFont();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
