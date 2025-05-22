@@ -6,7 +6,7 @@ namespace Vox
     class TestActor : public Actor
     {
     public:
-        TestActor(World* world);
+        TestActor(const ObjectInitializer&);
 
         IMPLEMENT_OBJECT(TestActor)
         

@@ -10,9 +10,9 @@ namespace Vox
     class MeshComponent : public SceneComponent
     {
     public:
-        MeshComponent(Actor* parent);
-        MeshComponent(Actor* parent, const std::string& meshName);
-        
+        MeshComponent(const ObjectInitializer& objectInitializer);
+        MeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName);
+
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
     protected:

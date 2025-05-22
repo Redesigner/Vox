@@ -68,6 +68,8 @@ namespace Vox
         void ClearMeshOutlines();
 
         void ClearOverlays();
+
+        [[nodiscard]] PickBuffer* GetPickBuffer() const;
 #endif
 
     private:

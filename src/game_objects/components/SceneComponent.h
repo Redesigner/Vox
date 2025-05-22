@@ -6,7 +6,7 @@ namespace Vox
     class SceneComponent : public Component
     {
     public:
-        SceneComponent(Actor* parent);
+        SceneComponent(const ObjectInitializer& objectInitializer);
 
         void PropertyChanged(const Property& property) override;
         

@@ -7,6 +7,20 @@
 
 namespace Vox
 {
+    ObjectInitializer::ObjectInitializer()
+    {
+    }
+
+    ObjectInitializer::ObjectInitializer(World* world)
+        :world(world)
+    {
+    }
+
+    ObjectInitializer::ObjectInitializer(Actor* parent)
+        :parent(parent)
+    {
+    }
+
     const std::vector<Property>& Object::GetProperties() const
     {
         const ObjectClass* objectClass = GetClass();

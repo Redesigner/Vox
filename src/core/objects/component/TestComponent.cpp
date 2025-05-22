@@ -2,8 +2,8 @@
 
 namespace Vox
 {
-    TestComponent::TestComponent(Actor* parent)
-        :Component(parent)
+    TestComponent::TestComponent(const ObjectInitializer& objectInitializer)
+        :Component(objectInitializer)
     {
     }
 

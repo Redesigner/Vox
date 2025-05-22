@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "core/concepts/Concepts.h"
+#include "core/objects/Object.h"
 #include "core/objects/ObjectClass.h"
 
 namespace Vox
@@ -16,7 +17,7 @@ namespace Vox
         void RegisterObjectClass() requires Derived<T, Object>
         {
             std::vector<Property> properties;
-            T defaultObject = T(nullptr);
+            T defaultObject = T(ObjectInitializer());
             defaultObject.BuildProperties(properties);
             T::SetObjectClass(
                 RegisterObjectClass(defaultObject.GetClassDisplayName(),

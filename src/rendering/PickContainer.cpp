@@ -11,8 +11,8 @@
 
 namespace Vox
 {
-    PickContainer::PickContainer(SceneRenderer* owner, PickBuffer* attachedBuffer)
-        :owner(owner), attachedBuffer(attachedBuffer)
+    PickContainer::PickContainer(SceneRenderer* owner)
+        :owner(owner)
     {
         callbacks = {};
         counter = 1;
@@ -25,7 +25,7 @@ namespace Vox
                  return;
              }
             
-            const unsigned int key = this->attachedBuffer->GetValue(viewX, viewY);
+            const unsigned int key = this->owner->GetPickBuffer()->GetValue(viewX, viewY);
             if (key == 0)
             {
                 ServiceLocator::GetEditorService()->GetEditor()->SelectObject(std::weak_ptr<Object>());

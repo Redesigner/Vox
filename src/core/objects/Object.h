@@ -23,6 +23,18 @@
 
 namespace Vox
 {
+    class Actor;
+    class World;
+
+    struct ObjectInitializer
+    {
+        ObjectInitializer();
+        ObjectInitializer(World* world);
+        ObjectInitializer(Actor* parent);
+
+        World* world = nullptr;
+        Actor* parent = nullptr;
+    };
     class ObjectClass;
 
     /// Object is an object type that has reflected properties
@@ -38,9 +50,9 @@ namespace Vox
         Object& operator =(Object&&) = delete;
         
         template <typename T>
-        static std::function<std::shared_ptr<T>()> GetConstructor() requires Derived<T, Object>
+        static std::function<std::shared_ptr<T>(const ObjectInitializer&)> GetConstructor() requires Derived<T, Object>
         {
-            return [] { return std::make_shared<T>(nullptr); };
+            return [] (const ObjectInitializer& objectInitializer){ return std::make_shared<T>(objectInitializer); };
         }
 
         [[nodiscard]] const std::vector<Property>& GetProperties() const;

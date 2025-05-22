@@ -10,29 +10,26 @@
 
 namespace Vox
 {
-    MeshComponent::MeshComponent(Actor* parent)
-        :SceneComponent(parent)
+    MeshComponent::MeshComponent(const ObjectInitializer& objectInitializer)
+        :SceneComponent(objectInitializer)
     {
         DEFAULT_DISPLAY_NAME()
     }
 
-    MeshComponent::MeshComponent(Actor* parent, const std::string& meshName)
-        :MeshComponent(parent)
+    MeshComponent::MeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName)
+        :MeshComponent(objectInitializer)
     {
-        // @TODO: this is just a temp fix
-        if (parent == nullptr || parent->GetWorld() == nullptr)
+        if (objectInitializer.world)
         {
-            return;
+            mesh = objectInitializer.world->GetRenderer()->CreateMeshInstance(meshName);
+#ifdef EDITOR
+            mesh->RegisterClickCallback([this](const glm::ivec2 position)
+            {
+                this->Clicked(position);
+            });
+#endif
         }
 
-        mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshName);
-
-#ifdef EDITOR
-        mesh->RegisterClickCallback([this](const glm::ivec2 position)
-        {
-            this->Clicked(position);
-        });
-#endif
     }
 
     void MeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)

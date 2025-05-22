@@ -4,8 +4,8 @@
 
 namespace Vox
 {
-    SceneComponent::SceneComponent(Actor* parent)
-        :Component(parent)
+    SceneComponent::SceneComponent(const ObjectInitializer& objectInitializer)
+        :Component(objectInitializer)
     {
     }
 

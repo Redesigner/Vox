@@ -21,7 +21,7 @@ namespace Vox
     using Callback = std::function<void(glm::ivec2)>;
 
     public:
-        PickContainer(SceneRenderer* owner, PickBuffer* attachedBuffer);
+        PickContainer(SceneRenderer* owner);
 
         unsigned int RegisterCallback(Callback callback);
 
@@ -31,8 +31,6 @@ namespace Vox
         std::unordered_map<unsigned int, Callback> callbacks;
 
         SceneRenderer* owner;
-
-        PickBuffer* attachedBuffer;
 
         unsigned int counter;
     };

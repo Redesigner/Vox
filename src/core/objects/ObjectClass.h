@@ -5,20 +5,21 @@
 
 namespace Vox
 {
+    struct ObjectInitializer;
     class Object;
 
     class ObjectClass
     {
     public:
-        using Constructor = std::function<std::shared_ptr<Object>()>;
+        using Constructor = std::function<std::shared_ptr<Object>(const ObjectInitializer&)>;
         ObjectClass(Constructor constructor, std::vector<Property> properties);
 
-        [[nodiscard]] std::function<std::shared_ptr<Object>()> GetConstructor() const;
+        [[nodiscard]] Constructor GetConstructor() const;
         [[nodiscard]] const std::vector<Property>& GetProperties() const;
         [[nodiscard]] Property* GetPropertyByType(PropertyType type) const;
         
     private:
-        std::function<std::shared_ptr<Object>()> constructor;
+        Constructor constructor;
         std::vector<Property> properties;
     };
 }

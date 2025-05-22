@@ -13,7 +13,7 @@ namespace  Vox
     class Actor : public Object, public Tickable
     {
     public:
-        explicit Actor(World* world);
+        explicit Actor(const ObjectInitializer& objectInitializer);
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
@@ -45,7 +45,10 @@ namespace  Vox
         template <typename T, typename... Args>
         std::shared_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
         {
-            auto result = std::static_pointer_cast<T>(components.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
+            ObjectInitializer objectInitializer;
+            objectInitializer.world = world;
+            objectInitializer.parent = this;
+            auto result = std::static_pointer_cast<T>(components.emplace_back(Component::Create<T>(objectInitializer, std::forward<Args>(args)...)));
             if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
             {
                 tickableComponents.emplace_back(std::move(tickable));
@@ -56,7 +59,10 @@ namespace  Vox
         template <typename T, typename... Args>
         std::shared_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
         {
-            auto result = std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(this, std::forward<Args>(args)...)));
+            ObjectInitializer objectInitializer;
+            objectInitializer.world = world;
+            objectInitializer.parent = this;
+            auto result = std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(objectInitializer, std::forward<Args>(args)...)));
             if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
             {
                 tickableComponents.emplace_back(std::move(tickable));

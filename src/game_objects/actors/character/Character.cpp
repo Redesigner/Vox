@@ -16,8 +16,8 @@
 
 namespace Vox
 {
-	Character::Character(World* world)
-	    :Actor(world)
+    Character::Character(const ObjectInitializer& objectInitializer)
+	    :Actor(objectInitializer)
 	{
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 

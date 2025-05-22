@@ -10,16 +10,16 @@ namespace Vox
     class Component : public Object
     {
     public:
-        explicit Component(Actor* parent);
+        explicit Component(const ObjectInitializer& objectInitializer);
 
         [[nodiscard]] Actor* GetParent() const;
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
         template <class T, typename... Args>
-        static std::shared_ptr<T> Create(Actor* parent, Args&&... args) requires Derived<T, Component>
+        static std::shared_ptr<T> Create(const ObjectInitializer& objectInitializer, Args&&... args) requires Derived<T, Component>
         {
-            std::shared_ptr<T> result = std::make_shared<T>(parent, std::forward<Args>(args)...);
+            std::shared_ptr<T> result = std::make_shared<T>(objectInitializer, std::forward<Args>(args)...);
             return result;
         }
 

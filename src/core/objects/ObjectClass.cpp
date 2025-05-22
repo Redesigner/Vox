@@ -1,13 +1,17 @@
 ﻿#include "ObjectClass.h"
 
+#include "Object.h"
+
 namespace Vox
 {
-    ObjectClass::ObjectClass(std::function<std::shared_ptr<Object>()> constructor, std::vector<Property> properties)
+    using Constructor = std::function<std::shared_ptr<Object>(const ObjectInitializer&)>;
+
+    ObjectClass::ObjectClass(Constructor constructor, std::vector<Property> properties)
         :constructor(std::move(constructor)), properties(std::move(properties))
     {
     }
 
-    std::function<std::shared_ptr<Object>()> ObjectClass::GetConstructor() const
+    Constructor ObjectClass::GetConstructor() const
     {
         return constructor;
     }

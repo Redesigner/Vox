@@ -6,7 +6,7 @@ namespace Vox
     class TestComponent : public Component
     {
     public:
-        TestComponent(Actor* parent);
+        TestComponent(const ObjectInitializer& objectInitializer);
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         

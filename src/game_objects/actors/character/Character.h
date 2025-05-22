@@ -19,7 +19,7 @@ namespace Vox
 	class Character : public Actor
 	{
 	public:
-		explicit Character(World* world);
+		Character(const ObjectInitializer& objectInitializer);
         ~Character() override;
 
 		void Tick(float deltaTime) override;

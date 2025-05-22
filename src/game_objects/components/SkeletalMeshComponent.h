@@ -16,8 +16,8 @@ namespace Vox
     class SkeletalMeshComponent : public SceneComponent, public Tickable
     {
     public:
-        SkeletalMeshComponent(Actor* parent);
-        explicit SkeletalMeshComponent(Actor* parent, const std::string& meshName);
+        SkeletalMeshComponent(const ObjectInitializer& objectInitializer);
+        explicit SkeletalMeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName);
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 

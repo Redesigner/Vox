@@ -12,14 +12,14 @@
 
 namespace Vox
 {
-    CameraComponent::CameraComponent(Actor* parent)
-        :SceneComponent(parent)
+    CameraComponent::CameraComponent(const ObjectInitializer& objectInitializer)
+        :SceneComponent(objectInitializer)
     {
         DEFAULT_DISPLAY_NAME();
 
-        if (parent && parent->GetWorld())
+        if (objectInitializer.world)
         {
-            camera = parent->GetWorld()->GetRenderer()->CreateCamera();
+            camera = objectInitializer.world->GetRenderer()->CreateCamera();
         }
     }
 
@@ -45,11 +45,6 @@ namespace Vox
 
     void CameraComponent::OnTransformUpdated()
     {
-        // @TODO: this is just a temp fix
-        if (!camera)
-        {
-            return;
-        }
         const Transform& worldTransform = GetWorldTransform();
         camera->SetPosition(worldTransform.position);
         camera->SetRotation(-worldTransform.rotation);
@@ -57,11 +52,6 @@ namespace Vox
 
     void CameraComponent::Tick(float deltaTime)
     {
-        // @TODO: this is just a temp fix
-        if (!camera)
-        {
-            return;
-        }
         RayCastResultNormal rayCastResult;
         const glm::vec3 start = GetWorldTransform().position;
         const glm::vec3 forward = GetWorldTransform().GetForwardVector();

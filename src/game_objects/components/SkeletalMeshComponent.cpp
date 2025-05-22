@@ -13,8 +13,8 @@
 
 namespace Vox
 {
-    SkeletalMeshComponent::SkeletalMeshComponent(Actor* parent)
-        :SceneComponent(parent)
+    SkeletalMeshComponent::SkeletalMeshComponent(const ObjectInitializer& objectInitializer)
+        :SceneComponent(objectInitializer)
     {
         DEFAULT_DISPLAY_NAME()
 
@@ -24,22 +24,20 @@ namespace Vox
         playing = true;
     }
 
-    SkeletalMeshComponent::SkeletalMeshComponent(Actor* parent, const std::string& meshName)
-        :SkeletalMeshComponent(parent)
+    SkeletalMeshComponent::SkeletalMeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName)
+        :SkeletalMeshComponent(objectInitializer)
     {
-        if (parent == nullptr || parent->GetWorld() == nullptr)
+        if (objectInitializer.world)
         {
-            return;
+            mesh = objectInitializer.world->GetRenderer()->CreateSkeletalMeshInstance(meshName);
+#ifdef EDITOR
+            mesh->RegisterCallback([this](const glm::ivec2 position)
+            {
+                this->Clicked(position);
+            });
+#endif
         }
 
-        mesh = GetParent()->GetWorld()->GetRenderer()->CreateSkeletalMeshInstance(meshName);
-
-#ifdef EDITOR
-        mesh->RegisterCallback([this](const glm::ivec2 position)
-        {
-            this->Clicked(position);
-        });
-#endif
     }
 
     void SkeletalMeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)
@@ -75,12 +73,6 @@ namespace Vox
 
     void SkeletalMeshComponent::Tick(float DeltaTime)
     {
-        // @TODO: this is just a temp fix
-        if (!mesh)
-        {
-            return;
-        }
-
         if (playing)
         {
             animationTime += DeltaTime;

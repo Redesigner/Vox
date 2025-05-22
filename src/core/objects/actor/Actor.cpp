@@ -2,8 +2,8 @@
 
 namespace Vox
 {
-    Actor::Actor(World* world)
-        :world(world)
+    Actor::Actor(const ObjectInitializer& objectInitializer)
+        :world(objectInitializer.world)
     {
     }
 

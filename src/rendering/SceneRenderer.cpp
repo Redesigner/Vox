@@ -370,7 +370,7 @@ namespace Vox
 
 #ifdef EDITOR
         pickBuffer = std::make_unique<PickBuffer>(defaultWidth, defaultHeight);
-        pickContainer = std::make_unique<PickContainer>(this, pickBuffer.get());
+        pickContainer = std::make_unique<PickContainer>(this);
         stencilBuffer = std::make_unique<StencilBuffer>(defaultWidth, defaultHeight);
         outlineBuffer = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
         outlineBuffer2 = std::make_unique<UVec2Buffer>(defaultWidth, defaultHeight);
@@ -438,6 +438,11 @@ namespace Vox
     void SceneRenderer::ClearOverlays()
     {
         overlayMeshes.clear();
+    }
+
+    PickBuffer* SceneRenderer::GetPickBuffer() const
+    {
+        return pickBuffer.get();
     }
 #endif
 

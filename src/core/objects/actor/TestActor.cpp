@@ -7,9 +7,10 @@
 
 namespace Vox
 {
-    TestActor::TestActor(World* world)
-        :Actor(world)
+    TestActor::TestActor(const ObjectInitializer& objectInitializer)
+        :Actor(objectInitializer)
     {
+
         displayName = fmt::format("{}_Default", classDisplayName);
 
         AttachComponent<MeshComponent>("witch");

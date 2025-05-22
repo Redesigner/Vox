@@ -9,7 +9,7 @@ namespace Vox
     class CameraComponent : public SceneComponent, public Tickable
     {
     public:
-        CameraComponent(Actor* parent);
+        CameraComponent(const ObjectInitializer& objectInitializer);
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
