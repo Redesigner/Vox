@@ -44,11 +44,13 @@ namespace Vox
 
 	    [[nodiscard]] std::weak_ptr<Object> GetSelectedObject() const;
 
+		[[nodiscard]] static ImFont* GetFont_GitLab14();
 		[[nodiscard]] static ImFont* GetFont_GitLab18();
 		[[nodiscard]] static ImFont* GetFont_GitLab24();
 
 	    static ImVec4 lightBgColor;
-
+	    static ImVec4 mediumBgColor;
+	    static ImVec4 darkBgColor;
 
 	private:
 		void DrawToolbar();

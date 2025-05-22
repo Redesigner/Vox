@@ -19,6 +19,8 @@ namespace Vox
     Character::Character(const ObjectInitializer& objectInitializer)
 	    :Actor(objectInitializer)
 	{
+        DEFAULT_DISPLAY_NAME();
+
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 
 	    auto mesh = AttachComponent<MeshComponent>("witch");

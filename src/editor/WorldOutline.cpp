@@ -36,20 +36,28 @@ namespace Vox
     void WorldOutline::Draw(World* world)
     {
         tempWorld = world;
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
+        ImGui::PushFont(Editor::GetFont_GitLab18());
         if (ImGui::BeginTabBar("WorldOutlineTabs"))
         {
             if (ImGui::BeginTabItem("World Outline"))
             {
+                ImGui::PushFont(Editor::GetFont_GitLab14());
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+                ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
                 for (const auto& object : world->GetObjects())
                 {
                     DrawObject(object);
                 }
+                ImGui::PopStyleVar();
+                ImGui::PopStyleColor();
+                ImGui::EndChild();
+                ImGui::PopFont();
             }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
-        ImGui::PopStyleColor();
+        ImGui::PopFont();
         UpdateGizmos();
     }
 

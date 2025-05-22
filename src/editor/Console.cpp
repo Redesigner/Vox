@@ -21,11 +21,11 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        if (ImGui::BeginChild("Console", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration))
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
+        if (ImGui::BeginChild("Console", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_NoDecoration))
         {
             DrawTabs();
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::mediumBgColor);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(15.0f, 15.0f));
             if (ImGui::BeginChild("ConsoleEntries", ImVec2(-FLT_MIN, 0.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding))
             {

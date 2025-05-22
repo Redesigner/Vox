@@ -32,7 +32,9 @@ namespace Vox
     Editor::~Editor()
     = default;
 
-    ImVec4 Editor::lightBgColor = ImVec4(ImColor(80, 80, 80));
+    ImVec4 Editor::lightBgColor = ImVec4(ImColor(43, 45, 48));
+    ImVec4 Editor::mediumBgColor = ImVec4(ImColor(38, 38, 38));
+    ImVec4 Editor::darkBgColor = ImVec4(ImColor(30, 31, 34));
 
     void Editor::Draw()
     {
@@ -50,19 +52,21 @@ namespace Vox
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 #endif
 
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(ImColor(38, 38, 38)));
-            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, mediumBgColor);
+            ImGui::PushStyleColor(ImGuiCol_Border, darkBgColor);
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, darkBgColor);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImGui::PushFont(gitLabSans14);
 
             if (ImGui::Begin("Main", nullptr,
                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize /*| ImGuiWindowFlags_MenuBar*/ | ImGuiWindowFlags_NoBringToFrontOnFocus))
             {
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(2.0f, 2.0f));
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 4.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
                 ImGui::BeginChild("MainUpper", ImVec2(0, 400), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
                 {
                     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 4.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
                     constexpr ImGuiChildFlags flags = ImGuiChildFlags_AlwaysUseWindowPadding;
                     ImGui::BeginChild("MainClassList", ImVec2(100, 0), flags | ImGuiChildFlags_ResizeX);
                     ClassList::Draw();
@@ -74,10 +78,35 @@ namespace Vox
                     ImGui::EndChild();
 
                     ImGui::SameLine();
-                    ImGui::BeginChild("MainWorldOutline", ImVec2(0, 0), flags);
-                    if (!currentWorld.expired())
+                    ImGui::BeginChild("MainWorldOutlineDetails", ImVec2(0, 0), flags);
                     {
-                        worldOutline->Draw(currentWorld.lock().get());
+                        ImGui::BeginChild("MainWorldOutline", ImVec2(0, 300), ImGuiChildFlags_ResizeY);
+                        if (!currentWorld.expired())
+                        {
+                            worldOutline->Draw(currentWorld.lock().get());
+                        }
+                        ImGui::EndChild();
+                        ImGui::BeginChild("MainDetailsPanel");
+                        ImGui::PushFont(GetFont_GitLab18());
+                        if (ImGui::BeginTabBar("DetailPanelTabs"))
+                        {
+                            const std::string tabName = fmt::format("{}###DetailPanelTab", worldOutline->GetSelectedObject().expired() ?
+                                "No Object Selected" :
+                                worldOutline->GetSelectedObject().lock()->GetDisplayName());
+                            if (ImGui::BeginTabItem(tabName.c_str()))
+                            {
+                                ImGui::PushFont(GetFont_GitLab14());
+                                if (!worldOutline->GetSelectedObject().expired())
+                                {
+                                    DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
+                                }
+                                ImGui::PopFont();
+                            }
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+                        ImGui::PopFont();
+                        ImGui::EndChild();
                     }
                     ImGui::EndChild();
                     ImGui::PopStyleVar(2);
@@ -89,7 +118,7 @@ namespace Vox
                     console->Draw();
                 }
                 ImGui::EndChild();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(2);
             }
             ImGui::End();
 
@@ -98,14 +127,9 @@ namespace Vox
                 AssetDisplayWindow::Draw(&drawAssetViewer);
             }
             //DrawToolbar();
-
-            if (!worldOutline->GetSelectedObject().expired())
-            {
-                DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
-            }
         }
         ImGui::PopStyleVar();
-        ImGui::PopStyleColor(2);
+        ImGui::PopStyleColor(3);
         ImGui::PopFont();
 
         ImGui::Render();
@@ -120,6 +144,11 @@ namespace Vox
     void Editor::SetWorld(const std::shared_ptr<World>& world)
     {
         currentWorld = world;
+    }
+
+    ImFont* Editor::GetFont_GitLab14()
+    {
+        return gitLabSans14;
     }
 
     ImFont* Editor::GetFont_GitLab18()

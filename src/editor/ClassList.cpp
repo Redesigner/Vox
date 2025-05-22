@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <imgui.h>
 
+#include "Editor.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 
@@ -18,6 +19,10 @@ namespace Vox
         {
             if (ImGui::BeginTabItem("Classes"))
             {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 0.0f));
+                ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
+
                 std::for_each(ServiceLocator::GetObjectService()->GetBegin(), ServiceLocator::GetObjectService()->GetEnd(),
                     [](const std::pair<std::string, ObjectClass>& entry)
                     {
@@ -28,6 +33,10 @@ namespace Vox
                             ImGui::EndDragDropSource();
                         }
                     });
+
+                ImGui::PopStyleVar();
+                ImGui::PopStyleColor();
+                ImGui::EndChild();
             }
             ImGui::EndTabItem();
         }

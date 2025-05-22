@@ -13,14 +13,15 @@ namespace Vox
     void DetailPanel::Draw(Object* object)
     {
         assert(object);
-        if (ImGui::Begin(fmt::format("{}###DetailPanel", object->GetDisplayName()).c_str(), 0))
+        if (ImGui::BeginChild(fmt::format("{}###DetailPanel", object->GetDisplayName()).c_str()))
         {
             for (const Property& property : object->GetProperties())
             {
                 DrawProperty(object, property);
+                ImGui::Separator();
             }
         }
-        ImGui::End();
+        ImGui::EndChild();
     }
 
     void DetailPanel::DrawProperty(Object* object, const Property& property)

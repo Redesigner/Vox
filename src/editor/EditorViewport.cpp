@@ -41,7 +41,6 @@ namespace Vox
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, static_cast<ImVec4>(ImColor::HSV(0.0f, 0.0f, 0.2f)));
 
         if (ImGui::BeginChild("Main Viewport", ImVec2(0, 0), 0 /*,
             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus*/))
@@ -82,7 +81,6 @@ namespace Vox
             world->GetRenderer()->SetSize(static_cast<int>(max.x - min.x), static_cast<int>(max.y - min.y));
         }
         ImGui::EndChild();
-        ImGui::PopStyleColor();
         ImGui::PopStyleVar(2);
     }
 

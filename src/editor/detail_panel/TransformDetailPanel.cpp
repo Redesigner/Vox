@@ -7,7 +7,7 @@ namespace Vox
 {
     bool TransformDetailPanel::Draw(const char* label, Transform* transform, ImGuiInputTextFlags flags)
     {
-        ImGui::Text(label);
+        ImGui::SeparatorText(label);
         bool result = Vec3DetailPanel::Draw("Position", &transform->position, "%.3f", flags);
 
         glm::vec3 rotationEulerAxis = glm::degrees(transform->rotation);
