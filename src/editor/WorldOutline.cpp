@@ -128,6 +128,11 @@ namespace Vox
         }
     }
 
+    void WorldOutline::SetDoubleClickCallback(ClickCallback callback)
+    {
+        doubleClickCallback = std::move(callback);
+    }
+
     void WorldOutline::DrawObject(const std::shared_ptr<Object>& object)
     {
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;

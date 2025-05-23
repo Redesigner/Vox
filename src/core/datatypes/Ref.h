@@ -9,7 +9,8 @@ namespace Vox
 	template <typename T>
 	struct Ref
 	{
-	public:
+	    template<typename> friend struct WeakRef;
+
 		Ref()
 			:container(nullptr), index(0), id(0)
 		{

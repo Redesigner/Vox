@@ -16,7 +16,7 @@ namespace Vox
         callbacks = {};
         counter = 1;
 
-        ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](int x, int y)
+        masterCallback = ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](int x, int y)
         {
             if (this->owner->viewport.expired())
             {
@@ -43,6 +43,11 @@ namespace Vox
                 result->second(glm::ivec2(x, y));
             }
         });
+    }
+
+    PickContainer::~PickContainer()
+    {
+        ServiceLocator::GetInputService()->UnregisterMouseClickCallback(masterCallback);
     }
 
     unsigned int PickContainer::RegisterCallback(Callback callback)

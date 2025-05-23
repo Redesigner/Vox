@@ -23,7 +23,13 @@ namespace Vox
     using Callback = std::function<void(glm::ivec2)>;
 
     public:
-        PickContainer(SceneRenderer* owner);
+        explicit PickContainer(SceneRenderer* owner);
+        ~PickContainer();
+
+        PickContainer(const PickContainer&) = delete;
+        PickContainer(PickContainer&&) = delete;
+        PickContainer& operator=(const PickContainer&) = delete;
+        PickContainer& operator=(PickContainer&&) = delete;
 
         unsigned int RegisterCallback(Callback callback);
 
@@ -35,6 +41,8 @@ namespace Vox
         SceneRenderer* owner;
 
         unsigned int counter;
+
+        std::function<void(int,int)> masterCallback;
     };
 }
 

@@ -209,13 +209,13 @@ namespace Vox
         pickShader->Enable();
         GetRenderer()->BindMeshVao();
         glClear(GL_DEPTH_BUFFER_BIT);
-        for (const Ref<MeshInstance>& meshInstance : overlayMeshes)
+        for (const WeakRef<MeshInstance>& meshInstance : overlayMeshes)
         {
             meshInstance->GetMeshOwner()->RenderInstance(pickShader, *meshInstance);
         }
     }
 
-    void SceneRenderer::DrawOutline() const
+    void SceneRenderer::DrawOutline()
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, stencilBuffer->GetFramebufferId());
         glClear(GL_COLOR_BUFFER_BIT);
@@ -224,7 +224,17 @@ namespace Vox
         stencilShader->Enable();
         stencilShader->SetCamera(currentCamera);
         GetRenderer()->BindMeshVao();
-        for (const Ref<MeshInstance>& mesh : outlinedMeshes)
+
+        std::erase_if(outlinedMeshes, [](const WeakRef<MeshInstance>& meshInstance)
+            {
+                return !meshInstance;
+            });
+        std::erase_if(outlinedSkeletalMeshes, [](const WeakRef<SkeletalMeshInstance>& meshInstance)
+            {
+                return !meshInstance;
+            });
+
+        for (const WeakRef<MeshInstance>& mesh : outlinedMeshes)
         {
             mesh->GetMeshOwner()->RenderInstance(stencilShader, *mesh);
         }
@@ -278,14 +288,20 @@ namespace Vox
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    void SceneRenderer::DrawOverlay() const
+    void SceneRenderer::DrawOverlay()
     {
         glClear(GL_DEPTH_BUFFER_BIT);
         GetRenderer()->BindMeshVao();
         const MaterialShader* overlayShader = GetRenderer()->GetOverlayShader();
         overlayShader->Enable();
         overlayShader->SetCamera(currentCamera);
-        for (const Ref<MeshInstance>& mesh : overlayMeshes)
+
+        std::erase_if(overlayMeshes, [](const WeakRef<MeshInstance>& meshInstance)
+            {
+                return !meshInstance;
+            });
+
+        for (const WeakRef<MeshInstance>& mesh : overlayMeshes)
         {
             mesh->GetMeshOwner()->RenderInstance(overlayShader, *mesh);
         }

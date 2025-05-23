@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <functional>
 #include <memory>
 
 namespace Vox
@@ -9,6 +10,8 @@ namespace Vox
 
     class WorldOutline
     {
+        using ClickCallback = std::function<void(std::weak_ptr<Object>)>;
+
     public:
         WorldOutline();
         ~WorldOutline();
@@ -23,12 +26,16 @@ namespace Vox
 
         void SetSelectedObject(const std::weak_ptr<Object>& object);
 
+        void SetDoubleClickCallback(ClickCallback callback);
+
     private:
         void DrawObject(const std::shared_ptr<Object>& object);
 
         std::weak_ptr<Object> currentlySelectedObject;
 
         std::unique_ptr<Gizmo> gizmo;
+
+        ClickCallback doubleClickCallback;
 
         World* tempWorld;
     };

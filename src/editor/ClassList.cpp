@@ -13,6 +13,14 @@
 
 namespace Vox
 {
+    ClassList::ClassList()
+    {
+    }
+
+    ClassList::~ClassList()
+    {
+    }
+
     void ClassList::Draw()
     {
         if (ImGui::BeginTabBar("ClassesTabs"))
@@ -24,13 +32,18 @@ namespace Vox
                 ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
 
                 std::for_each(ServiceLocator::GetObjectService()->GetBegin(), ServiceLocator::GetObjectService()->GetEnd(),
-                    [](const std::pair<std::string, ObjectClass>& entry)
+                    [this](const std::pair<std::string, ObjectClass>& entry)
                     {
                         ImGui::Selectable(entry.first.c_str());
                         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                         {
                             ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", entry.first.data(), entry.first.size() + 1);
                             ImGui::EndDragDropSource();
+                        }
+
+                        if (ImGui::IsItemFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                        {
+                            doubleClickCallback(entry.second);
                         }
                     });
 
@@ -41,5 +54,10 @@ namespace Vox
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
+    }
+
+    void ClassList::SetDoubleClickCallback(ObjectCallback callback)
+    {
+        doubleClickCallback = std::move(callback);
     }
 } // Vox

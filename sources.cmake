@@ -16,6 +16,8 @@ target_sources(Vox PRIVATE
 	"src/core/concepts/Concepts.h"
 	"src/core/config/Config.cpp"
 	"src/core/config/Config.h"
+	"src/core/datatypes/Delegate.h"
+	"src/core/datatypes/DelegateHandle.h"
 	"src/core/datatypes/DynamicObjectContainer.h"
 	"src/core/datatypes/DynamicRef.h"
 	"src/core/datatypes/ObjectContainer.h"

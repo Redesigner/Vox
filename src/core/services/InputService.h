@@ -11,6 +11,8 @@
 #include <glm/vec2.hpp>
 #include <SDL3/SDL_events.h>
 
+#include "core/datatypes/Delegate.h"
+
 struct SDL_Window;
 
 namespace Vox
@@ -43,8 +45,8 @@ namespace Vox
 		void UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback);
 
 
-		const MouseClickEventCallback& RegisterMouseClickCallback(MouseClickEventCallback callback);
-		void UnregisterMouseClickCallback(const MouseClickEventCallback& callback);
+		const DelegateHandle<void(int, int)> RegisterMouseClickCallback(MouseClickEventCallback callback);
+		void UnregisterMouseClickCallback(const DelegateHandle<int, int>& handle);
 
 	    const MouseReleaseEventCallback& RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
 		void UnregisterMouseReleaseCallback(const MouseReleaseEventCallback& callback);
@@ -79,7 +81,7 @@ namespace Vox
 
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
 		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
-		std::vector<MouseClickEventCallback> mouseClickEventCallbacks;
+		Delegate<int, int> mouseClickEventCallbacks;
 	    std::vector<MouseReleaseEventCallback> mouseReleaseEventCallbacks;
 
 		// @TODO: move window logic and variables to a separate wrapper class?

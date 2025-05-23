@@ -3,12 +3,26 @@
 //
 
 #pragma once
+#include <functional>
+#include <memory>
 
 namespace Vox
 {
+    class ObjectClass;
+
     class ClassList
     {
+        using ObjectCallback = std::function<void(const ObjectClass&)>;
+
     public:
-        static void Draw();
+        ClassList();
+        ~ClassList();
+
+        void Draw();
+
+        void SetDoubleClickCallback(ObjectCallback callback);
+
+    private:
+        ObjectCallback doubleClickCallback;
     };
 } // Vox

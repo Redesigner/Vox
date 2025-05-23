@@ -78,25 +78,27 @@ namespace Vox
 
     void InputService::UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback)
     {
-        auto target = callback.target<void(int, int)>();
+        auto target = callback.target<void(*)(int, int)>();
+        if (!target)
+        {
+            auto targetType = callback.target_type().name();
+            VoxLog(Warning, Input, "InputService attempting to unregister mouse motion callbacks, but the callback was invalid.");
+            VoxLog(Warning, Input, "Target type was '{}'", targetType);
+        }
         std::erase_if(mouseMotionEventCallbacks, [target](const MouseMotionEventCallback& motionCallback)
         {
-           return motionCallback.target<void(int, int)>() == target;
+           return motionCallback.target<void(*)(int, int)>() == target;
         });
     }
 
-    const MouseMotionEventCallback& InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
+    const MouseClickEventCallback& InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
     {
         return mouseClickEventCallbacks.emplace_back(std::move(callback));
     }
 
-    void InputService::UnregisterMouseClickCallback(const MouseClickEventCallback& callback)
+    void InputService::UnregisterMouseClickCallback(const DelegateHandle<int, int>& handle)
     {
-        auto target = callback.target<void(int, int)>();
-        std::erase_if(mouseClickEventCallbacks, [target](const MouseClickEventCallback& clickCallback)
-        {
-           return clickCallback.target<void(int, int)>() == target;
-        });
+        mouseClickEventCallbacks.
     }
 
     const MouseReleaseEventCallback& InputService::RegisterMouseReleaseCallback(MouseReleaseEventCallback callback)

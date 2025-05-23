@@ -12,6 +12,7 @@
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "core/datatypes/Ref.h"
+#include "core/datatypes/WeakRef.h"
 #include "mesh/MeshInstanceContainer.h"
 #include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
 
@@ -87,9 +88,9 @@ namespace Vox
 #ifdef EDITOR
         void DrawPickBuffer();
 
-        void DrawOutline() const;
+        void DrawOutline();
 
-        void DrawOverlay() const;
+        void DrawOverlay();
 #endif
 
         void DrawVoxels();
@@ -132,9 +133,9 @@ namespace Vox
         LightUniformLocations lightUniformLocations;
 
 #ifdef EDITOR
-        std::vector<Ref<MeshInstance>> outlinedMeshes;
-        std::vector<Ref<SkeletalMeshInstance>> outlinedSkeletalMeshes;
-        std::vector<Ref<MeshInstance>> overlayMeshes;
+        std::vector<WeakRef<MeshInstance>> outlinedMeshes;
+        std::vector<WeakRef<SkeletalMeshInstance>> outlinedSkeletalMeshes;
+        std::vector<WeakRef<MeshInstance>> overlayMeshes;
 #endif
     };
 } // Vox

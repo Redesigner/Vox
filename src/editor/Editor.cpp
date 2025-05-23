@@ -28,6 +28,11 @@ namespace Vox
                 worldOutline->SetSelectedObject(object);
             };
         actorEditor = std::make_unique<ActorEditor>();
+        classList = std::make_unique<ClassList>();
+        classList->SetDoubleClickCallback([this](const ObjectClass& objectClass)
+            {
+               pendingEditorClass = &objectClass;
+            });
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
@@ -44,6 +49,8 @@ namespace Vox
 
     void Editor::Draw()
     {
+        bool actorEditorOpen = true;
+
         ImGui_ImplSDL3_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
@@ -75,7 +82,7 @@ namespace Vox
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
                     constexpr ImGuiChildFlags flags = ImGuiChildFlags_AlwaysUseWindowPadding;
                     ImGui::BeginChild("MainClassList", ImVec2(100, 0), flags | ImGuiChildFlags_ResizeX);
-                    ClassList::Draw();
+                    classList->Draw();
                     ImGui::EndChild();
 
                     ImGui::SameLine();
@@ -125,11 +132,14 @@ namespace Vox
                 AssetDisplayWindow::Draw(&drawAssetViewer);
             }
 
-            if (ImGui::Begin("Actor Editor"))
+            if (actorEditor)
             {
-                actorEditor->Draw();
+                if (ImGui::Begin("Actor Editor", &actorEditorOpen))
+                {
+                    actorEditor->Draw();
+                }
+                ImGui::End();
             }
-            ImGui::End();
             //DrawToolbar();
         }
         ImGui::PopStyleVar();
@@ -138,6 +148,17 @@ namespace Vox
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (!actorEditorOpen)
+        {
+            actorEditor.reset();
+        }
+
+        if (pendingEditorClass)
+        {
+            actorEditor = std::make_unique<ActorEditor>();
+            pendingEditorClass = nullptr;
+        }
     }
 
     void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)

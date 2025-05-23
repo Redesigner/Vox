@@ -37,6 +37,14 @@ namespace Vox
 			return container != nullptr && container->Get(index, id) != nullptr;
 		}
 
+	    T& operator*() const
+		{
+		    T* t = container->Get(index, id);
+		    assert(t != nullptr);
+		    // ReSharper disable once CppDFANullDereference
+		    return *t;
+		}
+
 	private:
 		ObjectContainer<T>* container;
 		size_t index;

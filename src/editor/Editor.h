@@ -10,6 +10,12 @@
 
 namespace Vox
 {
+    class ObjectClass;
+    class ClassList;
+}
+
+namespace Vox
+{
     class ActorEditor;
     class EditorViewport;
 }
@@ -69,11 +75,14 @@ namespace Vox
 
 		bool drawAssetViewer = false;
 
+		std::unique_ptr<Console> console;
+		std::weak_ptr<World> currentWorld;
 	    std::shared_ptr<EditorViewport> primaryViewport;
 	    std::unique_ptr<ActorEditor> actorEditor;
-		std::unique_ptr<Console> console;
+	    std::unique_ptr<ClassList> classList;
 	    std::unique_ptr<WorldOutline> worldOutline;
-		std::weak_ptr<World> currentWorld;
+
+	    const ObjectClass* pendingEditorClass = nullptr;
 
 		static ImFont* gitLabSans14;
 		static ImFont* gitLabSans18;
