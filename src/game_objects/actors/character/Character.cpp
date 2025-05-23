@@ -21,6 +21,11 @@ namespace Vox
 	{
         DEFAULT_DISPLAY_NAME();
 
+        if (!objectInitializer.world)
+        {
+            return;
+        }
+
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 
 	    auto mesh = AttachComponent<MeshComponent>("witch");

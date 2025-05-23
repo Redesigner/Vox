@@ -11,6 +11,7 @@
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
+#include "rendering/SceneRenderer.h"
 #include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
@@ -21,7 +22,7 @@ namespace Vox
     {
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
-        primaryViewport = std::make_unique<EditorViewport>();
+        primaryViewport = std::make_shared<EditorViewport>();
         primaryViewport->OnObjectSelected = [this](const std::shared_ptr<Object>& object)
             {
                 worldOutline->SetSelectedObject(object);
@@ -147,6 +148,7 @@ namespace Vox
     void Editor::SetWorld(const std::shared_ptr<World>& world)
     {
         currentWorld = world;
+        world->GetRenderer()->viewport = primaryViewport;
     }
 
     ImFont* Editor::GetFont_GitLab14()

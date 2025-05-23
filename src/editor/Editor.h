@@ -69,7 +69,7 @@ namespace Vox
 
 		bool drawAssetViewer = false;
 
-	    std::unique_ptr<EditorViewport> primaryViewport;
+	    std::shared_ptr<EditorViewport> primaryViewport;
 	    std::unique_ptr<ActorEditor> actorEditor;
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;

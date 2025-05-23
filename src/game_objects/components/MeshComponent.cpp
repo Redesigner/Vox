@@ -5,6 +5,7 @@
 #include "core/objects/actor/Actor.h"
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
+#include "editor/EditorViewport.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
@@ -39,18 +40,13 @@ namespace Vox
     
     void MeshComponent::OnTransformUpdated()
     {
-        // @TODO: this is just a temp fix
-        if (!mesh)
-        {
-            return;
-        }
         mesh->SetTransform(GetWorldTransform().GetMatrix());
     }
 
 #ifdef EDITOR
     void MeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(GetWeakThis());
+        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetWeakThis().lock());
     }
 
     void MeshComponent::Select()

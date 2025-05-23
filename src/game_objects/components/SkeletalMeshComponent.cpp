@@ -8,6 +8,7 @@
 #include "core/objects/actor/Actor.h"
 #include "core/services/EditorService.h"
 #include "core/services/ServiceLocator.h"
+#include "editor/EditorViewport.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
@@ -90,7 +91,7 @@ namespace Vox
 #ifdef EDITOR
     void SkeletalMeshComponent::Clicked(glm::ivec2 position)
     {
-        ServiceLocator::GetEditorService()->GetEditor()->SelectObject(GetWeakThis());
+        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetWeakThis().lock());
     }
 
     void SkeletalMeshComponent::Select()
