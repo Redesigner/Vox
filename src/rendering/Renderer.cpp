@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "PickContainer.h"
+#include "SceneRenderer.h"
 #include "core/logging/Logging.h"
 #include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
@@ -44,6 +45,7 @@ namespace Vox
         CreateSkeletalMeshVao();
         CreateVoxelVao();
 
+        UploadModel("gizmoArrow", "gizmoArrow.glb");
         LoadDefaultShaders();
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
@@ -55,8 +57,19 @@ namespace Vox
         glDeleteBuffers(1, &voxelMeshVao);
     }
 
+#ifdef EDITOR
     void Renderer::Render(Editor* editor)
     {
+        std::erase_if(activeScenes, [](const std::weak_ptr<SceneRenderer>& renderer)
+        {
+            return renderer.expired();
+        });
+
+        for (const std::weak_ptr<SceneRenderer>& renderer : activeScenes)
+        {
+            renderer.lock()->Draw();
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         int x, y;
         SDL_GetWindowSizeInPixels(mainWindow, &x, &y);
@@ -65,6 +78,12 @@ namespace Vox
         editor->Draw();
         SDL_GL_SwapWindow(mainWindow);
     }
+
+    void Renderer::RegisterScene(const std::shared_ptr<SceneRenderer>& scene)
+    {
+        activeScenes.emplace_back(scene);
+    }
+#endif
 
     bool Renderer::UploadModel(std::string alias, const std::string& relativeFilePath)
     {

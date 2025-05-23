@@ -4,10 +4,12 @@
 
 #include <functional>
 #include <glm/vec2.hpp>
+#include <memory>
 
 
 namespace Vox
 {
+    class EditorViewport;
     class SceneRenderer;
     class PickBuffer;
 }

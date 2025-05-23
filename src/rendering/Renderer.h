@@ -61,6 +61,8 @@ namespace Vox
 
 #ifdef EDITOR
 		void Render(Editor* editor);
+
+	    void RegisterScene(const std::shared_ptr<SceneRenderer>& scene);
 #elif
 	    void Render();
 #endif
@@ -163,8 +165,11 @@ namespace Vox
 
 		std::unique_ptr<FullscreenQuad> quad;
 
+	    // If the editor is active, we can render multiple scenes
 #ifndef EDITOR
 	    std::unique_ptr<SceneRenderer> sceneRenderer;
+#else
+        std::vector<std::weak_ptr<SceneRenderer>> activeScenes;
 #endif
 	};
 }

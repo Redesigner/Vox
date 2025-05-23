@@ -10,6 +10,7 @@
 
 namespace Vox
 {
+    class ActorEditor;
     class EditorViewport;
 }
 
@@ -48,6 +49,9 @@ namespace Vox
 		[[nodiscard]] static ImFont* GetFont_GitLab18();
 		[[nodiscard]] static ImFont* GetFont_GitLab24();
 
+	    static void BeginEmptyTab(const std::string& tabName);
+	    static void EndEmptyTab();
+
 	    static ImVec4 lightBgColor;
 	    static ImVec4 mediumBgColor;
 	    static ImVec4 darkBgColor;
@@ -66,11 +70,11 @@ namespace Vox
 		bool drawAssetViewer = false;
 
 	    std::unique_ptr<EditorViewport> primaryViewport;
+	    std::unique_ptr<ActorEditor> actorEditor;
 		std::unique_ptr<Console> console;
 	    std::unique_ptr<WorldOutline> worldOutline;
-
 		std::weak_ptr<World> currentWorld;
-		
+
 		static ImFont* gitLabSans14;
 		static ImFont* gitLabSans18;
 		static ImFont* gitLabSans24;

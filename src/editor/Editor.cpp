@@ -4,10 +4,10 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
 
+#include "../../out/build/default/vcpkg_installed/vcpkg/blds/imgui/src/v1.91.9-afb09617a6.clean/imgui_internal.h"
 #include "ClassList.h"
 #include "EditorViewport.h"
-#include "core/math/Math.h"
-#include "core/objects/ObjectClass.h"
+#include "actor_editor/ActorEditor.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
@@ -22,6 +22,11 @@ namespace Vox
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
         primaryViewport = std::make_unique<EditorViewport>();
+        primaryViewport->OnObjectSelected = [this](const std::shared_ptr<Object>& object)
+            {
+                worldOutline->SetSelectedObject(object);
+            };
+        actorEditor = std::make_unique<ActorEditor>();
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
@@ -86,26 +91,18 @@ namespace Vox
                             worldOutline->Draw(currentWorld.lock().get());
                         }
                         ImGui::EndChild();
+
                         ImGui::BeginChild("MainDetailsPanel");
-                        ImGui::PushFont(GetFont_GitLab18());
-                        if (ImGui::BeginTabBar("DetailPanelTabs"))
+                        const std::string tabName = fmt::format("{}###DetailPanelTab", worldOutline->GetSelectedObject().expired() ?
+                            "No Object Selected" :
+                            worldOutline->GetSelectedObject().lock()->GetDisplayName());
+                        BeginEmptyTab(tabName);
+                        if (!worldOutline->GetSelectedObject().expired())
                         {
-                            const std::string tabName = fmt::format("{}###DetailPanelTab", worldOutline->GetSelectedObject().expired() ?
-                                "No Object Selected" :
-                                worldOutline->GetSelectedObject().lock()->GetDisplayName());
-                            if (ImGui::BeginTabItem(tabName.c_str()))
-                            {
-                                ImGui::PushFont(GetFont_GitLab14());
-                                if (!worldOutline->GetSelectedObject().expired())
-                                {
-                                    DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
-                                }
-                                ImGui::PopFont();
-                            }
-                            ImGui::EndTabItem();
+                            DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
                         }
-                        ImGui::EndTabBar();
-                        ImGui::PopFont();
+                        EndEmptyTab();
+
                         ImGui::EndChild();
                     }
                     ImGui::EndChild();
@@ -126,6 +123,12 @@ namespace Vox
             {
                 AssetDisplayWindow::Draw(&drawAssetViewer);
             }
+
+            if (ImGui::Begin("Actor Editor"))
+            {
+                actorEditor->Draw();
+            }
+            ImGui::End();
             //DrawToolbar();
         }
         ImGui::PopStyleVar();
@@ -159,6 +162,22 @@ namespace Vox
     ImFont* Editor::GetFont_GitLab24()
     {
         return gitLabSans24;
+    }
+
+    void Editor::BeginEmptyTab(const std::string& tabName)
+    {
+        ImGui::PushFont(GetFont_GitLab18());
+        ImGui::BeginTabBar((tabName + "Bar").c_str());
+        ImGui::BeginTabItem(tabName.c_str());
+        ImGui::PushFont(GetFont_GitLab14());
+    }
+
+    void Editor::EndEmptyTab()
+    {
+        ImGui::PopFont();
+        ImGui::EndTabItem();
+        ImGui::EndTabBar();
+        ImGui::PopFont();
     }
 
     void Editor::DrawToolbar()

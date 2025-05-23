@@ -4,9 +4,8 @@
 #include "Renderer.h"
 #include "SceneRenderer.h"
 #include "buffers/frame_buffers/PickBuffer.h"
-#include "core/services/EditorService.h"
+#include "core/logging/Logging.h"
 #include "core/services/InputService.h"
-#include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
 
 namespace Vox
@@ -19,16 +18,22 @@ namespace Vox
 
         ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](int x, int y)
         {
+            if (this->owner->viewport.expired())
+            {
+                return;
+            }
+
             unsigned int viewX, viewY;
-             if (!ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(viewX, viewY,x, y))
-             {
-                 return;
-             }
+            EditorViewport* viewport = this->owner->viewport.lock().get();
+            if (!viewport->GetClickViewportSpace(viewX, viewY,x, y))
+            {
+                return;
+            }
             
             const unsigned int key = this->owner->GetPickBuffer()->GetValue(viewX, viewY);
             if (key == 0)
             {
-                ServiceLocator::GetEditorService()->GetEditor()->SelectObject(std::weak_ptr<Object>());
+                viewport->OnObjectSelected(nullptr);
                 this->owner->ClearMeshOutlines();
                 return;
             }
@@ -42,7 +47,7 @@ namespace Vox
 
     unsigned int PickContainer::RegisterCallback(Callback callback)
     {
-        VoxLog(Display, Input, "Registering click callback for object {}", counter);
+        // VoxLog(Display, Input, "Registering click callback for object {}", counter);
         callbacks.emplace(counter, std::move(callback));
         return counter++;
     }
@@ -51,7 +56,7 @@ namespace Vox
     {
         if (const auto result = callbacks.find(key); result != callbacks.end())
         {
-            VoxLog(Display, Input, "Unregistering click callback for object '{}'", key);
+            // VoxLog(Display, Input, "Unregistering click callback for object '{}'", key);
             callbacks.erase(result);
         }
     }

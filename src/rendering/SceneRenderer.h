@@ -17,6 +17,11 @@
 
 namespace Vox
 {
+    class EditorViewport;
+}
+
+namespace Vox
+{
     class Camera;
     class ColorDepthFramebuffer;
     class GBuffer;
@@ -70,6 +75,8 @@ namespace Vox
         void ClearOverlays();
 
         [[nodiscard]] PickBuffer* GetPickBuffer() const;
+
+        std::weak_ptr<EditorViewport> viewport;
 #endif
 
     private:
@@ -97,7 +104,7 @@ namespace Vox
 
         void ConditionalResizeFramebuffers();
 
-        Renderer* GetRenderer() const;
+        [[nodiscard]] Renderer* GetRenderer() const;
 
         //std::weak_ptr<Camera> currentCamera;
         Ref<Camera> currentCamera;

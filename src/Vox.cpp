@@ -100,6 +100,7 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
     io.Fonts->Build();
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.DisplaySize = ImVec2(800, 450);
     //io.Fonts->AddFontFromFileTTF("includes/fonts/arial.ttf", 14.0f);
@@ -115,14 +116,19 @@ int main()
         std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
 
         std::shared_ptr<World> testWorld = std::make_shared<World>();
+        std::shared_ptr<World> actorWorld = std::make_shared<World>();
+
+#ifdef EDITOR
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
+        ServiceLocator::GetRenderer()->RegisterScene(testWorld->GetRenderer());
+        ServiceLocator::GetRenderer()->RegisterScene(actorWorld->GetRenderer());
+#endif
 
         VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), testWorld->GetRenderer().get());
 
         ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "witch.glb");
-        ServiceLocator::GetRenderer()->UploadModel("gizmoArrow", "gizmoArrow.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
@@ -234,7 +240,6 @@ int main()
         {
             ServiceLocator::GetInputService()->PollEvents();
             testWorld->Tick(1 / 60.0f);
-            testWorld->GetRenderer()->Draw();
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
         runPhysics = false;

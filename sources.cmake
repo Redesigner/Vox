@@ -58,6 +58,8 @@ target_sources(Vox PRIVATE
 	"src/core/services/ServiceLocator.cpp"
 	"src/core/services/ServiceLocator.h"
 
+	"src/editor/actor_editor/ActorEditor.cpp"
+	"src/editor/actor_editor/ActorEditor.h"
 	"src/editor/AssetDisplayWindow.cpp"
 	"src/editor/AssetDisplayWindow.h"
 	"src/editor/ClassList.cpp"

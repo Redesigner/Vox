@@ -11,7 +11,7 @@ namespace Vox
     {
     public:
         WorldOutline();
-        ~WorldOutline() = default;
+        ~WorldOutline();
 
         void InitializeGizmos(World* world);
 

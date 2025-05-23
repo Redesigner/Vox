@@ -46,15 +46,15 @@ namespace Vox
             ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus*/))
         {
             ImGui::SetScrollY(0);
-            const ImVec2 dimensions = ImGui::GetContentRegionAvail();
-            const ImVec2 bottomRight = ImGui::GetContentRegionMax();
-            viewportDimensions = glm::vec2(dimensions.x, dimensions.y);
+            const ImVec2 topLeft = ImGui::GetWindowPos();
+            const ImVec2 size = ImGui::GetContentRegionMax();
+            viewportDimensions = glm::vec2(size.x, size.y);
             viewportBox = ViewportBox
             (
-                static_cast<int>(bottomRight.x - dimensions.x),
-                static_cast<int>(bottomRight.y - dimensions.y),
-                static_cast<int>(bottomRight.x),
-                static_cast<int>(bottomRight.y)
+                static_cast<int>(topLeft.x),
+                static_cast<int>(topLeft.y),
+                static_cast<int>(topLeft.x + size.x),
+                static_cast<int>(topLeft.y + size.y)
             );
 
             ColorDepthFramebuffer* texture = world->GetRenderer()->GetTexture();

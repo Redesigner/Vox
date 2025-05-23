@@ -30,9 +30,11 @@ namespace Vox
 
         bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
 
-        glm::vec2 GetDimensions() const;
+        [[nodiscard]] glm::vec2 GetDimensions() const;
 
-        ViewportBox GetViewportBox() const;
+        [[nodiscard]] ViewportBox GetViewportBox() const;
+
+        std::function<void(std::shared_ptr<Object>)> OnObjectSelected;
 
     private:
         glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);

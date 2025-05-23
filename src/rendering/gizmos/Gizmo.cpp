@@ -194,7 +194,7 @@ namespace Vox
         // This won't work right now!
         const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
         glm::vec2 mouseLocationViewport;
-        ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(
+        xArrowMesh->GetMeshOwner()->GetOwner()->viewport.lock()->GetClickViewportSpace(
             mouseLocationViewport.x, mouseLocationViewport.y,
             static_cast<unsigned int>(mouseLocationPixels.x), static_cast<unsigned int>(mouseLocationPixels.y)
         );

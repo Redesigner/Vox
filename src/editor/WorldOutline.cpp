@@ -28,6 +28,8 @@ namespace Vox
         });
     }
 
+    WorldOutline::~WorldOutline() = default;
+
     void WorldOutline::InitializeGizmos(World* world)
     {
         gizmo = std::make_unique<Gizmo>(world->GetRenderer().get());
@@ -65,7 +67,7 @@ namespace Vox
     {
         if (currentlySelectedObject.expired())
         {
-            SetSelectedObject(std::weak_ptr<Object>());
+            gizmo->SetVisible(false);
             return;
         }
 
