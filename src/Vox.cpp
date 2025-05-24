@@ -186,7 +186,7 @@ int main()
 
         testWorld->CreateObject<Character>();
         
-        ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
+        DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;
             Ref<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
             if (!camera)
@@ -242,6 +242,7 @@ int main()
             testWorld->Tick(1 / 60.0f);
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
+        ServiceLocator::GetInputService()->UnregisterMouseClickCallback(raycastDelegate);
         runPhysics = false;
         physicsThread.join();
     }

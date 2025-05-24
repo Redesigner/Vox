@@ -47,7 +47,10 @@ namespace Vox
 
     PickContainer::~PickContainer()
     {
-        ServiceLocator::GetInputService()->UnregisterMouseClickCallback(masterCallback);
+        if (InputService* inputService = ServiceLocator::GetInputService())
+        {
+            inputService->UnregisterMouseClickCallback(masterCallback);
+        }
     }
 
     unsigned int PickContainer::RegisterCallback(Callback callback)

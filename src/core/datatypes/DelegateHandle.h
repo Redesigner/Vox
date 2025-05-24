@@ -9,7 +9,12 @@ namespace Vox
     template <typename...T>
     struct DelegateHandle
     {
-	    template <typename> friend class Delegate;
+	    template <typename...> friend class Delegate;
+
+        DelegateHandle()
+            :owner(nullptr), id(0)
+        {
+        }
 
         DelegateHandle(Delegate<T...>* owner, const unsigned int id)
             :owner(owner), id(id)

@@ -3,50 +3,62 @@
 //
 
 #pragma once
-#include <algorithm>
 #include <functional>
+#include <ranges>
+#include <unordered_map>
 
 #include "DelegateHandle.h"
 
 namespace Vox
 {
 
-    template <typename...T>
+    template <typename...Args>
     class Delegate
     {
     public:
-        Delegate<T...>()
+        Delegate<Args...>()
         {
             counter = 0;
         }
 
-        DelegateHandle<T...> RegisterCallback(std::function<void(T...)> function)
+        ~Delegate()
+        {
+
+        }
+
+        DelegateHandle<Args...> RegisterCallback(std::function<void(Args...)> function)
         {
             unsigned int id = counter;
-            keyMap.emplace(counter++, std::move(function));
+            keyMap.emplace(counter++, function);
             return DelegateHandle(this, id);
         }
 
-        void UnregisterCallback(DelegateHandle<T...> handle)
+        void UnregisterCallback(DelegateHandle<Args...> handle)
         {
+            // assume the delegate handle was never initialized
+            if (!handle.owner)
+            {
+                return;
+            }
+
             assert(handle.owner == this);
 
-            if (auto result = keyMap.find(handle.id); result != keyMap.end)
+            if (auto result = keyMap.find(handle.id); result != keyMap.end())
             {
                 keyMap.erase(result);
             }
         }
 
-        void operator()(T... data)
+        void operator()(Args... data)
         {
-            std::for_each(keyMap, [data](const std::pair<unsigned int, std::function<void(T...)>>& pair)
-                {
-                    pair.second(data);
-                });
+            for (const std::function<void(Args...)>& callback : keyMap | std::views::values)
+            {
+                callback(data...);
+            }
         }
 
     private:
-        std::unordered_map<unsigned int, std::function<void(T...)>> keyMap;
+        std::unordered_map<unsigned int, std::function<void(Args...)>> keyMap;
         unsigned int counter;
     };
 

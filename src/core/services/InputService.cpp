@@ -1,7 +1,5 @@
 #include "InputService.h"
 
-#include <cmath>
-
 #include <imgui_impl_sdl3.h>
 #include <GL/glew.h>
 #include <SDL3/SDL_events.h>
@@ -71,48 +69,34 @@ namespace Vox
         }
     }
 
-    const MouseMotionEventCallback& InputService::RegisterMouseMotionCallback(MouseMotionEventCallback callback)
+    DelegateHandle<int, int> InputService::RegisterMouseMotionCallback(const MouseMotionEventCallback& callback)
     {
-        return mouseMotionEventCallbacks.emplace_back(std::move(callback));
+        return mouseMotionEventCallbacks.RegisterCallback(callback);
     }
 
-    void InputService::UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback)
+    void InputService::UnregisterMouseMotionCallback(const DelegateHandle<int, int>& callback)
     {
-        auto target = callback.target<void(*)(int, int)>();
-        if (!target)
-        {
-            auto targetType = callback.target_type().name();
-            VoxLog(Warning, Input, "InputService attempting to unregister mouse motion callbacks, but the callback was invalid.");
-            VoxLog(Warning, Input, "Target type was '{}'", targetType);
-        }
-        std::erase_if(mouseMotionEventCallbacks, [target](const MouseMotionEventCallback& motionCallback)
-        {
-           return motionCallback.target<void(*)(int, int)>() == target;
-        });
+        mouseMotionEventCallbacks.UnregisterCallback(callback);
     }
 
-    const MouseClickEventCallback& InputService::RegisterMouseClickCallback(MouseClickEventCallback callback)
+    DelegateHandle<int, int> InputService::RegisterMouseClickCallback(const MouseClickEventCallback& callback)
     {
-        return mouseClickEventCallbacks.emplace_back(std::move(callback));
+        return mouseClickEventCallbacks.RegisterCallback(callback);
     }
 
     void InputService::UnregisterMouseClickCallback(const DelegateHandle<int, int>& handle)
     {
-        mouseClickEventCallbacks.
+        mouseClickEventCallbacks.UnregisterCallback(handle);
     }
 
-    const MouseReleaseEventCallback& InputService::RegisterMouseReleaseCallback(MouseReleaseEventCallback callback)
+    DelegateHandle<> InputService::RegisterMouseReleaseCallback(MouseReleaseEventCallback callback)
     {
-        return mouseReleaseEventCallbacks.emplace_back(std::move(callback));
+        return mouseReleaseEventCallbacks.RegisterCallback(callback);
     }
 
-    void InputService::UnregisterMouseReleaseCallback(const MouseReleaseEventCallback& callback)
+    void InputService::UnregisterMouseReleaseCallback(const DelegateHandle<>& callback)
     {
-        auto target = callback.target<void()>();
-        std::erase_if(mouseReleaseEventCallbacks, [target](const MouseReleaseEventCallback& clickCallback)
-        {
-           return clickCallback.target<void()>() == target;
-        });
+        mouseReleaseEventCallbacks.UnregisterCallback(callback);
     }
 
     glm::vec2 InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
@@ -276,21 +260,14 @@ namespace Vox
             return;
         }
 
-        for (MouseMotionEventCallback& callback : mouseMotionEventCallbacks)
-        {
-            callback(mouseEvent.xrel, mouseEvent.yrel);
-        }
+        mouseMotionEventCallbacks(mouseEvent.xrel, mouseEvent.yrel);
     }
 
     void InputService::HandleMouseButtonEvent(SDL_MouseButtonEvent& mouseEvent)
     {
         if (mouseEvent.button == SDL_BUTTON_LEFT)
         {
-            // VoxLog(Display, Input, "Mouse clicked at position({}, {})", mouseEvent.x, mouseEvent.y);
-            for (MouseClickEventCallback& callback : mouseClickEventCallbacks)
-            {
-                callback(mouseEvent.x, mouseEvent.y);
-            }
+            mouseClickEventCallbacks(mouseEvent.x, mouseEvent.y);
         }
     }
 
@@ -299,10 +276,7 @@ namespace Vox
         if (mouseEvent.button == SDL_BUTTON_LEFT)
         {
             // VoxLog(Display, Input, "Mouse released at position({}, {})", mouseEvent.x, mouseEvent.y);
-            for (MouseReleaseEventCallback& callback : mouseReleaseEventCallbacks)
-            {
-                callback();
-            }
+            mouseReleaseEventCallbacks();
         }
     }
 

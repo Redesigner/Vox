@@ -6,6 +6,8 @@
 #include <glm/vec2.hpp>
 #include <memory>
 
+#include "core/datatypes/DelegateHandle.h"
+
 
 namespace Vox
 {
@@ -42,7 +44,7 @@ namespace Vox
 
         unsigned int counter;
 
-        std::function<void(int,int)> masterCallback;
+        DelegateHandle<int,int> masterCallback;
     };
 }
 

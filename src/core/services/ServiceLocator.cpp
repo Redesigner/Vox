@@ -31,9 +31,15 @@ namespace Vox
 		delete editorService;
 		delete fileIoService;
 		delete inputService;
+	    inputService = nullptr;
 		delete objectService;
 		delete physicsServer;
 		delete renderer;
+	    editorService = nullptr;
+	    fileIoService = nullptr;
+	    objectService = nullptr;
+	    physicsServer = nullptr;
+	    renderer = nullptr;
 	}
 
 	EditorService* ServiceLocator::GetEditorService()

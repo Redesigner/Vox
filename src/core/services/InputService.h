@@ -41,15 +41,15 @@ namespace Vox
 		void UnregisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback);
 
 
-		const MouseMotionEventCallback& RegisterMouseMotionCallback(MouseMotionEventCallback callback);
-		void UnregisterMouseMotionCallback(const MouseMotionEventCallback& callback);
+		DelegateHandle<int, int> RegisterMouseMotionCallback(const MouseMotionEventCallback& callback);
+		void UnregisterMouseMotionCallback(const DelegateHandle<int, int>& callback);
 
 
-		const DelegateHandle<void(int, int)> RegisterMouseClickCallback(MouseClickEventCallback callback);
+		DelegateHandle<int, int> RegisterMouseClickCallback(const MouseClickEventCallback& callback);
 		void UnregisterMouseClickCallback(const DelegateHandle<int, int>& handle);
 
-	    const MouseReleaseEventCallback& RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
-		void UnregisterMouseReleaseCallback(const MouseReleaseEventCallback& callback);
+	    DelegateHandle<> RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
+		void UnregisterMouseReleaseCallback(const DelegateHandle<>& callback);
 
 
 		[[nodiscard]] glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
@@ -80,9 +80,9 @@ namespace Vox
 		void ToggleFullscreen();
 
 		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
-		std::vector<MouseMotionEventCallback> mouseMotionEventCallbacks;
+		Delegate<int, int> mouseMotionEventCallbacks;
 		Delegate<int, int> mouseClickEventCallbacks;
-	    std::vector<MouseReleaseEventCallback> mouseReleaseEventCallbacks;
+	    Delegate<> mouseReleaseEventCallbacks;
 
 		// @TODO: move window logic and variables to a separate wrapper class?
 		bool windowClosed = false;

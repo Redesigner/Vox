@@ -9,7 +9,6 @@
 #include "PickContainer.h"
 #include "SceneRenderer.h"
 #include "core/logging/Logging.h"
-#include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"

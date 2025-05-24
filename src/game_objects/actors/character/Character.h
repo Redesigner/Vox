@@ -5,6 +5,7 @@
 #undef GLM_ENABLE_EXPERIMENTAL
 #include <memory>
 
+#include "core/datatypes/DelegateHandle.h"
 #include "core/datatypes/Ref.h"
 #include "core/objects/actor/Actor.h"
 
@@ -31,7 +32,7 @@ namespace Vox
 	    std::shared_ptr<CameraComponent> cameraComponent;
 
         std::function<void(bool)> jumpCallback;
-	    std::function<void(int x, int y)> mouseLookCallback;
+	    DelegateHandle<int, int> mouseLookCallback;
 
 	    IMPLEMENT_OBJECT(Character)
 	};

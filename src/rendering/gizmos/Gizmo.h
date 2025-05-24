@@ -6,6 +6,7 @@
 
 #include <functional>
 
+#include "core/datatypes/DelegateHandle.h"
 #include "core/datatypes/Ref.h"
 #include "core/datatypes/Transform.h"
 #include "rendering/PBRMaterial.h"
@@ -60,8 +61,8 @@ namespace Vox
 
         PBRMaterial red, green, blue, selected;
 
-        std::function<void()> mouseReleaseCallback;
-        std::function<void(int, int)> mouseMotionCallback;
+        DelegateHandle<> mouseReleaseCallback;
+        DelegateHandle<int, int> mouseMotionCallback;
     };
 
 } // Vox
