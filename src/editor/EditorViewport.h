@@ -26,9 +26,9 @@ namespace Vox
 
         void Draw(const std::shared_ptr<World>& world);
 
-        bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
+        [[nodiscard]] bool GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const;
 
-        bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
+        [[nodiscard]] bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
 
         [[nodiscard]] glm::vec2 GetDimensions() const;
 
@@ -39,6 +39,8 @@ namespace Vox
     private:
         glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
         ViewportBox viewportBox{ 0, 0, 800, 450 };
+
+        bool isFocused = false;
     };
 
 } // Vox

@@ -50,7 +50,7 @@ namespace Vox
          * @return a pair of vectors, where first is the click's location in world space
          * and second is the click's direction
          */
-        std::pair<glm::vec3, glm::vec3> GetClickVector();
+        bool GetClickVector(glm::vec3& positionOut, glm::vec3& directionOut);
 
         Transform transform;
         Transform originalTransform;

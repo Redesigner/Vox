@@ -64,6 +64,11 @@ namespace Vox
             if (ImGui::IsItemHovered())
             {
                 ImGui::SetNextFrameWantCaptureMouse(false);
+                isFocused = true;
+            }
+            else
+            {
+                isFocused = false;
             }
 
             if (ImGui::BeginDragDropTarget())
@@ -86,6 +91,10 @@ namespace Vox
 
     bool EditorViewport::GetClickViewportSpace(float& xOut, float& yOut, unsigned int clickX, unsigned int clickY) const
     {
+        if (!isFocused)
+        {
+            return false;
+        }
         if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
             clickX < viewportBox.left || clickX > viewportBox.right)
         {
@@ -99,6 +108,10 @@ namespace Vox
 
     bool EditorViewport::GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const
     {
+        if (!isFocused)
+        {
+            return false;
+        }
         if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
             clickX < viewportBox.left || clickX > viewportBox.right)
         {

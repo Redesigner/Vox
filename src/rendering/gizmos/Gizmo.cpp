@@ -7,7 +7,6 @@
 #include <glm/gtc/matrix_inverse.inl>
 
 #include "core/math/Math.h"
-#include "core/services/EditorService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
@@ -113,7 +112,11 @@ namespace Vox
 
     void Gizmo::MouseMoved()
     {
-        auto click = GetClickVector();
+        glm::vec3 position, direction;
+        if (!GetClickVector(position, direction))
+        {
+            return;
+        }
 
         switch (selectedAxis)
         {
@@ -121,7 +124,7 @@ namespace Vox
         {
             const glm::vec3 intersection = ClosestPoint(
                 originalTransform.position + glm::vec3(1.0f, 0.0f, 0.0f), {1.0f, 0.0f, 0.0f},
-                click.first, click.second
+                position, direction
             );
             transform.position.x = intersection.x - 1.0f;
             break;
@@ -130,7 +133,7 @@ namespace Vox
         {
             const glm::vec3 intersection = ClosestPoint(
                 originalTransform.position + glm::vec3(0.0f, 1.0f, 0.0f), {0.0f, 1.0f, 0.0f},
-                click.first, click.second
+                position, direction
             );
             transform.position.y = intersection.y - 1.0f;
             break;
@@ -139,7 +142,7 @@ namespace Vox
         {
             const glm::vec3 intersection = ClosestPoint(
                 originalTransform.position + glm::vec3(0.0f, 0.0f, 1.0f), {0.0f, 0.0f, 1.0f},
-                click.first, click.second
+                position, direction
             );
             transform.position.z = intersection.z - 1.0f;
             break;
@@ -185,7 +188,7 @@ namespace Vox
         originalTransform = transform;
     }
 
-    std::pair<glm::vec3, glm::vec3> Gizmo::GetClickVector()
+    bool Gizmo::GetClickVector(glm::vec3& positionOut, glm::vec3& directionOut)
     {
         Ref<Camera> camera = xArrowMesh->GetMeshOwner()->GetOwner()->GetCurrentCamera();
         glm::mat4x4 worldToScreen = camera->GetViewProjectionMatrix();
@@ -194,15 +197,20 @@ namespace Vox
         // This won't work right now!
         const glm::vec2 mouseLocationPixels = ServiceLocator::GetInputService()->GetMousePosition();
         glm::vec2 mouseLocationViewport;
-        xArrowMesh->GetMeshOwner()->GetOwner()->viewport.lock()->GetClickViewportSpace(
+        if (!xArrowMesh->GetMeshOwner()->GetOwner()->viewport.lock()->GetClickViewportSpace(
             mouseLocationViewport.x, mouseLocationViewport.y,
             static_cast<unsigned int>(mouseLocationPixels.x), static_cast<unsigned int>(mouseLocationPixels.y)
-        );
+        ))
+        {
+            return false;
+        }
         glm::vec4 mouseLocationWorldOrigin = glm::vec4(mouseLocationViewport, -1.0f, 1.0f) * screenToWorld;
         glm::vec4 mouseLocationWorldEnd = glm::vec4(mouseLocationViewport, 1.0f, 1.0f) * screenToWorld;
         mouseLocationWorldOrigin /= mouseLocationWorldOrigin.w; // affine
         mouseLocationWorldEnd /= mouseLocationWorldEnd.w;
         glm::vec3 delta = mouseLocationWorldEnd - mouseLocationWorldOrigin;
-        return {mouseLocationWorldOrigin, glm::normalize(delta)};
+        positionOut = mouseLocationWorldOrigin;
+        directionOut = glm::normalize(delta);
+        return true;
     }
 } // Vox
