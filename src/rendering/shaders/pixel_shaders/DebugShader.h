@@ -1,6 +1,7 @@
 #pragma once
+#include <memory>
+
 #include "PixelShader.h"
-#include "core/datatypes/Ref.h"
 
 namespace Vox
 {
@@ -11,7 +12,7 @@ namespace Vox
     public:
         DebugShader(const std::string& vertLocation, const std::string& fragLocation);
 
-        void SetCamera(const Ref<Camera>& camera) const;
+        void SetCamera(const std::shared_ptr<Camera>& camera) const;
 
     private:
         int viewProjectionMatrixLocation = -1;

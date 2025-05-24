@@ -13,6 +13,7 @@ constexpr double CAMERA_CULL_DISTANCE_FAR = 1000.0;
 Vox::Camera::Camera()
     :positionMatrix(glm::identity<glm::mat4x4>()), rotationMatrix(glm::identity<glm::mat4x4>())
 {
+    UpdateRotationMatrix();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
 }
@@ -75,7 +76,17 @@ glm::mat4x4 Vox::Camera::GetRotationMatrix() const
 
 glm::vec3 Vox::Camera::GetForwardVector() const
 {
-	return glm::normalize(target - position);
+	return forward;
+}
+
+glm::vec3 Vox::Camera::GetUpVector() const
+{
+    return up;
+}
+
+glm::vec3 Vox::Camera::GetRightVector() const
+{
+    return right;
 }
 
 void Vox::Camera::SetFovY(double fovY)
@@ -138,6 +149,7 @@ void Vox::Camera::UpdateRotationMatrix()
 {
 	useLookAt = false;
 	rotationMatrix = glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
+    UpdateLocalVectors();
 	UpdateViewMatrix();
 }
 
@@ -158,4 +170,12 @@ void Vox::Camera::UpdateProjectionMatrix()
 void Vox::Camera::UpdateViewProjectionMatrix()
 {
 	viewProjectionMatrix = projectionMatrix * viewMatrix;
+}
+
+void Vox::Camera::UpdateLocalVectors()
+{
+    const glm::mat4x4 reverseRotationMatrix = glm::eulerAngleZYX(-rotation.z, -rotation.y, -rotation.x);
+    forward = reverseRotationMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    up = reverseRotationMatrix * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    right = reverseRotationMatrix * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

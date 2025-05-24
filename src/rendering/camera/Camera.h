@@ -22,6 +22,8 @@ namespace Vox
 		[[nodiscard]] glm::mat4x4 GetRotationMatrix() const;
 
 		[[nodiscard]] glm::vec3 GetForwardVector() const;
+		[[nodiscard]] glm::vec3 GetUpVector() const;
+		[[nodiscard]] glm::vec3 GetRightVector() const;
 
 		void SetFovY(double fovY);
 		void SetAspectRatio(double aspectRatioIn);
@@ -39,10 +41,13 @@ namespace Vox
 		void UpdateViewMatrix();
 		void UpdateProjectionMatrix();
 		void UpdateViewProjectionMatrix();
+	    void UpdateLocalVectors();
 
 		glm::vec3 position{};
 		glm::vec3 rotation{};
 		glm::vec3 target{};
+
+	    glm::vec3 forward{}, right{}, up{};
 
 		bool useLookAt = false;
 

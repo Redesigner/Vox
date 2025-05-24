@@ -1,6 +1,6 @@
 ﻿#include "PickShader.h"
 
-#include "rendering/Camera.h"
+#include "../../../camera/Camera.h"
 
 namespace Vox
 {

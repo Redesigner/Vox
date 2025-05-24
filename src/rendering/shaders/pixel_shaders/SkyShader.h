@@ -1,4 +1,6 @@
 #pragma once
+#include <memory>
+
 #include "PixelShader.h"
 #include "core/datatypes/Ref.h"
 
@@ -11,7 +13,7 @@ namespace Vox
     public:
         SkyShader();
 
-        void SetCamera(const Ref<Camera>& camera) const;
+        void SetCamera(const std::shared_ptr<Camera>& camera) const;
 
     private:
         static inline std::string vertLocation = "assets/shaders/sky.vert", fragLocation = "assets/shaders/sky.frag";

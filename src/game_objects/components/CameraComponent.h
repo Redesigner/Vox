@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "SceneComponent.h"
-#include "core/datatypes/Ref.h"
 #include "core/objects/Tickable.h"
-#include "rendering/Camera.h"
+#include "../../rendering/camera/Camera.h"
 
 namespace Vox
 {
@@ -26,7 +25,7 @@ namespace Vox
 
         float armLength = 5.0f;
 
-        Ref<Camera> camera;
+        std::shared_ptr<Camera> camera;
     };
 }
     

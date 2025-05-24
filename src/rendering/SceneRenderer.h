@@ -8,7 +8,7 @@
 #include <unordered_map>
 
 #include "Light.h"
-#include "rendering/Camera.h"
+#include "camera/Camera.h"
 #include "core/datatypes/DynamicObjectContainer.h"
 #include "core/datatypes/DynamicRef.h"
 #include "core/datatypes/Ref.h"
@@ -18,6 +18,7 @@
 
 namespace Vox
 {
+    class FlyCamera;
     class EditorViewport;
 }
 
@@ -52,11 +53,9 @@ namespace Vox
 
         DynamicRef<VoxelMesh> CreateVoxelMesh(glm::ivec2 chunkLocation);
 
-        [[nodiscard]] Ref<Camera> CreateCamera();
+        [[nodiscard]] std::shared_ptr<Camera> GetCurrentCamera() const;
 
-        [[nodiscard]] Ref<Camera> GetCurrentCamera() const;
-
-        void SetCurrentCamera(const Ref<Camera>& camera);
+        void SetCurrentCamera(const std::shared_ptr<Camera>& camera);
 
         [[nodiscard]] ColorDepthFramebuffer* GetTexture() const;
 
@@ -107,8 +106,8 @@ namespace Vox
 
         [[nodiscard]] Renderer* GetRenderer() const;
 
-        //std::weak_ptr<Camera> currentCamera;
-        Ref<Camera> currentCamera;
+        std::shared_ptr<Camera> currentCamera;
+        std::shared_ptr<FlyCamera> defaultCamera;
 
         glm::uvec2 viewportSize;
 
@@ -127,7 +126,6 @@ namespace Vox
         std::unordered_map<std::string, MeshInstanceContainer> meshInstances;
         std::unordered_map<std::string, SkeletalMeshInstanceContainer> skeletalMeshInstances;
         DynamicObjectContainer<VoxelMesh> voxelMeshes;
-        ObjectContainer<Camera> cameras;
 
         Light testLight;
         LightUniformLocations lightUniformLocations;

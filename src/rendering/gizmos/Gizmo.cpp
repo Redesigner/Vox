@@ -10,7 +10,7 @@
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
-#include "rendering/Camera.h"
+#include "../camera/Camera.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
@@ -190,7 +190,7 @@ namespace Vox
 
     bool Gizmo::GetClickVector(glm::vec3& positionOut, glm::vec3& directionOut)
     {
-        Ref<Camera> camera = xArrowMesh->GetMeshOwner()->GetOwner()->GetCurrentCamera();
+        std::shared_ptr<Camera> camera = xArrowMesh->GetMeshOwner()->GetOwner()->GetCurrentCamera();
         glm::mat4x4 worldToScreen = camera->GetViewProjectionMatrix();
         glm::mat4x4 screenToWorld = glm::inverseTranspose(worldToScreen);
 

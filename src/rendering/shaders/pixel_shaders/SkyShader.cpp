@@ -4,7 +4,7 @@
 
 #include "SkyShader.h"
 
-#include "rendering/Camera.h"
+#include "rendering/camera/Camera.h"
 
 namespace Vox
 {
@@ -18,7 +18,7 @@ namespace Vox
         cameraWorldSpaceLocation = GetUniformLocation("cameraWorldSpace");
     }
 
-    void SkyShader::SetCamera(const Ref<Camera>& camera) const
+    void SkyShader::SetCamera(const std::shared_ptr<Camera>& camera) const
     {
         const glm::mat4x4 cameraRotation = camera->GetRotationMatrix();
         const glm::mat4x4 projection = camera->GetProjectionMatrix();

@@ -36,7 +36,7 @@
 #include "game_objects/components/SkeletalMeshComponent.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
-#include "rendering/Camera.h"
+#include "rendering/camera/Camera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
@@ -188,7 +188,7 @@ int main()
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;
-            Ref<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
+            std::shared_ptr<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
             if (!camera)
             {
                 return;

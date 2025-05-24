@@ -4,7 +4,7 @@
 
 #include "DebugShader.h"
 
-#include "rendering/Camera.h"
+#include "rendering/camera/Camera.h"
 
 namespace Vox
 {
@@ -14,7 +14,7 @@ namespace Vox
         viewProjectionMatrixLocation = GetUniformLocation("viewProjection");
     }
 
-    void DebugShader::SetCamera(const Ref<Camera>& camera) const
+    void DebugShader::SetCamera(const std::shared_ptr<Camera>& camera) const
     {
         SetUniformMatrix(viewProjectionMatrixLocation, camera->GetViewProjectionMatrix());
     }

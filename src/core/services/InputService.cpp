@@ -92,7 +92,7 @@ namespace Vox
         mouseReleaseEventCallbacks.UnregisterCallback(callback);
     }
 
-    glm::vec2 InputService::GetInputAxisNormalized(KeyboardInputAxis2D input) const
+    glm::vec2 InputService::GetInputAxisNormalized(const KeyboardInputAxis2D input) const
     {
         glm::vec2 result = glm::vec2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
         float lengthSquared = result.x * result.x + result.y * result.y;
@@ -103,6 +103,11 @@ namespace Vox
             result.y /= length;
         }
         return result;
+    }
+
+    float InputService::GetInputAxis(const KeyboardInputAxis input) const
+    {
+        return keyPressed[input.positive] - keyPressed[input.negative];
     }
 
     glm::vec2 InputService::GetMousePosition() const
@@ -297,6 +302,11 @@ namespace Vox
             SDL_SetWindowFullscreen(mainWindow, true);
             windowFullscreen = true;
         }
+    }
+
+    KeyboardInputAxis::KeyboardInputAxis(SDL_Scancode positive, SDL_Scancode negative)
+        :positive(positive), negative(negative)
+    {
     }
 
     KeyboardInputAxis2D::KeyboardInputAxis2D(SDL_Scancode yPos, SDL_Scancode yNeg, SDL_Scancode xPos, SDL_Scancode xNeg)

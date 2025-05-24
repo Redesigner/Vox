@@ -1,6 +1,6 @@
 #include "MeshShader.h"
 
-#include "rendering/Camera.h"
+#include "../../../camera/Camera.h"
 
 namespace Vox
 {
@@ -12,7 +12,7 @@ namespace Vox
         uniformLocations.projectionMatrix = GetUniformLocation("matProjection");
     }
 
-    void MeshShader::SetCamera(Ref<Camera> camera) const
+    void MeshShader::SetCamera(const std::shared_ptr<Camera>& camera) const
     {
         SetUniformMatrix(uniformLocations.viewMatrix, camera->GetViewMatrix());
         SetUniformMatrix(uniformLocations.projectionMatrix, camera->GetProjectionMatrix());

@@ -17,6 +17,12 @@ struct SDL_Window;
 
 namespace Vox
 {
+    struct KeyboardInputAxis
+    {
+        SDL_Scancode positive, negative;
+        KeyboardInputAxis(SDL_Scancode positive, SDL_Scancode negative);
+    };
+
 	struct KeyboardInputAxis2D
 	{
 		SDL_Scancode yPos, yNeg, xPos, xNeg;
@@ -53,6 +59,8 @@ namespace Vox
 
 
 		[[nodiscard]] glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
+
+	    [[nodiscard]] float GetInputAxis(KeyboardInputAxis input) const;
 
 	    [[nodiscard]] glm::vec2 GetMousePosition() const;
 

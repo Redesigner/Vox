@@ -106,8 +106,10 @@ target_sources(Vox PRIVATE
 	"src/physics/VoxelBody.cpp"
 	"src/physics/VoxelBody.h"
 
-	"src/rendering/Camera.cpp"
-	"src/rendering/Camera.h"
+	"src/rendering/camera/Camera.cpp"
+	"src/rendering/camera/Camera.h"
+	"src/rendering/camera/FlyCamera.cpp"
+	"src/rendering/camera/FlyCamera.h"
 	"src/rendering/DebugRenderer.cpp"
 	"src/rendering/DebugRenderer.h"
 	"src/rendering/FullscreenQuad.cpp"

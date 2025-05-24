@@ -6,7 +6,7 @@
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
-#include "rendering/Camera.h"
+#include "../../rendering/camera/Camera.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
@@ -17,10 +17,10 @@ namespace Vox
     {
         DEFAULT_DISPLAY_NAME();
 
-        if (objectInitializer.world)
-        {
-            camera = objectInitializer.world->GetRenderer()->CreateCamera();
-        }
+        camera = std::make_shared<Camera>();
+        camera->SetPosition(0.0f, 0.0f, 0.0f);
+        camera->SetRotation(0.0f, 0.0f, 0.0f);
+        camera->SetFovY(45.0f);
     }
 
     void CameraComponent::BuildProperties(std::vector<Property>& propertiesInOut)

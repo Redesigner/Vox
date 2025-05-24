@@ -6,7 +6,8 @@
 #include "core/math/Math.h"
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
-#include "rendering/Camera.h"
+#include "camera/Camera.h"
+#include "camera/FlyCamera.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
@@ -35,13 +36,21 @@ namespace Vox
         GenerateBuffers();
         testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
         lightUniformLocations = LightUniformLocations(GetRenderer()->GetDeferredShader());
-        currentCamera = CreateCamera();
+        defaultCamera = std::make_shared<FlyCamera>();
+        defaultCamera->SetPosition(0.0f, 0.0f, 0.0f);
+        defaultCamera->SetRotation(0.0f, 0.0f, 0.0f);
+        defaultCamera->SetFovY(45.0f);
+        currentCamera = defaultCamera;
     }
 
     SceneRenderer::~SceneRenderer() = default;
 
     void SceneRenderer::Draw()
     {
+        if (currentCamera == defaultCamera)
+        {
+            defaultCamera->Tick( 1.0f / 60.0f);
+        }
         ConditionalResizeFramebuffers();
         glViewport(0, 0, viewportSize.x, viewportSize.y);
         currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y));
@@ -95,21 +104,12 @@ namespace Vox
         return {&voxelMeshes, voxelMeshes.Create(chunkLocation)};
     }
 
-    Ref<Camera> SceneRenderer::CreateCamera()
-    {
-        Ref newCamera = {&cameras, cameras.Create()};
-        newCamera->SetPosition(0.0f, 0.0f, 0.0f);
-        newCamera->SetRotation(0.0f, 0.0f, 0.0f);
-        newCamera->SetFovY(45.0f);
-        return newCamera;
-    }
-
-    Ref<Camera> SceneRenderer::GetCurrentCamera() const
+    std::shared_ptr<Camera> SceneRenderer::GetCurrentCamera() const
     {
         return currentCamera;
     }
 
-    void SceneRenderer::SetCurrentCamera(const Ref<Camera>& camera)
+    void SceneRenderer::SetCurrentCamera(const std::shared_ptr<Camera>& camera)
     {
         currentCamera = camera;
     }
