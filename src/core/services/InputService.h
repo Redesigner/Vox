@@ -37,18 +37,18 @@ namespace Vox
 		void PollEvents();
 
 
-		const KeyboardEventCallback& RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback);
-		void UnregisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback);
+		[[nodiscard]] DelegateHandle<bool> RegisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback);
+		void UnregisterKeyboardCallback(SDL_Scancode scancode, const DelegateHandle<bool>& callback);
 
 
-		DelegateHandle<int, int> RegisterMouseMotionCallback(const MouseMotionEventCallback& callback);
+		[[nodiscard]] DelegateHandle<int, int> RegisterMouseMotionCallback(const MouseMotionEventCallback& callback);
 		void UnregisterMouseMotionCallback(const DelegateHandle<int, int>& callback);
 
 
-		DelegateHandle<int, int> RegisterMouseClickCallback(const MouseClickEventCallback& callback);
+		[[nodiscard]] DelegateHandle<int, int> RegisterMouseClickCallback(const MouseClickEventCallback& callback);
 		void UnregisterMouseClickCallback(const DelegateHandle<int, int>& handle);
 
-	    DelegateHandle<> RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
+	    [[nodiscard]] DelegateHandle<> RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
 		void UnregisterMouseReleaseCallback(const DelegateHandle<>& callback);
 
 
@@ -79,7 +79,7 @@ namespace Vox
 
 		void ToggleFullscreen();
 
-		std::unordered_map<SDL_Scancode, std::vector<KeyboardEventCallback>> keyboardEventMap;
+		std::unordered_map<SDL_Scancode, Delegate<bool>> keyboardEventMap;
 		Delegate<int, int> mouseMotionEventCallbacks;
 		Delegate<int, int> mouseClickEventCallbacks;
 	    Delegate<> mouseReleaseEventCallbacks;
@@ -94,6 +94,8 @@ namespace Vox
 		bool windowFullscreen;
 
 		bool windowMaximized;
+
+	    DelegateHandle<bool> escDelegate, fullscreenDelegate, tabDelegate;
 
 		SDL_Window* mainWindow;
 	};

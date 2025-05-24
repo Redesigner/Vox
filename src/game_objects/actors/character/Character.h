@@ -31,7 +31,7 @@ namespace Vox
 		Ref<CharacterController> characterController;
 	    std::shared_ptr<CameraComponent> cameraComponent;
 
-        std::function<void(bool)> jumpCallback;
+        DelegateHandle<bool> jumpCallback;
 	    DelegateHandle<int, int> mouseLookCallback;
 
 	    IMPLEMENT_OBJECT(Character)

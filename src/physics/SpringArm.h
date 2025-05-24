@@ -22,6 +22,7 @@ namespace Vox
 	class SpringArm
 	{
 	public:
+        [[deprecated]]
 		SpringArm();
 
 		void SetOrigin(JPH::BodyID bodyId);

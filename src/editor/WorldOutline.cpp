@@ -19,7 +19,7 @@ namespace Vox
         tempWorld = nullptr;
         gizmo = nullptr;
 
-        ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_DELETE, [this](bool pressed)
+        deleteDelegate = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_DELETE, [this](bool pressed)
         {
             if (pressed)
             {
@@ -28,7 +28,10 @@ namespace Vox
         });
     }
 
-    WorldOutline::~WorldOutline() = default;
+    WorldOutline::~WorldOutline()
+    {
+        ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_DELETE, deleteDelegate);
+    }
 
     void WorldOutline::InitializeGizmos(World* world)
     {

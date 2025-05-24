@@ -2,6 +2,8 @@
 #include <functional>
 #include <memory>
 
+#include "core/datatypes/DelegateHandle.h"
+
 namespace Vox
 {
     class Gizmo;
@@ -38,6 +40,8 @@ namespace Vox
         ClickCallback doubleClickCallback;
 
         World* tempWorld;
+
+        DelegateHandle<bool> deleteDelegate;
     };
 }
 

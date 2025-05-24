@@ -19,13 +19,14 @@ namespace Vox
         windowFullscreen = false;
 
         // Register some default callbacks!
-        RegisterKeyboardCallback(SDL_SCANCODE_ESCAPE, [this](bool pressed) { windowClosed = true; });
-        RegisterKeyboardCallback(SDL_SCANCODE_TAB, [this](bool pressed) { if (pressed) ToggleCursorLock(); });
-        RegisterKeyboardCallback(SDL_SCANCODE_F11, [this](bool pressed) { if (pressed) ToggleFullscreen(); });
+        escDelegate = RegisterKeyboardCallback(SDL_SCANCODE_ESCAPE, [this](bool pressed) { windowClosed = true; });
+        tabDelegate = RegisterKeyboardCallback(SDL_SCANCODE_TAB, [this](bool pressed) { if (pressed) ToggleCursorLock(); });
+        fullscreenDelegate = RegisterKeyboardCallback(SDL_SCANCODE_F11, [this](bool pressed) { if (pressed) ToggleFullscreen(); });
     }
 
     InputService::~InputService()
-    = default;
+    {
+    }
 
     void InputService::PollEvents()
     {
@@ -38,20 +39,19 @@ namespace Vox
         }
     }
 
-    const KeyboardEventCallback& InputService::RegisterKeyboardCallback(SDL_Scancode scancode, KeyboardEventCallback callback)
+    DelegateHandle<bool> InputService::RegisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback)
     {
-        auto callbacks = keyboardEventMap.find(scancode);
+        const auto callbacks = keyboardEventMap.find(scancode);
         if (callbacks == keyboardEventMap.end())
         {
-            std::vector<KeyboardEventCallback> newCallbackVector{ callback };
-            auto [fst, snd] = keyboardEventMap.insert(std::pair<SDL_Scancode, std::vector<KeyboardEventCallback>>(scancode, newCallbackVector));
-            return fst->second.at(0);
+            auto [newIterator, success] = keyboardEventMap.emplace(scancode, std::move(Delegate<bool>()));
+            return newIterator->second.RegisterCallback(callback);
         }
 
-        return callbacks->second.emplace_back(std::move(callback));
+        return callbacks->second.RegisterCallback(callback);
     }
 
-    void InputService::UnregisterKeyboardCallback(SDL_Scancode scancode, const KeyboardEventCallback& callback)
+    void InputService::UnregisterKeyboardCallback(SDL_Scancode scancode, const DelegateHandle<bool>& callback)
     {
         auto callbacks = keyboardEventMap.find(scancode);
         if (callbacks == keyboardEventMap.end())
@@ -59,14 +59,7 @@ namespace Vox
             return;
         }
 
-        for (int i = 0; i < callbacks->second.size(); ++i)
-        {
-            if (callbacks->second[i].target<void(bool)>() == callback.target<void(bool)>())
-            {
-                callbacks->second.erase(callbacks->second.begin() + i);
-                return;
-            }
-        }
+        callbacks->second.UnregisterCallback(callback);
     }
 
     DelegateHandle<int, int> InputService::RegisterMouseMotionCallback(const MouseMotionEventCallback& callback)
@@ -289,10 +282,7 @@ namespace Vox
             return;
         }
 
-        for (KeyboardEventCallback& callback : callbacks->second)
-        {
-            callback(pressed);
-        }
+        callbacks->second(pressed);
     }
 
     void InputService::ToggleFullscreen()
