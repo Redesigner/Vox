@@ -7,6 +7,7 @@
 
 namespace Vox
 {
+    class ObjectClass;
     class Object;
     class DetailPanel;
 }
@@ -24,7 +25,7 @@ namespace Vox
     class ActorEditor
     {
     public:
-        ActorEditor();
+        ActorEditor(const ObjectClass* actorClass);
         ~ActorEditor();
 
         void Draw();

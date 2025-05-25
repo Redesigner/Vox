@@ -17,9 +17,10 @@
 
 namespace Vox
 {
-    ActorEditor::ActorEditor()
+    ActorEditor::ActorEditor(const ObjectClass* actorClass)
     {
         world = std::make_shared<World>();
+        world->CreateObject(actorClass);
         viewport = std::make_shared<EditorViewport>();
         viewport->OnObjectSelected = [this](const std::shared_ptr<Object>& object)
             {

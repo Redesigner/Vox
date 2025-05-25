@@ -33,6 +33,8 @@ namespace Vox
 
         std::shared_ptr<Object> CreateObject(const std::string& className);
 
+        std::shared_ptr<Object> CreateObject(const ObjectClass* objectClass);
+
         void Tick(float deltaTime);
 
         void DestroyObject(const std::shared_ptr<Object>& object);

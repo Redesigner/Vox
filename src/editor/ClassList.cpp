@@ -31,21 +31,21 @@ namespace Vox
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 0.0f));
                 ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
 
-                std::for_each(ServiceLocator::GetObjectService()->GetBegin(), ServiceLocator::GetObjectService()->GetEnd(),
-                    [this](const std::pair<std::string, ObjectClass>& entry)
+                auto endItr = ServiceLocator::GetObjectService()->GetEnd();
+                for (auto itr = ServiceLocator::GetObjectService()->GetBegin(); itr != endItr; ++itr)
+                {
+                    ImGui::Selectable(itr->first.c_str());
+                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                     {
-                        ImGui::Selectable(entry.first.c_str());
-                        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-                        {
-                            ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", entry.first.data(), entry.first.size() + 1);
-                            ImGui::EndDragDropSource();
-                        }
+                        ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", itr->first.data(), itr->first.size() + 1);
+                        ImGui::EndDragDropSource();
+                    }
 
-                        if (ImGui::IsItemFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                        {
-                            doubleClickCallback(entry.second);
-                        }
-                    });
+                    if (ImGui::IsItemFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                    {
+                        doubleClickCallback(&itr->second);
+                    }
+                }
 
                 ImGui::PopStyleVar();
                 ImGui::PopStyleColor();

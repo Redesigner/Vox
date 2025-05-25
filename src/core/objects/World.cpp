@@ -23,6 +23,13 @@ namespace Vox
         return nullptr;
     }
 
+    std::shared_ptr<Object> World::CreateObject(const ObjectClass* objectClass)
+    {
+        auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
+        InsertCheckTickable(result);
+        return result;
+    }
+
     void World::Tick(float deltaTime)
     {
         for (Tickable* tickable : actorsToTick)

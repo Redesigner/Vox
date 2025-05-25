@@ -12,7 +12,7 @@ namespace Vox
 
     class ClassList
     {
-        using ObjectCallback = std::function<void(const ObjectClass&)>;
+        using ObjectCallback = std::function<void(const ObjectClass*)>;
 
     public:
         ClassList();

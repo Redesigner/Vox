@@ -27,11 +27,11 @@ namespace Vox
             {
                 worldOutline->SetSelectedObject(object);
             };
-        actorEditor = std::make_unique<ActorEditor>();
+        actorEditor = nullptr;
         classList = std::make_unique<ClassList>();
-        classList->SetDoubleClickCallback([this](const ObjectClass& objectClass)
+        classList->SetDoubleClickCallback([this](const ObjectClass* objectClass)
             {
-               pendingEditorClass = &objectClass;
+               pendingEditorClass = objectClass;
             });
 
         const ImGuiIO& io = ImGui::GetIO();
@@ -156,7 +156,7 @@ namespace Vox
 
         if (pendingEditorClass)
         {
-            actorEditor = std::make_unique<ActorEditor>();
+            actorEditor = std::make_unique<ActorEditor>(pendingEditorClass);
             pendingEditorClass = nullptr;
         }
     }
