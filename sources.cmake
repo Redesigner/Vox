@@ -72,6 +72,8 @@ target_sources(Vox PRIVATE
 	"src/editor/Editor.h"
 	"src/editor/EditorViewport.cpp"
 	"src/editor/EditorViewport.h"
+	"src/editor/PlayButton.cpp"
+	"src/editor/PlayButton.h"
 	"src/editor/WorldOutline.cpp"
 	"src/editor/WorldOutline.h"
 	"src/editor/detail_panel/DetailPanel.cpp"

@@ -8,6 +8,7 @@
 #include "core/objects/actor/Actor.h"
 #include "core/objects/component/Component.h"
 #include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 #include "rendering/gizmos/Gizmo.h"
@@ -28,7 +29,7 @@ namespace Vox
         });
     }
 
-    WorldOutline::~WorldOutline()
+    WorldOutline::~WorldOutline() // NOLINT(*-use-equals-default)
     {
         ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_DELETE, deleteDelegate);
     }

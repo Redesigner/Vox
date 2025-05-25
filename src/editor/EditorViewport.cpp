@@ -6,6 +6,7 @@
 
 #include <imgui.h>
 
+#include "PlayButton.h"
 #include "core/math/Math.h"
 #include "core/services/EditorService.h"
 #include "rendering/SceneRenderer.h"
@@ -84,6 +85,14 @@ namespace Vox
             const ImVec2 min = ImGui::GetWindowContentRegionMin();
             const ImVec2 max = ImGui::GetWindowContentRegionMax();
             world->GetRenderer()->SetSize(static_cast<int>(max.x - min.x), static_cast<int>(max.y - min.y));
+
+            if (drawPlayButtons)
+            {
+                ImGui::SetCursorPos(ImVec2((min.x + max.x) / 2.0f - 32.0f, min.y));
+                WorldState state = world->GetWorldState();
+                PlayButton::Draw(state);
+                world->SetWorldState(state);
+            }
         }
         ImGui::EndChild();
         ImGui::PopStyleVar(2);
@@ -120,6 +129,21 @@ namespace Vox
 
         xOut = clickX - viewportBox.left;
         yOut = clickY - viewportBox.top;
+        return true;
+    }
+
+    bool EditorViewport::IsValidClick(unsigned int clickX, unsigned int clickY) const
+    {
+        if (!isFocused)
+        {
+            return false;
+        }
+        if (clickY < viewportBox.top || clickY > viewportBox.bottom ||
+            clickX < viewportBox.left || clickX > viewportBox.right)
+        {
+            return false;
+        }
+        
         return true;
     }
 

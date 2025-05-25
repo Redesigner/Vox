@@ -92,6 +92,26 @@ namespace Vox
         mouseReleaseEventCallbacks.UnregisterCallback(callback);
     }
 
+    DelegateHandle<int, int> InputService::RegisterMouseRightClickCallback(const MouseClickEventCallback& callback)
+    {
+        return mouseRightClickEventCallbacks.RegisterCallback(callback);
+    }
+
+    void InputService::UnregisterMouseRightClickCallback(const DelegateHandle<int, int>& handle)
+    {
+        mouseRightClickEventCallbacks.UnregisterCallback(handle);
+    }
+
+    DelegateHandle<> InputService::RegisterMouseRightReleaseCallback(const MouseReleaseEventCallback& callback)
+    {
+        return mouseRightReleaseEventCallbacks.RegisterCallback(callback);
+    }
+
+    void InputService::UnregisterMouseRightReleaseCallback(const DelegateHandle<>& callback)
+    {
+        mouseRightReleaseEventCallbacks.UnregisterCallback(callback);
+    }
+
     glm::vec2 InputService::GetInputAxisNormalized(const KeyboardInputAxis2D input) const
     {
         glm::vec2 result = glm::vec2(keyPressed[input.xPos] - keyPressed[input.xNeg], keyPressed[input.yPos] - keyPressed[input.yNeg]);
@@ -266,6 +286,13 @@ namespace Vox
         if (mouseEvent.button == SDL_BUTTON_LEFT)
         {
             mouseClickEventCallbacks(mouseEvent.x, mouseEvent.y);
+            return;
+        }
+
+        if (mouseEvent.button == SDL_BUTTON_RIGHT)
+        {
+            mouseRightClickEventCallbacks(mouseEvent.x, mouseEvent.y);
+            return;
         }
     }
 
@@ -273,8 +300,14 @@ namespace Vox
     {
         if (mouseEvent.button == SDL_BUTTON_LEFT)
         {
-            // VoxLog(Display, Input, "Mouse released at position({}, {})", mouseEvent.x, mouseEvent.y);
             mouseReleaseEventCallbacks();
+            return;
+        }
+
+        if (mouseEvent.button == SDL_BUTTON_RIGHT)
+        {
+            mouseRightReleaseEventCallbacks();
+            return;
         }
     }
 

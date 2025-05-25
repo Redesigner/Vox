@@ -57,6 +57,12 @@ namespace Vox
 	    [[nodiscard]] DelegateHandle<> RegisterMouseReleaseCallback(MouseReleaseEventCallback callback);
 		void UnregisterMouseReleaseCallback(const DelegateHandle<>& callback);
 
+	    [[nodiscard]] DelegateHandle<int, int> RegisterMouseRightClickCallback(const MouseClickEventCallback& callback);
+		void UnregisterMouseRightClickCallback(const DelegateHandle<int, int>& handle);
+
+	    [[nodiscard]] DelegateHandle<> RegisterMouseRightReleaseCallback(const MouseReleaseEventCallback& callback);
+		void UnregisterMouseRightReleaseCallback(const DelegateHandle<>& callback);
+
 
 		[[nodiscard]] glm::vec2 GetInputAxisNormalized(KeyboardInputAxis2D input) const;
 
@@ -89,8 +95,12 @@ namespace Vox
 
 		std::unordered_map<SDL_Scancode, Delegate<bool>> keyboardEventMap;
 		Delegate<int, int> mouseMotionEventCallbacks;
+
 		Delegate<int, int> mouseClickEventCallbacks;
 	    Delegate<> mouseReleaseEventCallbacks;
+
+        Delegate<int, int> mouseRightClickEventCallbacks;
+	    Delegate<> mouseRightReleaseEventCallbacks;
 
 		// @TODO: move window logic and variables to a separate wrapper class?
 		bool windowClosed = false;

@@ -19,8 +19,7 @@ Vox::Camera::Camera()
 }
 
 Vox::Camera::~Camera()
-{
-}
+= default;
 
 void Vox::Camera::SetPosition(const glm::vec3 position)
 {

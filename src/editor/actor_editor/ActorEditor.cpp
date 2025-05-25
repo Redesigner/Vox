@@ -7,6 +7,7 @@
 #include <imgui.h>
 
 #include "core/objects/World.h"
+#include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
 #include "editor/WorldOutline.h"
@@ -30,6 +31,10 @@ namespace Vox
         outline->InitializeGizmos(world.get());
 
         world->GetRenderer()->viewport = viewport;
+        const std::shared_ptr<Camera>& defaultCamera = world->GetRenderer()->GetCurrentCamera();
+        constexpr glm::vec3 cameraDefaultRotation = {glm::radians(22.5f), glm::radians(-45.0f), 0.0f};
+        defaultCamera->SetRotation(cameraDefaultRotation);
+        defaultCamera->SetPosition(defaultCamera->GetForwardVector() * 5.0f);
 
         ServiceLocator::GetRenderer()->RegisterScene(world->GetRenderer());
     }

@@ -20,7 +20,11 @@ namespace Vox
     private:
         void RotateCamera(int x, int y);
 
+        bool activelyControlled = false;
+
         DelegateHandle<int, int> mouseLookDelegate;
+        DelegateHandle<int, int> mouseClickDelegate;
+        DelegateHandle<> mouseReleaseDelegate;
     };
 
 } // Vox

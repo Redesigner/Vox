@@ -32,6 +32,11 @@ namespace Vox
 
     void World::Tick(float deltaTime)
     {
+        if (state != Playing)
+        {
+            return;
+        }
+
         for (Tickable* tickable : actorsToTick)
         {
             tickable->Tick(deltaTime);
@@ -59,6 +64,33 @@ namespace Vox
         return renderer;
     }
 
+    void World::SetWorldState(WorldState worldState)
+    {
+        if (worldState == state)
+        {
+            return;
+        }
+
+        switch (worldState)
+        {
+        case Playing:
+            break;
+        case Paused:
+            Pause();
+            break;
+        case Inactive:
+            Restart();
+            break;
+        }
+
+        state = worldState;
+    }
+
+    WorldState World::GetWorldState() const
+    {
+        return state;
+    }
+
     World::World()
     {
         renderer = std::make_shared<SceneRenderer>();
@@ -78,5 +110,13 @@ namespace Vox
     void World::RegisterTickable(Tickable* tickable)
     {
         actorsToTick.push_back(tickable);
+    }
+
+    void World::Pause()
+    {
+    }
+
+    void World::Restart()
+    {
     }
 }

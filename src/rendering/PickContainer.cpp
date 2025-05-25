@@ -6,6 +6,7 @@
 #include "buffers/frame_buffers/PickBuffer.h"
 #include "core/logging/Logging.h"
 #include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
 
 namespace Vox

@@ -2,8 +2,6 @@
 
 #include "core/concepts/Concepts.h"
 #include "core/objects/Object.h"
-#include "core/services/ObjectService.h"
-#include "core/services/ServiceLocator.h"
 
 namespace Vox
 {
@@ -14,6 +12,13 @@ namespace Vox
 {
     class Actor;
     class Tickable;
+
+    enum WorldState : char
+    {
+        Inactive,
+        Playing,
+        Paused
+    };
 
     class World
     {
@@ -41,10 +46,20 @@ namespace Vox
 
         [[nodiscard]] std::shared_ptr<SceneRenderer> GetRenderer() const;
 
+        void SetWorldState(WorldState worldState);
+
+        [[nodiscard]] WorldState GetWorldState() const;
+
     private:
         void InsertCheckTickable(const std::shared_ptr<Object>& object);
 
         void RegisterTickable(Tickable* tickable);
+
+        void Pause();
+
+        void Restart();
+
+        WorldState state = WorldState::Inactive;
 
         std::shared_ptr<SceneRenderer> renderer;
 

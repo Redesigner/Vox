@@ -30,11 +30,15 @@ namespace Vox
 
         [[nodiscard]] bool GetClickViewportSpace(unsigned int& xOut, unsigned int& yOut, unsigned int clickX, unsigned int clickY) const;
 
+        [[nodiscard]] bool IsValidClick(unsigned int clickX, unsigned int clickY) const;
+
         [[nodiscard]] glm::vec2 GetDimensions() const;
 
         [[nodiscard]] ViewportBox GetViewportBox() const;
 
         std::function<void(std::shared_ptr<Object>)> OnObjectSelected;
+
+        bool drawPlayButtons = true;
 
     private:
         glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);

@@ -11,21 +11,38 @@
 
 namespace Vox
 {
-    FlyCamera::FlyCamera()
+    FlyCamera::FlyCamera() // NOLINT(*-use-equals-default)
     {
         mouseLookDelegate = ServiceLocator::GetInputService()->RegisterMouseMotionCallback([this](int xMotion, int yMotion)
         {
             RotateCamera(xMotion, yMotion);
         });
+
+        mouseClickDelegate = ServiceLocator::GetInputService()->RegisterMouseRightClickCallback([this](int clickX, int clickY)
+        {
+            activelyControlled = true;
+        });
+
+        mouseReleaseDelegate = ServiceLocator::GetInputService()->RegisterMouseRightReleaseCallback([this]()
+        {
+            activelyControlled = false;
+        });
     }
 
-    FlyCamera::~FlyCamera()
+    FlyCamera::~FlyCamera() // NOLINT(*-use-equals-default)
     {
         ServiceLocator::GetInputService()->UnregisterMouseMotionCallback(mouseLookDelegate);
+        ServiceLocator::GetInputService()->UnregisterMouseRightClickCallback(mouseClickDelegate);
+        ServiceLocator::GetInputService()->UnregisterMouseRightReleaseCallback(mouseReleaseDelegate);
     }
 
     void FlyCamera::Tick(float deltaTime)
     {
+        if (!activelyControlled)
+        {
+            return;
+        }
+
         const InputService* inputService = ServiceLocator::GetInputService();
         const glm::vec3 input = {
             inputService->GetInputAxis({SDL_SCANCODE_A, SDL_SCANCODE_D}),
@@ -47,6 +64,11 @@ namespace Vox
 
     void FlyCamera::RotateCamera(int x, int y)
     {
+        if (!activelyControlled)
+        {
+            return;
+        }
+
         glm::vec3 rotation = GetRotation();
         rotation.x += static_cast<float>(y) / 500.0f;
         rotation.x = std::clamp(rotation.x, -1.5f, 1.5f);
