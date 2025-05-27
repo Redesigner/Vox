@@ -31,7 +31,6 @@ namespace Vox
 	    auto mesh = AttachComponent<MeshComponent>("witch");
 	    mesh->SetPosition({0.0f, -1.5f, 0.0f});
         cameraComponent = AttachComponent<CameraComponent>();
-        cameraComponent->Activate();
 
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())
@@ -68,6 +67,11 @@ namespace Vox
 
 	    Actor::Tick(deltaTime);
 	}
+
+    void Character::Play()
+    {
+        cameraComponent->Activate();
+    }
 
     void Character::RotateCamera(const int x, const int y) const
     {

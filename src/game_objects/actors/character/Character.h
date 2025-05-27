@@ -25,6 +25,8 @@ namespace Vox
 
 		void Tick(float deltaTime) override;
 
+	    void Play() override;
+
 	private:
         void RotateCamera(int x, int y) const;
 

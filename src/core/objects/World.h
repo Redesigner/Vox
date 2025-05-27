@@ -55,6 +55,8 @@ namespace Vox
 
         void RegisterTickable(Tickable* tickable);
 
+        void Play();
+
         void Pause();
 
         void Restart();

@@ -4,7 +4,6 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
 
-#include "../../out/build/default/vcpkg_installed/vcpkg/blds/imgui/src/v1.91.9-afb09617a6.clean/imgui_internal.h"
 #include "ClassList.h"
 #include "EditorViewport.h"
 #include "actor_editor/ActorEditor.h"
@@ -12,7 +11,6 @@
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
 #include "rendering/SceneRenderer.h"
-#include "rendering/gizmos/Gizmo.h"
 
 namespace Vox
 {
@@ -170,6 +168,10 @@ namespace Vox
     {
         currentWorld = world;
         world->GetRenderer()->viewport = primaryViewport;
+        const std::shared_ptr<Camera>& defaultCamera = world->GetRenderer()->GetCurrentCamera();
+        constexpr glm::vec3 cameraDefaultRotation = {glm::radians(22.5f), glm::radians(-45.0f), 0.0f};
+        defaultCamera->SetRotation(cameraDefaultRotation);
+        defaultCamera->SetPosition(defaultCamera->GetForwardVector() * 5.0f);
     }
 
     ImFont* Editor::GetFont_GitLab14()

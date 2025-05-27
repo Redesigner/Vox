@@ -74,6 +74,10 @@ namespace Vox
         switch (worldState)
         {
         case Playing:
+            if (state == Inactive)
+            {
+                Play();
+            }
             break;
         case Paused:
             Pause();
@@ -110,6 +114,14 @@ namespace Vox
     void World::RegisterTickable(Tickable* tickable)
     {
         actorsToTick.push_back(tickable);
+    }
+
+    void World::Play()
+    {
+        for (Tickable* tickable : actorsToTick)
+        {
+            tickable->Play();
+        }
     }
 
     void World::Pause()

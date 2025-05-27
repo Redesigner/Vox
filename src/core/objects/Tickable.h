@@ -13,6 +13,8 @@ namespace Vox
         virtual ~Tickable() = default;
 
         virtual void Tick(float DeltaTime) = 0;
+
+        virtual void Play() {}
     };
 
 } // Vox
