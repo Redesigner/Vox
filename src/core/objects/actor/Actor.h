@@ -18,11 +18,6 @@ namespace  Vox
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
         void PropertyChanged(const Property& property) override;
-
-        std::weak_ptr<Component> GetWeakChild(const Component* component) const;
-        std::weak_ptr<Component> GetWeakChild(const SceneComponent* component) const;
-
-        [[nodiscard]] const std::vector<std::shared_ptr<Component>>& GetComponents() const;
         
         [[nodiscard]] const std::vector<std::shared_ptr<SceneComponent>>& GetAttachedComponents() const;
 
@@ -43,20 +38,6 @@ namespace  Vox
 
     protected:
         template <typename T, typename... Args>
-        std::shared_ptr<T> RegisterComponent(Args&&... args) requires Derived<T, Component> && !Derived<T, SceneComponent>
-        {
-            ObjectInitializer objectInitializer;
-            objectInitializer.world = world;
-            objectInitializer.parent = this;
-            auto result = std::static_pointer_cast<T>(components.emplace_back(Component::Create<T>(objectInitializer, std::forward<Args>(args)...)));
-            if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
-            {
-                tickableComponents.emplace_back(std::move(tickable));
-            }
-            return result;
-        }
-
-        template <typename T, typename... Args>
         std::shared_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
         {
             ObjectInitializer objectInitializer;
@@ -74,8 +55,6 @@ namespace  Vox
         void UpdateChildTransforms() const;
         
         Transform transform;
-
-        std::vector<std::shared_ptr<Component>> components;
 
         std::vector<std::shared_ptr<SceneComponent>> attachedComponents;
 

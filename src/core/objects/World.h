@@ -31,7 +31,9 @@ namespace Vox
         template <typename T, class... Args>
         std::shared_ptr<T> CreateObject(Args&&... args) requires Derived<T, Object>
         {
-            std::shared_ptr<T> newObject = std::static_pointer_cast<T>(objects.emplace_back(std::make_shared<T>(this, std::forward<Args>(args)...)));
+            std::shared_ptr<T> newObject = std::static_pointer_cast<T>(objects.emplace_back(
+                std::make_shared<T>(ObjectInitializer(this), std::forward<Args>(args)...))
+            );
             InsertCheckTickable(newObject);
             return newObject;
         }

@@ -35,7 +35,10 @@ namespace Vox
         {
             return;
         }
-        GetParent()->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
+        if (const auto* actor = dynamic_cast<Actor*>(GetParent()))
+        {
+            actor->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
+        }
     }
 
     void CameraComponent::SetArmLength(float length)

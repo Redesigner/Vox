@@ -15,6 +15,6 @@ namespace Vox
 
         AttachComponent<MeshComponent>("witch");
         AttachComponent<SkeletalMeshComponent>("scorpion");
-        RegisterComponent<TestComponent>();
+        CreateChild<TestComponent>("Test component");
     }
 }

@@ -89,18 +89,10 @@ namespace Vox
         return worldTransform;
     }
 
-    std::weak_ptr<Component> SceneComponent::GetWeakThis() const
-    {
-        if (!GetParent())
-        {
-            return {};
-        }
-        return GetParent()->GetWeakChild(this);
-    }
 
     void SceneComponent::UpdateTransform()
     {
-        if (const Actor* parent = GetParent())
+        if (const Actor* parent = GetActor())
         {
             worldTransform = Transform(parent->GetTransform().GetMatrix() * localTransform.GetMatrix());
         }

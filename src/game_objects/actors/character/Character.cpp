@@ -45,7 +45,7 @@ namespace Vox
         });
 	}
 
-    Character::~Character()
+    Character::~Character() // NOLINT(*-use-equals-default)
     {
 	    ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_SPACE, jumpCallback);
 	    ServiceLocator::GetInputService()->UnregisterMouseMotionCallback(mouseLookCallback);

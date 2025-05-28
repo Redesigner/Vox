@@ -3,7 +3,7 @@
 namespace Vox
 {
     Actor::Actor(const ObjectInitializer& objectInitializer)
-        :world(objectInitializer.world)
+        :Object(objectInitializer), world(objectInitializer.world)
     {
     }
 
@@ -18,41 +18,6 @@ namespace Vox
         {
             UpdateChildTransforms();
         }
-    }
-
-    std::weak_ptr<Component> Actor::GetWeakChild(const SceneComponent* component) const
-    {
-        auto result = std::ranges::find_if(attachedComponents, [component](const std::shared_ptr<Component>& ownedComponent)
-        {
-            return ownedComponent.get() == component;
-        });
-
-        if (result != attachedComponents.end())
-        {
-            return *result;
-        }
-
-        return {};
-    }
-
-    std::weak_ptr<Component> Actor::GetWeakChild(const Component* component) const
-    {
-        auto result = std::ranges::find_if(components, [component](const std::shared_ptr<Component>& ownedComponent)
-        {
-            return ownedComponent.get() == component;
-        });
-
-        if (result != components.end())
-        {
-            return *result;
-        }
-
-        return {};
-    }
-
-    const std::vector<std::shared_ptr<Component>>& Actor::GetComponents() const
-    {
-        return components;
     }
 
     const std::vector<std::shared_ptr<SceneComponent>>& Actor::GetAttachedComponents() const

@@ -23,17 +23,17 @@
 
 namespace Vox
 {
-    class Actor;
+    class Object;
     class World;
 
     struct ObjectInitializer
     {
         ObjectInitializer();
-        ObjectInitializer(World* world);
-        ObjectInitializer(Actor* parent);
+        explicit ObjectInitializer(World* world);
+        explicit ObjectInitializer(Object* parent);
 
         World* world = nullptr;
-        Actor* parent = nullptr;
+        Object* parent = nullptr;
     };
     class ObjectClass;
 
@@ -41,7 +41,7 @@ namespace Vox
     class Object
     {
     public:
-        Object() = default;
+        explicit Object(const ObjectInitializer& objectInitializer);
         virtual ~Object() = default;
 
         Object(Object&) = delete;
@@ -69,10 +69,36 @@ namespace Vox
 
         void SetName(const std::string& name);
 
-        nlohmann::ordered_json Serialize();
+        void AddChild(const std::shared_ptr<Object>& child);
+
+        [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetChildren() const;
+
+        [[nodiscard]] nlohmann::ordered_json Serialize();
+
+        [[nodiscard]] virtual Object* GetParent() const;
+
+        [[nodiscard]] std::shared_ptr<Object> GetSharedChild() const;
+
+        [[nodiscard]] std::shared_ptr<Object> GetSharedThis() const;
+
+        [[nodiscard]] std::shared_ptr<Object> GetSharedChild(Object* object) const;
         
     protected:
+        template<typename T>
+        void CreateChild(const std::string& name)
+        {
+            std::shared_ptr<T> newObject = T::template GetConstructor<T>()(ObjectInitializer(this));
+            newObject->SetName(name);
+            AddChild(newObject);
+        }
+
         std::string displayName;
+
+    private:
+        // @TODO: rework this into weak ptrs?
+        Object* parent;
+
+        std::vector<std::shared_ptr<Object>> children;
         
     };
 }

@@ -3,6 +3,7 @@
 namespace Vox
 {
     TestObject::TestObject(const ObjectInitializer& objectInitializer)
+        :Object(objectInitializer)
     {
         displayName = fmt::format("{}_Default", classDisplayName);
     }

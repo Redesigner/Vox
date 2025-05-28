@@ -184,7 +184,11 @@ int main()
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         testWorld->CreateObject("Test Actor");
 
-        testWorld->CreateObject<Character>();
+        std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
+        nlohmann::ordered_json serializedCharacter = character->Serialize();
+        std::string serializedCharacterString = serializedCharacter.dump(4);
+        VoxLog(Display, Game, "{}", serializedCharacterString);
+        character.reset();
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;

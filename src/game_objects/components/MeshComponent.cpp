@@ -46,12 +46,16 @@ namespace Vox
 #ifdef EDITOR
     void MeshComponent::Clicked(glm::ivec2 position)
     {
-        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetWeakThis().lock());
+        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetSharedThis());
     }
 
     void MeshComponent::Select()
     {
-        GetParent()->GetWorld()->GetRenderer()->AddMeshOutline(mesh);
+        // @TODO: use proper getworld function
+        if (const auto* world = dynamic_cast<World*>(GetParent()->GetParent()))
+        {
+           world->GetRenderer()->AddMeshOutline(mesh);
+        }
     }
 #endif
 }

@@ -82,7 +82,7 @@ namespace Vox
             {
                 gizmo->SetTransform(component->GetWorldTransform());
                 gizmo->Update();
-                Transform newTransform = Transform(glm::inverse(component->GetParent()->GetTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
+                Transform newTransform = Transform(glm::inverse(component->GetActor()->GetTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
                 component->SetTransform(newTransform);
             }
 
@@ -161,7 +161,7 @@ namespace Vox
                     }
                 }
                 
-                for (const std::shared_ptr<Component>& component : actor->GetComponents())
+                for (const std::shared_ptr<Object>& component : actor->GetChildren())
                 {
                     if (ImGui::Selectable(
                         fmt::format("\t{}", component->GetDisplayName()).c_str(),

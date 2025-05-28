@@ -12,7 +12,7 @@ namespace Vox
     public:
         explicit Component(const ObjectInitializer& objectInitializer);
 
-        [[nodiscard]] Actor* GetParent() const;
+        [[nodiscard]] Actor* GetActor() const;
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
@@ -23,12 +23,7 @@ namespace Vox
             return result;
         }
 
-    protected:
-        [[nodiscard]] virtual std::weak_ptr<Component> GetWeakThis() const;
-
     private:
-        Actor* parent = nullptr;
-        
         IMPLEMENT_OBJECT(Component)
     };
 }

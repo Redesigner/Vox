@@ -91,12 +91,15 @@ namespace Vox
 #ifdef EDITOR
     void SkeletalMeshComponent::Clicked(glm::ivec2 position)
     {
-        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetWeakThis().lock());
+        mesh->GetMeshOwner()->GetOwner()->viewport.lock()->OnObjectSelected(GetSharedThis());
     }
 
     void SkeletalMeshComponent::Select()
     {
-        GetParent()->GetWorld()->GetRenderer()->AddMeshOutline(mesh);
+        if (const auto* world = dynamic_cast<World*>(GetParent()->GetParent()))
+        {
+            world->GetRenderer()->AddMeshOutline(mesh);
+        }
     }
 #endif
 }

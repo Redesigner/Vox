@@ -5,25 +5,21 @@
 namespace Vox
 {
     Component::Component(const ObjectInitializer& objectInitializer)
-        :parent(objectInitializer.parent)
+        :Object(objectInitializer)
     {
     }
 
-    Actor* Component::GetParent() const
+    Actor* Component::GetActor() const
     {
-        return parent;
+        if (auto* parent = dynamic_cast<Actor*>(GetParent()))
+        {
+            return parent;
+        }
+
+        return nullptr;
     }
 
     void Component::BuildProperties(std::vector<Property>& propertiesInOut)
     {
-    }
-
-    std::weak_ptr<Component> Component::GetWeakThis() const
-    {
-        if (!parent)
-        {
-            return {};
-        }
-        return parent->GetWeakChild(this);
     }
 }
