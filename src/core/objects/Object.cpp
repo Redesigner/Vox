@@ -62,17 +62,29 @@ namespace Vox
         return children;
     }
 
-    nlohmann::ordered_json Object::Serialize()
+    // May need to create some kind of stack limit here
+    nlohmann::ordered_json Object::Serialize() // NOLINT(*-no-recursion)
     {
         using json = nlohmann::ordered_json;
 
         json objectJson {};
         objectJson[displayName]["class"] = GetClassDisplayName();
 
+        objectJson[displayName]["properties"] = json::value_type::object();
         for (const Property& property : GetProperties())
         {
             json propertyJson = property.Serialize(this);
-            objectJson[displayName].insert(propertyJson.begin(), propertyJson.end());
+            objectJson[displayName]["properties"].insert(propertyJson.begin(), propertyJson.end());
+        }
+
+        if (!children.empty())
+        {
+            objectJson[displayName]["children"] = json::value_type::object();
+            for (const auto& child : children)
+            {
+                json childJson = child->Serialize();
+                objectJson[displayName]["children"].insert(childJson.begin(), childJson.end());
+            }
         }
         return objectJson;
     }
@@ -82,19 +94,6 @@ namespace Vox
         return parent;
     }
 
-    std::shared_ptr<Object> Object::GetSharedChild() const
-    {
-        for (const std::shared_ptr<Object>& child : parent->GetChildren())
-        {
-            if (child.get() == this)
-            {
-                return child;
-            }
-        }
-
-        return {};
-    }
-
     std::shared_ptr<Object> Object::GetSharedThis() const
     {
         if (!parent)
@@ -102,7 +101,7 @@ namespace Vox
             return {};
         }
 
-        if (auto result = parent->GetSharedChild())
+        if (auto result = parent->GetSharedChild(this))
         {
             return result;
         }
@@ -111,7 +110,7 @@ namespace Vox
         return {};
     }
 
-    std::shared_ptr<Object> Object::GetSharedChild(Object* object) const
+    std::shared_ptr<Object> Object::GetSharedChild(const Object* object) const
     {
         auto result = std::ranges::find_if(children, [object](const std::shared_ptr<Object>& childObject)
         {
@@ -121,6 +120,19 @@ namespace Vox
         if (result != children.end())
         {
             return *result;
+        }
+
+        return {};
+    }
+
+    std::shared_ptr<Object> Object::GetChildByName(const std::string& name) const
+    {
+        for (const auto& child : children)
+        {
+            if (child->GetDisplayName() == name)
+            {
+                return child;
+            }
         }
 
         return {};

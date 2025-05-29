@@ -77,11 +77,11 @@ namespace Vox
 
         [[nodiscard]] virtual Object* GetParent() const;
 
-        [[nodiscard]] std::shared_ptr<Object> GetSharedChild() const;
-
         [[nodiscard]] std::shared_ptr<Object> GetSharedThis() const;
 
-        [[nodiscard]] std::shared_ptr<Object> GetSharedChild(Object* object) const;
+        [[nodiscard]] std::shared_ptr<Object> GetSharedChild(const Object* object) const;
+
+        [[nodiscard]] std::shared_ptr<Object> GetChildByName(const std::string& name) const;
         
     protected:
         template<typename T>

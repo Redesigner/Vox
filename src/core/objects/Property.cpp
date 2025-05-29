@@ -6,7 +6,7 @@
 
 namespace Vox
 {
-    std::string GetPropertyTypeString(const PropertyType type)
+    constexpr std::string GetPropertyTypeString(const PropertyType type)
     {
         switch (type)
         {
@@ -30,6 +30,51 @@ namespace Vox
         default:
             return "invalid";
         }
+    }
+
+    PropertyType GetPropertyTypeFromString(const std::string& propertyTypeString)
+    {
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_bool))
+        {
+            return PropertyType::_bool;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_int))
+        {
+            return PropertyType::_int;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_uint))
+        {
+            return PropertyType::_uint;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_float))
+        {
+            return PropertyType::_float;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_string))
+        {
+            return PropertyType::_string;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_vec3))
+        {
+            return PropertyType::_vec3;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_quat))
+        {
+            return PropertyType::_quat;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_transform))
+        {
+            return PropertyType::_transform;
+        }
+
+        return PropertyType::_invalid;
     }
 
     Property::Property(const std::string& name, const PropertyType propertyType, const size_t offset)
@@ -123,5 +168,94 @@ namespace Vox
             }
         }
         return propertyJson;
+    }
+
+    std::pair<PropertyType, PropertyVariant> Property::Deserialize(
+        const nlohmann::ordered_json& property)
+    {
+        using Json = nlohmann::json;
+        using TypedVariant = std::pair<PropertyType, PropertyVariant>;
+        if (!property.contains("type") || !property["type"].is_string() || !property.contains("value"))
+        {
+            return TypedVariant{PropertyType::_invalid, {}};
+        }
+
+        PropertyType type = GetPropertyTypeFromString(property["type"]);
+        const Json& propertyValue = property["value"];
+
+        PropertyVariant variant;
+        switch(type)
+        {
+        case PropertyType::_bool:
+            return propertyValue.is_boolean() ? TypedVariant{type, propertyValue.get<Json::value_type::boolean_t>()} :
+            TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_int:
+            return propertyValue.is_number_integer() ? TypedVariant{type, static_cast<int>(propertyValue.get<Json::value_type::number_integer_t>())} :
+            TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_uint:
+            return propertyValue.is_number_integer() ? TypedVariant{type, static_cast<unsigned int>(propertyValue.get<Json::value_type::number_integer_t>())} :
+            TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_float:
+            return propertyValue.is_number_float() ? TypedVariant{type, static_cast<float>(propertyValue.get<Json::value_type::number_float_t>())} :
+            TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_string:
+            return propertyValue.is_string() ? TypedVariant{type, propertyValue.get<Json::value_type::string_t>()} :
+            TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_vec3:
+            if (propertyValue.is_array())
+            {
+                if (propertyValue.size() == 3)
+                {
+                    if (propertyValue[0].is_number_float() && propertyValue[1].is_number_float() && propertyValue[2].is_number_float())
+                    {
+                        return TypedVariant{type, glm::vec3(propertyValue[0], propertyValue[1], propertyValue[2])};
+                    }
+                }
+            }
+            return TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_quat:
+            if (propertyValue.is_array())
+            {
+                if (propertyValue.size() == 3)
+                {
+                    if (propertyValue[0].is_number_float() && propertyValue[1].is_number_float() && propertyValue[2].is_number_float() && propertyValue[3].is_number_float())
+                    {
+                        return TypedVariant{type, glm::quat(propertyValue[0], propertyValue[1], propertyValue[2], propertyValue[3])};
+                    }
+                }
+            }
+            return TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_transform:
+            if (propertyValue.is_array())
+            {
+                if (propertyValue.size() == 9)
+                {
+                    for (int i = 0; i < 9; ++i)
+                    {
+                        if (!propertyValue[i].is_number_float())
+                        {
+                            return TypedVariant{PropertyType::_invalid, {}};
+                        }
+                    }
+                    return TypedVariant{type, Transform(
+                        {propertyValue[0], propertyValue[1], propertyValue[2]},
+                        {propertyValue[3], propertyValue[4], propertyValue[5]},
+                        {propertyValue[6], propertyValue[7], propertyValue[8]}
+                    )};
+                }
+            }
+            return TypedVariant{PropertyType::_invalid, {}};
+
+        case PropertyType::_invalid:
+        default:
+            return TypedVariant{PropertyType::_invalid, {}};
+        }
     }
 }

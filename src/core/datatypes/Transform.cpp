@@ -23,6 +23,11 @@ namespace Vox
 		rotation = glm::eulerAngles(rotationQuat);
 	}
 
+    Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+        :position(position), rotation(rotation), scale(scale)
+    {
+    }
+
     bool Transform::operator==(const Transform& other) const
     {
         return position == other.position && rotation == other.rotation && scale == other.scale;

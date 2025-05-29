@@ -37,6 +37,8 @@ target_sources(Vox PRIVATE
 	"src/core/objects/ObjectClass.h"
 	"src/core/objects/Property.cpp"
 	"src/core/objects/Property.h"
+	"src/core/objects/Prefab.cpp"
+	"src/core/objects/Prefab.h"
 	"src/core/objects/TestObject.cpp"
 	"src/core/objects/TestObject.h"
 	"src/core/objects/TestObjectChild.cpp"

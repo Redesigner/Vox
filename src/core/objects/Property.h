@@ -4,6 +4,7 @@
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 
 #include "core/datatypes/Transform.h"
 
@@ -33,7 +34,11 @@ namespace Vox
         _invalid
     };
 
-    static std::string GetPropertyTypeString(PropertyType type);
+    using PropertyVariant = std::variant<bool, int, unsigned int, float, std::string, glm::vec3, glm::quat, Transform>;
+
+    static constexpr std::string GetPropertyTypeString(PropertyType type);
+
+    static PropertyType GetPropertyTypeFromString(const std::string& propertyTypeString);
 
     template<typename Parent, typename Child>
     size_t objectOffset(Child* object)
@@ -85,6 +90,8 @@ namespace Vox
         static std::string FormatProperty(std::string propertyString);
 
         nlohmann::ordered_json Serialize(void* objectLocation) const;
+
+        static std::pair<PropertyType, PropertyVariant> Deserialize(const nlohmann::ordered_json& property);
         
     private:
         size_t propertyLocationOffset = 0;

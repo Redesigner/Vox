@@ -23,11 +23,13 @@
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
+#include "core/objects/Prefab.h"
 #include "core/objects/TestObjectChild.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/TestActor.h"
 #include "core/objects/component/TestComponent.h"
 #include "core/services/EditorService.h"
+#include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
@@ -187,7 +189,9 @@ int main()
         std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
         nlohmann::ordered_json serializedCharacter = character->Serialize();
         std::string serializedCharacterString = serializedCharacter.dump(4);
-        VoxLog(Display, Game, "{}", serializedCharacterString);
+        ServiceLocator::GetFileIoService()->WriteToFile("prefabs/test.json", serializedCharacterString);
+        Prefab testPrefab = Prefab("test.json");
+
         character.reset();
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {

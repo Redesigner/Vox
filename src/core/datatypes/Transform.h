@@ -12,6 +12,7 @@ namespace Vox
 	{
 		Transform();
 		explicit  Transform(const glm::mat4x4& matrix);
+	    Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
 
 	    bool operator ==(const Transform& other) const;
 

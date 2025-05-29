@@ -44,6 +44,7 @@ namespace  Vox
             objectInitializer.world = world;
             objectInitializer.parent = this;
             auto result = std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(objectInitializer, std::forward<Args>(args)...)));
+            AddChild(result);
             if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
             {
                 tickableComponents.emplace_back(std::move(tickable));
