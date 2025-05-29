@@ -40,6 +40,10 @@ namespace Vox
     
     void MeshComponent::OnTransformUpdated()
     {
+        if (!mesh)
+        {
+            return;
+        }
         mesh->SetTransform(GetWorldTransform().GetMatrix());
     }
 

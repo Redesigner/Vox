@@ -97,6 +97,81 @@ namespace Vox
         return friendlyName;
     }
 
+    void Property::SetValue(void* objectLocation, PropertyType type, const PropertyVariant& value) const
+    {
+        switch (type)
+        {
+        case PropertyType::_bool:
+            GetValueChecked<bool>(objectLocation) = std::get<bool>(value);
+            break;
+
+        case PropertyType::_int:
+            GetValueChecked<int>(objectLocation) = std::get<int>(value);
+            break;
+
+        case PropertyType::_uint:
+            GetValueChecked<unsigned int>(objectLocation) = std::get<unsigned int>(value);
+            break;
+
+        case PropertyType::_float:
+            GetValueChecked<float>(objectLocation) = std::get<float>(value);
+            break;
+
+        case PropertyType::_string:
+            GetValueChecked<std::string>(objectLocation) = std::get<std::string>(value);
+            break;
+
+        case PropertyType::_vec3:
+            GetValueChecked<glm::vec3>(objectLocation) = std::get<glm::vec3>(value);
+            break;
+
+        case PropertyType::_quat:
+            GetValueChecked<glm::quat>(objectLocation) = std::get<glm::quat>(value);
+            break;
+
+        case PropertyType::_transform:
+            GetValueChecked<Transform>(objectLocation) = std::get<Transform>(value);
+            break;
+
+        case PropertyType::_invalid:
+            break;
+        }
+    }
+
+    bool Property::ValueEquals(void* objectLocationA, void* objectLocationB) const
+    {
+        switch (type)
+        {
+        case PropertyType::_bool:
+            return GetValueChecked<bool>(objectLocationA) == GetValueChecked<bool>(objectLocationB);
+
+        case PropertyType::_int:
+            return GetValueChecked<int>(objectLocationA) == GetValueChecked<int>(objectLocationB);
+
+        case PropertyType::_uint:
+            return GetValueChecked<unsigned int>(objectLocationA) == GetValueChecked<unsigned int>(objectLocationB);
+
+        case PropertyType::_float:
+            return GetValueChecked<float>(objectLocationA) == GetValueChecked<float>(objectLocationB);
+
+        case PropertyType::_string:
+            return GetValueChecked<std::string>(objectLocationA) == GetValueChecked<std::string>(objectLocationB);
+
+        case PropertyType::_vec3:
+            return GetValueChecked<glm::vec3>(objectLocationA) == GetValueChecked<glm::vec3>(objectLocationB);
+
+        case PropertyType::_quat:
+            return GetValueChecked<glm::quat>(objectLocationA) == GetValueChecked<glm::quat>(objectLocationB);
+
+        case PropertyType::_transform:
+            return GetValueChecked<Transform>(objectLocationA) == GetValueChecked<Transform>(objectLocationB);
+
+        default:
+        case PropertyType::_invalid:
+            return false;
+        }
+    }
+
     std::string Property::FormatProperty(std::string propertyString)
     {
         assert(!propertyString.empty());

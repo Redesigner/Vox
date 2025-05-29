@@ -187,10 +187,12 @@ int main()
         testWorld->CreateObject("Test Actor");
 
         std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
+        std::dynamic_pointer_cast<MeshComponent>(character->GetChildByName("Player Mesh"))->SetPosition({0.0f, 2.0f, 0.0f});
         nlohmann::ordered_json serializedCharacter = character->Serialize();
         std::string serializedCharacterString = serializedCharacter.dump(4);
         ServiceLocator::GetFileIoService()->WriteToFile("prefabs/test.json", serializedCharacterString);
         Prefab testPrefab = Prefab("test.json");
+        testPrefab.Construct(ObjectInitializer(testWorld.get()));
 
         character.reset();
         

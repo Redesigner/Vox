@@ -73,7 +73,7 @@ namespace Vox
 
         [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetChildren() const;
 
-        [[nodiscard]] nlohmann::ordered_json Serialize();
+        [[nodiscard]] nlohmann::ordered_json Serialize(std::shared_ptr<Object> defaultObject = nullptr);
 
         [[nodiscard]] virtual Object* GetParent() const;
 

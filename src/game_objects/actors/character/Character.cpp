@@ -21,16 +21,17 @@ namespace Vox
 	{
         DEFAULT_DISPLAY_NAME();
 
-        if (!objectInitializer.world)
-        {
-            return;
-        }
-
 		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 
 	    auto mesh = AttachComponent<MeshComponent>("witch");
 	    mesh->SetPosition({0.0f, -1.5f, 0.0f});
+        mesh->SetName("Player Mesh");
         cameraComponent = AttachComponent<CameraComponent>();
+
+        if (!objectInitializer.world)
+        {
+            return;
+        }
 
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())

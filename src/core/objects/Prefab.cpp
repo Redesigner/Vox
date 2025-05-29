@@ -14,6 +14,7 @@
 namespace Vox
 {
     Prefab::Prefab(const std::string& filename)
+        :parent(nullptr)
     {
         using Json = nlohmann::json;
 
@@ -24,6 +25,11 @@ namespace Vox
         }
 
         const Json prefabJson = Json::parse(jsonString);
+
+        if (prefabJson.empty())
+        {
+            return;
+        }
 
         const Json& objectRoot = prefabJson.front();
 
@@ -45,15 +51,20 @@ namespace Vox
         CreateOverrides(objectRoot, {});
     }
 
-    std::shared_ptr<Object> Prefab::Construct()
+    std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer) const
     {
         if (!parent)
         {
             return {};
         }
 
-        std::shared_ptr<Object> object = parent->GetConstructor()(ObjectInitializer());
+        std::shared_ptr<Object> object = parent->GetConstructor()(objectInitializer);
+        for (const auto& override : propertyOverrides)
+        {
+            OverrideProperty(object, override);
+        }
 
+        return object;
     }
 
     void Prefab::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
@@ -66,15 +77,14 @@ namespace Vox
         }
 
         const auto& propertiesObject = context["properties"];
-        for (auto& property : propertiesObject)
+        for (auto& property : propertiesObject.items())
         {
-            auto propertyParsed = Property::Deserialize(property);
+            auto propertyParsed = Property::Deserialize(property.value());
             if (propertyParsed.first == PropertyType::_invalid)
             {
                 break;
             }
-
-            propertyOverrides.emplace_back(currentPathStack, propertyParsed.first, propertyParsed.second);
+            propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed.first, propertyParsed.second);
         }
 
         if (!context.contains("children"))
@@ -95,5 +105,29 @@ namespace Vox
             childPathStack.emplace_back(child.key());
             CreateOverrides(child.value(), std::move(childPathStack));
         }
+    }
+
+    void Prefab::OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride)
+    {
+        std::shared_ptr<Object> currentObject = object;
+        for (const auto& objectName : propertyOverride.path)
+        {
+            currentObject = currentObject->GetChildByName(objectName);
+            if (!currentObject)
+            {
+                VoxLog(Warning, Game, "Prefab could not override property. Object '{}' was not found.", objectName);
+                return;
+            }
+        }
+
+        Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
+        if (!property)
+        {
+            VoxLog(Warning, Game, "Prefab could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, currentObject->GetDisplayName());
+            return;
+        }
+
+        property->SetValue(currentObject.get(), propertyOverride.type, propertyOverride.overrideValue);
+        currentObject->PropertyChanged(*property);
     }
 } // Vox

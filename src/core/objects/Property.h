@@ -87,6 +87,10 @@ namespace Vox
         /// Spaces and capitalization will be inserted
         [[nodiscard]] const std::string& GetFriendlyName() const;
 
+        void SetValue(void* objectLocation, PropertyType type, const PropertyVariant& value) const;
+
+        bool ValueEquals(void* objectLocationA, void* objectLocationB) const;
+
         static std::string FormatProperty(std::string propertyString);
 
         nlohmann::ordered_json Serialize(void* objectLocation) const;

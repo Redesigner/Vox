@@ -63,9 +63,14 @@ namespace Vox
     }
 
     // May need to create some kind of stack limit here
-    nlohmann::ordered_json Object::Serialize() // NOLINT(*-no-recursion)
+    nlohmann::ordered_json Object::Serialize(std::shared_ptr<Object> defaultObject) // NOLINT(*-no-recursion)
     {
         using json = nlohmann::ordered_json;
+
+        if (!defaultObject)
+        {
+            defaultObject = GetClass()->GetConstructor()(ObjectInitializer());
+        }
 
         json objectJson {};
         objectJson[displayName]["class"] = GetClassDisplayName();
@@ -73,6 +78,11 @@ namespace Vox
         objectJson[displayName]["properties"] = json::value_type::object();
         for (const Property& property : GetProperties())
         {
+            if (property.ValueEquals(defaultObject.get(), this))
+            {
+                continue;
+            }
+
             json propertyJson = property.Serialize(this);
             objectJson[displayName]["properties"].insert(propertyJson.begin(), propertyJson.end());
         }
@@ -82,9 +92,27 @@ namespace Vox
             objectJson[displayName]["children"] = json::value_type::object();
             for (const auto& child : children)
             {
-                json childJson = child->Serialize();
+                // Match children by names
+                json childJson = child->Serialize(defaultObject->GetChildByName(child->GetDisplayName()));
                 objectJson[displayName]["children"].insert(childJson.begin(), childJson.end());
             }
+        }
+
+
+        if (objectJson[displayName]["children"].empty() && objectJson[displayName]["properties"].empty())
+        {
+            objectJson.erase(displayName);
+            return objectJson;
+        }
+
+        if (objectJson[displayName]["properties"].empty())
+        {
+            objectJson[displayName].erase("properties");
+        }
+
+        if (objectJson[displayName]["children"].empty())
+        {
+            objectJson[displayName].erase("children");
         }
         return objectJson;
     }

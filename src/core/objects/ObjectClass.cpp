@@ -35,4 +35,19 @@ namespace Vox
 
         return result._Ptr;
     }
+
+    Property* ObjectClass::GetPropertyByName(const std::string& name) const
+    {
+        const auto result = std::ranges::find_if(properties, [name](const Property& property)
+        {
+            return property.GetName() == name;
+        });
+
+        if (result == properties.end())
+        {
+            return nullptr;
+        }
+
+        return result._Ptr;
+    }
 }

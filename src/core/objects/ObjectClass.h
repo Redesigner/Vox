@@ -17,6 +17,7 @@ namespace Vox
         [[nodiscard]] Constructor GetConstructor() const;
         [[nodiscard]] const std::vector<Property>& GetProperties() const;
         [[nodiscard]] Property* GetPropertyByType(PropertyType type) const;
+        [[nodiscard]] Property* GetPropertyByName(const std::string& name) const;
         
     private:
         Constructor constructor;
