@@ -69,41 +69,29 @@ namespace Vox
 
     void Prefab::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
     {
-        if (!context.contains("properties") || !context.is_object())
+        if (context.contains("properties") && context["properties"].is_object())
         {
-            VoxLog(Warning, Game, "Unable to parse object from json. The object does not have a valid properties list. "
-                "Check that the json is not malformed or corrupted.");
-            return;
-        }
-
-        const auto& propertiesObject = context["properties"];
-        for (auto& property : propertiesObject.items())
-        {
-            auto propertyParsed = Property::Deserialize(property.value());
-            if (propertyParsed.first == PropertyType::_invalid)
+            const auto& propertiesObject = context["properties"];
+            for (auto& property : propertiesObject.items())
             {
-                break;
+                auto propertyParsed = Property::Deserialize(property.value());
+                if (propertyParsed.first == PropertyType::_invalid)
+                {
+                    break;
+                }
+                propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed.first, propertyParsed.second);
             }
-            propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed.first, propertyParsed.second);
         }
 
-        if (!context.contains("children"))
+        if (context.contains("children") && context["children"].is_object())
         {
-            return;
-        }
-
-        if (!context["children"].is_object())
-        {
-            VoxLog(Warning, Game, "Error parsing prefab. A list of children was found, but it was invalid.");
-            return;
-        }
-
-        const auto& childrenObject = context["children"];
-        for (const auto& child : childrenObject.items())
-        {
-            std::vector<std::string> childPathStack = currentPathStack;
-            childPathStack.emplace_back(child.key());
-            CreateOverrides(child.value(), std::move(childPathStack));
+            const auto& childrenObject = context["children"];
+            for (const auto& child : childrenObject.items())
+            {
+                std::vector<std::string> childPathStack = currentPathStack;
+                childPathStack.emplace_back(child.key());
+                CreateOverrides(child.value(), std::move(childPathStack));
+            }
         }
     }
 

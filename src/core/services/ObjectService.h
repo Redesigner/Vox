@@ -5,6 +5,7 @@
 #include "core/concepts/Concepts.h"
 #include "core/objects/Object.h"
 #include "core/objects/ObjectClass.h"
+#include "core/objects/Prefab.h"
 
 namespace Vox
 {    
@@ -26,6 +27,8 @@ namespace Vox
             );
         }
 
+        void RegisterPrefab(const std::string& filename);
+
         /// Register an object class, skipping if the class is already registered
         template <typename T>
         void RegisterObjectClassConditional() requires Derived<T, Object>
@@ -39,11 +42,19 @@ namespace Vox
 
         [[nodiscard]] const ObjectClass* GetObjectClass(const std::string& objectClassId) const;
 
-        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetBegin() const;
-        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetEnd() const;
+
+        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetClassBegin() const;
+        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetClassEnd() const;
+
+
+        [[nodiscard]] const Prefab* GetPrefab(const std::string& prefabId) const;
+
+        [[nodiscard]] std::unordered_map<std::string, Prefab>::const_iterator GetPrefabBegin() const;
+        [[nodiscard]] std::unordered_map<std::string, Prefab>::const_iterator GetPrefabEnd() const;
 
 
     private:
         std::unordered_map<std::string, ObjectClass> classRegistry;
+        std::unordered_map<std::string, Prefab> prefabRegistry;
     };
 }

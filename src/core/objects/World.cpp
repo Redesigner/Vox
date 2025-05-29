@@ -30,6 +30,18 @@ namespace Vox
         return result;
     }
 
+    std::shared_ptr<Object> World::CreatePrefab(const std::string& prefabName)
+    {
+        if (const Prefab* prefab = ServiceLocator::GetObjectService()->GetPrefab(prefabName))
+        {
+            auto result = objects.emplace_back(prefab->Construct(ObjectInitializer(this)));
+            InsertCheckTickable(result);
+            return result;
+        }
+
+        return {};
+    }
+
     void World::Tick(float deltaTime)
     {
         if (state != Playing)

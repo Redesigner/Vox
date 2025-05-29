@@ -5,6 +5,7 @@
 
 namespace Vox
 {
+    class Prefab;
     class SceneRenderer;
 }
 
@@ -41,6 +42,8 @@ namespace Vox
         std::shared_ptr<Object> CreateObject(const std::string& className);
 
         std::shared_ptr<Object> CreateObject(const ObjectClass* objectClass);
+
+        std::shared_ptr<Object> CreatePrefab(const std::string& prefabName);
 
         void Tick(float deltaTime);
 

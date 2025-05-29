@@ -179,6 +179,8 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
+        ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
+
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
@@ -187,12 +189,7 @@ int main()
         testWorld->CreateObject("Test Actor");
 
         std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
-        std::dynamic_pointer_cast<MeshComponent>(character->GetChildByName("Player Mesh"))->SetPosition({0.0f, 2.0f, 0.0f});
-        nlohmann::ordered_json serializedCharacter = character->Serialize();
-        std::string serializedCharacterString = serializedCharacter.dump(4);
-        ServiceLocator::GetFileIoService()->WriteToFile("prefabs/test.json", serializedCharacterString);
-        Prefab testPrefab = Prefab("test.json");
-        testPrefab.Construct(ObjectInitializer(testWorld.get()));
+        testWorld->CreatePrefab("test.json");
 
         character.reset();
         

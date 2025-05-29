@@ -153,14 +153,6 @@ namespace Vox
         {
             if (const Actor* actor = dynamic_cast<Actor*>(object.get()))
             {
-                for (const auto& sceneComponent : actor->GetAttachedComponents())
-                {
-                    if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str(), sceneComponent == currentlySelectedObject.lock()))
-                    {
-                        SetSelectedObject(sceneComponent);
-                    }
-                }
-                
                 for (const std::shared_ptr<Object>& component : actor->GetChildren())
                 {
                     if (ImGui::Selectable(
