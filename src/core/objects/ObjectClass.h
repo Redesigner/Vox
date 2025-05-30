@@ -13,6 +13,7 @@ namespace Vox
     public:
         using Constructor = std::function<std::shared_ptr<Object>(const ObjectInitializer&)>;
         ObjectClass(Constructor constructor, std::vector<Property> properties);
+        virtual ~ObjectClass() = default;
 
         [[nodiscard]] Constructor GetConstructor() const;
         [[nodiscard]] const std::vector<Property>& GetProperties() const;
@@ -22,5 +23,6 @@ namespace Vox
     protected:
         Constructor constructor;
         std::vector<Property> properties;
+        bool canBeRenamed = false;
     };
 }

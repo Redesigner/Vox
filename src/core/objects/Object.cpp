@@ -117,6 +117,42 @@ namespace Vox
         return objectJson;
     }
 
+    std::vector<PropertyOverride> Object::GenerateOverrides() const
+    {
+        std::vector<std::string> context {};
+        return GenerateOverrides(GetClass()->GetConstructor()(ObjectInitializer()), context);
+    }
+
+    std::vector<PropertyOverride> Object::GenerateOverrides(std::shared_ptr<Object> defaultObject,
+        std::vector<std::string>& context) const
+    {
+        std::vector<PropertyOverride> result;
+        for (const Property& property : GetProperties())
+        {
+            if (property.ValueEquals(defaultObject.get(), this))
+            {
+                continue;
+            }
+
+            result.emplace_back(context, property.GetName(), property.GetTypedVariant(this));
+        }
+
+        if (!children.empty())
+        {
+            for (const auto& child : children)
+            {
+                std::vector<std::string> childContext = context;
+                childContext.emplace_back(child->GetDisplayName());
+                std::vector<PropertyOverride> childOverrides = child->GenerateOverrides(
+                    defaultObject->GetChildByName(child->GetDisplayName()), childContext
+                );
+                result.insert(result.end(), childOverrides.begin(), childOverrides.end());
+            }
+        }
+
+        return result;
+    }
+
     Object* Object::GetParent() const
     {
         return parent;

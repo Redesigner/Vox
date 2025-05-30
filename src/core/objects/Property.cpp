@@ -32,6 +32,11 @@ namespace Vox
         }
     }
 
+    bool TypedPropertyVariant::operator==(const TypedPropertyVariant& other) const
+    {
+        return type == other.type && value == other.value;
+    }
+
     PropertyType GetPropertyTypeFromString(const std::string& propertyTypeString)
     {
         if (propertyTypeString == GetPropertyTypeString(PropertyType::_bool))
@@ -138,38 +143,9 @@ namespace Vox
         }
     }
 
-    bool Property::ValueEquals(void* objectLocationA, void* objectLocationB) const
+    bool Property::ValueEquals(const void* objectLocationA, const void* objectLocationB) const
     {
-        switch (type)
-        {
-        case PropertyType::_bool:
-            return GetValueChecked<bool>(objectLocationA) == GetValueChecked<bool>(objectLocationB);
-
-        case PropertyType::_int:
-            return GetValueChecked<int>(objectLocationA) == GetValueChecked<int>(objectLocationB);
-
-        case PropertyType::_uint:
-            return GetValueChecked<unsigned int>(objectLocationA) == GetValueChecked<unsigned int>(objectLocationB);
-
-        case PropertyType::_float:
-            return GetValueChecked<float>(objectLocationA) == GetValueChecked<float>(objectLocationB);
-
-        case PropertyType::_string:
-            return GetValueChecked<std::string>(objectLocationA) == GetValueChecked<std::string>(objectLocationB);
-
-        case PropertyType::_vec3:
-            return GetValueChecked<glm::vec3>(objectLocationA) == GetValueChecked<glm::vec3>(objectLocationB);
-
-        case PropertyType::_quat:
-            return GetValueChecked<glm::quat>(objectLocationA) == GetValueChecked<glm::quat>(objectLocationB);
-
-        case PropertyType::_transform:
-            return GetValueChecked<Transform>(objectLocationA) == GetValueChecked<Transform>(objectLocationB);
-
-        default:
-        case PropertyType::_invalid:
-            return false;
-        }
+        return GetTypedVariant(objectLocationA) == GetTypedVariant(objectLocationB);
     }
 
     std::string Property::FormatProperty(std::string propertyString)
@@ -180,7 +156,41 @@ namespace Vox
         return propertyString;
     }
 
-    nlohmann::ordered_json Property::Serialize(void* objectLocation) const
+    TypedPropertyVariant Property::GetTypedVariant(const void* objectLocation) const
+    {
+        switch (type)
+        {
+        case PropertyType::_bool:
+            return {type, GetValueChecked<bool>(objectLocation)};
+
+        case PropertyType::_int:
+            return {type, GetValueChecked<int>(objectLocation)};
+
+        case PropertyType::_uint:
+            return {type, GetValueChecked<unsigned int>(objectLocation)};
+
+        case PropertyType::_float:
+            return {type, GetValueChecked<float>(objectLocation)};
+
+        case PropertyType::_string:
+            return {type, GetValueChecked<std::string>(objectLocation)};
+
+        case PropertyType::_vec3:
+            return {type, GetValueChecked<glm::vec3>(objectLocation)};
+
+        case PropertyType::_quat:
+            return {type, GetValueChecked<glm::quat>(objectLocation)};
+
+        case PropertyType::_transform:
+            return {type, GetValueChecked<Transform>(objectLocation)};
+
+        case PropertyType::_invalid:
+        default:
+            return {type, nullptr};
+        }
+    }
+
+    nlohmann::ordered_json Property::Serialize(const void* objectLocation) const
     {
         using json = nlohmann::ordered_json;
 
@@ -245,14 +255,13 @@ namespace Vox
         return propertyJson;
     }
 
-    std::pair<PropertyType, PropertyVariant> Property::Deserialize(
+    TypedPropertyVariant Property::Deserialize(
         const nlohmann::ordered_json& property)
     {
         using Json = nlohmann::json;
-        using TypedVariant = std::pair<PropertyType, PropertyVariant>;
         if (!property.contains("type") || !property["type"].is_string() || !property.contains("value"))
         {
-            return TypedVariant{PropertyType::_invalid, {}};
+            return {PropertyType::_invalid, {}};
         }
 
         PropertyType type = GetPropertyTypeFromString(property["type"]);
@@ -262,24 +271,24 @@ namespace Vox
         switch(type)
         {
         case PropertyType::_bool:
-            return propertyValue.is_boolean() ? TypedVariant{type, propertyValue.get<Json::value_type::boolean_t>()} :
-            TypedVariant{PropertyType::_invalid, {}};
+            return propertyValue.is_boolean() ? TypedPropertyVariant{type, propertyValue.get<Json::value_type::boolean_t>()} :
+            TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_int:
-            return propertyValue.is_number_integer() ? TypedVariant{type, static_cast<int>(propertyValue.get<Json::value_type::number_integer_t>())} :
-            TypedVariant{PropertyType::_invalid, {}};
+            return propertyValue.is_number_integer() ? TypedPropertyVariant{type, static_cast<int>(propertyValue.get<Json::value_type::number_integer_t>())} :
+            TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_uint:
-            return propertyValue.is_number_integer() ? TypedVariant{type, static_cast<unsigned int>(propertyValue.get<Json::value_type::number_integer_t>())} :
-            TypedVariant{PropertyType::_invalid, {}};
+            return propertyValue.is_number_integer() ? TypedPropertyVariant{type, static_cast<unsigned int>(propertyValue.get<Json::value_type::number_integer_t>())} :
+            TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_float:
-            return propertyValue.is_number_float() ? TypedVariant{type, static_cast<float>(propertyValue.get<Json::value_type::number_float_t>())} :
-            TypedVariant{PropertyType::_invalid, {}};
+            return propertyValue.is_number_float() ? TypedPropertyVariant{type, static_cast<float>(propertyValue.get<Json::value_type::number_float_t>())} :
+            TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_string:
-            return propertyValue.is_string() ? TypedVariant{type, propertyValue.get<Json::value_type::string_t>()} :
-            TypedVariant{PropertyType::_invalid, {}};
+            return propertyValue.is_string() ? TypedPropertyVariant{type, propertyValue.get<Json::value_type::string_t>()} :
+            TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_vec3:
             if (propertyValue.is_array())
@@ -288,11 +297,11 @@ namespace Vox
                 {
                     if (propertyValue[0].is_number_float() && propertyValue[1].is_number_float() && propertyValue[2].is_number_float())
                     {
-                        return TypedVariant{type, glm::vec3(propertyValue[0], propertyValue[1], propertyValue[2])};
+                        return TypedPropertyVariant{type, glm::vec3(propertyValue[0], propertyValue[1], propertyValue[2])};
                     }
                 }
             }
-            return TypedVariant{PropertyType::_invalid, {}};
+            return TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_quat:
             if (propertyValue.is_array())
@@ -301,11 +310,11 @@ namespace Vox
                 {
                     if (propertyValue[0].is_number_float() && propertyValue[1].is_number_float() && propertyValue[2].is_number_float() && propertyValue[3].is_number_float())
                     {
-                        return TypedVariant{type, glm::quat(propertyValue[0], propertyValue[1], propertyValue[2], propertyValue[3])};
+                        return TypedPropertyVariant{type, glm::quat(propertyValue[0], propertyValue[1], propertyValue[2], propertyValue[3])};
                     }
                 }
             }
-            return TypedVariant{PropertyType::_invalid, {}};
+            return TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_transform:
             if (propertyValue.is_array())
@@ -316,21 +325,21 @@ namespace Vox
                     {
                         if (!propertyValue[i].is_number_float())
                         {
-                            return TypedVariant{PropertyType::_invalid, {}};
+                            return TypedPropertyVariant{PropertyType::_invalid, {}};
                         }
                     }
-                    return TypedVariant{type, Transform(
+                    return TypedPropertyVariant{type, Transform(
                         {propertyValue[0], propertyValue[1], propertyValue[2]},
                         {propertyValue[3], propertyValue[4], propertyValue[5]},
                         {propertyValue[6], propertyValue[7], propertyValue[8]}
                     )};
                 }
             }
-            return TypedVariant{PropertyType::_invalid, {}};
+            return TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_invalid:
         default:
-            return TypedVariant{PropertyType::_invalid, {}};
+            return TypedPropertyVariant{PropertyType::_invalid, {}};
         }
     }
 }

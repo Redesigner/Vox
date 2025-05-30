@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 #include <nlohmann/adl_serializer.hpp>
 
+#include "PropertyOverride.h"
 #include "core/concepts/Concepts.h"
 #include "core/objects/Property.h"
 
@@ -74,6 +75,9 @@ namespace Vox
         [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetChildren() const;
 
         [[nodiscard]] nlohmann::ordered_json Serialize(std::shared_ptr<Object> defaultObject = nullptr);
+
+        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides() const;
+        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(std::shared_ptr<Object> defaultObject, std::vector<std::string>& context) const;
 
         [[nodiscard]] virtual Object* GetParent() const;
 

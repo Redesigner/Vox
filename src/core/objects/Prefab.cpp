@@ -50,6 +50,12 @@ namespace Vox
         CreateOverrides(objectRoot, {});
     }
 
+    PrefabContext::PrefabContext(const Object* object)
+    {
+        parent = object->GetClass();
+        propertyOverrides = object->GenerateOverrides();
+    }
+
     void PrefabContext::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
     {
         if (context.contains("properties") && context["properties"].is_object())
@@ -58,11 +64,11 @@ namespace Vox
             for (auto& property : propertiesObject.items())
             {
                 auto propertyParsed = Property::Deserialize(property.value());
-                if (propertyParsed.first == PropertyType::_invalid)
+                if (propertyParsed.type == PropertyType::_invalid)
                 {
                     break;
                 }
-                propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed.first, propertyParsed.second);
+                propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed);
             }
         }
 
@@ -82,6 +88,16 @@ namespace Vox
         :ObjectClass({}, {})
     {
         auto context = std::make_shared<PrefabContext>(filename);
+        constructor = [context](const ObjectInitializer& objectInitializer)
+        {
+            return Construct(objectInitializer, context.get());
+        };
+    }
+
+    Prefab::Prefab(const Object* object)
+        :ObjectClass({}, {})
+    {
+        auto context = std::make_shared<PrefabContext>(object);
         constructor = [context](const ObjectInitializer& objectInitializer)
         {
             return Construct(objectInitializer, context.get());
@@ -124,7 +140,7 @@ namespace Vox
             return;
         }
 
-        property->SetValue(currentObject.get(), propertyOverride.type, propertyOverride.overrideValue);
+        property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
         currentObject->PropertyChanged(*property);
     }
 } // Vox

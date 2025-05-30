@@ -36,6 +36,14 @@ namespace Vox
 
     using PropertyVariant = std::variant<bool, int, unsigned int, float, std::string, glm::vec3, glm::quat, Transform>;
 
+    struct TypedPropertyVariant
+    {
+        PropertyType type;
+        PropertyVariant value;
+
+        bool operator ==(const TypedPropertyVariant& other) const;
+    };
+
     static constexpr std::string GetPropertyTypeString(PropertyType type);
 
     static PropertyType GetPropertyTypeFromString(const std::string& propertyTypeString);
@@ -80,6 +88,13 @@ namespace Vox
             return *reinterpret_cast<T*>(static_cast<char*>(objectLocation) + propertyLocationOffset);
         }
 
+        template<typename T>
+        const T& GetValueChecked(const void* objectLocation) const
+        {
+            assert(GetType() == GetPropertyType<T>());
+            return *reinterpret_cast<const T*>(static_cast<const char*>(objectLocation) + propertyLocationOffset);
+        }
+
         /// Get the property name
         [[nodiscard]] const std::string& GetName() const;
         
@@ -89,13 +104,15 @@ namespace Vox
 
         void SetValue(void* objectLocation, PropertyType type, const PropertyVariant& value) const;
 
-        bool ValueEquals(void* objectLocationA, void* objectLocationB) const;
+        bool ValueEquals(const void* objectLocationA, const void* objectLocationB) const;
 
         static std::string FormatProperty(std::string propertyString);
 
-        nlohmann::ordered_json Serialize(void* objectLocation) const;
+        TypedPropertyVariant GetTypedVariant(const void* objectLocation) const;
 
-        static std::pair<PropertyType, PropertyVariant> Deserialize(const nlohmann::ordered_json& property);
+        nlohmann::ordered_json Serialize(const void* objectLocation) const;
+
+        static TypedPropertyVariant Deserialize(const nlohmann::ordered_json& property);
         
     private:
         size_t propertyLocationOffset = 0;

@@ -10,6 +10,7 @@
 
 #include "ObjectClass.h"
 #include "Property.h"
+#include "PropertyOverride.h"
 
 namespace Vox
 {
@@ -17,17 +18,10 @@ namespace Vox
     class Object;
     class ObjectClass;
 
-    struct PropertyOverride
-    {
-        std::vector<std::string> path;
-        std::string propertyName;
-        PropertyType type;
-        PropertyVariant overrideValue;
-    };
-
     struct PrefabContext
     {
-        PrefabContext(const std::string& filename);
+        explicit PrefabContext(const std::string& filename);
+        explicit PrefabContext(const Object* object);
 
         void CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack);
 
@@ -41,6 +35,8 @@ namespace Vox
     {
     public:
         explicit Prefab(const std::string& filename);
+        explicit Prefab(const Object* object);
+        ~Prefab() override = default;
 
     private:
         static std::shared_ptr<Object> Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext);

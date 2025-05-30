@@ -24,5 +24,7 @@ namespace Vox
 
     private:
         ObjectCallback doubleClickCallback;
+
+        ObjectClass* selectedObjectClass;
     };
 } // Vox

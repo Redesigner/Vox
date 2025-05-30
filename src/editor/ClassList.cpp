@@ -15,11 +15,11 @@ namespace Vox
 {
     ClassList::ClassList()
     {
+        selectedObjectClass = nullptr;
     }
 
     ClassList::~ClassList()
-    {
-    }
+    = default;
 
     void ClassList::Draw()
     {
@@ -44,6 +44,17 @@ namespace Vox
                     if (ImGui::IsItemFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
                         doubleClickCallback(&itr->second);
+                    }
+
+                    if (dynamic_cast<const Prefab*>(&itr->second))
+                    {
+                        if (ImGui::BeginPopupContextItem())
+                        {
+                            ImGui::Text("Edit name:");
+                            if (ImGui::Button("Close"))
+                                ImGui::CloseCurrentPopup();
+                            ImGui::EndPopup();
+                        }
                     }
                 }
 
