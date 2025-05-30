@@ -42,7 +42,7 @@ namespace Vox
 
     GBuffer::~GBuffer()
     {
-        VoxLog(Display, Rendering, "Destroying GBuffer...");
+        VoxLog(Verbose, Rendering, "Destroying GBuffer...");
         // VoxLog(Display, Rendering, "Destroying GBuffer textures '({}, {}, {}, {}, {})'", positionTexture, normalTexture, albedoTexture, metallicRoughnessTexture, depthTexture);
 
         const unsigned int textureIds[5] = {

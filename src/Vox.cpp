@@ -179,7 +179,7 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
-        ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
+         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);
@@ -189,7 +189,7 @@ int main()
         testWorld->CreateObject("Test Actor");
 
         std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
-        testWorld->CreatePrefab("test.json");
+        testWorld->CreateObject("test.json");
 
         character.reset();
         

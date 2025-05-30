@@ -19,7 +19,7 @@ namespace Vox
         [[nodiscard]] Property* GetPropertyByType(PropertyType type) const;
         [[nodiscard]] Property* GetPropertyByName(const std::string& name) const;
         
-    private:
+    protected:
         Constructor constructor;
         std::vector<Property> properties;
     };

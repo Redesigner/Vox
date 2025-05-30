@@ -105,10 +105,10 @@ namespace Vox
         if (const GLenum framebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER); framebufferStatus != GL_FRAMEBUFFER_COMPLETE)
         {
             VoxLog(Error, Rendering, "Failed to create FrameBuffer: {}",
-                   GetFramebufferStatusString(framebufferStatus));
+                GetFramebufferStatusString(framebufferStatus));
             return false;
         }
-        VoxLog(Display, Rendering, "Successfully created FrameBuffer.");
+        VoxLog(Verbose, Rendering, "Successfully created FrameBuffer.");
         return true;
     }
 }

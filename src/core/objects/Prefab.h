@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "ObjectClass.h"
 #include "Property.h"
 
 namespace Vox
@@ -24,22 +25,27 @@ namespace Vox
         PropertyVariant overrideValue;
     };
 
-    class Prefab
+    struct PrefabContext
     {
-    public:
-        explicit Prefab(const std::string& filename);
+        PrefabContext(const std::string& filename);
 
-        std::shared_ptr<Object> Construct(const ObjectInitializer& objectInitializer) const;
-
-    private:
         void CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack);
-
-        static void OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride);
 
         const ObjectClass* parent;
 
         std::vector<PropertyOverride> propertyOverrides;
         std::vector<Object> additionalObjects;
+    };
+
+    class Prefab : public ObjectClass
+    {
+    public:
+        explicit Prefab(const std::string& filename);
+
+    private:
+        static std::shared_ptr<Object> Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext);
+
+        static void OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride);
     };
 
 } // Vox

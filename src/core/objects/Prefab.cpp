@@ -13,8 +13,7 @@
 
 namespace Vox
 {
-    Prefab::Prefab(const std::string& filename)
-        :parent(nullptr)
+    PrefabContext::PrefabContext(const std::string& filename)
     {
         using Json = nlohmann::json;
 
@@ -51,23 +50,7 @@ namespace Vox
         CreateOverrides(objectRoot, {});
     }
 
-    std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer) const
-    {
-        if (!parent)
-        {
-            return {};
-        }
-
-        std::shared_ptr<Object> object = parent->GetConstructor()(objectInitializer);
-        for (const auto& override : propertyOverrides)
-        {
-            OverrideProperty(object, override);
-        }
-
-        return object;
-    }
-
-    void Prefab::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
+    void PrefabContext::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
     {
         if (context.contains("properties") && context["properties"].is_object())
         {
@@ -93,6 +76,32 @@ namespace Vox
                 CreateOverrides(child.value(), std::move(childPathStack));
             }
         }
+    }
+
+    Prefab::Prefab(const std::string& filename)
+        :ObjectClass({}, {})
+    {
+        auto context = std::make_shared<PrefabContext>(filename);
+        constructor = [context](const ObjectInitializer& objectInitializer)
+        {
+            return Construct(objectInitializer, context.get());
+        };
+    }
+
+    std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext)
+    {
+        if (!prefabContext->parent)
+        {
+            return {};
+        }
+
+        std::shared_ptr<Object> object = prefabContext->parent->GetConstructor()(objectInitializer);
+        for (const auto& override : prefabContext->propertyOverrides)
+        {
+            OverrideProperty(object, override);
+        }
+
+        return object;
     }
 
     void Prefab::OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride)

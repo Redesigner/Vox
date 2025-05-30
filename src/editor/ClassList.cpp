@@ -31,8 +31,8 @@ namespace Vox
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 0.0f));
                 ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
 
-                auto endItr = ServiceLocator::GetObjectService()->GetClassEnd();
-                for (auto itr = ServiceLocator::GetObjectService()->GetClassBegin(); itr != endItr; ++itr)
+                auto endItr = ServiceLocator::GetObjectService()->GetEnd();
+                for (auto itr = ServiceLocator::GetObjectService()->GetBegin(); itr != endItr; ++itr)
                 {
                     ImGui::Selectable(itr->first.c_str());
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))

@@ -43,8 +43,6 @@ namespace Vox
 
         std::shared_ptr<Object> CreateObject(const ObjectClass* objectClass);
 
-        std::shared_ptr<Object> CreatePrefab(const std::string& prefabName);
-
         void Tick(float deltaTime);
 
         void DestroyObject(const std::shared_ptr<Object>& object);
