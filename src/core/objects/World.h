@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "SavedWorld.h"
 #include "core/concepts/Concepts.h"
 #include "core/objects/Object.h"
 
@@ -35,7 +36,7 @@ namespace Vox
             std::shared_ptr<T> newObject = std::static_pointer_cast<T>(objects.emplace_back(
                 std::make_shared<T>(ObjectInitializer(this), std::forward<Args>(args)...))
             );
-            InsertCheckTickable(newObject);
+            PostObjectConstruct(newObject);
             return newObject;
         }
 
@@ -53,10 +54,23 @@ namespace Vox
 
         [[nodiscard]] WorldState GetWorldState() const;
 
+        void SaveToFile(const std::string& filename);
+
+        void Reload();
+
+        [[nodiscard]] SavedWorld Save() const;
+
+        void Load(const SavedWorld& savedWorld);
+
     private:
-        void InsertCheckTickable(const std::shared_ptr<Object>& object);
+        void PostObjectConstruct(const std::shared_ptr<Object>& object);
 
         void RegisterTickable(Tickable* tickable);
+
+        void CheckObjectName(const std::shared_ptr<Object>& object) const;
+
+        [[nodiscard]] std::shared_ptr<Object> FindObject(const std::string& name) const;
+        [[nodiscard]] std::shared_ptr<Object> FindObject(const std::shared_ptr<Object>& exclude, const std::string& name) const;
 
         void Play();
 

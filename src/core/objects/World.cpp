@@ -1,6 +1,10 @@
 ﻿#include "World.h"
 
+#include <nlohmann/json.hpp>
+
+#include "core/math/Strings.h"
 #include "core/objects/Tickable.h"
+#include "core/services/FileIOService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "rendering/SceneRenderer.h"
@@ -17,7 +21,7 @@ namespace Vox
         if (const ObjectClass* objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
             auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
-            InsertCheckTickable(result);
+            PostObjectConstruct(result);
             return result;
         }
         return nullptr;
@@ -26,7 +30,7 @@ namespace Vox
     std::shared_ptr<Object> World::CreateObject(const ObjectClass* objectClass)
     {
         auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
-        InsertCheckTickable(result);
+        PostObjectConstruct(result);
         return result;
     }
 
@@ -95,6 +99,62 @@ namespace Vox
         return state;
     }
 
+    void World::SaveToFile(const std::string& filename)
+    {
+        if (state != WorldState::Inactive)
+        {
+            return;
+        }
+
+        using Json = nlohmann::ordered_json;
+
+        Json worldJson;
+        worldJson["objects"] = Json::object();
+        for (const auto& child : objects)
+        {
+            const Json& childJson = child->Serialize();
+            if (childJson.empty())
+            {
+                worldJson["objects"][child->GetDisplayName()] = Json::object();
+            }
+            else
+            {
+                worldJson["objects"].insert(childJson.begin(), childJson.end());
+            }
+        }
+
+        ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename, worldJson.dump(4));
+    }
+
+    void World::Reload()
+    {
+        SavedWorld save = Save();
+        objects.clear();
+        actorsToTick.clear();
+        Load(save);
+    }
+
+    SavedWorld World::Save() const
+    {
+        SavedWorld result;
+
+        for (const std::shared_ptr<Object>& child : objects)
+        {
+            result.savedObjects.emplace_back(child->GetDisplayName(), Prefab(child.get()));
+        }
+        return result;
+    }
+
+    void World::Load(const SavedWorld& savedWorld)
+    {
+        for (const SavedWorldObject& object : savedWorld.savedObjects)
+        {
+            const std::shared_ptr<Object> child = objects.emplace_back(object.prefab.GetConstructor()(ObjectInitializer(this)));
+            child->SetName(object.name);
+            PostObjectConstruct(child);
+        }
+    }
+
     World::World()
     {
         renderer = std::make_shared<SceneRenderer>();
@@ -103,8 +163,9 @@ namespace Vox
     World::~World()
     = default;
 
-    void World::InsertCheckTickable(const std::shared_ptr<Object>& object)
+    void World::PostObjectConstruct(const std::shared_ptr<Object>& object)
     {
+        CheckObjectName(object);
         if (const auto tickable = dynamic_cast<Tickable*>(object.get()))
         {
             RegisterTickable(tickable);
@@ -114,6 +175,43 @@ namespace Vox
     void World::RegisterTickable(Tickable* tickable)
     {
         actorsToTick.push_back(tickable);
+    }
+
+    void World::CheckObjectName(const std::shared_ptr<Object>& object) const
+    {
+        std::string objectName = object->GetDisplayName();
+        while (FindObject(object, objectName))
+        {
+            objectName = IncrementString(objectName);
+        }
+        object->SetName(objectName);
+    }
+
+    std::shared_ptr<Object> World::FindObject(const std::string& name) const
+    {
+        auto result = std::ranges::find_if(objects, [name](const std::shared_ptr<Object>& child)
+        {
+            return name == child->GetDisplayName();
+        });
+        if (result == objects.end())
+        {
+            return nullptr;
+        }
+        return *result;
+    }
+
+    std::shared_ptr<Object> World::FindObject(const std::shared_ptr<Object>& exclude,
+        const std::string& name) const
+    {
+        auto result = std::ranges::find_if(objects, [exclude, name](const std::shared_ptr<Object>& child)
+        {
+            return child != exclude && name == child->GetDisplayName();
+        });
+        if (result == objects.end())
+        {
+            return nullptr;
+        }
+        return *result;
     }
 
     void World::Play()

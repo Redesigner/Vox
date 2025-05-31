@@ -55,11 +55,7 @@ namespace Vox
 
     void MeshComponent::Select()
     {
-        // @TODO: use proper getworld function
-        if (const auto* world = dynamic_cast<World*>(GetParent()->GetParent()))
-        {
-           world->GetRenderer()->AddMeshOutline(mesh);
-        }
+        mesh->GetMeshOwner()->GetOwner()->AddMeshOutline(mesh);
     }
 #endif
 }

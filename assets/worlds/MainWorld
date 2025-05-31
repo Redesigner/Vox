@@ -1,0 +1,29 @@
+{
+    "objects": {
+        "Test Actor_Default": {},
+        "Character_Default": {
+            "class": "Character",
+            "children": {
+                "Player Mesh": {
+                    "class": "Mesh Component",
+                    "properties": {
+                        "localTransform": {
+                            "type": "transform",
+                            "value": [
+                                -3.971729040145874,
+                                0.0,
+                                0.0,
+                                0.0,
+                                -0.0,
+                                0.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

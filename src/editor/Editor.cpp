@@ -70,8 +70,10 @@ namespace Vox
             ImGui::PushFont(gitLabSans14);
 
             if (ImGui::Begin("Main", nullptr,
-                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize /*| ImGuiWindowFlags_MenuBar*/ | ImGuiWindowFlags_NoBringToFrontOnFocus))
+                ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus))
             {
+                DrawToolbar();
+
                 ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 4.0f);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
                 ImGui::BeginChild("MainUpper", ImVec2(0, 400), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
@@ -231,11 +233,29 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5.0f, 5.0f));
         if (ImGui::BeginMenu("File"))
         {
-            ImGui::MenuItem("New");
-            ImGui::MenuItem("Open");
-            ImGui::MenuItem("Save");
-            ImGui::Separator();
-            ImGui::MenuItem("Exit");
+            if (ImGui::MenuItem("Save"))
+            {
+                if (!currentWorld.expired())
+                {
+                    currentWorld.lock()->SaveToFile("MainWorld");
+                }
+            }
+
+            if (ImGui::MenuItem("Load"))
+            {
+                if (!currentWorld.expired())
+                {
+                    //currentWorld.lock()->L
+                }
+            }
+
+            if (ImGui::MenuItem("Reload"))
+            {
+                if (!currentWorld.expired())
+                {
+                    currentWorld.lock()->Reload();
+                }
+            }
             ImGui::EndMenu();
         }
         ImGui::PopStyleVar();

@@ -195,6 +195,7 @@ int main()
         testWorld->CreateObject(&test);
 
         character.reset();
+        testWorld->SaveToFile("testWorld");
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;

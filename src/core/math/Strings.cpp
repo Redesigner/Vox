@@ -24,7 +24,7 @@ namespace Vox
         }
 
         int stringNumberSuffix = std::stoi(string.substr(validNumIndex));
-        std::string nameWithoutNum = string.substr(0, stringNumberSuffix - 1);
+        std::string nameWithoutNum = string.substr(0, validNumIndex);
         nameWithoutNum.append(std::to_string(stringNumberSuffix + 1));
         return nameWithoutNum;
     }

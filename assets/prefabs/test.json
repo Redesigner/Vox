@@ -1,0 +1,26 @@
+{
+    "Character_Default": {
+        "class": "Character",
+        "children": {
+            "Player Mesh": {
+                "class": "Mesh Component",
+                "properties": {
+                    "localTransform": {
+                        "type": "transform",
+                        "value": [
+                            0.0,
+                            2.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

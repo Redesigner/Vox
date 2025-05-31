@@ -96,10 +96,7 @@ namespace Vox
 
     void SkeletalMeshComponent::Select()
     {
-        if (const auto* world = dynamic_cast<World*>(GetParent()->GetParent()))
-        {
-            world->GetRenderer()->AddMeshOutline(mesh);
-        }
+        mesh->GetMeshOwner()->GetOwner()->AddMeshOutline(mesh);
     }
 #endif
 }
