@@ -18,6 +18,9 @@ namespace Vox
 
     struct SavedWorld
     {
+        SavedWorld() = default;
+        explicit SavedWorld(const std::string& jsonString);
+
         std::vector<SavedWorldObject> savedObjects;
     };
 

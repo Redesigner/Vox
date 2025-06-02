@@ -45,6 +45,8 @@ target_sources(Vox PRIVATE
 	"src/core/objects/TestObjectChild.h"
 	"src/core/objects/World.cpp"
 	"src/core/objects/World.h"
+	"src/core/objects/SavedWorld.cpp"
+	"src/core/objects/SavedWorld.h"
 	"src/core/objects/actor/Actor.cpp"
 	"src/core/objects/actor/Actor.h"
 	"src/core/objects/actor/TestActor.cpp"

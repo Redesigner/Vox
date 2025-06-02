@@ -50,13 +50,33 @@ namespace Vox
         CreateOverrides(objectRoot, {});
     }
 
+    PrefabContext::PrefabContext(const nlohmann::json& jsonObject)
+    {
+        if (!jsonObject.contains("class") || !jsonObject["class"].is_string())
+        {
+            VoxLog(Warning, Game, "Unable to parse object from json. The object does not have a valid class. "
+                "Check that the json is not malformed or corrupted.");
+            return;
+        }
+
+        const ObjectClass* baseClass = ServiceLocator::GetObjectService()->GetObjectClass(jsonObject["class"]);
+        if (!baseClass)
+        {
+            VoxLog(Warning, Game, "Prefab could not find class '{}'.", jsonObject["class"].get<std::string>());
+            return;
+        }
+
+        parent = baseClass;
+        CreateOverrides(jsonObject, {});
+    }
+
     PrefabContext::PrefabContext(const Object* object)
     {
         parent = object->GetClass();
         propertyOverrides = object->GenerateOverrides();
     }
 
-    void PrefabContext::CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack)
+    void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack)
     {
         if (context.contains("properties") && context["properties"].is_object())
         {
@@ -79,7 +99,7 @@ namespace Vox
             {
                 std::vector<std::string> childPathStack = currentPathStack;
                 childPathStack.emplace_back(child.key());
-                CreateOverrides(child.value(), std::move(childPathStack));
+                CreateOverrides(child.value(), childPathStack);
             }
         }
     }
@@ -88,6 +108,16 @@ namespace Vox
         :ObjectClass({}, {})
     {
         auto context = std::make_shared<PrefabContext>(filename);
+        constructor = [context](const ObjectInitializer& objectInitializer)
+        {
+            return Construct(objectInitializer, context.get());
+        };
+    }
+
+    Prefab::Prefab(const nlohmann::json& jsonObject)
+        :ObjectClass({}, {})
+    {
+        auto context = std::make_shared<PrefabContext>(jsonObject);
         constructor = [context](const ObjectInitializer& objectInitializer)
         {
             return Construct(objectInitializer, context.get());

@@ -1,17 +1,51 @@
 {
     "objects": {
-        "Test Actor_Default": {},
         "Character_Default": {
             "class": "Character",
+            "properties": {
+                "transform": {
+                    "type": "transform",
+                    "value": [
+                        -2.934469223022461,
+                        1.4427464008331299,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        },
+        "Test Actor_Default": {
+            "class": "Test Actor",
+            "properties": {
+                "transform": {
+                    "type": "transform",
+                    "value": [
+                        0.0,
+                        0.0,
+                        -4.047450065612793,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
             "children": {
-                "Player Mesh": {
+                "Mesh Component_Default": {
                     "class": "Mesh Component",
                     "properties": {
                         "localTransform": {
                             "type": "transform",
                             "value": [
-                                -3.971729040145874,
-                                0.0,
+                                -1.7938636541366577,
+                                0.9711683988571167,
                                 0.0,
                                 0.0,
                                 -0.0,

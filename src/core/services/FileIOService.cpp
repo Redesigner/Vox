@@ -1,14 +1,18 @@
 ﻿#include "FileIOService.h"
 
+#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_iostream.h>
 
 #include "core/logging/Logging.h"
+#include "core/math/Strings.h"
 
 namespace Vox
 {
     FileIOService::FileIOService()
     {
-        rootPath  = "../../../";
+        // rootPath  = "../../../";
+        std::vector<std::string> basePathString = SplitString(GetBasePath(), '\\');
+        rootPath = JoinString(basePathString.begin(), basePathString.end() - 3, '/') + '/';
         assetPath = rootPath + "assets/";
     }
 
@@ -40,6 +44,11 @@ namespace Vox
     std::string FileIOService::LoadFile(const std::string& filename) const
     {
         const std::string filepath = assetPath + filename;
+        return LoadFileAbsolutePath(filepath);
+    }
+
+    std::string FileIOService::LoadFileAbsolutePath(const std::string& filepath)
+    {
         SDL_IOStream* fileStream = SDL_IOFromFile(filepath.c_str(), "r");
         if (!fileStream)
         {
@@ -57,5 +66,10 @@ namespace Vox
         SDL_CloseIO(fileStream);
 
         return resultString;
+    }
+
+    std::string FileIOService::GetBasePath()
+    {
+        return {SDL_GetBasePath()};
     }
 }

@@ -123,14 +123,12 @@ namespace Vox
             }
         }
 
-        ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename, worldJson.dump(4));
+        ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename + ".world", worldJson.dump(4));
     }
 
     void World::Reload()
     {
         SavedWorld save = Save();
-        objects.clear();
-        actorsToTick.clear();
         Load(save);
     }
 
@@ -147,6 +145,9 @@ namespace Vox
 
     void World::Load(const SavedWorld& savedWorld)
     {
+        objects.clear();
+        actorsToTick.clear();
+
         for (const SavedWorldObject& object : savedWorld.savedObjects)
         {
             const std::shared_ptr<Object> child = objects.emplace_back(object.prefab.GetConstructor()(ObjectInitializer(this)));

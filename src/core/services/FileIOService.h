@@ -14,6 +14,8 @@ namespace Vox
         void WriteToFile(const std::string& filename, const std::string& data);
 
         [[nodiscard]] std::string LoadFile(const std::string& filename) const;
+        [[nodiscard]] static std::string LoadFileAbsolutePath(const std::string& filepath);
+        [[nodiscard]] static std::string GetBasePath();
         
     private:
         std::string rootPath;

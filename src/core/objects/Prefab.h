@@ -20,9 +20,10 @@ namespace Vox
     struct PrefabContext
     {
         explicit PrefabContext(const std::string& filename);
+        explicit PrefabContext(const nlohmann::json& jsonObject);
         explicit PrefabContext(const Object* object);
 
-        void CreateOverrides(const nlohmann::json& context, std::vector<std::string> currentPathStack);
+        void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
 
         const ObjectClass* parent;
 
@@ -34,6 +35,7 @@ namespace Vox
     {
     public:
         explicit Prefab(const std::string& filename);
+        explicit Prefab(const nlohmann::json& jsonObject);
         explicit Prefab(const Object* object);
         ~Prefab() override = default;
 

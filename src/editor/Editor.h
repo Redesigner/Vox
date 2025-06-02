@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL3/SDL_dialog.h>
 #include <functional>
 #include <string>
 
@@ -67,11 +68,15 @@ namespace Vox
 		void DrawFileToolbar();
 		void DrawImportToolbar();
 
+	    void SaveWorldFile(const std::string& filepath);
+	    void OpenWorldFile(const std::string& filename);
+
 		void openGLTF();
 
 		std::function<void(std::string)> onGLTFOpened = [](std::string string) {};
 
 		static const char* gltfFilter[2];
+	    static SDL_DialogFileFilter worldFilter;
 
 		bool drawAssetViewer = false;
 

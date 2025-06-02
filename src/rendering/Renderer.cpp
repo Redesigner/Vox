@@ -56,6 +56,11 @@ namespace Vox
         glDeleteBuffers(1, &voxelMeshVao);
     }
 
+    SDL_Window* Renderer::GetWindow() const
+    {
+        return mainWindow;
+    }
+
 #ifdef EDITOR
     void Renderer::Render(Editor* editor)
     {

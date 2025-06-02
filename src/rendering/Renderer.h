@@ -59,6 +59,8 @@ namespace Vox
 		Renderer& operator =(const Renderer& other) = delete;
 		Renderer& operator =(Renderer&& other) = delete;
 
+	    [[nodiscard]] SDL_Window* GetWindow() const;
+
 #ifdef EDITOR
 		void Render(Editor* editor);
 

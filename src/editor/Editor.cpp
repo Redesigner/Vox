@@ -1,20 +1,26 @@
 #include "Editor.h"
 
+#include <SDL3/SDL_dialog.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
+#include <nlohmann/json.hpp>
 
 #include "ClassList.h"
 #include "EditorViewport.h"
 #include "actor_editor/ActorEditor.h"
+#include "core/services/FileIOService.h"
+#include "core/services/ServiceLocator.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
+#include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
     const char* Editor::gltfFilter[2] = { "*.gltf", "*.glb" };
+    SDL_DialogFileFilter Editor::worldFilter = {"World file (*.world)", "world"};
 
     Editor::Editor()
     {
@@ -243,10 +249,17 @@ namespace Vox
 
             if (ImGui::MenuItem("Load"))
             {
-                if (!currentWorld.expired())
+                SDL_DialogFileCallback callback = [](void *userdata, const char * const *filelist, int filter)
                 {
-                    //currentWorld.lock()->L
-                }
+                    if (filelist && *filelist)
+                    {
+                        static_cast<Editor*>(userdata)->OpenWorldFile(std::string(filelist[0]));
+                    }
+                };
+                std::string worldPath = ServiceLocator::GetFileIoService()->GetAssetPath() + "worlds//";
+                SDL_ShowOpenFileDialog(callback, this, ServiceLocator::GetRenderer()->GetWindow(), &worldFilter,
+                    1, worldPath.c_str(),
+                    false);
             }
 
             if (ImGui::MenuItem("Reload"))
@@ -273,6 +286,23 @@ namespace Vox
             ImGui::EndMenu();
         }
         ImGui::PopStyleVar();
+    }
+
+    void Editor::SaveWorldFile(const std::string& filepath)
+    {
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void Editor::OpenWorldFile(const std::string& filename)
+    {
+        using Json = nlohmann::json;
+
+        if (!currentWorld.expired())
+        {
+            const std::string& loadedWorldString = FileIOService::LoadFileAbsolutePath(filename);
+            const auto loadedWorld = SavedWorld(loadedWorldString);
+            currentWorld.lock()->Load(loadedWorld);
+        }
     }
 
 
