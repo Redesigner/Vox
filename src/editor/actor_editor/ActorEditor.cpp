@@ -7,6 +7,7 @@
 #include <imgui.h>
 
 #include "core/objects/World.h"
+#include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
@@ -37,6 +38,14 @@ namespace Vox
         defaultCamera->SetPosition(defaultCamera->GetForwardVector() * 5.0f);
 
         ServiceLocator::GetRenderer()->RegisterScene(world->GetRenderer());
+
+        saveDelegate = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_S, [this](const bool pressed)
+        {
+           if (pressed && (ServiceLocator::GetInputService()->IsKeyPressed(SDL_SCANCODE_LCTRL) || ServiceLocator::GetInputService()->IsKeyPressed(SDL_SCANCODE_RCTRL)))
+           {
+               SavePrefab();
+           }
+        });
     }
 
     ActorEditor::~ActorEditor() = default;
@@ -67,5 +76,10 @@ namespace Vox
         ImGui::EndChild();
 
         ImGui::EndChild();
+    }
+
+    void ActorEditor::SavePrefab()
+    {
+        
     }
 } // Vox

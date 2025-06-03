@@ -26,11 +26,24 @@ namespace Vox
     {
         console = std::make_unique<Console>();
         worldOutline = std::make_unique<WorldOutline>();
+
         primaryViewport = std::make_shared<EditorViewport>();
         primaryViewport->OnObjectSelected = [this](const std::shared_ptr<Object>& object)
             {
                 worldOutline->SetSelectedObject(object);
             };
+
+        primaryViewport->SetOnDroppedDelegate([this](const void* data)
+            {
+                if (!currentWorld.expired())
+                {
+                    const auto objectClassName = static_cast<const char*>(data);
+                    currentWorld.lock()->CreateObject(std::string(objectClassName));
+                }
+            });
+
+        primaryViewport->SetDragFilter("OBJECT_CLASS_NAME");
+
         actorEditor = nullptr;
         classList = std::make_unique<ClassList>();
         classList->SetDoubleClickCallback([this](const ObjectClass* objectClass)

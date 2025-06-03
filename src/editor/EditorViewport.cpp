@@ -74,10 +74,9 @@ namespace Vox
 
             if (ImGui::BeginDragDropTarget())
             {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("OBJECT_CLASS_NAME"))
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(dragFilterString.c_str()))
                 {
-                    const char* objectClassName = static_cast<const char*>(payload->Data);
-                    world->CreateObject(std::string(objectClassName));
+                    onDropped(payload->Data);
                 }
                 ImGui::EndDragDropTarget();
             }
@@ -155,5 +154,15 @@ namespace Vox
     ViewportBox EditorViewport::GetViewportBox() const
     {
         return viewportBox;
+    }
+
+    void EditorViewport::SetDragFilter(const std::string& filterString)
+    {
+        dragFilterString = filterString;
+    }
+
+    void EditorViewport::SetOnDroppedDelegate(const std::function<void(void*)>& delegate)
+    {
+        onDropped = delegate;
     }
 } // Vox

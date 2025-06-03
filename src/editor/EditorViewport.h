@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <functional>
 #include <glm/vec2.hpp>
 
 #include "core/objects/World.h"
@@ -38,11 +39,19 @@ namespace Vox
 
         std::function<void(std::shared_ptr<Object>)> OnObjectSelected;
 
+        void SetDragFilter(const std::string& filterString);
+
+        void SetOnDroppedDelegate(const std::function<void(void*)>& delegate);
+
         bool drawPlayButtons = true;
 
     private:
         glm::vec2 viewportDimensions = glm::vec2(800.0f, 450.0f);
         ViewportBox viewportBox{ 0, 0, 800, 450 };
+
+        std::string dragFilterString;
+
+        std::function<void(void*)> onDropped;
 
         bool isFocused = false;
     };

@@ -46,21 +46,19 @@ namespace Vox
                         doubleClickCallback(&itr->second);
                     }
 
-                    if (dynamic_cast<const Prefab*>(&itr->second))
+                    if (ImGui::BeginPopupContextItem())
                     {
-                        if (ImGui::BeginPopupContextItem())
+                        ImGui::Selectable("New prefab from this");
+                        if (itr->second.CanBeRenamed())
                         {
-                            ImGui::Text("Edit name:");
-                            if (ImGui::Button("Close"))
-                                ImGui::CloseCurrentPopup();
-                            ImGui::EndPopup();
+                            ImGui::Text("Edit name");
                         }
+                        ImGui::EndPopup();
                     }
                 }
-
+                ImGui::EndChild();
                 ImGui::PopStyleVar();
                 ImGui::PopStyleColor();
-                ImGui::EndChild();
             }
             ImGui::EndTabItem();
         }

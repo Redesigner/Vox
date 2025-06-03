@@ -16,6 +16,11 @@ namespace Vox
         return constructor;
     }
 
+    ObjectClass* ObjectClass::GetParentClass() const
+    {
+        return parentClass;
+    }
+
     const std::vector<Property>& ObjectClass::GetProperties() const
     {
         return properties;
@@ -50,4 +55,11 @@ namespace Vox
 
         return result._Ptr;
     }
+
+#ifdef EDITOR
+    bool ObjectClass::CanBeRenamed() const
+    {
+        return canBeRenamed;
+    }
+#endif
 }

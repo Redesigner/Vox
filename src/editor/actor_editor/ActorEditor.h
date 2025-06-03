@@ -5,6 +5,8 @@
 #pragma once
 #include <memory>
 
+#include "core/datatypes/DelegateHandle.h"
+
 namespace Vox
 {
     class ObjectClass;
@@ -31,9 +33,13 @@ namespace Vox
         void Draw();
 
     private:
+        void SavePrefab();
+
         std::shared_ptr<World> world;
         std::shared_ptr<EditorViewport> viewport;
         std::unique_ptr<WorldOutline> outline;
+
+        DelegateHandle<bool> saveDelegate;
     };
 
 } // Vox

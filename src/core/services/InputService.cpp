@@ -142,6 +142,11 @@ namespace Vox
         return windowClosed;
     }
 
+    bool InputService::IsKeyPressed(const SDL_Scancode scancode) const
+    {
+        return keyPressed[scancode];
+    }
+
     void InputService::ToggleCursorLock()
     {
         if (!cursorLocked)

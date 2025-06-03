@@ -72,6 +72,8 @@ namespace Vox
 
 		[[nodiscard]] bool ShouldCloseWindow() const;
 
+	    [[nodiscard]] bool IsKeyPressed(SDL_Scancode scancode) const;
+
 		void ToggleCursorLock();
 
 		[[nodiscard]] bool IsWindowFullscreen() const;
