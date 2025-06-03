@@ -24,6 +24,6 @@ namespace Vox
         }
 
     private:
-        IMPLEMENT_OBJECT(Component)
+        IMPLEMENT_OBJECT_BASE(Component)
     };
 }

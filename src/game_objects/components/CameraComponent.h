@@ -21,7 +21,7 @@ namespace Vox
         void SetArmLength(float length);
 
     private:
-        IMPLEMENT_OBJECT(CameraComponent)
+        IMPLEMENT_OBJECT(CameraComponent, SceneComponent)
 
         float armLength = 5.0f;
 

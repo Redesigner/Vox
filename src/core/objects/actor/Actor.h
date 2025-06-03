@@ -63,6 +63,6 @@ namespace  Vox
 
         World* world;
 
-        IMPLEMENT_OBJECT(Actor)
+        IMPLEMENT_OBJECT_BASE(Actor)
     };
 }

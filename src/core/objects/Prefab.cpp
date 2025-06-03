@@ -105,11 +105,12 @@ namespace Vox
     }
 
     Prefab::Prefab(const std::string& filename)
-        :ObjectClass({}, {})
+        :ObjectClass({}, {}, {})
     {
         canBeRenamed = true;
 
         auto context = std::make_shared<PrefabContext>(filename);
+        parentClass = context->parent;
         constructor = [context](const ObjectInitializer& objectInitializer)
         {
             return Construct(objectInitializer, context.get());
@@ -117,11 +118,12 @@ namespace Vox
     }
 
     Prefab::Prefab(const nlohmann::json& jsonObject)
-        :ObjectClass({}, {})
+        :ObjectClass({}, {}, {})
     {
         canBeRenamed = true;
 
         auto context = std::make_shared<PrefabContext>(jsonObject);
+        parentClass = context->parent;
         constructor = [context](const ObjectInitializer& objectInitializer)
         {
             return Construct(objectInitializer, context.get());
@@ -129,11 +131,12 @@ namespace Vox
     }
 
     Prefab::Prefab(const Object* object)
-        :ObjectClass({}, {})
+        :ObjectClass({}, {}, {})
     {
         canBeRenamed = true;
-        
+
         auto context = std::make_shared<PrefabContext>(object);
+        parentClass = context->parent;
         constructor = [context](const ObjectInitializer& objectInitializer)
         {
             return Construct(objectInitializer, context.get());

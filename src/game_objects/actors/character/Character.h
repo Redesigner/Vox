@@ -36,6 +36,6 @@ namespace Vox
         DelegateHandle<bool> jumpCallback;
 	    DelegateHandle<int, int> mouseLookCallback;
 
-	    IMPLEMENT_OBJECT(Character)
+	    IMPLEMENT_OBJECT(Character, Actor)
 	};
 }

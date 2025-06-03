@@ -11,7 +11,7 @@ namespace Vox
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
     private:
-        IMPLEMENT_OBJECT(TestComponent)
+        IMPLEMENT_OBJECT(TestComponent, Component)
 
         std::string tag;
     };

@@ -6,8 +6,8 @@ namespace Vox
 {
     using Constructor = std::function<std::shared_ptr<Object>(const ObjectInitializer&)>;
 
-    ObjectClass::ObjectClass(Constructor constructor, std::vector<Property> properties)
-        :constructor(std::move(constructor)), properties(std::move(properties))
+    ObjectClass::ObjectClass(Constructor constructor, const ObjectClass* parent, std::vector<Property> properties)
+        :constructor(std::move(constructor)), parentClass(parent), properties(std::move(properties))
     {
     }
 
@@ -16,7 +16,7 @@ namespace Vox
         return constructor;
     }
 
-    ObjectClass* ObjectClass::GetParentClass() const
+    const ObjectClass* ObjectClass::GetParentClass() const
     {
         return parentClass;
     }
@@ -57,6 +57,11 @@ namespace Vox
     }
 
 #ifdef EDITOR
+
+    template <>
+    bool ObjectClass::IsA<Object>() const
+    { return true; }
+
     bool ObjectClass::CanBeRenamed() const
     {
         return canBeRenamed;

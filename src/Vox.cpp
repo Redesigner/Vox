@@ -168,9 +168,13 @@ int main()
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });
-        
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
+
+        ServiceLocator::GetObjectService()->RegisterObjectClass<Actor>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<Component>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<SceneComponent>();
+
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<Character>();
 
@@ -179,7 +183,7 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
 
-         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
+        ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 
         glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
         glm::quat testQuat = glm::radians(testRotation);

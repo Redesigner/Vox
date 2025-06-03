@@ -38,7 +38,7 @@ namespace Vox
 
     struct TypedPropertyVariant
     {
-        PropertyType type;
+        PropertyType type = PropertyType::_invalid;
         PropertyVariant value;
 
         bool operator ==(const TypedPropertyVariant& other) const;

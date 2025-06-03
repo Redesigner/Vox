@@ -16,9 +16,19 @@
 #define DEFAULT_DISPLAY_NAME() displayName = fmt::format("{}_Default", classDisplayName);
 
 /// Implement the objects name and accessors for its ObjectClass
-#define IMPLEMENT_OBJECT(Name) private: static inline const ObjectClass* objectClass = nullptr;\
+#define IMPLEMENT_OBJECT(Name, Parent) private: static inline const ObjectClass* objectClass = nullptr;\
     public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
     const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
+    static const ObjectClass* Class() { return objectClass; }\
+    static const ObjectClass* GetParentClass() { return Parent::Class(); }\
+    IMPLEMENT_NAME(Name)\
+    private:
+
+#define IMPLEMENT_OBJECT_BASE(Name) private: static inline const ObjectClass* objectClass = nullptr;\
+    public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
+    const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
+    static const ObjectClass* Class() { return objectClass; }\
+    static const ObjectClass* GetParentClass() { return nullptr; }\
     IMPLEMENT_NAME(Name)\
     private:
 
@@ -103,6 +113,5 @@ namespace Vox
         Object* parent;
 
         std::vector<std::shared_ptr<Object>> children;
-        
     };
 }

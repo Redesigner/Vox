@@ -22,7 +22,7 @@ namespace Vox
             defaultObject.BuildProperties(properties);
             T::SetObjectClass(
                 RegisterObjectClass(defaultObject.GetClassDisplayName(),
-                    ObjectClass(T::template GetConstructor<T>(), properties)
+                    ObjectClass(T::template GetConstructor<T>(), T::GetParentClass(), properties)
                 )
             );
         }

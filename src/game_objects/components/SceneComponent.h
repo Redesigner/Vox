@@ -40,6 +40,6 @@ namespace Vox
         
         Transform localTransform;
 
-        IMPLEMENT_OBJECT(SceneComponent)
+        IMPLEMENT_OBJECT(SceneComponent, Component)
     };
 }

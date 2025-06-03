@@ -8,7 +8,7 @@ namespace Vox
     public:
         TestActor(const ObjectInitializer&);
 
-        IMPLEMENT_OBJECT(TestActor)
+        IMPLEMENT_OBJECT(TestActor, Actor)
         
     };
 }

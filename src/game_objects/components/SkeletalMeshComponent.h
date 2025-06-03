@@ -37,7 +37,7 @@ namespace Vox
         void Select() override;
 #endif
 
-        IMPLEMENT_OBJECT(SkeletalMeshComponent)
+        IMPLEMENT_OBJECT(SkeletalMeshComponent, SceneComponent)
 
         Ref<SkeletalMeshInstance> mesh;
 
