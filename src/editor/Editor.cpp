@@ -46,7 +46,7 @@ namespace Vox
 
         actorEditor = nullptr;
         classList = std::make_unique<ClassList>();
-        classList->SetDoubleClickCallback([this](const ObjectClass* objectClass)
+        classList->SetDoubleClickCallback([this](const std::shared_ptr<ObjectClass>& objectClass)
             {
                pendingEditorClass = objectClass;
             });
@@ -173,16 +173,23 @@ namespace Vox
             actorEditor.reset();
         }
 
-        if (pendingEditorClass)
+        if (!pendingEditorClass.expired() && !actorEditor)
         {
-            actorEditor = std::make_unique<ActorEditor>(pendingEditorClass);
-            pendingEditorClass = nullptr;
+            if (const auto* prefabClass = dynamic_cast<const Prefab*>(pendingEditorClass.lock().get()))
+            {
+                actorEditor = std::make_unique<ActorEditor>(prefabClass);
+                pendingEditorClass.reset();
+            }
+            else
+            {
+                prefabClass = nullptr;
+            }
         }
     }
 
     void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
     {
-        onGLTFOpened = function;
+        // onGLTFOpened = function;
     }
 
     void Editor::SetWorld(const std::shared_ptr<World>& world)
@@ -308,8 +315,6 @@ namespace Vox
     // ReSharper disable once CppMemberFunctionMayBeConst
     void Editor::OpenWorldFile(const std::string& filename)
     {
-        using Json = nlohmann::json;
-
         if (!currentWorld.expired())
         {
             const std::string& loadedWorldString = FileIOService::LoadFileAbsolutePath(filename);

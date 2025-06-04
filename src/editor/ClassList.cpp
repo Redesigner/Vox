@@ -43,13 +43,13 @@ namespace Vox
 
                     if (ImGui::IsItemFocused() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                     {
-                        doubleClickCallback(&itr->second);
+                        doubleClickCallback(itr->second);
                     }
 
                     if (ImGui::BeginPopupContextItem())
                     {
                         ImGui::Selectable("New prefab from this");
-                        if (itr->second.CanBeRenamed())
+                        if (itr->second->CanBeRenamed())
                         {
                             ImGui::Text("Edit name");
                         }

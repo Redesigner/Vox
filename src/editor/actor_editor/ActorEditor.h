@@ -9,25 +9,17 @@
 
 namespace Vox
 {
-    class ObjectClass;
-    class Object;
     class DetailPanel;
-}
-
-namespace Vox
-{
-    class WorldOutline;
-}
-
-namespace Vox
-{
     class EditorViewport;
+    class Object;
+    class Prefab;
     class World;
+    class WorldOutline;
 
     class ActorEditor
     {
     public:
-        ActorEditor(const ObjectClass* actorClass);
+        explicit ActorEditor(const Prefab* actorClass);
         ~ActorEditor();
 
         void Draw();
@@ -37,9 +29,11 @@ namespace Vox
 
         std::shared_ptr<World> world;
         std::shared_ptr<EditorViewport> viewport;
+        std::shared_ptr<Object> rootObject;
         std::unique_ptr<WorldOutline> outline;
 
         DelegateHandle<bool> saveDelegate;
+        const Prefab* currentPrefab;
     };
 
 } // Vox

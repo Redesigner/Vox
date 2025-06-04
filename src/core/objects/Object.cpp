@@ -27,7 +27,7 @@ namespace Vox
 
     const std::vector<Property>& Object::GetProperties() const
     {
-        const ObjectClass* objectClass = GetClass();
+        const std::shared_ptr<ObjectClass> objectClass = GetClass();
         assert(objectClass && "ObjectClass was invalid");
 
         // ReSharper disable once CppDFANullDereference

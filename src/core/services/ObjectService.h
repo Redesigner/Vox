@@ -12,7 +12,9 @@ namespace Vox
     class ObjectService
     {
     public:
-        const ObjectClass* RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass);
+        using ObjectMap = std::map<std::string, std::shared_ptr<ObjectClass>>;
+
+        std::shared_ptr<ObjectClass> RegisterObjectClass(const std::string& classId, const std::shared_ptr<ObjectClass>& objectClass);
         
         template <typename T>
         void RegisterObjectClass() requires Derived<T, Object>
@@ -22,7 +24,11 @@ namespace Vox
             defaultObject.BuildProperties(properties);
             T::SetObjectClass(
                 RegisterObjectClass(defaultObject.GetClassDisplayName(),
-                    ObjectClass(T::template GetConstructor<T>(), T::GetParentClass(), properties)
+                    std::make_shared<ObjectClass>(
+                        defaultObject.GetClassDisplayName(),
+                        T::template GetConstructor<T>(),
+                        T::GetParentClass(),
+                        properties)
                 )
             );
         }
@@ -40,13 +46,13 @@ namespace Vox
             RegisterObjectClass<T>();
         }
 
-        [[nodiscard]] const ObjectClass* GetObjectClass(const std::string& objectClassId) const;
+        [[nodiscard]] std::shared_ptr<ObjectClass> GetObjectClass(const std::string& objectClassId) const;
 
 
-        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetBegin() const;
-        [[nodiscard]] std::unordered_map<std::string, ObjectClass>::const_iterator GetEnd() const;
+        [[nodiscard]] ObjectMap::const_iterator GetBegin() const;
+        [[nodiscard]] ObjectMap::const_iterator GetEnd() const;
 
     private:
-        std::unordered_map<std::string, ObjectClass> classRegistry;
+        ObjectMap classRegistry;
     };
 }

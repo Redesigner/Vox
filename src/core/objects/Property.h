@@ -42,6 +42,8 @@ namespace Vox
         PropertyVariant value;
 
         bool operator ==(const TypedPropertyVariant& other) const;
+
+        [[nodiscard]] nlohmann::json Serialize() const;
     };
 
     static constexpr std::string GetPropertyTypeString(PropertyType type);
@@ -68,7 +70,7 @@ namespace Vox
     {
         Property(const std::string& name, PropertyType propertyType, size_t offset);
         
-        PropertyType GetType() const;
+        [[nodiscard]] PropertyType GetType() const;
 
         template <typename T>
         T* GetValuePtr(void* objectLocation) const

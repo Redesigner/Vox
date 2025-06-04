@@ -16,19 +16,21 @@
 #define DEFAULT_DISPLAY_NAME() displayName = fmt::format("{}_Default", classDisplayName);
 
 /// Implement the objects name and accessors for its ObjectClass
-#define IMPLEMENT_OBJECT(Name, Parent) private: static inline const ObjectClass* objectClass = nullptr;\
-    public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
-    const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
-    static const ObjectClass* Class() { return objectClass; }\
-    static const ObjectClass* GetParentClass() { return Parent::Class(); }\
+#define IMPLEMENT_OBJECT(Name, Parent)\
+    private: static inline std::shared_ptr<ObjectClass> objectClass = nullptr;\
+    public: static void SetObjectClass(const std::shared_ptr<ObjectClass>& objectClassIn) { objectClass = objectClassIn; }\
+    std::shared_ptr<ObjectClass> GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
+    static std::shared_ptr<ObjectClass> Class() { return objectClass; }\
+    static std::shared_ptr<ObjectClass> GetParentClass() { return Parent::Class(); }\
     IMPLEMENT_NAME(Name)\
     private:
 
-#define IMPLEMENT_OBJECT_BASE(Name) private: static inline const ObjectClass* objectClass = nullptr;\
-    public: static void SetObjectClass(const ObjectClass* objectClassIn) { objectClass = objectClassIn; }\
-    const ObjectClass* GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
-    static const ObjectClass* Class() { return objectClass; }\
-    static const ObjectClass* GetParentClass() { return nullptr; }\
+#define IMPLEMENT_OBJECT_BASE(Name)\
+    private: static inline std::shared_ptr<ObjectClass> objectClass = nullptr;\
+    public: static void SetObjectClass(const std::shared_ptr<ObjectClass>& objectClassIn) { objectClass = objectClassIn; }\
+    std::shared_ptr<ObjectClass> GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
+    static std::shared_ptr<ObjectClass> Class() { return objectClass; }\
+    static std::shared_ptr<ObjectClass> GetParentClass() { return nullptr; }\
     IMPLEMENT_NAME(Name)\
     private:
 
@@ -68,7 +70,7 @@ namespace Vox
 
         [[nodiscard]] const std::vector<Property>& GetProperties() const;
 
-        [[nodiscard]] virtual const ObjectClass* GetClass() const = 0;
+        [[nodiscard]] virtual std::shared_ptr<ObjectClass> GetClass() const = 0;
 
         [[nodiscard]] virtual std::string& GetClassDisplayName() const = 0;
 
@@ -96,6 +98,8 @@ namespace Vox
         [[nodiscard]] std::shared_ptr<Object> GetSharedChild(const Object* object) const;
 
         [[nodiscard]] std::shared_ptr<Object> GetChildByName(const std::string& name) const;
+
+        bool native = true;
         
     protected:
         template<typename T>

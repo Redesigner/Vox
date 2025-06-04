@@ -18,7 +18,7 @@ namespace Vox
 
     std::shared_ptr<Object> World::CreateObject(const std::string& className)
     {
-        if (const ObjectClass* objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
+        if (const std::shared_ptr<ObjectClass> objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
             auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
             PostObjectConstruct(result);

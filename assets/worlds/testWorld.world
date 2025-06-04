@@ -1,0 +1,77 @@
+{
+    "objects": {
+        "Test Actor_Default": {},
+        "Character_Default": {
+            "class": "Character",
+            "children": {
+                "Player Mesh": {
+                    "class": "Mesh Component",
+                    "properties": {
+                        "localTransform": {
+                            "type": "transform",
+                            "value": [
+                                2.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "Character_Default0": {
+            "class": "Character",
+            "children": {
+                "Player Mesh": {
+                    "class": "Mesh Component",
+                    "properties": {
+                        "localTransform": {
+                            "type": "transform",
+                            "value": [
+                                0.0,
+                                2.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "Character_Default1": {
+            "class": "Character",
+            "children": {
+                "Player Mesh": {
+                    "class": "Mesh Component",
+                    "properties": {
+                        "localTransform": {
+                            "type": "transform",
+                            "value": [
+                                2.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

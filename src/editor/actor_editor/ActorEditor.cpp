@@ -7,22 +7,23 @@
 #include <imgui.h>
 
 #include "core/objects/World.h"
+#include "core/objects/Prefab.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
 #include "editor/WorldOutline.h"
 #include "editor/detail_panel/DetailPanel.h"
-#include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
 namespace Vox
 {
-    ActorEditor::ActorEditor(const ObjectClass* actorClass)
+    ActorEditor::ActorEditor(const Prefab* actorClass)
     {
+        currentPrefab = actorClass;
         world = std::make_shared<World>();
-        world->CreateObject(actorClass);
+        rootObject = world->CreateObject(actorClass);
         viewport = std::make_shared<EditorViewport>();
         viewport->OnObjectSelected = [this](const std::shared_ptr<Object>& object)
             {
@@ -80,6 +81,7 @@ namespace Vox
 
     void ActorEditor::SavePrefab()
     {
-        
+        Prefab newPrefab = Prefab(rootObject.get());
+        newPrefab.SaveToFile(currentPrefab->GetName());
     }
 } // Vox

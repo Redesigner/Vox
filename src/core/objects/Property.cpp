@@ -6,6 +6,63 @@
 
 namespace Vox
 {
+    nlohmann::json TypedPropertyVariant::Serialize() const
+    {
+        using Json = nlohmann::json;
+
+        Json result;
+        result["type"] = GetPropertyTypeString(type);
+        switch (type)
+        {
+        case PropertyType::_bool:
+            result["value"] = std::get<bool>(value);
+            break;
+
+        case PropertyType::_int:
+            result["value"] = std::get<int>(value);
+            break;
+
+        case PropertyType::_uint:
+            result["value"] = std::get<unsigned int>(value);
+            break;
+
+        case PropertyType::_float:
+            result["value"] = std::get<float>(value);
+            break;
+
+        case PropertyType::_string:
+            result["value"] = std::get<std::string>(value);
+            break;
+
+        case PropertyType::_vec3:
+            const glm::vec3 vec3Value = std::get<glm::vec3>(value);
+            result["value"] = {vec3Value.x, vec3Value.y, vec3Value.z};
+            break;
+
+        case PropertyType::_quat:
+            const glm::quat quatValue = std::get<glm::quat>(value);
+            result["value"] = {quatValue.x, quatValue.y, quatValue.z, quatValue.w};
+            break;
+
+        case PropertyType::_transform:
+        {
+            const Transform transform = std::get<Transform>(value);
+            result["value"] = {
+                transform.position.x, transform.position.y, transform.position.z,
+                transform.rotation.x, transform.rotation.y, transform.rotation.z,
+                transform.scale.x, transform.scale.y, transform.scale.z
+            };
+            break;
+        }
+
+        case PropertyType::_invalid:
+        default:
+            break;
+        }
+
+        return result;
+    }
+
     constexpr std::string GetPropertyTypeString(const PropertyType type)
     {
         switch (type)
@@ -238,7 +295,7 @@ namespace Vox
             }
         case PropertyType::_transform:
             {
-                const Transform& transform = GetValueChecked<Transform>(objectLocation);
+                const auto& transform = GetValueChecked<Transform>(objectLocation);
                 propertyJson[name]["value"] = {
                     transform.position.x, transform.position.y, transform.position.z,
                     transform.rotation.x, transform.rotation.y, transform.rotation.z,

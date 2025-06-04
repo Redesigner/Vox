@@ -4,34 +4,34 @@
 
 namespace Vox
 {
-    const ObjectClass* ObjectService::RegisterObjectClass(const std::string& classId, const ObjectClass& objectClass)
+    std::shared_ptr<ObjectClass> ObjectService::RegisterObjectClass(const std::string& classId, const std::shared_ptr<ObjectClass>& objectClass)
     {
         assert(!classRegistry.contains(classId) && "Class is already registered");
         auto newClassEntry = classRegistry.insert({classId, objectClass});
-        return &newClassEntry.first->second;
+        return newClassEntry.first->second;
     }
 
     void ObjectService::RegisterPrefab(const std::string& filename)
     {
-        classRegistry.emplace(filename, Prefab(filename));
+        classRegistry.emplace(filename, std::make_shared<Prefab>(filename));
     }
 
-    const ObjectClass* ObjectService::GetObjectClass(const std::string& objectClassId) const
+    std::shared_ptr<ObjectClass> ObjectService::GetObjectClass(const std::string& objectClassId) const
     {
         auto iterator = classRegistry.find(objectClassId);
         if (iterator == classRegistry.end())
         {
             return nullptr;
         }
-        return &iterator->second;
+        return iterator->second;
     }
 
-    std::unordered_map<std::string, ObjectClass>::const_iterator ObjectService::GetBegin() const
+    std::map<std::string, std::shared_ptr<ObjectClass>>::const_iterator ObjectService::GetBegin() const
     {
         return classRegistry.cbegin();
     }
 
-    std::unordered_map<std::string, ObjectClass>::const_iterator ObjectService::GetEnd() const
+    std::map<std::string, std::shared_ptr<ObjectClass>>::const_iterator ObjectService::GetEnd() const
     {
         return classRegistry.cend();
     }

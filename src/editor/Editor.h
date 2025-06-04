@@ -87,7 +87,7 @@ namespace Vox
 	    std::unique_ptr<ClassList> classList;
 	    std::unique_ptr<WorldOutline> worldOutline;
 
-	    const ObjectClass* pendingEditorClass = nullptr;
+	    std::weak_ptr<ObjectClass> pendingEditorClass;
 
 		static ImFont* gitLabSans14;
 		static ImFont* gitLabSans18;

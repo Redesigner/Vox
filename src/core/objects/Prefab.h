@@ -17,6 +17,12 @@ namespace Vox
     class Object;
     class ObjectClass;
 
+    struct AdditionalObject
+    {
+        std::weak_ptr<ObjectClass> objectClass;
+        std::string objectName;
+    };
+
     struct PrefabContext
     {
         explicit PrefabContext(const std::string& filename);
@@ -25,10 +31,10 @@ namespace Vox
 
         void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
 
-        const ObjectClass* parent;
+        std::weak_ptr<ObjectClass> parent;
 
         std::vector<PropertyOverride> propertyOverrides;
-        std::vector<Object> additionalObjects;
+        std::vector<AdditionalObject> additionalObjects;
     };
 
     class Prefab : public ObjectClass
@@ -39,10 +45,15 @@ namespace Vox
         explicit Prefab(const Object* object);
         ~Prefab() override = default;
 
+        void SaveToFile(const std::string& filename) const;
+        [[nodiscard]] nlohmann::ordered_json Serialize() const;
+
     private:
         static std::shared_ptr<Object> Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext);
 
         static void OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride);
+
+        std::shared_ptr<PrefabContext> context;
     };
 
 } // Vox

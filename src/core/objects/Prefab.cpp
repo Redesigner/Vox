@@ -39,7 +39,7 @@ namespace Vox
             return;
         }
 
-        const ObjectClass* baseClass = ServiceLocator::GetObjectService()->GetObjectClass(objectRoot["class"]);
+        const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(objectRoot["class"]);
         if (!baseClass)
         {
             VoxLog(Warning, Game, "Prefab could not find class '{}'.", objectRoot["class"].get<std::string>());
@@ -48,6 +48,27 @@ namespace Vox
 
         parent = baseClass;
         CreateOverrides(objectRoot, {});
+
+        if (objectRoot.contains("additional") && objectRoot["additional"].is_object())
+        {
+            for (const auto& additionalChild : objectRoot["additional"])
+            {
+                if (!additionalChild.contains("name") || !additionalChild["name"].is_string())
+                {
+                    continue;
+                }
+
+                if (!additionalChild.contains("class") || !additionalChild["class"].is_string())
+                {
+                    continue;
+                }
+
+                if (auto childClass = ServiceLocator::GetObjectService()->GetObjectClass(additionalChild["class"]))
+                {
+                    additionalObjects.emplace_back(childClass, additionalChild["name"]);
+                }
+            }
+        }
     }
 
     PrefabContext::PrefabContext(const nlohmann::json& jsonObject)
@@ -59,7 +80,7 @@ namespace Vox
             return;
         }
 
-        const ObjectClass* baseClass = ServiceLocator::GetObjectService()->GetObjectClass(jsonObject["class"]);
+        const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(jsonObject["class"]);
         if (!baseClass)
         {
             VoxLog(Warning, Game, "Prefab could not find class '{}'.", jsonObject["class"].get<std::string>());
@@ -68,12 +89,41 @@ namespace Vox
 
         parent = baseClass;
         CreateOverrides(jsonObject, {});
+
+        if (jsonObject.contains("additional") && jsonObject["additional"].is_object())
+        {
+            for (const auto& additionalChild : jsonObject["additional"])
+            {
+                if (!additionalChild.contains("name") || !additionalChild["name"].is_string())
+                {
+                    continue;
+                }
+
+                if (!additionalChild.contains("class") || !additionalChild["class"].is_string())
+                {
+                    continue;
+                }
+
+                if (const std::shared_ptr<ObjectClass> childClass = ServiceLocator::GetObjectService()->GetObjectClass(additionalChild["class"]))
+                {
+                    additionalObjects.emplace_back(childClass, additionalChild["name"]);
+                }
+            }
+        }
     }
 
     PrefabContext::PrefabContext(const Object* object)
     {
         parent = object->GetClass();
         propertyOverrides = object->GenerateOverrides();
+
+        for (const auto& childObject : object->GetChildren())
+        {
+            if (!childObject->native)
+            {
+                additionalObjects.emplace_back(childObject->GetClass(), childObject->GetDisplayName());
+            }
+        }
     }
 
     void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack)
@@ -105,52 +155,106 @@ namespace Vox
     }
 
     Prefab::Prefab(const std::string& filename)
-        :ObjectClass({}, {}, {})
+        :ObjectClass({}, {}, {}, {})
     {
         canBeRenamed = true;
 
-        auto context = std::make_shared<PrefabContext>(filename);
-        parentClass = context->parent;
-        constructor = [context](const ObjectInitializer& objectInitializer)
+        context = std::make_shared<PrefabContext>(filename);
+        name = filename;
+        parentClass = context->parent.lock();
+        std::shared_ptr<PrefabContext> capturedContext = context;
+        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
         {
-            return Construct(objectInitializer, context.get());
+            return Construct(objectInitializer, capturedContext.get());
         };
     }
 
     Prefab::Prefab(const nlohmann::json& jsonObject)
-        :ObjectClass({}, {}, {})
+        :ObjectClass({}, {}, {}, {})
     {
         canBeRenamed = true;
 
-        auto context = std::make_shared<PrefabContext>(jsonObject);
-        parentClass = context->parent;
-        constructor = [context](const ObjectInitializer& objectInitializer)
+        if (jsonObject.front())
         {
-            return Construct(objectInitializer, context.get());
+            name = jsonObject.items().begin().key();
+        }
+        context = std::make_shared<PrefabContext>(jsonObject);
+        parentClass = context->parent.lock();
+        std::shared_ptr<PrefabContext> capturedContext = context;
+        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
+        {
+            return Construct(objectInitializer, capturedContext.get());
         };
     }
 
     Prefab::Prefab(const Object* object)
-        :ObjectClass({}, {}, {})
+        :ObjectClass({}, {}, {}, {})
     {
         canBeRenamed = true;
 
-        auto context = std::make_shared<PrefabContext>(object);
-        parentClass = context->parent;
-        constructor = [context](const ObjectInitializer& objectInitializer)
+        context = std::make_shared<PrefabContext>(object);
+        name = object->GetDisplayName();
+        parentClass = context->parent.lock();
+        std::shared_ptr<PrefabContext> capturedContext = context;
+        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
         {
-            return Construct(objectInitializer, context.get());
+            return Construct(objectInitializer, capturedContext.get());
         };
+    }
+
+    void Prefab::SaveToFile(const std::string& filename) const
+    {
+        ServiceLocator::GetFileIoService()->WriteToFile("prefabs/" + filename, Serialize().dump(4));
+    }
+
+    nlohmann::ordered_json Prefab::Serialize() const
+    {
+        using Json = nlohmann::ordered_json;
+
+        Json result = Json::object();
+        result[GetName()]["class"] = GetParentClass()->GetName();
+        for (const PropertyOverride& propertyOverride : context->propertyOverrides)
+        {
+            Json* currentContext = &result[GetName()]["children"];
+            for (const std::string& path : propertyOverride.path)
+            {
+                Json& propertyRootJson = *currentContext;
+                currentContext = &propertyRootJson[path];
+            }
+            const Json& propertyValueJson = propertyOverride.variant.Serialize();
+            Json& propertyRootJson = *currentContext;
+            propertyRootJson["properties"][propertyOverride.propertyName] = Json::object();
+            propertyRootJson["properties"][propertyOverride.propertyName].insert(propertyValueJson.begin(), propertyValueJson.end());
+        }
+
+        result[GetName()]["additional"] = Json::object();
+        for (const AdditionalObject& additionalObject : context->additionalObjects)
+        {
+            Json newObjectJson = Json::object();
+            newObjectJson["name"] = additionalObject.objectName;
+            newObjectJson["class"] = additionalObject.objectClass.lock()->GetName();
+            result[GetName()]["additional"].insert(newObjectJson.begin(), newObjectJson.end());
+        }
+        return result;
     }
 
     std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext)
     {
-        if (!prefabContext->parent)
+        if (prefabContext->parent.expired())
         {
             return {};
         }
 
-        std::shared_ptr<Object> object = prefabContext->parent->GetConstructor()(objectInitializer);
+        std::shared_ptr<Object> object = prefabContext->parent.lock()->GetConstructor()(objectInitializer);
+
+        for (const auto& additionalObject : prefabContext->additionalObjects)
+        {
+            std::shared_ptr<Object> child = additionalObject.objectClass.lock()->GetConstructor()(objectInitializer);
+            child->SetName(additionalObject.objectName);
+            child->native = false;
+            object->AddChild(child);
+        }
+
         for (const auto& override : prefabContext->propertyOverrides)
         {
             OverrideProperty(object, override);
