@@ -99,6 +99,8 @@ namespace Vox
 
         [[nodiscard]] std::shared_ptr<Object> GetChildByName(const std::string& name) const;
 
+        bool RemoveChild(const Object* object);
+
         bool native = true;
         
     protected:
@@ -109,6 +111,8 @@ namespace Vox
             newObject->SetName(name);
             AddChild(newObject);
         }
+
+        virtual void ChildRemoved(const Object* object) {};
 
         std::string displayName;
 

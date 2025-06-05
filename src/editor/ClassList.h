@@ -5,6 +5,7 @@
 #pragma once
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace Vox
 {
@@ -22,7 +23,15 @@ namespace Vox
 
         void SetDoubleClickCallback(ObjectCallback callback);
 
+        void SetClassFilter(std::function<bool(const std::shared_ptr<ObjectClass>&)> filter);
+
+        std::string title;
+
+        std::string objectClassPayloadType;
+
     private:
+        std::function<bool(const std::shared_ptr<ObjectClass>&)> classFilter;
+
         ObjectCallback doubleClickCallback;
 
         ObjectClass* selectedObjectClass;

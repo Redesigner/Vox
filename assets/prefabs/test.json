@@ -11,7 +11,7 @@
                             2.0,
                             0.0,
                             0.0,
-                            0.0,
+                            -0.0,
                             0.0,
                             1.0,
                             1.0,
@@ -19,8 +19,31 @@
                         ]
                     }
                 }
+            },
+            "Test Component_Default": {
+                "properties": {
+                    "tag": {
+                        "type": "string",
+                        "value": ""
+                    }
+                }
+            },
+            "Test Component_Default0": {
+                "properties": {
+                    "tag": {
+                        "type": "string",
+                        "value": "Test data"
+                    }
+                }
             }
         },
-        "additional": {}
+        "additional": {
+            "Test Component_Default": {
+                "class": "Test Component"
+            },
+            "Test Component_Default0": {
+                "class": "Test Component"
+            }
+        }
     }
 }

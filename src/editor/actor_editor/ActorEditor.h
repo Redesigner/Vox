@@ -9,6 +9,7 @@
 
 namespace Vox
 {
+    class ClassList;
     class DetailPanel;
     class EditorViewport;
     class Object;
@@ -31,8 +32,11 @@ namespace Vox
         std::shared_ptr<EditorViewport> viewport;
         std::shared_ptr<Object> rootObject;
         std::unique_ptr<WorldOutline> outline;
+        std::unique_ptr<ClassList> componentList;
 
         DelegateHandle<bool> saveDelegate;
+        DelegateHandle<bool> deleteDelegate;
+
         const Prefab* currentPrefab;
     };
 

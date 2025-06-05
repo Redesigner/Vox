@@ -11,6 +11,7 @@
 #include "actor_editor/ActorEditor.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
+#include "core/objects/actor/Actor.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
@@ -46,10 +47,16 @@ namespace Vox
 
         actorEditor = nullptr;
         classList = std::make_unique<ClassList>();
+        classList->title = "Actors";
+        classList->objectClassPayloadType = "OBJECT_CLASS_NAME";
         classList->SetDoubleClickCallback([this](const std::shared_ptr<ObjectClass>& objectClass)
             {
                pendingEditorClass = objectClass;
             });
+        classList->SetClassFilter([](const std::shared_ptr<ObjectClass>& objectClass)
+        {
+            return objectClass->IsA<Actor>();
+        });
 
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);

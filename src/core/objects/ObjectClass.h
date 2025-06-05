@@ -26,8 +26,8 @@ namespace Vox
         template <typename T>
         [[nodiscard]] bool IsA() const requires Derived<T, Object>
         {
-            const ObjectClass* matchingClass = T::Class();
-            for (const ObjectClass* objectClass = this; objectClass != nullptr; objectClass = objectClass->GetParentClass())
+            const ObjectClass* matchingClass = T::Class().get();
+            for (const ObjectClass* objectClass = this; objectClass != nullptr; objectClass = objectClass->GetParentClass().get())
             {
                 if (objectClass == matchingClass)
                 {

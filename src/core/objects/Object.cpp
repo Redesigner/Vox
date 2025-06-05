@@ -201,4 +201,18 @@ namespace Vox
 
         return {};
     }
+
+    bool Object::RemoveChild(const Object* object)
+    {
+        bool childErased = std::erase_if(children, [object](const std::shared_ptr<Object>& child)
+        {
+            return child.get() == object;
+        });
+
+        if (childErased)
+        {
+            ChildRemoved(object);
+        }
+        return childErased;
+    }
 }

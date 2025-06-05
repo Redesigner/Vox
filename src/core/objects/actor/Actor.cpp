@@ -86,6 +86,14 @@ namespace Vox
         return transform;
     }
 
+    void Actor::ChildRemoved(const Object* object)
+    {
+        std::erase_if(attachedComponents, [object](const std::shared_ptr<SceneComponent>& component)
+        {
+            return component.get() == object;
+        });
+    }
+
     void Actor::UpdateChildTransforms() const
     {
         for (auto& attachedComponent : attachedComponents)

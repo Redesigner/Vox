@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/objects/Tickable.h"
 #include "core/objects/Object.h"
+#include "core/objects/ObjectClass.h"
 #include "core/objects/component/Component.h"
 #include "game_objects/components/SceneComponent.h"
 
@@ -36,7 +37,6 @@ namespace  Vox
 
         [[nodiscard]] const Transform& GetTransform() const;
 
-    protected:
         template <typename T, typename... Args>
         std::shared_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
         {
@@ -51,6 +51,28 @@ namespace  Vox
             }
             return result;
         }
+
+        template <typename... Args>
+        std::shared_ptr<SceneComponent> AttachComponent(const ObjectClass* componentClass, Args&&... args)
+        {
+            assert(componentClass->IsA<SceneComponent>());
+
+            ObjectInitializer objectInitializer;
+            objectInitializer.world = world;
+            objectInitializer.parent = this;
+            auto result = std::dynamic_pointer_cast<SceneComponent>(attachedComponents.emplace_back(
+                std::dynamic_pointer_cast<SceneComponent>(componentClass->GetConstructor()(objectInitializer, std::forward<Args>(args)...)))
+            );
+            AddChild(result);
+            if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
+            {
+                tickableComponents.emplace_back(std::move(tickable));
+            }
+            return result;
+        }
+
+    protected:
+        void ChildRemoved(const Object* object) override;
     
     private:
         void UpdateChildTransforms() const;

@@ -38,12 +38,21 @@
                                 2.0,
                                 0.0,
                                 0.0,
-                                0.0,
+                                -0.0,
                                 0.0,
                                 1.0,
                                 1.0,
                                 1.0
                             ]
+                        }
+                    }
+                },
+                "Test Component_Default0": {
+                    "class": "Test Component",
+                    "properties": {
+                        "tag": {
+                            "type": "string",
+                            "value": "Test data"
                         }
                     }
                 }

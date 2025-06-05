@@ -5,6 +5,7 @@
 #include "ClassList.h"
 
 #include <algorithm>
+#include <utility>
 #include <imgui.h>
 
 #include "Editor.h"
@@ -25,7 +26,7 @@ namespace Vox
     {
         if (ImGui::BeginTabBar("ClassesTabs"))
         {
-            if (ImGui::BeginTabItem("Classes"))
+            if (ImGui::BeginTabItem(title.c_str()))
             {
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 0.0f));
@@ -34,10 +35,15 @@ namespace Vox
                 auto endItr = ServiceLocator::GetObjectService()->GetEnd();
                 for (auto itr = ServiceLocator::GetObjectService()->GetBegin(); itr != endItr; ++itr)
                 {
+                    if (!classFilter(itr->second))
+                    {
+                        continue;;
+                    }
+
                     ImGui::Selectable(itr->first.c_str());
                     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
                     {
-                        ImGui::SetDragDropPayload("OBJECT_CLASS_NAME", itr->first.data(), itr->first.size() + 1);
+                        ImGui::SetDragDropPayload(objectClassPayloadType.c_str(), itr->first.data(), itr->first.size() + 1);
                         ImGui::EndDragDropSource();
                     }
 
@@ -68,5 +74,10 @@ namespace Vox
     void ClassList::SetDoubleClickCallback(ObjectCallback callback)
     {
         doubleClickCallback = std::move(callback);
+    }
+
+    void ClassList::SetClassFilter(std::function<bool(const std::shared_ptr<ObjectClass>&)> filter)
+    {
+        classFilter = std::move(filter);
     }
 } // Vox

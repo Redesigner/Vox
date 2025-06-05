@@ -202,6 +202,11 @@ namespace Vox
 
     bool Property::ValueEquals(const void* objectLocationA, const void* objectLocationB) const
     {
+        if (objectLocationA == nullptr || objectLocationB == nullptr)
+        {
+            return false;
+        }
+
         return GetTypedVariant(objectLocationA) == GetTypedVariant(objectLocationB);
     }
 

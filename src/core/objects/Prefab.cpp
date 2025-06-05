@@ -48,27 +48,7 @@ namespace Vox
 
         parent = baseClass;
         CreateOverrides(objectRoot, {});
-
-        if (objectRoot.contains("additional") && objectRoot["additional"].is_object())
-        {
-            for (const auto& additionalChild : objectRoot["additional"])
-            {
-                if (!additionalChild.contains("name") || !additionalChild["name"].is_string())
-                {
-                    continue;
-                }
-
-                if (!additionalChild.contains("class") || !additionalChild["class"].is_string())
-                {
-                    continue;
-                }
-
-                if (auto childClass = ServiceLocator::GetObjectService()->GetObjectClass(additionalChild["class"]))
-                {
-                    additionalObjects.emplace_back(childClass, additionalChild["name"]);
-                }
-            }
-        }
+        CreateAdditionalObjects(objectRoot);
     }
 
     PrefabContext::PrefabContext(const nlohmann::json& jsonObject)
@@ -89,27 +69,7 @@ namespace Vox
 
         parent = baseClass;
         CreateOverrides(jsonObject, {});
-
-        if (jsonObject.contains("additional") && jsonObject["additional"].is_object())
-        {
-            for (const auto& additionalChild : jsonObject["additional"])
-            {
-                if (!additionalChild.contains("name") || !additionalChild["name"].is_string())
-                {
-                    continue;
-                }
-
-                if (!additionalChild.contains("class") || !additionalChild["class"].is_string())
-                {
-                    continue;
-                }
-
-                if (const std::shared_ptr<ObjectClass> childClass = ServiceLocator::GetObjectService()->GetObjectClass(additionalChild["class"]))
-                {
-                    additionalObjects.emplace_back(childClass, additionalChild["name"]);
-                }
-            }
-        }
+        CreateAdditionalObjects(jsonObject);
     }
 
     PrefabContext::PrefabContext(const Object* object)
@@ -150,6 +110,25 @@ namespace Vox
                 std::vector<std::string> childPathStack = currentPathStack;
                 childPathStack.emplace_back(child.key());
                 CreateOverrides(child.value(), childPathStack);
+            }
+        }
+    }
+
+    void PrefabContext::CreateAdditionalObjects(const nlohmann::json& context)
+    {
+        if (context.contains("additional") && context["additional"].is_object())
+        {
+            for (const auto& additionalChild : context["additional"].items())
+            {
+                if (!additionalChild.value().contains("class") || !additionalChild.value()["class"].is_string())
+                {
+                    continue;
+                }
+
+                if (auto childClass = ServiceLocator::GetObjectService()->GetObjectClass(additionalChild.value()["class"]))
+                {
+                    additionalObjects.emplace_back(childClass, additionalChild.key());
+                }
             }
         }
     }
@@ -231,8 +210,7 @@ namespace Vox
         for (const AdditionalObject& additionalObject : context->additionalObjects)
         {
             Json newObjectJson = Json::object();
-            newObjectJson["name"] = additionalObject.objectName;
-            newObjectJson["class"] = additionalObject.objectClass.lock()->GetName();
+            newObjectJson[additionalObject.objectName]["class"] = additionalObject.objectClass.lock()->GetName();
             result[GetName()]["additional"].insert(newObjectJson.begin(), newObjectJson.end());
         }
         return result;

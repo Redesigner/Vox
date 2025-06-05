@@ -40,8 +40,6 @@ namespace Vox
         ClickCallback doubleClickCallback;
 
         World* tempWorld;
-
-        DelegateHandle<bool> deleteDelegate;
     };
 }
 

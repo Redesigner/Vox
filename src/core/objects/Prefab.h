@@ -35,6 +35,9 @@ namespace Vox
 
         std::vector<PropertyOverride> propertyOverrides;
         std::vector<AdditionalObject> additionalObjects;
+
+    private:
+        void CreateAdditionalObjects(const nlohmann::json& context);
     };
 
     class Prefab : public ObjectClass
