@@ -8,10 +8,17 @@ namespace Vox
 {
     using Constructor = std::function<std::shared_ptr<Object>(const ObjectInitializer&)>;
 
-    ObjectClass::ObjectClass(std::string  name, Constructor constructor, const std::shared_ptr<ObjectClass>& parent, std::vector<Property> properties)
-        : constructor(std::move(constructor)), parentClass(parent), properties(std::move(properties)),
-          name(std::move(name))
+    ObjectClass::ObjectClass(const Constructor& constructor, const std::shared_ptr<ObjectClass>& parent)
+        : constructor(constructor), parentClass(parent)
     {
+        defaultObject = constructor(ObjectInitializer());
+        defaultObject->BuildProperties(properties);
+        name = defaultObject->GetClassDisplayName();
+    }
+
+    ObjectClass::~ObjectClass()
+    {
+
     }
 
     Constructor ObjectClass::GetConstructor() const
@@ -62,6 +69,11 @@ namespace Vox
     const std::string& ObjectClass::GetName() const
     {
         return name;
+    }
+
+    const Object* ObjectClass::GetDefaultObject() const
+    {
+        return defaultObject.get();
     }
 
 #ifdef EDITOR

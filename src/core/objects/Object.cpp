@@ -50,13 +50,13 @@ namespace Vox
     }
 
     // May need to create some kind of stack limit here
-    nlohmann::ordered_json Object::Serialize(std::shared_ptr<Object> defaultObject) // NOLINT(*-no-recursion)
+    nlohmann::ordered_json Object::Serialize(const Object* defaultObject) // NOLINT(*-no-recursion)
     {
         using json = nlohmann::ordered_json;
 
         if (!defaultObject)
         {
-            defaultObject = GetClass()->GetConstructor()(ObjectInitializer());
+            defaultObject = GetClass()->GetDefaultObject();
         }
 
         json objectJson {};
@@ -65,7 +65,7 @@ namespace Vox
         objectJson[displayName]["properties"] = json::value_type::object();
         for (const Property& property : GetProperties())
         {
-            if (property.ValueEquals(defaultObject.get(), this))
+            if (property.ValueEquals(defaultObject, this))
             {
                 continue;
             }
@@ -80,7 +80,7 @@ namespace Vox
             for (const auto& child : children)
             {
                 // Match children by names
-                json childJson = child->Serialize(defaultObject->GetChildByName(child->GetDisplayName()));
+                json childJson = child->Serialize(defaultObject->GetChildByName(child->GetDisplayName()).get());
                 objectJson[displayName]["children"].insert(childJson.begin(), childJson.end());
             }
         }
@@ -107,16 +107,16 @@ namespace Vox
     std::vector<PropertyOverride> Object::GenerateOverrides() const
     {
         std::vector<std::string> context {};
-        return GenerateOverrides(GetClass()->GetConstructor()(ObjectInitializer()), context);
+        return GenerateOverrides(GetClass()->GetDefaultObject(), context);
     }
 
-    std::vector<PropertyOverride> Object::GenerateOverrides(std::shared_ptr<Object> defaultObject,
+    std::vector<PropertyOverride> Object::GenerateOverrides(const Object* defaultObject,
         std::vector<std::string>& context) const
     {
         std::vector<PropertyOverride> result;
         for (const Property& property : GetProperties())
         {
-            if (property.ValueEquals(defaultObject.get(), this))
+            if (property.ValueEquals(defaultObject, this))
             {
                 continue;
             }
@@ -131,7 +131,7 @@ namespace Vox
                 std::vector<std::string> childContext = context;
                 childContext.emplace_back(child->GetDisplayName());
                 std::vector<PropertyOverride> childOverrides = child->GenerateOverrides(
-                    defaultObject->GetChildByName(child->GetDisplayName()), childContext
+                    defaultObject->GetChildByName(child->GetDisplayName()).get(), childContext
                 );
                 result.insert(result.end(), childOverrides.begin(), childOverrides.end());
             }

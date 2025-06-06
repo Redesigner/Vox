@@ -13,7 +13,7 @@ namespace Vox
     struct SavedWorldObject
     {
         std::string name;
-        Prefab prefab;
+        std::unique_ptr<Prefab> prefab;
     };
 
     struct SavedWorld

@@ -19,7 +19,7 @@ namespace Vox
 
         for (const auto& object : worldJson["objects"].items())
         {
-            savedObjects.emplace_back(object.key(), std::move(Prefab(object.value())));
+            savedObjects.emplace_back(object.key(), std::move(Prefab::FromJson(object.value())));
         }
     }
 } // Vox

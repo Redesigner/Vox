@@ -1,6 +1,16 @@
 {
     "test.json": {
         "class": "Character",
+        "children": {
+            "Test Component_Default": {
+                "properties": {
+                    "tag": {
+                        "type": "string",
+                        "value": "Test"
+                    }
+                }
+            }
+        },
         "additional": {
             "Test Component_Default": {
                 "class": "Test Component"

@@ -13,64 +13,27 @@
 
 namespace Vox
 {
-    PrefabContext::PrefabContext(const std::string& filename)
-    {
-        using Json = nlohmann::json;
-
-        const std::string& jsonString = ServiceLocator::GetFileIoService()->LoadFile("prefabs/" + filename);
-        if (jsonString.empty())
-        {
-            return;
-        }
-
-        const Json prefabJson = Json::parse(jsonString);
-
-        if (prefabJson.empty())
-        {
-            return;
-        }
-
-        const Json& objectRoot = prefabJson.front();
-
-        if (!objectRoot.contains("class") || !objectRoot["class"].is_string())
-        {
-            VoxLog(Warning, Game, "Unable to parse object from json. The object does not have a valid class. "
-                "Check that the json is not malformed or corrupted.");
-            return;
-        }
-
-        const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(objectRoot["class"]);
-        if (!baseClass)
-        {
-            VoxLog(Warning, Game, "Prefab could not find class '{}'.", objectRoot["class"].get<std::string>());
-            return;
-        }
-
-        className = filename;
-        parent = baseClass;
-        CreateOverrides(objectRoot, {});
-        CreateAdditionalObjects(objectRoot);
-    }
-
     PrefabContext::PrefabContext(const nlohmann::json& jsonObject)
     {
-        if (!jsonObject.contains("class") || !jsonObject["class"].is_string())
+        nlohmann::json root = jsonObject.front();
+        if (!root.contains("class") || !root["class"].is_string())
         {
             VoxLog(Warning, Game, "Unable to parse object from json. The object does not have a valid class. "
                 "Check that the json is not malformed or corrupted.");
             return;
         }
 
-        const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(jsonObject["class"]);
+        const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(root["class"]);
         if (!baseClass)
         {
-            VoxLog(Warning, Game, "Prefab could not find class '{}'.", jsonObject["class"].get<std::string>());
+            VoxLog(Warning, Game, "Prefab could not find class '{}'.", root["class"].get<std::string>());
             return;
         }
 
+        className = jsonObject.items().begin().key();
         parent = baseClass;
-        CreateOverrides(jsonObject, {});
-        CreateAdditionalObjects(jsonObject);
+        CreateOverrides(root, {});
+        CreateAdditionalObjects(root);
     }
 
     PrefabContext::PrefabContext(const Object* object)
@@ -88,7 +51,7 @@ namespace Vox
         }
     }
 
-    void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack)
+    void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack) // NOLINT(*-no-recursion)
     {
         if (context.contains("properties") && context["properties"].is_object())
         {
@@ -135,52 +98,41 @@ namespace Vox
         }
     }
 
-    Prefab::Prefab(const std::string& filename)
-        :ObjectClass({}, {}, {}, {})
+    Prefab::Prefab(const std::shared_ptr<PrefabContext>& context)
+        :ObjectClass([context](const ObjectInitializer& objectInitializer) { return Construct(objectInitializer, context.get());},
+        context->parent.lock()), context(context)
     {
+        name = context->className;
         canBeRenamed = true;
-
-        context = std::make_shared<PrefabContext>(filename);
-        name = filename;
-        parentClass = context->parent.lock();
-        std::shared_ptr<PrefabContext> capturedContext = context;
-        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
-        {
-            return Construct(objectInitializer, capturedContext.get());
-        };
     }
 
-    Prefab::Prefab(const nlohmann::json& jsonObject)
-        :ObjectClass({}, {}, {}, {})
-    {
-        canBeRenamed = true;
+    Prefab::~Prefab()
+    = default;
 
-        if (jsonObject.front())
+    std::unique_ptr<Prefab> Prefab::FromObject(const Object* object)
+    {
+        auto context = std::make_shared<PrefabContext>(object);
+        return std::make_unique<Prefab>(context);
+    }
+
+    std::unique_ptr<Prefab> Prefab::FromJson(const nlohmann::json& json)
+    {
+        auto context = std::make_shared<PrefabContext>(json);
+        return std::make_unique<Prefab>(context);
+    }
+
+    std::unique_ptr<Prefab> Prefab::FromFile(const std::string& filename)
+    {
+        using Json = nlohmann::json;
+
+        const std::string& jsonString = ServiceLocator::GetFileIoService()->LoadFile("prefabs/" + filename);
+        if (jsonString.empty())
         {
-            name = jsonObject.items().begin().key();
+            return nullptr;
         }
-        context = std::make_shared<PrefabContext>(jsonObject);
-        parentClass = context->parent.lock();
-        std::shared_ptr<PrefabContext> capturedContext = context;
-        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
-        {
-            return Construct(objectInitializer, capturedContext.get());
-        };
-    }
 
-    Prefab::Prefab(const Object* object)
-        :ObjectClass({}, {}, {}, {})
-    {
-        canBeRenamed = true;
-
-        context = std::make_shared<PrefabContext>(object);
-        name = object->GetDisplayName();
-        parentClass = context->parent.lock();
-        std::shared_ptr<PrefabContext> capturedContext = context;
-        constructor = [capturedContext](const ObjectInitializer& objectInitializer)
-        {
-            return Construct(objectInitializer, capturedContext.get());
-        };
+        const Json prefabJson = Json::parse(jsonString);
+        return FromJson(prefabJson);
     }
 
     // ReSharper disable once CppMemberFunctionMayBeConst

@@ -128,7 +128,7 @@ namespace Vox
          * @param defaultObject A default object to compare property values with.
          * @return Newly constructed JSON object
          */
-        [[nodiscard]] nlohmann::ordered_json Serialize(std::shared_ptr<Object> defaultObject = nullptr);
+        [[nodiscard]] nlohmann::ordered_json Serialize(const Object* defaultObject = nullptr);
 
         /**
          * @brief Generate the differences in this object's property values and the default object's property values
@@ -210,7 +210,7 @@ namespace Vox
         std::string displayName;
 
     private:
-        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(std::shared_ptr<Object> defaultObject, std::vector<std::string>& context) const;
+        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const Object* defaultObject, std::vector<std::string>& context) const;
 
         // @TODO: rework this into weak ptrs?
         Object* parent;

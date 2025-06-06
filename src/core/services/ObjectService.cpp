@@ -6,7 +6,7 @@ namespace Vox
 {
     void ObjectService::RegisterPrefab(const std::string& filename)
     {
-        classRegistry.emplace(filename, std::make_shared<Prefab>(filename));
+        classRegistry.emplace(filename, Prefab::FromFile(filename));
     }
 
     std::shared_ptr<ObjectClass> ObjectService::GetObjectClass(const std::string& objectClassId) const

@@ -140,7 +140,7 @@ namespace Vox
 
         for (const std::shared_ptr<Object>& child : objects)
         {
-            result.savedObjects.emplace_back(child->GetDisplayName(), Prefab(child.get()));
+            result.savedObjects.emplace_back(child->GetDisplayName(), Prefab::FromObject(child.get()));
         }
         return result;
     }
@@ -152,7 +152,7 @@ namespace Vox
 
         for (const SavedWorldObject& object : savedWorld.savedObjects)
         {
-            const std::shared_ptr<Object> child = objects.emplace_back(object.prefab.GetConstructor()(ObjectInitializer(this)));
+            const std::shared_ptr<Object> child = objects.emplace_back(object.prefab->GetConstructor()(ObjectInitializer(this)));
             child->SetName(object.name);
             PostObjectConstruct(child);
         }

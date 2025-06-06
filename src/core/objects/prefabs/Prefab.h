@@ -25,7 +25,6 @@ namespace Vox
 
     struct PrefabContext
     {
-        explicit PrefabContext(const std::string& filename);
         explicit PrefabContext(const nlohmann::json& jsonObject);
         explicit PrefabContext(const Object* object);
 
@@ -44,10 +43,12 @@ namespace Vox
     class Prefab : public ObjectClass
     {
     public:
-        explicit Prefab(const std::string& filename);
-        explicit Prefab(const nlohmann::json& jsonObject);
-        explicit Prefab(const Object* object);
-        ~Prefab() override = default;
+        explicit Prefab(const std::shared_ptr<PrefabContext>& context);
+        ~Prefab() override;
+
+        static std::unique_ptr<Prefab> FromObject(const Object* object);
+        static std::unique_ptr<Prefab> FromJson(const nlohmann::json& json);
+        static std::unique_ptr<Prefab> FromFile(const std::string& filename);
 
         void SaveChanges(const Object* object);
 

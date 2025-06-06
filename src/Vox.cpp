@@ -195,9 +195,9 @@ int main()
         std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
         testWorld->CreateObject("test.json")->SetName("test prefab");
         std::dynamic_pointer_cast<SceneComponent>(character->GetChildByName("Player Mesh"))->SetPosition({2.0f, 0.0f, 0.0f});
-        const Prefab test = Prefab(character.get());
-        test.SaveToFile("test2.json");
-        testWorld->CreateObject(&test);
+        const auto test = Prefab::FromObject(character.get());
+        test->SaveToFile("test2.json");
+        testWorld->CreateObject(test.get());
 
         character.reset();
         testWorld->SaveToFile("testWorld");

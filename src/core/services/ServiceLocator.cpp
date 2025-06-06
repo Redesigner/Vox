@@ -28,13 +28,13 @@ namespace Vox
 
 	void ServiceLocator::DeleteServices()
 	{
+		delete objectService;
 		delete editorService;
 		delete fileIoService;
 		delete inputService;
-	    inputService = nullptr;
-		delete objectService;
 		delete physicsServer;
 		delete renderer;
+	    inputService = nullptr;
 	    editorService = nullptr;
 	    fileIoService = nullptr;
 	    objectService = nullptr;

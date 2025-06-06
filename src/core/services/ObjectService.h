@@ -15,15 +15,14 @@ namespace Vox
     public:
         using ObjectMap = std::map<std::string, std::shared_ptr<ObjectClass>>;
 
+        ObjectService() = default;
+        ~ObjectService() = default;
+
         template <typename T>
         void RegisterObjectClass() requires Derived<T, Object>
         {
-            std::vector<Property> properties;
-            T defaultObject = T(ObjectInitializer());
-            defaultObject.BuildProperties(properties);
-
-            auto objectClass = std::make_shared<ObjectClass>(defaultObject.GetClassDisplayName(), T::template GetConstructor<T>(), T::GetParentClass(), properties);
-            classRegistry.emplace(defaultObject.GetClassDisplayName(), objectClass);
+            auto objectClass = std::make_shared<ObjectClass>(T::template GetConstructor<T>(), T::GetParentClass());
+            classRegistry.emplace(objectClass->GetName(), objectClass);
             T::SetStaticObjectClass(objectClass);
         }
 

@@ -1,5 +1,5 @@
 {
-    "Character_Default": {
+    "Character": {
         "class": "Character",
         "children": {
             "Player Mesh": {

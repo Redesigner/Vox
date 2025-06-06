@@ -48,8 +48,11 @@ namespace Vox
 
     Character::~Character() // NOLINT(*-use-equals-default)
     {
-	    ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_SPACE, jumpCallback);
-	    ServiceLocator::GetInputService()->UnregisterMouseMotionCallback(mouseLookCallback);
+        if (InputService* inputService = ServiceLocator::GetInputService())
+        {
+	        inputService->UnregisterKeyboardCallback(SDL_SCANCODE_SPACE, jumpCallback);
+	        inputService->UnregisterMouseMotionCallback(mouseLookCallback);
+        }
     }
 
     void Character::Tick(float deltaTime)
