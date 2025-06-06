@@ -140,7 +140,8 @@ namespace Vox
 
         for (const std::shared_ptr<Object>& child : objects)
         {
-            result.savedObjects.emplace_back(child->GetDisplayName(), Prefab::FromObject(child.get()));
+            const auto& tempPrefab = result.savedObjects.emplace_back(child->GetDisplayName(), Prefab::FromObject(child.get()));
+            tempPrefab.prefab->GetContext()->additionalObjects.clear();
         }
         return result;
     }

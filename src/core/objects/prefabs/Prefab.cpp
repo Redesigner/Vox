@@ -180,6 +180,11 @@ namespace Vox
         return result;
     }
 
+    std::shared_ptr<PrefabContext> Prefab::GetContext() const
+    {
+        return context;
+    }
+
     std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext)
     {
         if (prefabContext->parent.expired())

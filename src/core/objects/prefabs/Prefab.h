@@ -55,6 +55,8 @@ namespace Vox
         void SaveToFile(const std::string& filename) const;
         [[nodiscard]] nlohmann::ordered_json Serialize() const;
 
+        [[nodiscard]] std::shared_ptr<PrefabContext> GetContext() const;
+
     private:
         static std::shared_ptr<Object> Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext);
 

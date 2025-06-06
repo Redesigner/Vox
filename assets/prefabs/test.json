@@ -6,7 +6,7 @@
                 "properties": {
                     "tag": {
                         "type": "string",
-                        "value": "Test"
+                        "value": "This is an override!"
                     }
                 }
             }
