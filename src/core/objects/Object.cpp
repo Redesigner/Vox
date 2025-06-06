@@ -54,7 +54,7 @@ namespace Vox
                 child->SetName(IncrementString(child->GetDisplayName()));
             }
         }
-        children.emplace_back(child);
+        ChildAdded(children.emplace_back(child));
     }
 
     const std::vector<std::shared_ptr<Object>>& Object::GetChildren() const

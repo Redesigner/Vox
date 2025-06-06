@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "core/concepts/Concepts.h"
+#include "core/datatypes/Delegate.h"
 #include "core/objects/Object.h"
 #include "core/objects/ObjectClass.h"
 #include "core/objects/Prefab.h"
@@ -22,7 +23,7 @@ namespace Vox
             std::vector<Property> properties;
             T defaultObject = T(ObjectInitializer());
             defaultObject.BuildProperties(properties);
-            T::SetObjectClass(
+            T::SetStaticObjectClass(
                 RegisterObjectClass(defaultObject.GetClassDisplayName(),
                     std::make_shared<ObjectClass>(
                         defaultObject.GetClassDisplayName(),
@@ -52,7 +53,14 @@ namespace Vox
         [[nodiscard]] ObjectMap::const_iterator GetBegin() const;
         [[nodiscard]] ObjectMap::const_iterator GetEnd() const;
 
+        [[nodiscard]] DelegateHandle<const ObjectClass*> RegisterClassChangedDelegate(const std::function<void(const ObjectClass*)>& delegate);
+        void UnregisterClassChangedDelegate(DelegateHandle<const ObjectClass*> handle);
+
+        void UpdateClass(const ObjectClass* objectClass);
+
     private:
         ObjectMap classRegistry;
+
+        Delegate<const ObjectClass*> objectClassChanged;
     };
 }

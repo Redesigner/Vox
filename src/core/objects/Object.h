@@ -15,21 +15,25 @@
 
 #define DEFAULT_DISPLAY_NAME() displayName = fmt::format("{}_Default", classDisplayName);
 
+#define IMPLEMENT_OBJECT_ROOT(Name)\
+    friend class ObjectService;\
+    private:\
+    static inline std::shared_ptr<ObjectClass> objectClass = nullptr;\
+    static void SetStaticObjectClass(const std::shared_ptr<ObjectClass>& objectClassIn) { objectClass = objectClassIn; }\
+    public:\
+    std::shared_ptr<ObjectClass> GetClass() const override { return localClass ? localClass : objectClass; }\
+    static std::shared_ptr<ObjectClass> Class() { return objectClass; }\
+
 /// Implement the objects name and accessors for its ObjectClass
 #define IMPLEMENT_OBJECT(Name, Parent)\
-    private: static inline std::shared_ptr<ObjectClass> objectClass = nullptr;\
-    public: static void SetObjectClass(const std::shared_ptr<ObjectClass>& objectClassIn) { objectClass = objectClassIn; }\
-    std::shared_ptr<ObjectClass> GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
-    static std::shared_ptr<ObjectClass> Class() { return objectClass; }\
+    IMPLEMENT_OBJECT_ROOT(Name)\
     static std::shared_ptr<ObjectClass> GetParentClass() { return Parent::Class(); }\
     IMPLEMENT_NAME(Name)\
     private:
 
+/// Implement an object without a defined parent class
 #define IMPLEMENT_OBJECT_BASE(Name)\
-    private: static inline std::shared_ptr<ObjectClass> objectClass = nullptr;\
-    public: static void SetObjectClass(const std::shared_ptr<ObjectClass>& objectClassIn) { objectClass = objectClassIn; }\
-    std::shared_ptr<ObjectClass> GetClass() const override { assert(objectClass && "Class did not exist"); return objectClass; }\
-    static std::shared_ptr<ObjectClass> Class() { return objectClass; }\
+    IMPLEMENT_OBJECT_ROOT(Name)\
     static std::shared_ptr<ObjectClass> GetParentClass() { return nullptr; }\
     IMPLEMENT_NAME(Name)\
     private:
@@ -102,10 +106,12 @@ namespace Vox
         bool RemoveChild(const Object* object);
 
         bool native = true;
-        
+
+        std::shared_ptr<ObjectClass> localClass;
+
     protected:
         template<typename T>
-        void CreateChild(const std::string& name)
+        void CreateChild(const std::string& name) requires Derived<T, Object>
         {
             std::shared_ptr<T> newObject = T::template GetConstructor<T>()(ObjectInitializer(this));
             newObject->SetName(name);
@@ -113,6 +119,7 @@ namespace Vox
         }
 
         virtual void ChildRemoved(const Object* object) {};
+        virtual void ChildAdded(const std::shared_ptr<Object>& child) {};
 
         std::string displayName;
 

@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <cassert>
 #include <functional>
 #include <ranges>
 #include <unordered_map>

@@ -35,4 +35,20 @@ namespace Vox
     {
         return classRegistry.cend();
     }
+
+    DelegateHandle<const ObjectClass*> ObjectService::RegisterClassChangedDelegate(
+        const std::function<void(const ObjectClass*)>& delegate)
+    {
+        return objectClassChanged.RegisterCallback(delegate);
+    }
+
+    void ObjectService::UnregisterClassChangedDelegate(DelegateHandle<const ObjectClass*> handle)
+    {
+        objectClassChanged.UnregisterCallback(handle);
+    }
+
+    void ObjectService::UpdateClass(const ObjectClass* objectClass)
+    {
+        objectClassChanged(objectClass);
+    }
 }

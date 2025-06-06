@@ -133,7 +133,11 @@ namespace Vox
         {
             flags |= ImGuiTreeNodeFlags_Selected;
         }
-        const bool itemExpanded = ImGui::TreeNodeEx(fmt::format("{} {}", object->GetClassDisplayName(), object->GetDisplayName()).c_str(), flags);
+
+        const auto& objectClass = object->GetClass();
+        const std::string& className = objectClass->GetName();
+        const std::string& objectName = object->GetDisplayName();
+        const bool itemExpanded = ImGui::TreeNodeEx(fmt::format("{} {}", className, objectName).c_str(), flags);
         if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
         {
             SetSelectedObject(object);

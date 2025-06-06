@@ -20,7 +20,7 @@ namespace Vox
     class ActorEditor
     {
     public:
-        explicit ActorEditor(const Prefab* actorClass);
+        explicit ActorEditor(Prefab* actorClass);
         ~ActorEditor();
 
         void Draw();
@@ -37,7 +37,7 @@ namespace Vox
         DelegateHandle<bool> saveDelegate;
         DelegateHandle<bool> deleteDelegate;
 
-        const Prefab* currentPrefab;
+        Prefab* currentPrefab;
     };
 
 } // Vox

@@ -25,40 +25,8 @@
                 }
             }
         },
+        "test prefab": {},
         "Character_Default0": {
-            "class": "Character",
-            "children": {
-                "Player Mesh": {
-                    "class": "Mesh Component",
-                    "properties": {
-                        "localTransform": {
-                            "type": "transform",
-                            "value": [
-                                0.0,
-                                2.0,
-                                0.0,
-                                0.0,
-                                -0.0,
-                                0.0,
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        }
-                    }
-                },
-                "Test Component_Default0": {
-                    "class": "Test Component",
-                    "properties": {
-                        "tag": {
-                            "type": "string",
-                            "value": "Test data"
-                        }
-                    }
-                }
-            }
-        },
-        "Character_Default1": {
             "class": "Character",
             "children": {
                 "Player Mesh": {

@@ -12,6 +12,7 @@
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
 #include "core/objects/actor/Actor.h"
+#include "core/services/ObjectService.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"
 #include "editor/WorldOutline.h"
@@ -33,7 +34,6 @@ namespace Vox
             {
                 worldOutline->SetSelectedObject(object);
             };
-
         primaryViewport->SetOnDroppedDelegate([this](const void* data)
             {
                 if (!currentWorld.expired())
@@ -42,10 +42,8 @@ namespace Vox
                     currentWorld.lock()->CreateObject(std::string(objectClassName));
                 }
             });
-
         primaryViewport->SetDragFilter("OBJECT_CLASS_NAME");
 
-        actorEditor = nullptr;
         classList = std::make_unique<ClassList>();
         classList->title = "Actors";
         classList->objectClassPayloadType = "OBJECT_CLASS_NAME";
@@ -58,10 +56,22 @@ namespace Vox
             return objectClass->IsA<Actor>();
         });
 
+        actorEditor = nullptr;
+
         const ImGuiIO& io = ImGui::GetIO();
         gitLabSans14 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 14);
         gitLabSans18 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 18);
         gitLabSans24 = io.Fonts->AddFontFromFileTTF("../../../assets/fonts/GitLabSans.ttf", 24);
+
+        DelegateHandle<const ObjectClass*> handle = ServiceLocator::GetObjectService()->RegisterClassChangedDelegate([this](const ObjectClass*)
+        {
+            if (currentWorld.expired())
+            {
+                return;
+            }
+
+            currentWorld.lock()->Reload();
+        });
     }
 
     Editor::~Editor()
@@ -182,7 +192,7 @@ namespace Vox
 
         if (!pendingEditorClass.expired() && !actorEditor)
         {
-            if (const auto* prefabClass = dynamic_cast<const Prefab*>(pendingEditorClass.lock().get()))
+            if (auto* prefabClass = dynamic_cast<Prefab*>(pendingEditorClass.lock().get()))
             {
                 actorEditor = std::make_unique<ActorEditor>(prefabClass);
                 pendingEditorClass.reset();

@@ -86,6 +86,20 @@ namespace Vox
         return transform;
     }
 
+    void Actor::ChildAdded(const std::shared_ptr<Object>& child)
+    {
+        // Only check non-native children if they should be attached
+        if (child->native)
+        {
+            return;
+        }
+
+        if (const std::shared_ptr<SceneComponent> sceneComponent = std::dynamic_pointer_cast<SceneComponent>(child))
+        {
+            attachedComponents.emplace_back(sceneComponent);
+        }
+    }
+
     void Actor::ChildRemoved(const Object* object)
     {
         std::erase_if(attachedComponents, [object](const std::shared_ptr<SceneComponent>& component)

@@ -23,7 +23,7 @@
 
 namespace Vox
 {
-    ActorEditor::ActorEditor(const Prefab* actorClass)
+    ActorEditor::ActorEditor(Prefab* actorClass)
     {
         currentPrefab = actorClass;
         world = std::make_shared<World>();
@@ -43,7 +43,7 @@ namespace Vox
                 outline->SetSelectedObject(object);
             };
         viewport->SetDragFilter("COMPONENT_CLASS_NAME");
-        viewport->SetOnDroppedDelegate([this](void* classData)
+        viewport->SetOnDroppedDelegate([this](const void* classData)
         {
             const auto objectClassName = static_cast<const char*>(classData);
             std::shared_ptr<ObjectClass> componentClass = ServiceLocator::GetObjectService()->GetObjectClass(objectClassName);
@@ -160,7 +160,7 @@ namespace Vox
 
     void ActorEditor::SavePrefab()
     {
-        Prefab newPrefab = Prefab(rootObject.get());
-        newPrefab.SaveToFile(currentPrefab->GetName());
+        currentPrefab->SaveChanges(rootObject.get());
+        currentPrefab->SaveToFile(currentPrefab->GetName());
     }
 } // Vox

@@ -31,6 +31,7 @@ namespace Vox
 
         void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
 
+        std::string className;
         std::weak_ptr<ObjectClass> parent;
 
         std::vector<PropertyOverride> propertyOverrides;
@@ -47,6 +48,8 @@ namespace Vox
         explicit Prefab(const nlohmann::json& jsonObject);
         explicit Prefab(const Object* object);
         ~Prefab() override = default;
+
+        void SaveChanges(const Object* object);
 
         void SaveToFile(const std::string& filename) const;
         [[nodiscard]] nlohmann::ordered_json Serialize() const;

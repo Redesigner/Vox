@@ -46,6 +46,7 @@ namespace Vox
             return;
         }
 
+        className = filename;
         parent = baseClass;
         CreateOverrides(objectRoot, {});
         CreateAdditionalObjects(objectRoot);
@@ -74,6 +75,7 @@ namespace Vox
 
     PrefabContext::PrefabContext(const Object* object)
     {
+        className = object->GetClass()->GetName();
         parent = object->GetClass();
         propertyOverrides = object->GenerateOverrides();
 
@@ -181,6 +183,16 @@ namespace Vox
         };
     }
 
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void Prefab::SaveChanges(const Object* object)
+    {
+        const auto updatedPrefabContext = PrefabContext(object);
+        context->additionalObjects = updatedPrefabContext.additionalObjects;
+        context->propertyOverrides = updatedPrefabContext.propertyOverrides;
+
+        ServiceLocator::GetObjectService()->UpdateClass(this);
+    }
+
     void Prefab::SaveToFile(const std::string& filename) const
     {
         ServiceLocator::GetFileIoService()->WriteToFile("prefabs/" + filename, Serialize().dump(4));
@@ -224,10 +236,13 @@ namespace Vox
         }
 
         std::shared_ptr<Object> object = prefabContext->parent.lock()->GetConstructor()(objectInitializer);
+        object->localClass = ServiceLocator::GetObjectService()->GetObjectClass(prefabContext->className);
 
+        ObjectInitializer childInitializer = objectInitializer;
+        childInitializer.parent = object.get();
         for (const auto& additionalObject : prefabContext->additionalObjects)
         {
-            std::shared_ptr<Object> child = additionalObject.objectClass.lock()->GetConstructor()(objectInitializer);
+            std::shared_ptr<Object> child = additionalObject.objectClass.lock()->GetConstructor()(childInitializer);
             child->SetName(additionalObject.objectName);
             child->native = false;
             object->AddChild(child);
@@ -237,6 +252,8 @@ namespace Vox
         {
             OverrideProperty(object, override);
         }
+
+        // object->SetClass
 
         return object;
     }

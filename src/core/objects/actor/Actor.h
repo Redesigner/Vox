@@ -72,6 +72,8 @@ namespace  Vox
         }
 
     protected:
+        void ChildAdded(const std::shared_ptr<Object>& child) override;
+
         void ChildRemoved(const Object* object) override;
     
     private:
