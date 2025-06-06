@@ -23,7 +23,7 @@
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
-#include "core/objects/Prefab.h"
+#include "core/objects/prefabs/Prefab.h"
 #include "core/objects/TestObjectChild.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/TestActor.h"

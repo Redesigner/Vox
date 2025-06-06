@@ -4,13 +4,6 @@
 
 namespace Vox
 {
-    std::shared_ptr<ObjectClass> ObjectService::RegisterObjectClass(const std::string& classId, const std::shared_ptr<ObjectClass>& objectClass)
-    {
-        assert(!classRegistry.contains(classId) && "Class is already registered");
-        auto newClassEntry = classRegistry.insert({classId, objectClass});
-        return newClassEntry.first->second;
-    }
-
     void ObjectService::RegisterPrefab(const std::string& filename)
     {
         classRegistry.emplace(filename, std::make_shared<Prefab>(filename));

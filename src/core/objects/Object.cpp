@@ -7,19 +7,6 @@
 
 namespace Vox
 {
-    ObjectInitializer::ObjectInitializer()
-    = default;
-
-    ObjectInitializer::ObjectInitializer(World* world)
-        :world(world)
-    {
-    }
-
-    ObjectInitializer::ObjectInitializer(Object* parent)
-        :parent(parent)
-    {
-    }
-
     Object::Object(const ObjectInitializer& objectInitializer)
         :parent(objectInitializer.parent)
     {

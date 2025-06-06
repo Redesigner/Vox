@@ -20,7 +20,9 @@ namespace Vox
     {
         if (const std::shared_ptr<ObjectClass> objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
-            auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
+            const auto& constructor = objectClass->GetConstructor();
+            auto result = objects.emplace_back(constructor(ObjectInitializer(this)));
+            assert(result);
             PostObjectConstruct(result);
             return result;
         }
