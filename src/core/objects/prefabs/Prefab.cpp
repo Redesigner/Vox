@@ -36,11 +36,11 @@ namespace Vox
         CreateAdditionalObjects(root);
     }
 
-    PrefabContext::PrefabContext(const Object* object)
+    PrefabContext::PrefabContext(const Object* object, const std::weak_ptr<ObjectClass>& baseClass)
     {
         className = object->GetClass()->GetName();
         parent = object->GetClass();
-        propertyOverrides = object->GenerateOverrides();
+        propertyOverrides = object->GenerateOverrides(baseClass.lock().get());
 
         for (const auto& childObject : object->GetChildren())
         {
@@ -109,9 +109,13 @@ namespace Vox
     Prefab::~Prefab()
     = default;
 
-    std::unique_ptr<Prefab> Prefab::FromObject(const Object* object)
+    std::unique_ptr<Prefab> Prefab::FromObject(const Object* object, std::weak_ptr<ObjectClass> baseClass)
     {
-        auto context = std::make_shared<PrefabContext>(object);
+        if (!baseClass.lock())
+        {
+            baseClass = object->GetClass();
+        }
+        auto context = std::make_shared<PrefabContext>(object, baseClass);
         return std::make_unique<Prefab>(context);
     }
 
@@ -138,7 +142,8 @@ namespace Vox
     // ReSharper disable once CppMemberFunctionMayBeConst
     void Prefab::SaveChanges(const Object* object)
     {
-        const auto updatedPrefabContext = PrefabContext(object);
+        defaultObject = Construct(ObjectInitializer(), context.get());
+        const auto updatedPrefabContext = PrefabContext(object, GetParentClass());
         context->additionalObjects = updatedPrefabContext.additionalObjects;
         context->propertyOverrides = updatedPrefabContext.propertyOverrides;
 

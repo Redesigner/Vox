@@ -2,39 +2,15 @@
     "objects": {
         "Character_Default": {
             "class": "Character",
-            "properties": {
-                "transform": {
-                    "type": "transform",
-                    "value": [
-                        0.0,
-                        2.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
-                }
-            }
-        },
-        "Test Actor_Default": {
-            "class": "Test Actor",
-            "properties": {
-                "transform": {
-                    "type": "transform",
-                    "value": [
-                        -2.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
+            "children": {
+                "Test Component_Default0": {
+                    "class": "Test Component",
+                    "properties": {
+                        "tag": {
+                            "type": "string",
+                            "value": "boop"
+                        }
+                    }
                 }
             }
         }

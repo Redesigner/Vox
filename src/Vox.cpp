@@ -190,16 +190,6 @@ int main()
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
 
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
-        testWorld->CreateObject("Test Actor");
-
-        std::shared_ptr<Character> character = testWorld->CreateObject<Character>();
-        testWorld->CreateObject("test.json")->SetName("test prefab");
-        std::dynamic_pointer_cast<SceneComponent>(character->GetChildByName("Player Mesh"))->SetPosition({2.0f, 0.0f, 0.0f});
-        const auto test = Prefab::FromObject(character.get());
-        test->SaveToFile("test2.json");
-        testWorld->CreateObject(test.get());
-
-        character.reset();
         testWorld->SaveToFile("testWorld");
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {

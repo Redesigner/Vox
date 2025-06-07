@@ -118,6 +118,7 @@ namespace Vox
             if (childJson.empty())
             {
                 worldJson["objects"][child->GetDisplayName()] = Json::object();
+                worldJson["objects"][child->GetDisplayName()]["class"] = child->GetClass()->GetName();
             }
             else
             {
@@ -131,6 +132,7 @@ namespace Vox
     void World::Reload()
     {
         SavedWorld save = Save();
+        SaveToFile("MainWorld");
         Load(save);
     }
 

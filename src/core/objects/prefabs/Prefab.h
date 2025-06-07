@@ -26,7 +26,7 @@ namespace Vox
     struct PrefabContext
     {
         explicit PrefabContext(const nlohmann::json& jsonObject);
-        explicit PrefabContext(const Object* object);
+        explicit PrefabContext(const Object* object, const std::weak_ptr<ObjectClass>& baseClass);
 
         void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
 
@@ -46,7 +46,7 @@ namespace Vox
         explicit Prefab(const std::shared_ptr<PrefabContext>& context);
         ~Prefab() override;
 
-        static std::unique_ptr<Prefab> FromObject(const Object* object);
+        static std::unique_ptr<Prefab> FromObject(const Object* object, std::weak_ptr<ObjectClass> baseClass = {});
         static std::unique_ptr<Prefab> FromJson(const nlohmann::json& json);
         static std::unique_ptr<Prefab> FromFile(const std::string& filename);
 

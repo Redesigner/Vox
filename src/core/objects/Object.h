@@ -134,7 +134,7 @@ namespace Vox
          * @brief Generate the differences in this object's property values and the default object's property values
          * @return Vector of PropertyOverrides describing the differences
          */
-        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides() const;
+        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const ObjectClass* defaultClass = nullptr) const;
 
         /**
          * @brief Get the parent object of this
