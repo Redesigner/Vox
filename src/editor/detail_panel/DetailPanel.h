@@ -9,5 +9,7 @@ namespace Vox
         static void Draw(Object* object);
 
         static void DrawProperty(Object* object, const Property& property);
+
+        static void ResetProperty(Object* object, const Property& property);
     };
 }

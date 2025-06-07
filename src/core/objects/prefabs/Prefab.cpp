@@ -142,12 +142,12 @@ namespace Vox
     // ReSharper disable once CppMemberFunctionMayBeConst
     void Prefab::SaveChanges(const Object* object)
     {
-        defaultObject = Construct(ObjectInitializer(), context.get());
         const auto updatedPrefabContext = PrefabContext(object, GetParentClass());
         context->additionalObjects = updatedPrefabContext.additionalObjects;
         context->propertyOverrides = updatedPrefabContext.propertyOverrides;
 
         ServiceLocator::GetObjectService()->UpdateClass(this);
+        defaultObject = Construct(ObjectInitializer(), context.get());
     }
 
     void Prefab::SaveToFile(const std::string& filename) const
@@ -202,6 +202,11 @@ namespace Vox
 
         ObjectInitializer childInitializer = objectInitializer;
         childInitializer.parent = object.get();
+        for (auto& child : object->GetChildren())
+        {
+            child->native = true;
+        }
+
         for (const auto& additionalObject : prefabContext->additionalObjects)
         {
             std::shared_ptr<Object> child = additionalObject.objectClass.lock()->GetConstructor()(childInitializer);

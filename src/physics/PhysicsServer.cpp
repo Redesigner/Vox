@@ -157,13 +157,13 @@ namespace Vox
 
 	void PhysicsServer::StepCharacterControllers()
 	{
-		// for (std::optional<CharacterController>& characterController : characterControllers)
-		// {
-		// 	if (characterController.has_value())
-		// 	{
-		// 		characterController->Update(fixedTimeStep, this);
-		// 	}
-		// }
+		for (std::optional<CharacterController>& characterController : characterControllers)
+		{
+			if (characterController.has_value())
+			{
+				characterController->Update(fixedTimeStep, this);
+			}
+		}
 	}
 
 	void PhysicsServer::UpdateSpringArms()

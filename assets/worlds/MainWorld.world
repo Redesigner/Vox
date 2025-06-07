@@ -1,18 +1,7 @@
 {
     "objects": {
         "Character_Default": {
-            "class": "Character",
-            "children": {
-                "Test Component_Default0": {
-                    "class": "Test Component",
-                    "properties": {
-                        "tag": {
-                            "type": "string",
-                            "value": "boop"
-                        }
-                    }
-                }
-            }
+            "class": "test.json"
         }
     }
 }

@@ -142,6 +142,12 @@ namespace Vox
          */
         [[nodiscard]] Object* GetParent() const;
 
+        [[nodiscard]] const Object* GetRoot() const;
+
+        [[nodiscard]] std::vector<std::string> GetRootPath() const;
+
+        [[nodiscard]] std::shared_ptr<Object> GetChildByPath(const std::vector<std::string>& path) const;
+
         /**
          * @brief Get a shared_ptr to this object from the parent
          * @return shared_ptr to this. Can be nullptr if parent is nullptr

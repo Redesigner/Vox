@@ -157,6 +157,7 @@ namespace Vox
         {
             const std::shared_ptr<Object> child = objects.emplace_back(object.prefab->GetConstructor()(ObjectInitializer(this)));
             child->SetName(object.name);
+            child->native = false;
             PostObjectConstruct(child);
         }
     }
@@ -176,6 +177,8 @@ namespace Vox
         {
             RegisterTickable(tickable);
         }
+        // Objects are never native to a world!
+        object->native = false;
     }
 
     void World::RegisterTickable(Tickable* tickable)

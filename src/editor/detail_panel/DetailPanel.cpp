@@ -7,6 +7,7 @@
 
 #include "TransformDetailPanel.h"
 #include "Vec3DetailPanel.h"
+#include "core/objects/ObjectClass.h"
 
 namespace Vox
 {
@@ -18,6 +19,11 @@ namespace Vox
             for (const Property& property : object->GetProperties())
             {
                 DrawProperty(object, property);
+                ImGui::SameLine();
+                if (ImGui::Button("R"))
+                {
+                    ResetProperty(object, property);
+                }
                 ImGui::Separator();
             }
         }
@@ -48,13 +54,13 @@ namespace Vox
             }
         case PropertyType::_vec3:
             {
-                glm::vec3* vector = property.GetValuePtr<glm::vec3>(object);
+                auto* vector = property.GetValuePtr<glm::vec3>(object);
                 propertyChanged = Vec3DetailPanel::Draw(property.GetFriendlyName().c_str(), vector);
                 break;
             }
         case PropertyType::_transform:
             {
-                Transform* transform = property.GetValuePtr<Transform>(object);
+                auto* transform = property.GetValuePtr<Transform>(object);
                 propertyChanged = TransformDetailPanel::Draw(property.GetFriendlyName().c_str(), transform);
                 break;
             }
@@ -63,11 +69,30 @@ namespace Vox
                 propertyChanged = ImGui::InputScalar(property.GetFriendlyName().c_str(), ImGuiDataType_U32, property.GetValuePtr<unsigned int>(object));
                 break;
             }
+        default:
+            break;
         }
 
         if (propertyChanged)
         {
             object->PropertyChanged(property);
         }
+    }
+
+    void DetailPanel::ResetProperty(Object* object, const Property& property)
+    {
+        const auto& root = object->GetRoot();
+        const auto& rootClass = root->native ? root->GetClass()->GetParentClass() : root->GetClass();
+        const Object* defaultRootObject = rootClass->GetDefaultObject();
+        const std::vector<std::string> objectPath = object->GetRootPath();
+        std::shared_ptr<Object> defaultObject = defaultRootObject->GetChildByPath(objectPath);
+        if (!defaultObject)
+        {
+            property.SetValue(object, property.GetType(), property.GetTypedVariant(object->GetClass()->GetDefaultObject()).value);
+            return;
+        }
+        TypedPropertyVariant defaultValue = property.GetTypedVariant(defaultObject.get());
+        property.SetValue(object, property.GetType(), defaultValue.value);
+        object->PropertyChanged(property);
     }
 }

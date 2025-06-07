@@ -146,6 +146,47 @@ namespace Vox
         return parent;
     }
 
+    const Object* Object::GetRoot() const
+    {
+        const Object* result = this;
+        for (; result->GetParent(); result = result->GetParent())
+        {
+        }
+        return result;
+    }
+
+    std::vector<std::string> Object::GetRootPath() const
+    {
+        std::vector resultPath = { GetDisplayName() };
+        for (const Object* parent = GetParent(); parent; parent = parent->GetParent())
+        {
+            if (parent->GetParent())
+            {
+                resultPath.emplace_back(parent->GetDisplayName());
+            }
+        }
+        return resultPath;
+    }
+
+    std::shared_ptr<Object> Object::GetChildByPath(const std::vector<std::string>& path) const
+    {
+        if (path.empty())
+        {
+            return GetSharedThis();
+        }
+
+        std::shared_ptr<Object> currentObject;
+        for (auto iter = path.rbegin(); iter != path.rend(); ++iter)
+        {
+            currentObject = currentObject ? currentObject->GetChildByName(*iter) : GetChildByName(*iter);
+            if (!currentObject)
+            {
+                return nullptr;
+            }
+        }
+        return currentObject;
+    }
+
     std::shared_ptr<Object> Object::GetSharedThis() const
     {
         if (!parent)
