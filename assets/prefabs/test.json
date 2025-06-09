@@ -2,19 +2,25 @@
     "test.json": {
         "class": "Character",
         "children": {
-            "Test Component_Default": {
+            "Player Mesh": {
                 "properties": {
-                    "tag": {
-                        "type": "string",
-                        "value": "boop"
+                    "localTransform": {
+                        "type": "transform",
+                        "value": [
+                            0.0,
+                            0.7033184766769409,
+                            0.0,
+                            0.0,
+                            -0.0,
+                            0.0,
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
                     }
                 }
             }
         },
-        "additional": {
-            "Test Component_Default": {
-                "class": "Test Component"
-            }
-        }
+        "additional": {}
     }
 }

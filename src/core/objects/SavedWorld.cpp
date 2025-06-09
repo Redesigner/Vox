@@ -14,6 +14,7 @@ namespace Vox
         const Json worldJson = Json::parse(jsonString);
         if (!worldJson.contains("objects") || !worldJson["objects"].is_object())
         {
+            assert(false);
             return;
         }
 

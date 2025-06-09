@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "../ObjectClass.h"
-#include "../Property.h"
+#include "../properties/Property.h"
 #include "PropertyOverride.h"
 
 namespace Vox

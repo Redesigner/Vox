@@ -6,6 +6,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 
+#include "AssetPtr.h"
 #include "core/datatypes/Transform.h"
 
 #define PROPERTY_OFFSET(Class, Property) ((reinterpret_cast<char*>(&(Property)) - reinterpret_cast<char*>(this) ) - Vox::objectOffset<Object>(this))
@@ -31,10 +32,11 @@ namespace Vox
         _vec3,
         _quat,
         _transform,
+        _assetPtr,
         _invalid
     };
 
-    using PropertyVariant = std::variant<bool, int, unsigned int, float, std::string, glm::vec3, glm::quat, Transform>;
+    using PropertyVariant = std::variant<bool, int, unsigned int, float, std::string, glm::vec3, glm::quat, Transform, AssetPtr>;
 
     struct TypedPropertyVariant
     {
@@ -65,6 +67,7 @@ namespace Vox
     template <> consteval PropertyType GetPropertyType<glm::vec3>() { return PropertyType::_vec3; }
     template <> consteval PropertyType GetPropertyType<glm::quat>() { return PropertyType::_quat; }
     template <> consteval PropertyType GetPropertyType<Transform>() { return PropertyType::_transform; }
+    template <> consteval PropertyType GetPropertyType<AssetPtr>() { return PropertyType::_assetPtr; }
     
     struct Property
     {

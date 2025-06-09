@@ -7,7 +7,7 @@
 
 #include "prefabs/PropertyOverride.h"
 #include "core/concepts/Concepts.h"
-#include "core/objects/Property.h"
+#include "properties/Property.h"
 #include "core/objects/ObjectInitializer.h"
 
 #define IMPLEMENT_NAME(Name) private: inline static std::string classDisplayName = std::regex_replace(std::string(#Name), std::regex("(\\B[A-Z])"), " $1");\

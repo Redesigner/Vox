@@ -2,7 +2,7 @@
 #include <functional>
 
 #include "Object.h"
-#include "Property.h"
+#include "properties/Property.h"
 
 namespace Vox
 {

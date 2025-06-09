@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "core/objects/Object.h"
-#include "core/objects/Property.h"
+#include "properties/Property.h"
 
 namespace Vox
 {

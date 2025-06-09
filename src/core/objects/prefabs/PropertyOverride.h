@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "../Property.h"
+#include "../properties/Property.h"
 
 namespace Vox
 {

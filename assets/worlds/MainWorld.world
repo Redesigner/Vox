@@ -1,6 +1,6 @@
 {
     "objects": {
-        "Character_Default": {
+        "Test Character": {
             "class": "test.json"
         }
     }

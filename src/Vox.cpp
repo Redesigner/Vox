@@ -190,7 +190,7 @@ int main()
         glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
 
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
-        testWorld->SaveToFile("testWorld");
+        testWorld->Load(SavedWorld(ServiceLocator::GetFileIoService()->LoadFile("worlds/MainWorld.world")));
         
         DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
             float xViewport, yViewport;
