@@ -56,7 +56,6 @@ namespace Vox
         }
 
         case PropertyType::_invalid:
-        default:
             break;
         }
 
@@ -83,10 +82,13 @@ namespace Vox
             return "quat";
         case PropertyType::_transform:
             return "transform";
+        case PropertyType::_assetPtr:
+            return "assetPtr";
         case PropertyType::_invalid:
-        default:
             return "invalid";
         }
+
+        return "invalid";
     }
 
     bool TypedPropertyVariant::operator==(const TypedPropertyVariant& other) const
@@ -195,6 +197,10 @@ namespace Vox
             GetValueChecked<Transform>(objectLocation) = std::get<Transform>(value);
             break;
 
+        case PropertyType::_assetPtr:
+            GetValueChecked<AssetPtr>(objectLocation) = std::get<AssetPtr>(value);
+            break;
+
         case PropertyType::_invalid:
             break;
         }
@@ -246,10 +252,14 @@ namespace Vox
         case PropertyType::_transform:
             return {type, GetValueChecked<Transform>(objectLocation)};
 
+        case PropertyType::_assetPtr:
+            return {type, GetValueChecked<AssetPtr>(objectLocation)};
+
         case PropertyType::_invalid:
-        default:
             return {type, nullptr};
         }
+
+        return {PropertyType::_invalid, nullptr};
     }
 
     nlohmann::ordered_json Property::Serialize(const void* objectLocation) const
@@ -262,63 +272,79 @@ namespace Vox
         switch (type)
         {
         case PropertyType::_bool:
-            {
-                propertyJson[name]["value"] = GetValueChecked<bool>(objectLocation);
-                break;
-            }
-        case PropertyType::_int:
-            {
-                propertyJson[name]["value"] = GetValueChecked<int>(objectLocation);
-                break;
-            }
-        case PropertyType::_uint:
-            {
-                propertyJson[name]["value"] = GetValueChecked<unsigned int>(objectLocation);
-                break;
-            }
-        case PropertyType::_float:
-            {
-                propertyJson[name]["value"] = GetValueChecked<float>(objectLocation);
-                break;
-            }
-        case PropertyType::_string:
-            {
-                propertyJson[name]["value"] = GetValueChecked<std::string>(objectLocation);
-                break;
-            }
-        case PropertyType::_vec3:
-            {
-                const glm::vec3 vector = GetValueChecked<glm::vec3>(objectLocation);
-                propertyJson[name]["value"] = {vector.x, vector.y, vector.z};
-                break;
-            }
-        case PropertyType::_quat:
-            {
-                const glm::quat quaternion = GetValueChecked<glm::quat>(objectLocation);
-                propertyJson[name]["value"] = {quaternion.x, quaternion.y, quaternion.z, quaternion.w};
-                break;
-            }
-        case PropertyType::_transform:
-            {
-                const auto& transform = GetValueChecked<Transform>(objectLocation);
-                propertyJson[name]["value"] = {
-                    transform.position.x, transform.position.y, transform.position.z,
-                    transform.rotation.x, transform.rotation.y, transform.rotation.z,
-                    transform.scale.x, transform.scale.y, transform.scale.z
-                };
-                break;
-            }
-        case PropertyType::_invalid:
-            {
-                propertyJson[name]["value"] = 0;
-                break;
-            }
+        {
+            propertyJson[name]["value"] = GetValueChecked<bool>(objectLocation);
+            break;
         }
+
+        case PropertyType::_int:
+        {
+            propertyJson[name]["value"] = GetValueChecked<int>(objectLocation);
+            break;
+        }
+
+        case PropertyType::_uint:
+        {
+            propertyJson[name]["value"] = GetValueChecked<unsigned int>(objectLocation);
+            break;
+        }
+
+        case PropertyType::_float:
+        {
+            propertyJson[name]["value"] = GetValueChecked<float>(objectLocation);
+            break;
+        }
+
+        case PropertyType::_string:
+        {
+            propertyJson[name]["value"] = GetValueChecked<std::string>(objectLocation);
+            break;
+        }
+
+        case PropertyType::_vec3:
+        {
+            const glm::vec3 vector = GetValueChecked<glm::vec3>(objectLocation);
+            propertyJson[name]["value"] = {vector.x, vector.y, vector.z};
+            break;
+        }
+
+        case PropertyType::_quat:
+        {
+            const glm::quat quaternion = GetValueChecked<glm::quat>(objectLocation);
+            propertyJson[name]["value"] = {quaternion.x, quaternion.y, quaternion.z, quaternion.w};
+            break;
+        }
+
+        case PropertyType::_transform:
+        {
+            const auto& transform = GetValueChecked<Transform>(objectLocation);
+            propertyJson[name]["value"] = {
+                transform.position.x, transform.position.y, transform.position.z,
+                transform.rotation.x, transform.rotation.y, transform.rotation.z,
+                transform.scale.x, transform.scale.y, transform.scale.z
+            };
+            break;
+        }
+
+        case PropertyType::_assetPtr:
+        {
+            const auto& assetPtr = GetValueChecked<AssetPtr>(objectLocation);
+            const json assetPtrJson = assetPtr.Serialize();
+            propertyJson[name] = assetPtrJson;
+            break;
+        }
+
+        case PropertyType::_invalid:
+        {
+            propertyJson[name]["value"] = 0;
+            break;
+        }
+        }
+
         return propertyJson;
     }
 
-    TypedPropertyVariant Property::Deserialize(
-        const nlohmann::ordered_json& property)
+    TypedPropertyVariant Property::Deserialize(const nlohmann::ordered_json& property)
     {
         using Json = nlohmann::json;
         if (!property.contains("type") || !property["type"].is_string() || !property.contains("value"))
@@ -379,6 +405,7 @@ namespace Vox
             return TypedPropertyVariant{PropertyType::_invalid, {}};
 
         case PropertyType::_transform:
+        {
             if (propertyValue.is_array())
             {
                 if (propertyValue.size() == 9)
@@ -398,10 +425,22 @@ namespace Vox
                 }
             }
             return TypedPropertyVariant{PropertyType::_invalid, {}};
+        }
 
-        case PropertyType::_invalid:
-        default:
+        case PropertyType::_assetPtr:
+        {
+            std::optional<AssetPtr> assetPtr = AssetPtr::Deserialize(propertyValue);
+            if (assetPtr.has_value())
+            {
+                return TypedPropertyVariant{PropertyType::_assetPtr, assetPtr.value()};
+            }
             return TypedPropertyVariant{PropertyType::_invalid, {}};
         }
+
+        case PropertyType::_invalid:
+            return TypedPropertyVariant{PropertyType::_invalid, {}};
+        }
+
+        return TypedPropertyVariant{PropertyType::_invalid, {}};
     }
 }

@@ -1,7 +1,4 @@
 {
     "objects": {
-        "Test Character": {
-            "class": "test.json"
-        }
     }
 }

@@ -17,6 +17,8 @@ namespace Vox
 
     protected:
         void OnTransformUpdated() override;
+
+        void PropertyChanged(const Property& property) override;
         
     private:
 
@@ -29,5 +31,7 @@ namespace Vox
         IMPLEMENT_OBJECT(MeshComponent, SceneComponent)
         
         Ref<MeshInstance> mesh;
+
+        AssetPtr meshAsset;
     };
 }

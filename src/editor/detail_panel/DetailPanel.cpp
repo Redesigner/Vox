@@ -5,6 +5,7 @@
 #include <fmt/base.h>
 #include <fmt/format.h>
 
+#include "AssetPtrDetailPanel.h"
 #include "TransformDetailPanel.h"
 #include "Vec3DetailPanel.h"
 #include "core/objects/ObjectClass.h"
@@ -14,6 +15,7 @@ namespace Vox
     void DetailPanel::Draw(Object* object)
     {
         assert(object);
+        // ReSharper disable once CppDFANullDereference
         if (ImGui::BeginChild(fmt::format("{}###DetailPanel", object->GetDisplayName()).c_str()))
         {
             for (const Property& property : object->GetProperties())
@@ -36,39 +38,50 @@ namespace Vox
         switch (property.GetType())
         {
         case PropertyType::_bool:
-            {
-                propertyChanged = ImGui::Checkbox(property.GetFriendlyName().c_str(), property.GetValuePtr<bool>(object));
-                break;
-            }
+        {
+            propertyChanged = ImGui::Checkbox(property.GetFriendlyName().c_str(), property.GetValuePtr<bool>(object));
+            break;
+        }
+
         case PropertyType::_float:
-            {
-                propertyChanged = ImGui::InputFloat(property.GetFriendlyName().c_str(), property.GetValuePtr<float>(object));
-                break;
-            }
+        {
+            propertyChanged = ImGui::InputFloat(property.GetFriendlyName().c_str(), property.GetValuePtr<float>(object));
+            break;
+        }
+
         case PropertyType::_string:
-            {
-                std::string& string = *property.GetValuePtr<std::string>(object);
-                size_t size = string.size();
-                propertyChanged = ImGui::InputText(property.GetFriendlyName().c_str(), &string, ImGuiInputTextFlags_None);
-                break;
-            }
+        {
+            std::string& string = *property.GetValuePtr<std::string>(object);
+            propertyChanged = ImGui::InputText(property.GetFriendlyName().c_str(), &string, ImGuiInputTextFlags_None);
+            break;
+        }
+
         case PropertyType::_vec3:
-            {
-                auto* vector = property.GetValuePtr<glm::vec3>(object);
-                propertyChanged = Vec3DetailPanel::Draw(property.GetFriendlyName().c_str(), vector);
-                break;
-            }
+        {
+            auto* vector = property.GetValuePtr<glm::vec3>(object);
+            propertyChanged = Vec3DetailPanel::Draw(property.GetFriendlyName().c_str(), vector);
+            break;
+        }
+
         case PropertyType::_transform:
-            {
-                auto* transform = property.GetValuePtr<Transform>(object);
-                propertyChanged = TransformDetailPanel::Draw(property.GetFriendlyName().c_str(), transform);
-                break;
-            }
+        {
+            auto* transform = property.GetValuePtr<Transform>(object);
+            propertyChanged = TransformDetailPanel::Draw(property.GetFriendlyName().c_str(), transform);
+            break;
+        }
+
         case PropertyType::_uint:
-            {
-                propertyChanged = ImGui::InputScalar(property.GetFriendlyName().c_str(), ImGuiDataType_U32, property.GetValuePtr<unsigned int>(object));
-                break;
-            }
+        {
+            propertyChanged = ImGui::InputScalar(property.GetFriendlyName().c_str(), ImGuiDataType_U32, property.GetValuePtr<unsigned int>(object));
+            break;
+        }
+
+        case PropertyType::_assetPtr:
+        {
+            propertyChanged = AssetPtrDetailPanel::Draw(property.GetValueChecked<AssetPtr>(object), property.GetName());
+            break;
+        }
+
         default:
             break;
         }

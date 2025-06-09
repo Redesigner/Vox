@@ -15,6 +15,8 @@ namespace Vox
         :SceneComponent(objectInitializer)
     {
         DEFAULT_DISPLAY_NAME()
+
+        meshAsset.type = AssetPtr::AssetType::Mesh;
     }
 
     MeshComponent::MeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName)
@@ -23,6 +25,7 @@ namespace Vox
         if (objectInitializer.world)
         {
             mesh = objectInitializer.world->GetRenderer()->CreateMeshInstance(meshName);
+
 #ifdef EDITOR
             mesh->RegisterClickCallback([this](const glm::ivec2 position)
             {
@@ -36,6 +39,8 @@ namespace Vox
     void MeshComponent::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         SceneComponent::BuildProperties(propertiesInOut);
+
+        REGISTER_PROPERTY(AssetPtr, meshAsset);
     }
     
     void MeshComponent::OnTransformUpdated()
@@ -45,6 +50,19 @@ namespace Vox
             return;
         }
         mesh->SetTransform(GetWorldTransform().GetMatrix());
+    }
+
+    void MeshComponent::PropertyChanged(const Property& property)
+    {
+        SceneComponent::PropertyChanged(property);
+
+        if (property.GetValuePtr<AssetPtr>(this) == &meshAsset)
+        {
+            if (const Actor* parent = dynamic_cast<Actor*>(GetParent()))
+            {
+                mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshAsset.path.string());
+            }
+        }
     }
 
 #ifdef EDITOR
