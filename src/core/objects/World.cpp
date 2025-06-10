@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "core/logging/Logging.h"
 #include "core/math/Strings.h"
 #include "core/objects/Tickable.h"
 #include "core/services/FileIOService.h"
@@ -20,8 +21,10 @@ namespace Vox
     {
         if (const std::shared_ptr<ObjectClass> objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
+            auto objectInitializer = ObjectInitializer(this);
+            objectInitializer.rootObject = true;
             const auto& constructor = objectClass->GetConstructor();
-            auto result = objects.emplace_back(constructor(ObjectInitializer(this)));
+            auto result = objects.emplace_back(constructor(objectInitializer));
             assert(result);
             PostObjectConstruct(result);
             return result;
@@ -31,7 +34,9 @@ namespace Vox
 
     std::shared_ptr<Object> World::CreateObject(const ObjectClass* objectClass)
     {
-        auto result = objects.emplace_back(objectClass->GetConstructor()(ObjectInitializer(this)));
+        auto objectInitializer = ObjectInitializer(this);
+        objectInitializer.rootObject = true;
+        auto result = objects.emplace_back(objectClass->GetConstructor()(objectInitializer));
         PostObjectConstruct(result);
         return result;
     }
@@ -108,25 +113,7 @@ namespace Vox
             return;
         }
 
-        using Json = nlohmann::ordered_json;
-
-        Json worldJson;
-        worldJson["objects"] = Json::object();
-        for (const auto& child : objects)
-        {
-            const Json& childJson = child->Serialize();
-            if (childJson.empty())
-            {
-                worldJson["objects"][child->GetDisplayName()] = Json::object();
-                worldJson["objects"][child->GetDisplayName()]["class"] = child->GetClass()->GetName();
-            }
-            else
-            {
-                worldJson["objects"].insert(childJson.begin(), childJson.end());
-            }
-        }
-
-        ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename + ".world", worldJson.dump(4));
+        ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename + ".world", Save().Serialize().dump(4));
     }
 
     void World::Reload()
@@ -142,8 +129,8 @@ namespace Vox
 
         for (const std::shared_ptr<Object>& child : objects)
         {
-            const auto& tempPrefab = result.savedObjects.emplace_back(child->GetDisplayName(), Prefab::FromObject(child.get()));
-            tempPrefab.prefab->GetContext()->additionalObjects.clear();
+            auto tempPrefabContext = PrefabContext(child.get(), child->GetClass());
+            result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), std::move(tempPrefabContext.propertyOverrides));
         }
         return result;
     }
@@ -155,9 +142,37 @@ namespace Vox
 
         for (const SavedWorldObject& object : savedWorld.savedObjects)
         {
-            const std::shared_ptr<Object> child = objects.emplace_back(object.prefab->GetConstructor()(ObjectInitializer(this)));
+            auto objectInitializer = ObjectInitializer(this);
+            objectInitializer.rootObject = true;
+            const auto objectClass = ServiceLocator::GetObjectService()->GetObjectClass(object.className);
+            const std::shared_ptr<Object> child = objects.emplace_back(objectClass->GetConstructor()(objectInitializer));
+
+            for (const auto& propertyOverride : object.worldContextOverrides)
+            {
+                std::shared_ptr<Object> currentObject = child;
+                for (const auto& objectName : propertyOverride.path)
+                {
+                    currentObject = currentObject->GetChildByName(objectName);
+                    if (!currentObject)
+                    {
+                        VoxLog(Warning, Game, "World could not override property. Object '{}' was not found.", objectName);
+                        return;
+                    }
+                }
+
+                Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
+                if (!property)
+                {
+                    VoxLog(Warning, Game, "World could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, currentObject->GetDisplayName());
+                    return;
+                }
+
+                property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
+                currentObject->PropertyChanged(*property);
+            }
             child->SetName(object.name);
             child->native = false;
+            child->PostConstruct();
             PostObjectConstruct(child);
         }
     }

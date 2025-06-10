@@ -1,4 +1,23 @@
 {
     "objects": {
+        "": {
+            "class": "test.json",
+            "properties": {
+                "transform": {
+                    "type": "transform",
+                    "value": [
+                        -1.5124914646148682,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            }
+        }
     }
 }

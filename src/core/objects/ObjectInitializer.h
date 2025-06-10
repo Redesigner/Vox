@@ -20,6 +20,12 @@ namespace Vox
 
         World* world = nullptr;
         Object* parent = nullptr;
+
+        /**
+         * @brief Is this object's class the outermost class?
+         * If true, this will call PostConstruct after construction
+         */
+        bool rootObject = false;
     };
 
 } // Vox

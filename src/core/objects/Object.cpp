@@ -12,6 +12,14 @@ namespace Vox
     {
     }
 
+    void Object::PostConstruct() // NOLINT(*-no-recursion)
+    {
+        for (auto& child : children)
+        {
+            child->PostConstruct();
+        }
+    }
+
     const std::vector<Property>& Object::GetProperties() const
     {
         const std::shared_ptr<ObjectClass> objectClass = GetClass();

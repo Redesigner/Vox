@@ -33,8 +33,10 @@ namespace Vox
         template <typename T, class... Args>
         std::shared_ptr<T> CreateObject(Args&&... args) requires Derived<T, Object>
         {
+            auto objectInitializer = ObjectInitializer(this);
+            objectInitializer.rootObject = true;
             std::shared_ptr<T> newObject = std::static_pointer_cast<T>(objects.emplace_back(
-                std::make_shared<T>(ObjectInitializer(this), std::forward<Args>(args)...))
+                std::make_shared<T>(objectInitializer, std::forward<Args>(args)...))
             );
             PostObjectConstruct(newObject);
             return newObject;

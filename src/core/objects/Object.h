@@ -71,6 +71,12 @@ namespace Vox
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
 
         /**
+         * @brief Called after an object is constructed, or if it belongs to a prefab, <b>after</b> the properties have been overriden.
+         * Must call Super::PostConstruct, or child objects will not have PostConstruct called.
+         */
+        virtual void PostConstruct();
+
+        /**
          * @brief Get the ObjectClass from ObjectService
          * @return shared ptr to the Object's class. If the object is a primitive, returns the object's local class,
          * otherwise, returns the static object class

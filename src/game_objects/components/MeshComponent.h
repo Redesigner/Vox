@@ -19,13 +19,18 @@ namespace Vox
         void OnTransformUpdated() override;
 
         void PropertyChanged(const Property& property) override;
+
+        void PostConstruct() override;
         
     private:
+        void UpdateMeshFromPath();
 
 #ifdef EDITOR
         void Clicked(glm::ivec2 position);
 
         void Select() override;
+
+        void RegisterClickCallback();
 #endif
 
         IMPLEMENT_OBJECT(MeshComponent, SceneComponent)

@@ -3,8 +3,6 @@
 #include "core/logging/Logging.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/Actor.h"
-#include "core/services/EditorService.h"
-#include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
@@ -22,16 +20,10 @@ namespace Vox
     MeshComponent::MeshComponent(const ObjectInitializer& objectInitializer, const std::string& meshName)
         :MeshComponent(objectInitializer)
     {
+        meshAsset.path = meshName;
         if (objectInitializer.world)
         {
             mesh = objectInitializer.world->GetRenderer()->CreateMeshInstance(meshName);
-
-#ifdef EDITOR
-            mesh->RegisterClickCallback([this](const glm::ivec2 position)
-            {
-                this->Clicked(position);
-            });
-#endif
         }
 
     }
@@ -56,11 +48,30 @@ namespace Vox
     {
         SceneComponent::PropertyChanged(property);
 
-        if (property.GetValuePtr<AssetPtr>(this) == &meshAsset)
+        UpdateMeshFromPath();
+    }
+
+    void MeshComponent::PostConstruct()
+    {
+        SceneComponent::PostConstruct();
+
+        UpdateMeshFromPath();
+    }
+
+    void MeshComponent::UpdateMeshFromPath()
+    {
+        if (const Actor* parent = dynamic_cast<Actor*>(GetParent()))
         {
-            if (const Actor* parent = dynamic_cast<Actor*>(GetParent()))
+            if (World* world = parent->GetWorld())
             {
-                mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshAsset.path.string());
+                if (mesh)
+                {
+                    mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshAsset.path.string());
+                    mesh->SetTransform(GetWorldTransform().GetMatrix());
+#ifdef EDITOR
+                    RegisterClickCallback();
+#endif
+                }
             }
         }
     }
@@ -74,6 +85,14 @@ namespace Vox
     void MeshComponent::Select()
     {
         mesh->GetMeshOwner()->GetOwner()->AddMeshOutline(mesh);
+    }
+
+    void MeshComponent::RegisterClickCallback()
+    {
+        mesh->RegisterClickCallback([this](const glm::ivec2 position)
+        {
+            this->Clicked(position);
+        });
     }
 #endif
 }

@@ -20,15 +20,11 @@ namespace Vox
         {
             VoxLog(Warning, Game, "Unable to parse object from json. The object does not have a valid class. "
                 "Check that the json is not malformed or corrupted.");
-            return;
+            assert(false);
         }
 
         const std::shared_ptr<ObjectClass> baseClass = ServiceLocator::GetObjectService()->GetObjectClass(root["class"]);
-        if (!baseClass)
-        {
-            VoxLog(Warning, Game, "Prefab could not find class '{}'.", root["class"].get<std::string>());
-            return;
-        }
+        assert(baseClass && "Base class was not found.");
 
         className = jsonObject.items().begin().key();
         parent = baseClass;
@@ -40,6 +36,7 @@ namespace Vox
     {
         className = object->GetClass()->GetName();
         parent = object->GetClass();
+        assert(!parent.expired() && parent.lock());
         propertyOverrides = object->GenerateOverrides(baseClass.lock().get());
 
         for (const auto& childObject : object->GetChildren())
@@ -201,6 +198,7 @@ namespace Vox
         object->localClass = ServiceLocator::GetObjectService()->GetObjectClass(prefabContext->className);
 
         ObjectInitializer childInitializer = objectInitializer;
+        childInitializer.rootObject = false;
         childInitializer.parent = object.get();
         for (auto& child : object->GetChildren())
         {
@@ -220,7 +218,10 @@ namespace Vox
             OverrideProperty(object, override);
         }
 
-        // object->SetClass
+        if (objectInitializer.rootObject)
+        {
+            object->PostConstruct();
+        }
 
         return object;
     }
