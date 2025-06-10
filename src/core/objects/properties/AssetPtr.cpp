@@ -75,7 +75,7 @@ namespace Vox
     {
         using Json = nlohmann::ordered_json;
         Json assetPtrJson = Json::object();
-        assetPtrJson["assetType"] = type;
+        assetPtrJson["assetType"] = GetAssetTypeName(type);
         assetPtrJson["path"] = path.string();
         return assetPtrJson;
     }

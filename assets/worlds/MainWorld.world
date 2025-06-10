@@ -17,6 +17,26 @@
                         1.0
                     ]
                 }
+            },
+            "children": {
+                "Camera Component_Default": {
+                    "properties": {
+                        "localTransform": {
+                            "type": "transform",
+                            "value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                -0.10599999129772186,
+                                0.784000039100647,
+                                0.0,
+                                1.0,
+                                1.0,
+                                1.0
+                            ]
+                        }
+                    }
+                }
             }
         }
     }

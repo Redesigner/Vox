@@ -8,7 +8,7 @@ namespace Vox
 {
     nlohmann::json TypedPropertyVariant::Serialize() const
     {
-        using Json = nlohmann::json;
+        using Json = nlohmann::ordered_json;
 
         Json result;
         result["type"] = GetPropertyTypeString(type);
@@ -53,6 +53,14 @@ namespace Vox
                 transform.scale.x, transform.scale.y, transform.scale.z
             };
             break;
+        }
+
+        case PropertyType::_assetPtr:
+        {
+            const AssetPtr assetPtr = std::get<AssetPtr>(value);
+            result["value"] = Json::object();
+            auto assetJson = assetPtr.Serialize();
+            result["value"].insert(assetJson.begin(), assetJson.end());
         }
 
         case PropertyType::_invalid:
@@ -136,6 +144,11 @@ namespace Vox
         if (propertyTypeString == GetPropertyTypeString(PropertyType::_transform))
         {
             return PropertyType::_transform;
+        }
+
+        if (propertyTypeString == GetPropertyTypeString(PropertyType::_assetPtr))
+        {
+            return PropertyType::_assetPtr;
         }
 
         return PropertyType::_invalid;
@@ -330,7 +343,8 @@ namespace Vox
         {
             const auto& assetPtr = GetValueChecked<AssetPtr>(objectLocation);
             const json assetPtrJson = assetPtr.Serialize();
-            propertyJson[name] = assetPtrJson;
+            propertyJson[name]["value"] = json::object();
+            propertyJson[name]["value"].insert(assetPtrJson.begin(), assetPtrJson.end());
             break;
         }
 
