@@ -49,7 +49,7 @@ namespace Vox
         bool RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut);
 
 		// Character Controller functions
-		Ref<CharacterController> CreateCharacterController(float radius, float halfHeight);
+		std::shared_ptr<CharacterController> CreateCharacterController(float radius, float halfHeight);
 
 		Ref<SpringArm> CreateSpringArm(Ref<CharacterController>& id);
 
@@ -70,7 +70,7 @@ namespace Vox
 		void SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer);
 
 	private:
-		void StepCharacterControllers();
+		void StepCharacterControllers(float deltaTime);
 
 		void UpdateSpringArms();
 
@@ -92,7 +92,7 @@ namespace Vox
 
 		std::vector<JPH::BodyID> bodyIds;
 
-		ObjectContainer<CharacterController> characterControllers;
+		std::vector<std::weak_ptr<CharacterController>> characterControllers;
 
 		ObjectContainer<SpringArm> springArms;
 

@@ -65,7 +65,7 @@ namespace Vox
 	void PhysicsServer::Step()
 	{
 		++stepCount;
-		StepCharacterControllers();
+		StepCharacterControllers(fixedTimeStep);
 		UpdateSpringArms();
 		UpdateVoxelBodies();
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
@@ -85,10 +85,11 @@ namespace Vox
 		return capsuleId;
 	}
 
-	Ref<CharacterController> PhysicsServer::CreateCharacterController(float radius, float halfHeight)
+	std::shared_ptr<CharacterController> PhysicsServer::CreateCharacterController(float radius, float halfHeight)
 	{
-		auto refIds = characterControllers.Create(radius, halfHeight, &physicsSystem);
-		return {&characterControllers, refIds};
+	    auto result = std::make_shared<CharacterController>(radius, halfHeight, &physicsSystem);
+		characterControllers.emplace_back(result);
+		return result;
 	}
 
 	Ref<SpringArm> PhysicsServer::CreateSpringArm(Ref<CharacterController>& id)
@@ -124,13 +125,15 @@ namespace Vox
 		JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
 		// physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 		physicsSystem.DrawConstraints(debugRenderer.get());
-		for (std::optional<CharacterController>& characterController : characterControllers)
+
+		for (const auto& characterControllerWeak : characterControllers)
 		{
-			if (!characterController.has_value())
-			{
-				continue;
-			}
-			
+			const auto& characterController = characterControllerWeak.lock();
+		    if (!characterController)
+		    {
+		        continue;
+		    }
+
 			debugRenderer->DrawCapsule(JPH::Mat44::sTranslation(characterController->GetPosition()), characterController->GetHalfHeight(), characterController->GetRadius(), JPH::ColorArg::sRed);
 		}
 	}
@@ -155,15 +158,18 @@ namespace Vox
 		this->debugRenderer = debugRenderer;
 	}
 
-	void PhysicsServer::StepCharacterControllers()
+	void PhysicsServer::StepCharacterControllers(float deltaTime)
 	{
-		for (std::optional<CharacterController>& characterController : characterControllers)
+		for (auto& characterControllerWeak : characterControllers)
 		{
-			if (characterController.has_value())
+            if (auto characterController = characterControllerWeak.lock())
 			{
-				characterController->Update(fixedTimeStep, this);
+				characterController->Update(deltaTime, this);
 			}
 		}
+
+	    // Clean up expired pointers
+	    std::erase_if(characterControllers, [](const std::weak_ptr<CharacterController>& characterController){ return characterController.expired(); });
 	}
 
 	void PhysicsServer::UpdateSpringArms()

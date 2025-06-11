@@ -17,13 +17,6 @@
                             1.0,
                             1.0
                         ]
-                    },
-                    "meshAsset": {
-                        "type": "assetPtr",
-                        "value": {
-                            "assetType": "Mesh",
-                            "path": "gizmoArrow"
-                        }
                     }
                 }
             }

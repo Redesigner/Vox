@@ -30,7 +30,7 @@ namespace Vox
 	private:
         void RotateCamera(int x, int y) const;
 
-		Ref<CharacterController> characterController;
+		std::shared_ptr<CharacterController> characterController;
 	    std::shared_ptr<CameraComponent> cameraComponent;
 
         DelegateHandle<bool> jumpCallback;
