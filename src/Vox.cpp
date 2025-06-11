@@ -115,20 +115,17 @@ int main()
 
         ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
 
-        std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
-
         std::shared_ptr<World> testWorld = std::make_shared<World>();
-        std::shared_ptr<World> actorWorld = std::make_shared<World>();
+        std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
 
 #ifdef EDITOR
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         ServiceLocator::GetRenderer()->RegisterScene(testWorld->GetRenderer());
-        ServiceLocator::GetRenderer()->RegisterScene(actorWorld->GetRenderer());
 #endif
 
-        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), ServiceLocator::GetPhysicsServer(), testWorld->GetRenderer().get());
+        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), testWorld->GetPhysicsServer().get(), testWorld->GetRenderer().get());
 
-        ServiceLocator::GetPhysicsServer()->SetDebugRenderer(debugRenderer);
+        testWorld->GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
         ServiceLocator::GetRenderer()->UploadModel("witch", "witch.glb");
         ServiceLocator::GetRenderer()->UploadSkeletalModel("scorpion", "scorpion.glb");
@@ -153,12 +150,12 @@ int main()
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
         std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([&runPhysics, frameTime]
+        std::thread physicsThread = std::thread([&runPhysics, frameTime, testWorld]
             {
                 while (runPhysics)
                 {
                     std::chrono::time_point threadStartTime = std::chrono::steady_clock::now();
-                    ServiceLocator::GetPhysicsServer()->Step();
+                    testWorld->GetPhysicsServer()->Step();
 
                     if (threadStartTime + frameTime < std::chrono::steady_clock::now())
                     {
@@ -215,7 +212,7 @@ int main()
                 debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sRed, 5.0f);
                 VoxLog(Display, Game, "Casting ray from '({}, {}, {})' to '({}, {}, {})'", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ(), rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ());
                 RayCastResultNormal raycastResult;
-                if (ServiceLocator::GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
+                if (testWorld->GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
                 {
                     debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
                     const unsigned int gridSize = 1;

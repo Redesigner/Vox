@@ -8,6 +8,7 @@
 #include "physics/PhysicsServer.h"
 #include "camera/Camera.h"
 #include "camera/FlyCamera.h"
+#include "core/objects/World.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"
@@ -30,8 +31,8 @@
 
 namespace Vox
 {
-    SceneRenderer::SceneRenderer()
-        :viewportSize({400, 400})
+    SceneRenderer::SceneRenderer(World* world)
+        :owningWorld(world), viewportSize({400, 400})
     {
         GenerateBuffers();
         testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
@@ -341,14 +342,14 @@ namespace Vox
 
     void SceneRenderer::DrawDebugShapes() const
     {
-        PhysicsServer* physicsServer = ServiceLocator::GetPhysicsServer();
+        PhysicsServer* physicsServer = owningWorld->GetPhysicsServer().get();
 
         // Fill the debug renderer with our shapes
         physicsServer->RenderDebugShapes();
 
         glEnable(GL_DEPTH_TEST);
 
-        DebugRenderer* debugRenderer = ServiceLocator::GetPhysicsServer()->GetDebugRenderer();
+        DebugRenderer* debugRenderer = physicsServer->GetDebugRenderer();
 
         const DebugShader* debugLineShader = GetRenderer()->GetDebugLineShader();
         debugRenderer->BindAndBufferLines();

@@ -26,6 +26,8 @@ namespace Vox
         float armLength = 5.0f;
 
         std::shared_ptr<Camera> camera;
+
+        World* owningWorld;
     };
 }
     

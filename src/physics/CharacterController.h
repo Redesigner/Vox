@@ -2,6 +2,7 @@
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Character/CharacterVirtual.h>
+#include <mutex>
 
 namespace JPH
 {
@@ -17,26 +18,30 @@ namespace Vox
 	public:
 		CharacterController(float inRadius, float inHalfHeight, JPH::PhysicsSystem* physicsSystem);
 
-		JPH::Vec3 GetPosition() const;
+		[[nodiscard]] JPH::Vec3 GetPosition() const;
 
-		JPH::Vec3 GetVelocity() const;
+		[[nodiscard]] JPH::Vec3 GetVelocity() const;
 
-		JPH::Quat GetRotation() const;
+		[[nodiscard]] JPH::Quat GetRotation() const;
+
+		[[nodiscard]] bool IsGrounded() const;
+
+		[[nodiscard]] float GetRadius() const;
+
+		[[nodiscard]] float GetHalfHeight() const;
 
 		void AddImpulse(JPH::Vec3 impulse);
 
-		bool IsGrounded() const;
-
 		void Update(float deltaTime, PhysicsServer* physicsServer);
 
-		float GetRadius() const;
-
-		float GetHalfHeight() const;
+	    void SetPosition(JPH::Vec3 position);
 
 		JPH::Vec3 requestedVelocity;
 
 	private:
 		float radius, halfHeight;
+
+	    std::mutex characterMutex;
 
 		bool grounded = true;
 

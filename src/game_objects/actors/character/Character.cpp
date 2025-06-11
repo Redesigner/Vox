@@ -4,6 +4,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #undef GLM_ENABLE_EXPERIMENTAL
 
+#include "core/objects/World.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "game_objects/components/CameraComponent.h"
@@ -21,8 +22,6 @@ namespace Vox
 	{
         DEFAULT_DISPLAY_NAME();
 
-		characterController = ServiceLocator::GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
-
 	    auto mesh = AttachComponent<MeshComponent>("witch");
 	    mesh->SetPosition({0.0f, -1.5f, 0.0f});
         mesh->SetName("Player Mesh");
@@ -32,6 +31,8 @@ namespace Vox
         {
             return;
         }
+
+        characterController = objectInitializer.world->GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
 
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())

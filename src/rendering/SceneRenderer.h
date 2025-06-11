@@ -18,6 +18,7 @@
 
 namespace Vox
 {
+    class World;
     class FlyCamera;
     class EditorViewport;
 }
@@ -42,7 +43,7 @@ namespace Vox
     class SceneRenderer
     {
     public:
-        SceneRenderer();
+        SceneRenderer(World* world);
         ~SceneRenderer();
 
         void Draw();
@@ -129,6 +130,8 @@ namespace Vox
 
         Light testLight;
         LightUniformLocations lightUniformLocations;
+
+        World* owningWorld;
 
 #ifdef EDITOR
         std::vector<WeakRef<MeshInstance>> outlinedMeshes;

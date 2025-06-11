@@ -13,7 +13,6 @@ namespace Vox
 	FileIOService* ServiceLocator::fileIoService = nullptr;
 	InputService* ServiceLocator::inputService = nullptr;
 	ObjectService* ServiceLocator::objectService = nullptr;
-	PhysicsServer* ServiceLocator::physicsServer = nullptr;
 	Renderer* ServiceLocator::renderer = nullptr;
 
 	void ServiceLocator::InitServices(SDL_Window* window)
@@ -21,7 +20,6 @@ namespace Vox
 		fileIoService = new FileIOService();
 		inputService = new InputService(window);
 		objectService = new ObjectService();
-		physicsServer = new PhysicsServer();
 		renderer = new Renderer(window);
 		editorService = new EditorService();
 	}
@@ -32,13 +30,11 @@ namespace Vox
 		delete editorService;
 		delete fileIoService;
 		delete inputService;
-		delete physicsServer;
 		delete renderer;
 	    inputService = nullptr;
 	    editorService = nullptr;
 	    fileIoService = nullptr;
 	    objectService = nullptr;
-	    physicsServer = nullptr;
 	    renderer = nullptr;
 	}
 
@@ -60,11 +56,6 @@ namespace Vox
 	Renderer* ServiceLocator::GetRenderer()
 	{
 		return renderer;
-	}
-
-	PhysicsServer* ServiceLocator::GetPhysicsServer()
-	{
-		return physicsServer;
 	}
 
 	ObjectService* ServiceLocator::GetObjectService()

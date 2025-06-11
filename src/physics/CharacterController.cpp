@@ -51,6 +51,7 @@ namespace Vox
 
 	void CharacterController::AddImpulse(JPH::Vec3 impulse)
 	{
+	    std::lock_guard lock(characterMutex);
 		pendingImpulses += impulse;
 	}
 
@@ -61,6 +62,7 @@ namespace Vox
 
 	void CharacterController::Update(float deltaTime, PhysicsServer* physicsServer)
 	{
+	    std::lock_guard lock(characterMutex);
 		grounded = character->GetGroundState() == JPH::CharacterBase::EGroundState::OnGround;
 
 		JPH::PhysicsSystem* physicsSystem = physicsServer->GetPhysicsSystem();
@@ -86,7 +88,13 @@ namespace Vox
 		character->Update(deltaTime, physicsSystem->GetGravity(), physicsSystem->GetDefaultBroadPhaseLayerFilter(Physics::CollisionLayer::Dynamic), physicsSystem->GetDefaultLayerFilter(Physics::CollisionLayer::Dynamic), {}, {}, *physicsServer->GetAllocator());
 	}
 
-	float CharacterController::GetRadius() const
+    void CharacterController::SetPosition(JPH::Vec3 position)
+    {
+	    std::lock_guard lock(characterMutex);
+	    character->SetPosition(position);
+    }
+
+    float CharacterController::GetRadius() const
 	{
 		return radius;
 	}

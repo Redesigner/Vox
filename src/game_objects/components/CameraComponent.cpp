@@ -3,10 +3,9 @@
 #include "core/logging/Logging.h"
 #include "core/objects/World.h"
 #include "core/objects/actor/Actor.h"
-#include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
-#include "../../rendering/camera/Camera.h"
+#include "rendering/camera/Camera.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 
@@ -21,6 +20,8 @@ namespace Vox
         camera->SetPosition(0.0f, 0.0f, 0.0f);
         camera->SetRotation(0.0f, 0.0f, 0.0f);
         camera->SetFovY(45.0f);
+
+        owningWorld = objectInitializer.world;
     }
 
     void CameraComponent::BuildProperties(std::vector<Property>& propertiesInOut)
@@ -35,9 +36,9 @@ namespace Vox
         {
             return;
         }
-        if (const auto* actor = dynamic_cast<Actor*>(GetParent()))
+        if (owningWorld)
         {
-            actor->GetWorld()->GetRenderer()->SetCurrentCamera(camera);
+            owningWorld->GetRenderer()->SetCurrentCamera(camera);
         }
     }
 
@@ -58,7 +59,7 @@ namespace Vox
         RayCastResultNormal rayCastResult;
         const glm::vec3 start = GetWorldTransform().position;
         const glm::vec3 forward = GetWorldTransform().GetForwardVector();
-        if (ServiceLocator::GetPhysicsServer()->RayCast(start, forward * armLength, rayCastResult))
+        if (owningWorld && owningWorld->GetPhysicsServer()->RayCast(start, forward * armLength, rayCastResult))
         {
             camera->SetPosition(start + forward * armLength * rayCastResult.percentage * 0.95f);
         }

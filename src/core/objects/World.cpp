@@ -8,6 +8,7 @@
 #include "core/services/FileIOService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
+#include "physics/PhysicsServer.h"
 #include "rendering/SceneRenderer.h"
 
 namespace Vox
@@ -73,6 +74,11 @@ namespace Vox
     std::shared_ptr<SceneRenderer> World::GetRenderer() const
     {
         return renderer;
+    }
+
+    std::shared_ptr<PhysicsServer> World::GetPhysicsServer() const
+    {
+        return physicsServer;
     }
 
     void World::SetWorldState(WorldState worldState)
@@ -179,7 +185,8 @@ namespace Vox
 
     World::World()
     {
-        renderer = std::make_shared<SceneRenderer>();
+        renderer = std::make_shared<SceneRenderer>(this);
+        physicsServer = std::make_shared<PhysicsServer>();
     }
 
     World::~World()

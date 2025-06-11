@@ -6,6 +6,7 @@
 
 namespace Vox
 {
+    class PhysicsServer;
     class Prefab;
     class SceneRenderer;
 }
@@ -52,6 +53,8 @@ namespace Vox
 
         [[nodiscard]] std::shared_ptr<SceneRenderer> GetRenderer() const;
 
+        [[nodiscard]] std::shared_ptr<PhysicsServer> GetPhysicsServer() const;
+
         void SetWorldState(WorldState worldState);
 
         [[nodiscard]] WorldState GetWorldState() const;
@@ -83,6 +86,8 @@ namespace Vox
         WorldState state = WorldState::Inactive;
 
         std::shared_ptr<SceneRenderer> renderer;
+
+        std::shared_ptr<PhysicsServer> physicsServer;
 
         //@TODO: proper heap allocator here
         std::vector<std::shared_ptr<Object>> objects;

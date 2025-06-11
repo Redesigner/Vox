@@ -5,6 +5,7 @@
 #pragma once
 
 #include "game_objects/components/SceneComponent.h"
+#include "physics/CharacterController.h"
 
 namespace Vox
 {
@@ -16,6 +17,10 @@ namespace Vox
 
     private:
         IMPLEMENT_OBJECT(CharacterPhysicsComponent, SceneComponent);
+
+        void OnTransformUpdated() override;
+
+        std::shared_ptr<CharacterController> characterController;
     };
 
 } // Vox

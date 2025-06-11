@@ -25,7 +25,6 @@ namespace Vox
 		static FileIOService* GetFileIoService();
 		static InputService* GetInputService();
 		static ObjectService* GetObjectService();
-		static PhysicsServer* GetPhysicsServer();
 		static Renderer* GetRenderer();
 
 	private:
@@ -33,7 +32,6 @@ namespace Vox
 		static FileIOService* fileIoService;
 		static InputService* inputService;
 		static ObjectService* objectService;
-		static PhysicsServer* physicsServer;
 		static Renderer* renderer;
 	};
 }
