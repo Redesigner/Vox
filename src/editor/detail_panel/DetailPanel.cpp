@@ -22,7 +22,7 @@ namespace Vox
             {
                 DrawProperty(object, property);
                 ImGui::SameLine();
-                if (ImGui::Button(std::format("{}###R", property.GetFriendlyName()).c_str()))
+                if (ImGui::Button(std::format("R###{}", property.GetFriendlyName()).c_str()))
                 {
                     ResetProperty(object, property);
                 }
