@@ -6,6 +6,7 @@
 #include "core/math/Strings.h"
 #include "core/objects/Tickable.h"
 #include "core/services/FileIOService.h"
+#include "core/services/InputService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
@@ -191,10 +192,38 @@ namespace Vox
     {
         renderer = std::make_shared<SceneRenderer>(this);
         physicsServer = std::make_shared<PhysicsServer>();
+
+        toggleDebugRenderHandle = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F3, [this](const bool buttonPressed)
+        {
+            if (buttonPressed)
+            {
+                renderer->renderDebug = !renderer->renderDebug;
+            }
+        });
+
+        togglePauseHandle = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_PAUSE, [this](const bool buttonPressed)
+        {
+            if (!buttonPressed)
+            {
+                return;
+            }
+
+            if (state == Playing)
+            {
+                SetWorldState(Paused);
+            }
+            else if (state == Paused)
+            {
+                SetWorldState(Playing);
+            }
+        });
     }
 
-    World::~World()
-    = default;
+    World::~World() // NOLINT(*-use-equals-default)
+    {
+        ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_F3, toggleDebugRenderHandle);
+        ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_PAUSE, togglePauseHandle);
+    }
 
     void World::PostObjectConstruct(const std::shared_ptr<Object>& object)
     {

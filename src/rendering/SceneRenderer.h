@@ -82,6 +82,8 @@ namespace Vox
         std::weak_ptr<EditorViewport> viewport;
 #endif
 
+        bool renderDebug = false;
+
     private:
         void DrawGBuffer();
 

@@ -59,7 +59,11 @@ namespace Vox
         DrawGBuffer();
         DrawDeferredPass();
         DrawSky();
-        DrawDebugShapes();
+
+        if (renderDebug)
+        {
+            DrawDebugShapes();
+        }
 
 #ifdef EDITOR
         DrawPickBuffer();
@@ -354,7 +358,7 @@ namespace Vox
         {
             return;
         }
-        
+
         // Fill the debug renderer with our shapes
         physicsServer->RenderDebugShapes();
 

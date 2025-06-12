@@ -2,6 +2,7 @@
 
 #include "SavedWorld.h"
 #include "core/concepts/Concepts.h"
+#include "core/datatypes/DelegateHandle.h"
 #include "core/objects/Object.h"
 
 namespace Vox
@@ -94,6 +95,9 @@ namespace Vox
         //@TODO: proper heap allocator here
         std::vector<std::shared_ptr<Object>> objects;
         std::vector<Tickable*> actorsToTick;
+
+        DelegateHandle<bool> toggleDebugRenderHandle;
+        DelegateHandle<bool> togglePauseHandle;
 
         SavedWorld initialState;
     };
