@@ -94,6 +94,12 @@ namespace Vox
 	    character->SetPosition(position);
     }
 
+    void CharacterController::SetRequestedVelocity(const JPH::Vec3& velocity)
+    {
+	    std::lock_guard lock(characterMutex);
+	    requestedVelocity = velocity;
+    }
+
     float CharacterController::GetRadius() const
 	{
 		return radius;

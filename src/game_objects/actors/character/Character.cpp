@@ -9,6 +9,7 @@
 #include "core/services/ServiceLocator.h"
 #include "game_objects/components/CameraComponent.h"
 #include "game_objects/components/MeshComponent.h"
+#include "game_objects/components/physics/CharacterPhysicsComponent.h"
 #include "physics/CharacterController.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
@@ -22,7 +23,10 @@ namespace Vox
 	{
         DEFAULT_DISPLAY_NAME();
 
-	    auto mesh = AttachComponent<MeshComponent>("witch");
+        characterController = AttachComponent<CharacterPhysicsComponent>(0.5f, 1.0f);
+        characterController->SetName("Controller");
+
+	    mesh = AttachComponent<MeshComponent>("witch");
 	    mesh->SetPosition({0.0f, -1.5f, 0.0f});
         mesh->SetName("Player Mesh");
         cameraComponent = AttachComponent<CameraComponent>();
@@ -32,12 +36,10 @@ namespace Vox
             return;
         }
 
-        characterController = objectInitializer.world->GetPhysicsServer()->CreateCharacterController(0.5f, 1.0f);
-
 		jumpCallback = ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_SPACE, [this](bool pressed) {
 			if (pressed && characterController->IsGrounded())
 			{
-				characterController->AddImpulse(JPH::Vec3(0.0f, 6.0f, 0.0f));
+				characterController->AddImpulse(glm::vec3(0.0f, 6.0f, 0.0f));
 			}
 			});
 
@@ -61,14 +63,19 @@ namespace Vox
 		const glm::vec2 inputVector = ServiceLocator::GetInputService()->GetInputAxisNormalized(
 		    Vox::KeyboardInputAxis2D(SDL_SCANCODE_W, SDL_SCANCODE_S, SDL_SCANCODE_A, SDL_SCANCODE_D)
 		    );
-        float pitch, yaw, roll;
-	    glm::extractEulerAngleYXZ(cameraComponent->GetWorldTransform().GetMatrix(), yaw, pitch, roll);
+        const float yaw = cameraComponent->GetWorldTransform().rotation.y;
 		const float cos = std::cosf(-yaw);
         const float sin = std::sinf(-yaw);
-		characterController->requestedVelocity.SetX((cos * inputVector.x - sin * inputVector.y) * -4.0f);
-		characterController->requestedVelocity.SetZ((sin * inputVector.x + cos * inputVector.y) * -4.0f);
-
-		SetPosition(Vector3From(characterController->GetPosition()));
+        const glm::vec2 requestedVelocity = {
+            (cos * inputVector.x - sin * inputVector.y) * -4.0f,
+            (sin * inputVector.x + cos * inputVector.y) * -4.0f
+        };
+        characterController->SetRequestedVelocity(requestedVelocity);
+        if (requestedVelocity.x != 0.0f && requestedVelocity.y != 0.0f)
+        {
+            const float characterDirection = glm::atan2(-requestedVelocity.y, requestedVelocity.x);
+            mesh->SetRotation({0.0f, characterDirection + glm::pi<float>() / 2.0f, 0.0f});
+        }
 
 	    Actor::Tick(deltaTime);
 	}

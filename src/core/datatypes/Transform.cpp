@@ -19,8 +19,10 @@ namespace Vox
 		glm::vec3 skew;
 		glm::vec4 perspective;
 		glm::quat rotationQuat;
+	    float yaw, pitch, roll;
 		decompose(matrix, scale, rotationQuat, position, skew, perspective);
-		rotation = glm::eulerAngles(rotationQuat);
+		glm::extractEulerAngleYXZ(matrix, yaw, pitch, roll);
+	    rotation = {pitch, yaw, roll};
 	}
 
     Transform::Transform(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)

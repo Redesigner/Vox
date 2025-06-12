@@ -11,8 +11,17 @@
 
 namespace Vox
 {
+    class MeshComponent;
+}
+
+namespace Vox
+{
+    class CharacterPhysicsComponent;
+}
+
+namespace Vox
+{
     class CameraComponent;
-	class CharacterController;
 	class SpringArm;
     class World;
 	struct MeshInstance;
@@ -30,7 +39,8 @@ namespace Vox
 	private:
         void RotateCamera(int x, int y) const;
 
-		std::shared_ptr<CharacterController> characterController;
+	    std::shared_ptr<MeshComponent> mesh;
+		std::shared_ptr<CharacterPhysicsComponent> characterController;
 	    std::shared_ptr<CameraComponent> cameraComponent;
 
         DelegateHandle<bool> jumpCallback;

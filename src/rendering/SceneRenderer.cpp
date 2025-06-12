@@ -59,6 +59,7 @@ namespace Vox
         DrawGBuffer();
         DrawDeferredPass();
         DrawSky();
+        DrawDebugShapes();
 
 #ifdef EDITOR
         DrawPickBuffer();

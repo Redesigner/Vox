@@ -141,9 +141,9 @@ namespace Vox
                             "No Object Selected" :
                             worldOutline->GetSelectedObject().lock()->GetDisplayName());
                         BeginEmptyTab(tabName);
-                        if (!worldOutline->GetSelectedObject().expired())
+                        if (const std::shared_ptr<Object> selectedObject = worldOutline->GetSelectedObject().lock())
                         {
-                            DetailPanel::Draw(worldOutline->GetSelectedObject().lock().get());
+                            DetailPanel::Draw(selectedObject.get());
                         }
                         EndEmptyTab();
 

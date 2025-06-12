@@ -49,8 +49,8 @@ namespace Vox
 
     void CameraComponent::OnTransformUpdated()
     {
+        // The camera's position here is updated by the raycast in tick
         const Transform& worldTransform = GetWorldTransform();
-        camera->SetPosition(worldTransform.position);
         camera->SetRotation(-worldTransform.rotation);
     }
 

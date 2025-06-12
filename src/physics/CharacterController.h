@@ -24,6 +24,8 @@ namespace Vox
 
 		[[nodiscard]] JPH::Quat GetRotation() const;
 
+	    [[nodiscard]] const JPH::Vec3& GetRequestedVelocity() const;
+
 		[[nodiscard]] bool IsGrounded() const;
 
 		[[nodiscard]] float GetRadius() const;
@@ -36,7 +38,7 @@ namespace Vox
 
 	    void SetPosition(JPH::Vec3 position);
 
-		JPH::Vec3 requestedVelocity;
+	    void SetRequestedVelocity(const JPH::Vec3& velocity);
 
 	private:
 		float radius, halfHeight;
@@ -46,6 +48,8 @@ namespace Vox
 		bool grounded = true;
 
 		JPH::Vec3 pendingImpulses;
+
+		JPH::Vec3 requestedVelocity;
 
 		JPH::Ref<JPH::CharacterVirtual> character;
 		JPH::Ref<JPH::Shape> capsuleShape;

@@ -12,6 +12,8 @@ target_sources(Vox PRIVATE
 	"src/game_objects/components/SkeletalMeshComponent.h"
 	"src/game_objects/components/SceneComponent.cpp"
 	"src/game_objects/components/SceneComponent.h"
+	"src/game_objects/components/physics/CharacterPhysicsComponent.cpp"
+	"src/game_objects/components/physics/CharacterPhysicsComponent.h"
 
 	"src/core/concepts/Concepts.h"
 	"src/core/config/Config.cpp"

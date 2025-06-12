@@ -20,6 +20,7 @@
 #include "game_objects/actors/character/Character.h"
 #include "game_objects/components/MeshComponent.h"
 #include "game_objects/components/CameraComponent.h"
+#include "game_objects/components/physics/CharacterPhysicsComponent.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
@@ -179,6 +180,7 @@ int main()
         ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
         ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
+        ServiceLocator::GetObjectService()->RegisterObjectClass<CharacterPhysicsComponent>();
 
         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 

@@ -14,7 +14,7 @@ namespace Vox
 
         void OnTransformUpdated() override;
 
-        void Tick(float deltaTime);
+        void Tick(float deltaTime) override;
 
         void Activate() const;
 
