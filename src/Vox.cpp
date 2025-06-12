@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/vec3.hpp>
 #include <Jolt/Jolt.h>
+#include <Jolt/RegisterTypes.h>
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl3.h>
@@ -146,6 +147,10 @@ int main()
                 }
             }
         }
+        Voxel testVoxel2 = Voxel();
+        testVoxel2.materialId = 2;
+
+        voxelChunk.SetVoxel({15, 21, 15}, testVoxel2);
         voxelChunk.FinalizeUpdate();
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
@@ -166,21 +171,6 @@ int main()
                     std::this_thread::sleep_until(threadStartTime + frameTime);
                 }
             });
-
-        ServiceLocator::GetObjectService()->RegisterObjectClass<Actor>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<Component>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<SceneComponent>();
-
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObject>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestObjectChild>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestActor>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<Character>();
-
-        ServiceLocator::GetObjectService()->RegisterObjectClass<TestComponent>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<MeshComponent>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<SkeletalMeshComponent>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<CameraComponent>();
-        ServiceLocator::GetObjectService()->RegisterObjectClass<CharacterPhysicsComponent>();
 
         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 
@@ -261,6 +251,10 @@ int main()
     }
     config.windowMaximized = ServiceLocator::GetInputService()->IsWindowMaximized();
     config.Write();
+
+    // JPH::UnregisterTypes();
+    // delete JPH::Factory::sInstance;
+    // JPH::Factory::sInstance = nullptr;
 
     ServiceLocator::DeleteServices();
 

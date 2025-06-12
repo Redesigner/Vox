@@ -116,6 +116,11 @@ namespace Vox
         currentCamera = camera;
     }
 
+    void SceneRenderer::ResetCamera()
+    {
+        SetCurrentCamera(defaultCamera);
+    }
+
     ColorDepthFramebuffer* SceneRenderer::GetTexture() const
     {
         return deferredFramebuffer.get();
@@ -344,13 +349,17 @@ namespace Vox
     void SceneRenderer::DrawDebugShapes() const
     {
         PhysicsServer* physicsServer = owningWorld->GetPhysicsServer().get();
-
+        DebugRenderer* debugRenderer = physicsServer->GetDebugRenderer();
+        if (!debugRenderer)
+        {
+            return;
+        }
+        
         // Fill the debug renderer with our shapes
         physicsServer->RenderDebugShapes();
 
         glEnable(GL_DEPTH_TEST);
 
-        DebugRenderer* debugRenderer = physicsServer->GetDebugRenderer();
 
         const DebugShader* debugLineShader = GetRenderer()->GetDebugLineShader();
         debugRenderer->BindAndBufferLines();

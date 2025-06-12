@@ -58,6 +58,8 @@ namespace Vox
 
         void SetCurrentCamera(const std::shared_ptr<Camera>& camera);
 
+        void ResetCamera();
+
         [[nodiscard]] ColorDepthFramebuffer* GetTexture() const;
 
         void SetSize(unsigned int x, unsigned int y);

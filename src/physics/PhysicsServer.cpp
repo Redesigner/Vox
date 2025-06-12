@@ -44,7 +44,6 @@ namespace Vox
 			broadPhaseLayerImplementation, objectVsBroadPhaseLayerFilter, objectLayerPairFilter);
 
 		physicsSystem.SetContactListener(&contactListener);
-		JPH::DebugRenderer::sInstance = debugRenderer.get();
 	}
 
 	PhysicsServer::~PhysicsServer()
@@ -55,15 +54,15 @@ namespace Vox
 			bodyInterface.RemoveBody(bodyId);
 			bodyInterface.DestroyBody(bodyId);
 		}
-
-		JPH::UnregisterTypes();
-
-		delete JPH::Factory::sInstance;
-		JPH::Factory::sInstance = nullptr;
 	}
 
 	void PhysicsServer::Step()
 	{
+	    if (!running)
+	    {
+	        return;
+	    }
+
 		++stepCount;
 		StepCharacterControllers(fixedTimeStep);
 		UpdateSpringArms();
@@ -156,6 +155,7 @@ namespace Vox
 	void PhysicsServer::SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer)
 	{
 		this->debugRenderer = debugRenderer;
+        JPH::DebugRenderer::sInstance = debugRenderer.get();
 	}
 
 	void PhysicsServer::StepCharacterControllers(float deltaTime)

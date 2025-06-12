@@ -15,7 +15,7 @@ namespace Vox
     public:
         using ObjectMap = std::map<std::string, std::shared_ptr<ObjectClass>>;
 
-        ObjectService() = default;
+        ObjectService();
         ~ObjectService() = default;
 
         template <typename T>
@@ -51,6 +51,8 @@ namespace Vox
         void UpdateClass(const ObjectClass* objectClass);
 
     private:
+        void LoadDefaultObjectClasses();
+
         ObjectMap classRegistry;
 
         Delegate<const ObjectClass*> objectClassChanged;

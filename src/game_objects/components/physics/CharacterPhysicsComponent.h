@@ -25,14 +25,27 @@ namespace Vox
 
         [[nodiscard]] glm::vec3 GetRequestedVelocity() const;
 
+    protected:
+        void BuildProperties(std::vector<Property>& propertiesInOut) override;
+
+        void PropertyChanged(const Property& property) override;
+
+        void PostConstruct() override;
+
     private:
         IMPLEMENT_OBJECT(CharacterPhysicsComponent, SceneComponent);
 
         void OnTransformUpdated() override;
 
+        void GenerateController();
+
         void Tick(float DeltaTime) override;
 
         std::shared_ptr<CharacterController> characterController;
+
+        float radius;
+
+        float halfHeight;
     };
 
 } // Vox

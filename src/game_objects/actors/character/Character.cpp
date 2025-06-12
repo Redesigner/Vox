@@ -23,7 +23,7 @@ namespace Vox
 	{
         DEFAULT_DISPLAY_NAME();
 
-        characterController = AttachComponent<CharacterPhysicsComponent>(0.5f, 1.0f);
+        characterController = AttachComponent<CharacterPhysicsComponent>(0.5f, 0.5f);
         characterController->SetName("Controller");
 
 	    mesh = AttachComponent<MeshComponent>("witch");

@@ -26,6 +26,8 @@ namespace Vox
 
         [[nodiscard]] Transform GetWorldTransform() const;
 
+        [[nodiscard]] World* GetWorld() const;
+
 #ifdef EDITOR
         virtual void Select() {}
 #endif

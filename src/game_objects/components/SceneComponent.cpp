@@ -89,6 +89,11 @@ namespace Vox
         return worldTransform;
     }
 
+    World* SceneComponent::GetWorld() const
+    {
+        return GetActor()->GetWorld();
+    }
+
 
     void SceneComponent::UpdateTransform()
     {

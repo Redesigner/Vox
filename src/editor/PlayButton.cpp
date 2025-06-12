@@ -16,7 +16,7 @@ namespace Vox
         constexpr auto buttonSize = ImVec2(32, 32);
         if (worldState == Inactive)
         {
-            if (ImGui::Button("play", buttonSize))
+            if (ImGui::Button("Play", buttonSize))
             {
                 worldState = WorldState::Playing;
             }
@@ -29,9 +29,19 @@ namespace Vox
             }
         }
         ImGui::SameLine();
-        if (ImGui::Button("Pause", buttonSize))
+        if (worldState == WorldState::Paused)
         {
-            worldState = WorldState::Paused;
+            if (ImGui::Button("Resume", buttonSize))
+            {
+                worldState = WorldState::Playing;
+            }
+        }
+        else
+        {
+            if (ImGui::Button("Pause", buttonSize))
+            {
+                worldState = WorldState::Paused;
+            }
         }
 
         ImGui:ImGui::PopStyleVar();

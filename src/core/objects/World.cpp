@@ -95,6 +95,10 @@ namespace Vox
             {
                 Play();
             }
+            else if (state == Paused)
+            {
+                Unpause();
+            }
             break;
         case Paused:
             Pause();
@@ -247,6 +251,8 @@ namespace Vox
 
     void World::Play()
     {
+        initialState = Save();
+        physicsServer->running = true;
         for (Tickable* tickable : actorsToTick)
         {
             tickable->Play();
@@ -255,9 +261,18 @@ namespace Vox
 
     void World::Pause()
     {
+        physicsServer->running = false;
+    }
+
+    void World::Unpause()
+    {
+        physicsServer->running = true;
     }
 
     void World::Restart()
     {
+        physicsServer->running = false;
+        renderer->ResetCamera();
+        Load(initialState);
     }
 }

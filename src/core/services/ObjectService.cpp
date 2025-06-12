@@ -1,9 +1,24 @@
 ﻿#include "ObjectService.h"
 
-#include <cassert>
+#include "core/objects/TestObject.h"
+#include "core/objects/TestObjectChild.h"
+#include "core/objects/actor/Actor.h"
+#include "core/objects/actor/TestActor.h"
+#include "core/objects/component/TestComponent.h"
+
+#include "game_objects/actors/character/Character.h"
+#include "game_objects/components/CameraComponent.h"
+#include "game_objects/components/MeshComponent.h"
+#include "game_objects/components/SkeletalMeshComponent.h"
+#include "game_objects/components/physics/CharacterPhysicsComponent.h"
 
 namespace Vox
 {
+    ObjectService::ObjectService()
+    {
+        LoadDefaultObjectClasses();
+    }
+
     void ObjectService::RegisterPrefab(const std::string& filename)
     {
         classRegistry.emplace(filename, Prefab::FromFile(filename));
@@ -43,5 +58,21 @@ namespace Vox
     void ObjectService::UpdateClass(const ObjectClass* objectClass)
     {
         objectClassChanged(objectClass);
+    }
+
+    void ObjectService::LoadDefaultObjectClasses()
+    {
+        RegisterObjectClass<Actor>();
+        RegisterObjectClass<Component>();
+        RegisterObjectClass<SceneComponent>();
+        RegisterObjectClass<TestObject>();
+        RegisterObjectClass<TestObjectChild>();
+        RegisterObjectClass<TestActor>();
+        RegisterObjectClass<Character>();
+        RegisterObjectClass<TestComponent>();
+        RegisterObjectClass<MeshComponent>();
+        RegisterObjectClass<SkeletalMeshComponent>();
+        RegisterObjectClass<CameraComponent>();
+        RegisterObjectClass<CharacterPhysicsComponent>();
     }
 }

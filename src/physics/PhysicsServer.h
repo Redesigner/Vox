@@ -69,6 +69,8 @@ namespace Vox
 
 		void SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer);
 
+	    std::atomic_bool running = false;
+
 	private:
 		void StepCharacterControllers(float deltaTime);
 

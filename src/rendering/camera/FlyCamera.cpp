@@ -59,7 +59,7 @@ namespace Vox
             glm::vec3(0.0f, input.y, 0.0f) +
             GetForwardVector() * input.z;
 
-        SetPosition(GetPosition() + -delta * deltaTime);
+        SetPosition(GetPosition() + -delta *  5.0f * deltaTime);
     }
 
     void FlyCamera::RotateCamera(int x, int y)

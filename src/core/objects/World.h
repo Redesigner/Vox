@@ -81,6 +81,8 @@ namespace Vox
 
         void Pause();
 
+        void Unpause();
+
         void Restart();
 
         WorldState state = WorldState::Inactive;
@@ -92,5 +94,7 @@ namespace Vox
         //@TODO: proper heap allocator here
         std::vector<std::shared_ptr<Object>> objects;
         std::vector<Tickable*> actorsToTick;
+
+        SavedWorld initialState;
     };
 }
