@@ -22,21 +22,23 @@ namespace Vox
 {
 	PhysicsServer::PhysicsServer()
 	{
-		JPH::RegisterDefaultAllocator();
+	    if (!JPH::Factory::sInstance)
+	    {
+	        JPH::RegisterDefaultAllocator();
+	        JPH::Factory::sInstance = new JPH::Factory();
+	        JPH::RegisterTypes();
+	    }
 
-		JPH::Factory::sInstance = new JPH::Factory();
-		JPH::RegisterTypes();
-
-		const JPH::uint cMaxPhysicsJobs = 64;
-		const JPH::uint cMaxPhysicsBarriers = 8;
+        constexpr JPH::uint cMaxPhysicsJobs = 64;
+        constexpr JPH::uint cMaxPhysicsBarriers = 8;
 
 		jobSystem = std::make_unique<JPH::JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 		tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(10 * 1024 * 1024);
 
-		const JPH::uint cMaxBodies = 1024;
-		const JPH::uint cNumBodyMutexes = 0;
-		const JPH::uint cMaxBodyPairs = 1024;
-		const JPH::uint cMaxContactConstraints = 1024;
+        constexpr JPH::uint cMaxBodies = 1024;
+        constexpr JPH::uint cNumBodyMutexes = 0;
+        constexpr JPH::uint cMaxBodyPairs = 1024;
+        constexpr JPH::uint cMaxContactConstraints = 1024;
 
 		voxelBodies = DynamicObjectContainer<VoxelBody>(8);
 
@@ -70,16 +72,16 @@ namespace Vox
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
 
-	JPH::BodyID PhysicsServer::CreateStaticBox(JPH::RVec3 size, JPH::Vec3 position)
+	JPH::BodyID PhysicsServer::CreateStaticBox(const JPH::RVec3 size, const JPH::Vec3 position)
 	{
-		JPH::BoxShapeSettings boxShapeSettings = JPH::BoxShapeSettings(size / 2.0f);
+		const auto boxShapeSettings = JPH::BoxShapeSettings(size / 2.0f);
 		return CreateStaticShape(boxShapeSettings.Create().Get(), position);
 	}
 
-	JPH::BodyID PhysicsServer::CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position)
+	JPH::BodyID PhysicsServer::CreatePlayerCapsule(const float radius, const float halfHeight, const JPH::Vec3 position)
 	{
-		JPH::CapsuleShapeSettings capsuleShapeSettings = JPH::CapsuleShapeSettings(halfHeight, radius);
-		JPH::BodyID capsuleId = CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
+		const auto capsuleShapeSettings = JPH::CapsuleShapeSettings(halfHeight, radius);
+		const JPH::BodyID capsuleId = CreateDynamicShape(capsuleShapeSettings.Create().Get(), position);
 		// physicsSystem.GetBodyInterface().SetLinearVelocity(capsuleId, JPH::Vec3(0.0f, -0.01f, 0.0f));
 		return capsuleId;
 	}
@@ -91,7 +93,7 @@ namespace Vox
 		return result;
 	}
 
-	Ref<SpringArm> PhysicsServer::CreateSpringArm(Ref<CharacterController>& id)
+	Ref<SpringArm> PhysicsServer::CreateSpringArm(const Ref<CharacterController>& id)
 	{
 		auto result = Ref(&springArms, springArms.Create());
 		result->SetOrigin(id);
@@ -100,7 +102,7 @@ namespace Vox
 		return result;
 	}
 
-	Ref<SpringArm> PhysicsServer::CreateSpringArm(JPH::BodyID bodyId)
+	Ref<SpringArm> PhysicsServer::CreateSpringArm(const JPH::BodyID bodyId)
 	{
 		auto result = Ref(&springArms, springArms.Create());
 		result->SetOrigin(bodyId);
@@ -121,8 +123,6 @@ namespace Vox
 
 	void PhysicsServer::RenderDebugShapes()
 	{
-		JPH::BodyManager::DrawSettings drawSettings = JPH::BodyManager::DrawSettings();
-		// physicsSystem.DrawBodies(drawSettings, debugRenderer.get());
 		physicsSystem.DrawConstraints(debugRenderer.get());
 
 		for (const auto& characterControllerWeak : characterControllers)
@@ -152,17 +152,20 @@ namespace Vox
 		return tempAllocator.get();
 	}
 
-	void PhysicsServer::SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer)
+	void PhysicsServer::SetDebugRenderer(const std::shared_ptr<DebugRenderer>& debugRenderer)
 	{
 		this->debugRenderer = debugRenderer;
         JPH::DebugRenderer::sInstance = debugRenderer.get();
 	}
 
-	void PhysicsServer::StepCharacterControllers(float deltaTime)
+
+    // ReSharper disable once CppDFAConstantParameter
+    // For now anyways, this will be constant
+    void PhysicsServer::StepCharacterControllers(const float deltaTime)
 	{
 		for (auto& characterControllerWeak : characterControllers)
 		{
-            if (auto characterController = characterControllerWeak.lock())
+            if (const auto characterController = characterControllerWeak.lock())
 			{
 				characterController->Update(deltaTime, this);
 			}
@@ -186,9 +189,9 @@ namespace Vox
 	void PhysicsServer::UpdateVoxelBodies()
 	{
 		JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
-		for (const std::pair<size_t, int>& index : voxelBodies.GetDiryIndices())
+		for (const auto& [id, index] : voxelBodies.GetDirtyIndices())
 		{
-			if (VoxelBody* body = voxelBodies.Get(index.first, index.second))
+			if (VoxelBody* body = voxelBodies.Get(id, index))
 			{
 				if (!body->GetBodyId().IsInvalid())
 				{
@@ -203,38 +206,37 @@ namespace Vox
 		voxelBodies.ClearDirty();
 	}
 
-	JPH::BodyID PhysicsServer::CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position)
+	JPH::BodyID PhysicsServer::CreateStaticShape(const JPH::Shape* shape, const JPH::Vec3& position)
 	{
-		JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, Physics::CollisionLayer::Static);
-		JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
+		const JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, Physics::CollisionLayer::Static);
+		const JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
 		bodyIds.push_back(bodyId);
 		return bodyId;
 	}
 
-	JPH::BodyID PhysicsServer::CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position)
+	JPH::BodyID PhysicsServer::CreateDynamicShape(const JPH::Shape* shape, const JPH::Vec3& position)
 	{
-		JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Physics::CollisionLayer::Dynamic);
-		JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
+		const JPH::BodyCreationSettings bodyCreationSettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Physics::CollisionLayer::Dynamic);
+		const JPH::BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, JPH::EActivation::Activate);
 		bodyIds.push_back(bodyId);
 		return bodyId;
 	}
 
-	JPH::BodyID PhysicsServer::CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings)
+	JPH::BodyID PhysicsServer::CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings)
 	{
 		using namespace JPH;
-		JPH::BodyCreationSettings bodyCreationSettings(settings, Vec3::sZero(), Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
-		BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
-		// physicsSystem.
+		const BodyCreationSettings bodyCreationSettings(settings, Vec3::sZero(), Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
+		const BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
 		return bodyId;
 	}
 
 	DynamicRef<VoxelBody> PhysicsServer::CreateVoxelBody()
 	{
-		return DynamicRef<VoxelBody>(&voxelBodies, voxelBodies.Create(32));
+		return {&voxelBodies, voxelBodies.Create(32)};
 	}
 
-	bool PhysicsServer::RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut)
-	{
+	bool PhysicsServer::RayCast(const JPH::Vec3 origin, const JPH::Vec3 direction, RayCastResultNormal& resultOut) const
+    {
 		using namespace JPH;
 		RRayCast rayCast = RRayCast(origin, direction);
 		RayCastResult rayCastResult = RayCastResult();
@@ -245,7 +247,7 @@ namespace Vox
 			resultOut.impactPoint = origin + direction * rayCastResult.mFraction;\
 		    resultOut.percentage = rayCastResult.mFraction;
 
-			BodyLockRead lock = BodyLockRead(physicsSystem.GetBodyLockInterfaceNoLock(), rayCastResult.mBodyID);
+			const auto lock = BodyLockRead(physicsSystem.GetBodyLockInterfaceNoLock(), rayCastResult.mBodyID);
 			if (lock.Succeeded())
 			{
 				const Body& hitBody = lock.GetBody();
@@ -260,7 +262,7 @@ namespace Vox
 		return false;
 	}
 
-    bool PhysicsServer::RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut)
+    bool PhysicsServer::RayCast(const glm::vec3 origin, const glm::vec3 direction, RayCastResultNormal& resultOut) const
     {
         return RayCast(Vec3From(origin), Vec3From(direction), resultOut);
     }

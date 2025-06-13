@@ -26,9 +26,11 @@ namespace Vox
 
 		void SetVoxel(glm::uvec3 voxelPosition, Voxel voxel);
 
-		Voxel GetVoxel(glm::uvec3 voxelPosition) const;
+		[[nodiscard]] Voxel GetVoxel(glm::uvec3 voxelPosition) const;
 
 		void FinalizeUpdate();
+
+		static constexpr unsigned int chunkSize = 32;
 
 	private:
 		glm::ivec2 chunkLocation;
@@ -37,10 +39,8 @@ namespace Vox
 
 		DynamicRef<VoxelBody> body;
 
-		std::unique_ptr<std::array<std::array<std::array<Voxel, 32>, 32>, 32>> voxels;
+		std::unique_ptr<std::array<std::array<std::array<Voxel, chunkSize>, chunkSize>, chunkSize>> voxels;
 
-		const unsigned int dimensions = 32;
-		
-		Octree::CollisionNode voxelCollisionMask = Octree::CollisionNode(dimensions);
+		Octree::CollisionNode voxelCollisionMask = Octree::CollisionNode(chunkSize);
 	};
 }

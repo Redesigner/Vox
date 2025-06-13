@@ -11,12 +11,12 @@ namespace Vox
 	{
 		mesh = renderer->CreateVoxelMesh(chunkLocation);
 		body = physicsServer->CreateVoxelBody();
-		voxels = std::make_unique<std::array<std::array<std::array<Voxel, 32>, 32>, 32>>();
+		voxels = std::make_unique<std::array<std::array<std::array<Voxel, chunkSize>, chunkSize>, chunkSize>>();
 	}
 
 	void VoxelChunk::SetVoxel(glm::uvec3 voxelPosition, Voxel voxel)
 	{
-		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
+		assert(voxelPosition.x < chunkSize && voxelPosition.y < chunkSize && voxelPosition.z < chunkSize);
 
 		if (voxel == voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z])
 		{
@@ -39,7 +39,7 @@ namespace Vox
 
 	Voxel VoxelChunk::GetVoxel(glm::uvec3 voxelPosition) const
 	{
-		assert(voxelPosition.x < dimensions && voxelPosition.y < dimensions && voxelPosition.z < dimensions);
+		assert(voxelPosition.x < chunkSize && voxelPosition.y < chunkSize && voxelPosition.z < chunkSize);
 		return voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z];
 	}
 

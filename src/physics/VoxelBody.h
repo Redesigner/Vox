@@ -27,9 +27,9 @@ namespace Vox
 		void EraseVoxel(glm::uvec3 position);
 
 		JPH::BodyID GetBodyId() const;
-		void SetBodyId(JPH::BodyID bodyId);
+		void SetBodyId(JPH::BodyID bodyIdIn);
 
-		JPH::Ref<JPH::StaticCompoundShapeSettings> GetShapeSettings();
+		JPH::Ref<JPH::StaticCompoundShapeSettings> GetShapeSettings() const;
 
 	private:
 		JPH::BodyID bodyId;

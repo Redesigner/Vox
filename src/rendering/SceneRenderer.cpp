@@ -381,7 +381,7 @@ namespace Vox
     void SceneRenderer::UpdateVoxels()
     {
         GetRenderer()->GetVoxelGenerationShader()->Enable();
-        for (const auto& [index, snd] : voxelMeshes.GetDiryIndices())
+        for (const auto& [index, snd] : voxelMeshes.GetDirtyIndices())
         {
             if (VoxelMesh* mesh = voxelMeshes.Get(index, snd))
             {

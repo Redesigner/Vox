@@ -252,9 +252,9 @@ int main()
     config.windowMaximized = ServiceLocator::GetInputService()->IsWindowMaximized();
     config.Write();
 
-    // JPH::UnregisterTypes();
-    // delete JPH::Factory::sInstance;
-    // JPH::Factory::sInstance = nullptr;
+    JPH::UnregisterTypes();
+    delete JPH::Factory::sInstance;
+    JPH::Factory::sInstance = nullptr;
 
     ServiceLocator::DeleteServices();
 

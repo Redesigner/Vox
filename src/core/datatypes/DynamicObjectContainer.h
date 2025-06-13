@@ -43,7 +43,7 @@ namespace Vox
 			dirtyInstances.clear();
 		}
 
-		const std::vector<std::pair<size_t, int>>& GetDiryIndices() const
+		const std::vector<std::pair<size_t, int>>& GetDirtyIndices() const
 		{
 			return dirtyInstances;
 		}

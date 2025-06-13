@@ -41,17 +41,17 @@ namespace Vox
 
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
-		JPH::BodyID CreateCompoundShape(JPH::StaticCompoundShapeSettings* settings);
+		JPH::BodyID CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings);
 
 		DynamicRef<VoxelBody> CreateVoxelBody();
 
-		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut);
-        bool RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut);
+		bool RayCast(JPH::Vec3 origin, JPH::Vec3 direction, RayCastResultNormal& resultOut) const;
+        bool RayCast(glm::vec3 origin, glm::vec3 direction, RayCastResultNormal& resultOut) const;
 
 		// Character Controller functions
 		std::shared_ptr<CharacterController> CreateCharacterController(float radius, float halfHeight);
 
-		Ref<SpringArm> CreateSpringArm(Ref<CharacterController>& id);
+		Ref<SpringArm> CreateSpringArm(const Ref<CharacterController>& id);
 
 		Ref<SpringArm> CreateSpringArm(JPH::BodyID bodyId);
 
@@ -67,7 +67,7 @@ namespace Vox
 		// Move these into private methods after restructuring
 		JPH::TempAllocator* GetAllocator() const;
 
-		void SetDebugRenderer(std::shared_ptr<DebugRenderer> debugRenderer);
+		void SetDebugRenderer(const std::shared_ptr<DebugRenderer>& debugRenderer);
 
 	    std::atomic_bool running = false;
 
@@ -78,9 +78,9 @@ namespace Vox
 
 		void UpdateVoxelBodies();
 
-		JPH::BodyID CreateStaticShape(JPH::Shape* shape, const JPH::Vec3& position);
+		JPH::BodyID CreateStaticShape(const JPH::Shape* shape, const JPH::Vec3& position);
 
-		JPH::BodyID CreateDynamicShape(JPH::Shape* shape, const JPH::Vec3& position);
+		JPH::BodyID CreateDynamicShape(const JPH::Shape* shape, const JPH::Vec3& position);
 
 		JPH::PhysicsSystem physicsSystem;
 

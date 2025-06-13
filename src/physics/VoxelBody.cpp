@@ -2,20 +2,28 @@
 
 namespace Vox
 {
-    VoxelBody::VoxelBody(unsigned int dimensions)
+    VoxelBody::VoxelBody(const unsigned int dimensions)
         :voxelCollisionMask(dimensions)
     {
     }
 
-    void VoxelBody::CreateVoxel(glm::uvec3 position)
+    void VoxelBody::CreateVoxel(const glm::uvec3 position)
     {
-        Octree::PhysicsVoxel solidVoxel = Octree::PhysicsVoxel(true);
-        voxelCollisionMask.SetVoxel(position.x - 16, position.y - 16, position.z - 16, &solidVoxel);
+        auto solidVoxel = Octree::PhysicsVoxel(true);
+        voxelCollisionMask.SetVoxel(
+            static_cast<int>(position.x - 16),
+            static_cast<int>(position.y - 16),
+            static_cast<int>(position.z - 16),
+            &solidVoxel);
     }
 
-    void VoxelBody::EraseVoxel(glm::uvec3 position)
+    void VoxelBody::EraseVoxel(const glm::uvec3 position)
     {
-        voxelCollisionMask.SetVoxel(position.x - 16, position.y - 16, position.z - 16, nullptr);
+        voxelCollisionMask.SetVoxel(
+            static_cast<int>(position.x - 16),
+            static_cast<int>(position.y - 16),
+            static_cast<int>(position.z - 16),
+            nullptr);
     }
 
     JPH::BodyID VoxelBody::GetBodyId() const
@@ -23,12 +31,12 @@ namespace Vox
         return bodyId;
     }
 
-    void VoxelBody::SetBodyId(JPH::BodyID bodyIdIn)
+    void VoxelBody::SetBodyId(const JPH::BodyID bodyIdIn)
     {
         bodyId = bodyIdIn;
     }
 
-    JPH::Ref<JPH::StaticCompoundShapeSettings> VoxelBody::GetShapeSettings()
+    JPH::Ref<JPH::StaticCompoundShapeSettings> VoxelBody::GetShapeSettings() const
     {
         return voxelCollisionMask.MakeCompoundShape();
     }
