@@ -104,6 +104,7 @@ namespace Octree
 				    subNode = std::make_unique<PhysicsVoxel>();
 				}
 
+			    GetAccessor(x, y, z) = std::make_unique<PhysicsVoxel>(voxel);
 				state = State::Partial;
 				return;
 			}
@@ -223,10 +224,16 @@ namespace Octree
 			for (const auto& subNode : subNodes)
 			{
 			    auto& collisionNode = std::get<std::unique_ptr<CollisionNode>>(subNode);
-			    if (collisionNode->state != State::Full || *std::get<std::unique_ptr<PhysicsVoxel>>(collisionNode->subNodes[0]) != voxel)
+			    if (collisionNode->state != State::Full)
 				{
 					return;
 				}
+
+			    auto& nodeFullVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(collisionNode->subNodes[0]);
+			    if (nodeFullVoxel != voxel)
+			    {
+			        return;
+			    }
 			}
 			// All nodes are full, and match the voxel we just inserted, collapse
 			CollapseSubnodes(voxel);
