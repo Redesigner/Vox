@@ -21,7 +21,10 @@ namespace Vox
 		friend class PhysicsServer;
 
 	public:
-		VoxelBody(unsigned int dimensions);
+		VoxelBody();
+	    ~VoxelBody();
+
+	    VoxelBody(VoxelBody&& other) noexcept;
 
 		void CreateVoxel(glm::uvec3 position);
 		void EraseVoxel(glm::uvec3 position);
@@ -33,6 +36,6 @@ namespace Vox
 
 	private:
 		JPH::BodyID bodyId;
-		Octree::CollisionNode voxelCollisionMask;
+		std::unique_ptr<Octree::CollisionNode> voxelCollisionMask;
 	};
 }

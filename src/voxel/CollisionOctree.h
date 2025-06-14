@@ -4,9 +4,12 @@
 #include <memory>
 #include <vector>
 
+// ReSharper disable once CppUnusedIncludeDirective -- Jolt must be included first
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/Reference.h>
 #include <Jolt/Physics/Collision/Shape/StaticCompoundShape.h>
+#include <optional>
+#include <variant>
 
 namespace JPH
 {
@@ -26,7 +29,7 @@ namespace Octree
 	struct PhysicsVoxel
 	{
 		PhysicsVoxel();
-		PhysicsVoxel(bool solid);
+		explicit PhysicsVoxel(bool solid);
 
 		bool solid = false;
 
@@ -36,30 +39,35 @@ namespace Octree
 	class CollisionNode
 	{
 		// relevant physics information here
-
-		enum State : char
+		enum class State : char
 		{
 			Full,
 			Empty,
 			Partial
 		};
 
+	    using NodeVariant = std::variant<std::unique_ptr<CollisionNode>, std::unique_ptr<PhysicsVoxel>>;
+
 	public:
-		CollisionNode(unsigned int size);
-		CollisionNode(unsigned int size, PhysicsVoxel* voxel);
+		explicit CollisionNode(unsigned int size);
+		CollisionNode(unsigned int size, const PhysicsVoxel& voxel);
 		~CollisionNode();
 
-		unsigned short GetSize() const;
+	    CollisionNode(CollisionNode&& other) noexcept;
+	    CollisionNode& operator = (CollisionNode&& other) noexcept;
 
-		PhysicsVoxel* GetVoxel(int x, int y, int z);
 
-		void SetVoxel(int x, int y, int z, PhysicsVoxel* voxel);
+		[[nodiscard]] unsigned short GetSize() const;
 
-		JPH::Ref<JPH::StaticCompoundShapeSettings> MakeCompoundShape() const;
+		[[nodiscard]] PhysicsVoxel* GetVoxel(int x, int y, int z) const;
 
-		std::vector<Cube> GetCubes() const;
+		void SetVoxel(int x, int y, int z, const PhysicsVoxel& voxel);
 
-		std::vector<char> GetPacked() const;
+		[[nodiscard]] JPH::Ref<JPH::StaticCompoundShapeSettings> MakeCompoundShape() const;
+
+		[[nodiscard]] std::vector<Cube> GetCubes() const;
+
+		[[nodiscard]] std::vector<char> GetPacked() const;
 
 		static std::shared_ptr<CollisionNode> FromPacked(const std::vector<char>& data);
 
@@ -72,11 +80,12 @@ namespace Octree
 
 		static int GetIndex(int x, int y, int z);
 
-		void* GetAccessor(int x, int y, int z) const;
+		[[nodiscard]] NodeVariant& GetAccessor(int x, int y, int z);
+	    [[nodiscard]] const NodeVariant& GetAccessor(int x, int y, int z) const;
 
-		void CollapseSubnodes(PhysicsVoxel* voxel);
+		void CollapseSubnodes(const PhysicsVoxel& voxel);
 
-		std::array<CollisionNode*, 8> subNodes;
+		std::array<NodeVariant, 8> subNodes;
 		State state;
 		unsigned short size;
 	};

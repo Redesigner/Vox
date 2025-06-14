@@ -51,10 +51,6 @@ namespace Vox
 		// Character Controller functions
 		std::shared_ptr<CharacterController> CreateCharacterController(float radius, float halfHeight);
 
-		Ref<SpringArm> CreateSpringArm(const Ref<CharacterController>& id);
-
-		Ref<SpringArm> CreateSpringArm(JPH::BodyID bodyId);
-
 		JPH::Vec3 GetObjectPosition(const JPH::BodyID& id) const;
 
 		void RenderDebugShapes();
@@ -73,8 +69,6 @@ namespace Vox
 
 	private:
 		void StepCharacterControllers(float deltaTime);
-
-		void UpdateSpringArms();
 
 		void UpdateVoxelBodies();
 
@@ -95,8 +89,6 @@ namespace Vox
 		std::vector<JPH::BodyID> bodyIds;
 
 		std::vector<std::weak_ptr<CharacterController>> characterControllers;
-
-		ObjectContainer<SpringArm> springArms;
 
 		DynamicObjectContainer<VoxelBody> voxelBodies;
 

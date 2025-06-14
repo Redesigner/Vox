@@ -1,3 +1,5 @@
+// ReSharper disable CppUseStructuredBinding
+// Don't use bindings with unions!!!
 #include "CollisionOctree.h"
 
 #include <cassert>
@@ -12,182 +14,128 @@
 
 namespace Octree
 {
-	CollisionNode::CollisionNode(unsigned int size)
+	CollisionNode::CollisionNode(const unsigned int size)
 		:size(size)
 	{
 		assert((size & (size - 1)) == 0);
-		subNodes[0] = nullptr;
-		state = Empty;
+		state = State::Empty;
 	}
 
-	CollisionNode::CollisionNode(unsigned int size, PhysicsVoxel* voxel)
-		:size(size)
+	CollisionNode::CollisionNode(const unsigned int size, const PhysicsVoxel& voxel)
+		:CollisionNode(size)
 	{
+	    // Size must be power of 2
 		assert((size & (size - 1)) == 0);
-		// Allocate a voxel that we can copy our incoming voxel to
-		subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-		std::memcpy(subNodes[0], voxel, sizeof(PhysicsVoxel));
-		state = Full;
+
+		subNodes[0] = std::make_unique<PhysicsVoxel>(voxel);
+		state = State::Full;
 	}
 
 	CollisionNode::~CollisionNode()
-	{
-		if (size == 2)
-		{
-			switch (state)
-			{
-			case Full:
-			{
-				delete reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
-				break;
-			}
-			case Partial:
-			{
-				for (int i = 0; i < 8; ++i)
-				{
-					delete reinterpret_cast<PhysicsVoxel*>(subNodes[i]);
-				}
-			}
-			}
-			return;
-		}
+	= default;
 
-		switch (state)
-		{
-		case Full:
-		{
-			delete reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
-			break;
-		}
+    CollisionNode::CollisionNode(CollisionNode&& other) noexcept
+    {
+        state = other.state;
+        size = other.size;
+        subNodes = std::move(other.subNodes);
+    }
 
-		case Partial:
-		{
-			for (int i = 0; i < 8; ++i)
-			{
-				delete reinterpret_cast<CollisionNode*>(subNodes[i]);
-			}
-		}
-		}
-	}
+    CollisionNode& CollisionNode::operator=(CollisionNode&& other) noexcept
+    {
+        state = other.state;
+        size = other.size;
+        subNodes = std::move(other.subNodes);
+        return *this;
+    }
 
-	unsigned short CollisionNode::GetSize() const
+    unsigned short CollisionNode::GetSize() const
 	{
 		return size;
 	}
 
-	PhysicsVoxel* CollisionNode::GetVoxel(int x, int y, int z)
-	{
-		int halfSize = size / 2;
-		if (x < -halfSize || x >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
-		if (y < -halfSize || y >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
-		if (z < -halfSize || z >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
+	PhysicsVoxel* CollisionNode::GetVoxel(const int x, const int y, const int z) const // NOLINT(*-no-recursion)
+    {
+		const int halfSize = size / 2;
+	    assert(x >= -halfSize && x < halfSize && y >= -halfSize && y < halfSize && z >= -halfSize && z < halfSize);
 
 		switch (state)
 		{
-		case Empty:
+		case State::Empty:
 			return nullptr;
-		case Full:
-			return reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
-		case Partial:
+
+		case State::Full:
+			return std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]).get();
+
+		case State::Partial:
 		{
 			// Access the elements directly if we're at the smallest size
 			if (size == 2)
 			{
-				return reinterpret_cast<PhysicsVoxel*>(GetAccessor(x, y, z));
+				return std::get<std::unique_ptr<PhysicsVoxel>>(GetAccessor(x, y, z)).get();
 			}
 
-			int half = size / 4;
+			const int half = size / 4;
+			const int subX = x + (x < 0 ? half : -half);
+			const int subY = y + (y < 0 ? half : -half);
+			const int subZ = z + (z < 0 ? half : -half);
+			return std::get<std::unique_ptr<CollisionNode>>(GetAccessor(x, y, z))->GetVoxel(subX, subY, subZ);
+		}
+		}
 
-			int subX = x + (x < 0 ? half : -half);
-			int subY = y + (y < 0 ? half : -half);
-			int subZ = z + (z < 0 ? half : -half);
-			return reinterpret_cast<CollisionNode*>(GetAccessor(x, y, z))->GetVoxel(subX, subY, subZ);
-		}
-		}
 		return nullptr;
 	}
 
-	void CollisionNode::SetVoxel(int x, int y, int z, PhysicsVoxel* voxel)
+	void CollisionNode::SetVoxel(const int x, const int y, const int z, const PhysicsVoxel& voxel) // NOLINT(*-no-recursion)
 	{
-		int halfSize = size / 2;
-		if (x < -halfSize || x >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
-		if (y < -halfSize || y >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
-		if (z < -halfSize || z >= halfSize)
-		{
-			throw std::out_of_range("Accessed voxel outside of range.");
-		}
+		const int halfSize = size / 2;
+	    assert(x >= -halfSize && x < halfSize && y >= -halfSize && y < halfSize && z >= -halfSize && z < halfSize);
 
 		if (size == 2)
 		{
 			switch (state)
 			{
-			case Empty:
+			case State::Empty:
 			{
 				// We don't have any nodes so allocate new voxels
-				subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[1] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[2] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[3] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[4] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[5] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[6] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[7] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
+                // ReSharper disable once CppUseStructuredBinding -- Can't use this with unions
+                for (auto& subNode : subNodes)
+				{
+				    subNode = std::make_unique<PhysicsVoxel>();
+				}
 
-				std::memcpy(GetAccessor(x, y, z), voxel, sizeof(PhysicsVoxel));
-				state = Partial;
+				state = State::Partial;
 				return;
 			}
 
-			case Full:
+			case State::Full:
 			{
-				PhysicsVoxel* currentVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
-				if (*currentVoxel == *voxel)
+                if (const auto currentVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]); currentVoxel == voxel)
 				{
 					return;
 				}
-				// We only have one voxel, at index 0
-				delete currentVoxel;
 
-				subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[1] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[2] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[3] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[4] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[5] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[6] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				subNodes[7] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
+			    for (auto& node : subNodes)
+			    {
+			        node = std::make_unique<PhysicsVoxel>();
+			    }
 
-				std::memcpy(GetAccessor(x, y, z), voxel, sizeof(PhysicsVoxel));
-				state = Partial;
+				GetAccessor(x, y, z) = std::make_unique<PhysicsVoxel>(voxel);
+				state = State::Partial;
 				return;
 			}
 
-			case Partial:
+			case State::Partial:
 			{
 				// Copy our new voxel into the relevant location
-				std::memcpy(GetAccessor(x, y, z), voxel, sizeof(PhysicsVoxel));
+			    GetAccessor(x, y, z) = std::make_unique<PhysicsVoxel>(voxel);
 
 				// Check if all the voxels are the same
 				bool allSame = true;
-				for (int i = 0; i < 8; ++i)
+				for (const auto& subNode : subNodes)
 				{
-					PhysicsVoxel* subVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[i]);
-					if (*subVoxel != *voxel)
+
+                    if (*std::get<std::unique_ptr<PhysicsVoxel>>(subNode) != voxel)
 					{
 						allSame = false;
 						break;
@@ -196,12 +144,13 @@ namespace Octree
 
 				if (allSame)
 				{
-					state = Full;
-					std::memcpy(subNodes[0], voxel, sizeof(PhysicsVoxel));
-					for (int i = 1; i < 8; ++i)
+					state = State::Full;
+				    //subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel(voxel));
+					for (auto& subNode : subNodes)
 					{
-						delete reinterpret_cast<PhysicsVoxel*>(subNodes[i]);
+						std::get<std::unique_ptr<PhysicsVoxel>>(subNode).reset();
 					}
+					subNodes[0] = std::make_unique<PhysicsVoxel>(voxel);
 				}
 				return;
 			}
@@ -210,83 +159,76 @@ namespace Octree
 
 		switch (state)
 		{
-		case Empty:
+		case State::Empty:
 		{
-			// Dont set an empty voxel to the already empty node
-			if (voxel == nullptr)
-			{
-				return;
-			}
-
 			// Allocate subnodes
-			int half = size / 4;
-			for (int i = 0; i < 8; ++i)
+			const int half = size / 4;
+			for (auto& subNode : subNodes)
 			{
-				subNodes[i] = new CollisionNode(size / 2);
+				subNode = std::make_unique<CollisionNode>(size / 2);
 			}
-			int subX = x + (x < 0 ? half : -half);
-			int subY = y + (y < 0 ? half : -half);
-			int subZ = z + (z < 0 ? half : -half);
+			const int subX = x + (x < 0 ? half : -half);
+			const int subY = y + (y < 0 ? half : -half);
+			const int subZ = z + (z < 0 ? half : -half);
 
-			reinterpret_cast<CollisionNode*>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
-			state = Partial;
+			std::get<std::unique_ptr<CollisionNode>>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
+			state = State::Partial;
 			break;
 		}
 
-		case Full:
+		case State::Full:
 		{
 			// The same as empty, but delete our "Full" node representation
-			PhysicsVoxel* fullVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
+			const PhysicsVoxel& fullVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]);
 
 			// This wouldn't change the node -- it should still be full
-			if (*fullVoxel == *voxel)
+			if (fullVoxel == voxel)
 			{
 				return;
 			}
 
-			int half = size / 4;
+			const int half = size / 4;
 
-			for (int i = 0; i < 8; ++i)
+			for (auto& subNode : subNodes)
 			{
-				subNodes[i] = new CollisionNode(size / 2, fullVoxel);
+				subNode = std::make_unique<CollisionNode>(size / 2, fullVoxel);
 			}
-			delete fullVoxel;
 
-			int subX = x + (x < 0 ? half : -half);
-			int subY = y + (y < 0 ? half : -half);
-			int subZ = z + (z < 0 ? half : -half);
+			const int subX = x + (x < 0 ? half : -half);
+			const int subY = y + (y < 0 ? half : -half);
+			const int subZ = z + (z < 0 ? half : -half);
 
-			reinterpret_cast<CollisionNode*>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
-			state = Partial;
+			std::get<std::unique_ptr<CollisionNode>>(GetAccessor(x, y, z))->SetVoxel(subX, subY, subZ, voxel);
+			state = State::Partial;
 			break;
 		}
 
-		case Partial:
+		case State::Partial:
 		{
-			int half = size / 4;
+			const int half = size / 4;
 
-			int subX = x + (x < 0 ? half : -half);
-			int subY = y + (y < 0 ? half : -half);
-			int subZ = z + (z < 0 ? half : -half);
+			const int subX = x + (x < 0 ? half : -half);
+			const int subY = y + (y < 0 ? half : -half);
+			const int subZ = z + (z < 0 ? half : -half);
 
-			CollisionNode* assignedNode = reinterpret_cast<CollisionNode*>(GetAccessor(x, y, z));
+			const auto& assignedNode = std::get<std::unique_ptr<CollisionNode>>(GetAccessor(x, y, z));
 			assignedNode->SetVoxel(subX, subY, subZ, voxel);
 
 			// check if the recently assigned node has been collapsed by our assignment
-			if (assignedNode->state == Partial)
+			if (assignedNode->state == State::Partial)
 			{
 				return;
 			}
 
-			for (int i = 0; i < 8; ++i)
+			for (const auto& subNode : subNodes)
 			{
-				CollisionNode* subNode = reinterpret_cast<CollisionNode*>(subNodes[i]);
-				if (subNode->state != Full || *reinterpret_cast<PhysicsVoxel*>(subNode->subNodes[0]) != *voxel)
+			    auto& collisionNode = std::get<std::unique_ptr<CollisionNode>>(subNode);
+			    if (collisionNode->state != State::Full || *std::get<std::unique_ptr<PhysicsVoxel>>(collisionNode->subNodes[0]) != voxel)
 				{
 					return;
 				}
 			}
-			// All nodes are full, and match the voxel we just insterted, collapse
+			// All nodes are full, and match the voxel we just inserted, collapse
 			CollapseSubnodes(voxel);
 			break;
 		}
@@ -296,18 +238,27 @@ namespace Octree
 	JPH::Ref<JPH::StaticCompoundShapeSettings> CollisionNode::MakeCompoundShape() const
 	{
 		using namespace JPH;
-		Ref<StaticCompoundShapeSettings> shapeSettings = new StaticCompoundShapeSettings;
-		std::vector<Cube> cubes = GetCubes();
-		for (const Cube& cube : cubes)
+		Ref shapeSettings = new StaticCompoundShapeSettings;
+        const std::vector<Cube> cubes = GetCubes();
+        VoxLog(Display, Physics, "Created voxel body with '{}' cubes", cubes.size());
+        for (const Cube& cube : cubes)
 		{
-			float cubeHalfExtent = static_cast<float>(cube.size / 2.0f);
+			const float cubeHalfExtent = static_cast<float>(cube.size) / 2.0f;
 			if (cube.size == 1)
 			{
-				shapeSettings->AddShape(Vec3(cube.x + cubeHalfExtent, cube.y + cubeHalfExtent, cube.z + cubeHalfExtent), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
+				shapeSettings->AddShape({
+				    static_cast<float>(cube.x) + cubeHalfExtent,
+				    static_cast<float>(cube.y) + cubeHalfExtent,
+				    static_cast<float>(cube.z) + cubeHalfExtent},
+				    Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
 			}
 			else
 			{
-				shapeSettings->AddShape(Vec3(cube.x, cube.y, cube.z), Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
+				shapeSettings->AddShape({
+				    static_cast<float>(cube.x),
+				    static_cast<float>(cube.y),
+				    static_cast<float>(cube.z)},
+				    Quat::sIdentity(), new BoxShape(Vec3(cubeHalfExtent, cubeHalfExtent, cubeHalfExtent)));
 			}
 		}
 
@@ -341,87 +292,92 @@ namespace Octree
 			return nullptr;
 		}
 
-		std::shared_ptr<CollisionNode> root = std::make_shared<CollisionNode>(treeSize);
+		auto root = std::make_shared<CollisionNode>(treeSize);
 		size_t currentIndex = sizeof(unsigned short);
 		root->Unpack(data, currentIndex);
 		return root;
 	}
 
-	void CollisionNode::GenerateCubes(int x, int y, int z, std::vector<Cube>& cubes) const
+	void CollisionNode::GenerateCubes(int x, int y, int z, std::vector<Cube>& cubes) const // NOLINT(*-no-recursion)
 	{
 		switch (state)
 		{
-		case Empty:
+		case State::Empty:
 		{
 			return;
 		}
-		case Full:
+		case State::Full:
 		{
 			cubes.emplace_back(x, y, z, size);
 			return;
 		}
-		case Partial:
+		case State::Partial:
 		{
 			if (size == 2)
 			{
-				PhysicsVoxel* physicsVoxel;
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[0]);
+                const auto* physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x - 1, y - 1, z - 1, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[1]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[1]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x - 1, y - 1, z, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[2]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[2]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x - 1, y, z - 1, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[3]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[3]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x - 1, y, z, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[4]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[4]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x, y - 1, z - 1, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[5]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[5]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x, y - 1, z, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[6]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[6]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x, y, z - 1, 1); }
-				physicsVoxel = reinterpret_cast<PhysicsVoxel*>(subNodes[7]);
+				physicsVoxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[7]).get();
 				if (physicsVoxel->solid) { cubes.emplace_back(x, y, z, 1); }
 			}
 			else
 			{
-				unsigned int halfSize = size / 4;
-				subNodes[0]->GenerateCubes(x - halfSize, y - halfSize, z - halfSize, cubes);
-				subNodes[1]->GenerateCubes(x - halfSize, y - halfSize, z + halfSize, cubes);
-				subNodes[2]->GenerateCubes(x - halfSize, y + halfSize, z - halfSize, cubes);
-				subNodes[3]->GenerateCubes(x - halfSize, y + halfSize, z + halfSize, cubes);
-				subNodes[4]->GenerateCubes(x + halfSize, y - halfSize, z - halfSize, cubes);
-				subNodes[5]->GenerateCubes(x + halfSize, y - halfSize, z + halfSize, cubes);
-				subNodes[6]->GenerateCubes(x + halfSize, y + halfSize, z - halfSize, cubes);
-				subNodes[7]->GenerateCubes(x + halfSize, y + halfSize, z + halfSize, cubes);
+				const unsigned int halfSize = size / 4;
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[0])->GenerateCubes(static_cast<int>(x - halfSize), static_cast<int>(y - halfSize), static_cast<int>(z - halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[1])->GenerateCubes(static_cast<int>(x - halfSize), static_cast<int>(y - halfSize), static_cast<int>(z + halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[2])->GenerateCubes(static_cast<int>(x - halfSize), static_cast<int>(y + halfSize), static_cast<int>(z - halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[3])->GenerateCubes(static_cast<int>(x - halfSize), static_cast<int>(y + halfSize), static_cast<int>(z + halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[4])->GenerateCubes(static_cast<int>(x + halfSize), static_cast<int>(y - halfSize), static_cast<int>(z - halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[5])->GenerateCubes(static_cast<int>(x + halfSize), static_cast<int>(y - halfSize), static_cast<int>(z + halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[6])->GenerateCubes(static_cast<int>(x + halfSize), static_cast<int>(y + halfSize), static_cast<int>(z - halfSize), cubes);
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[7])->GenerateCubes(static_cast<int>(x + halfSize), static_cast<int>(y + halfSize), static_cast<int>(z + halfSize), cubes);
 			}
 			return;
 		}
 		}
 	}
 
-	void CollisionNode::AccumulatePacked(std::vector<char>& data) const
+	void CollisionNode::AccumulatePacked(std::vector<char>& data) const // NOLINT(*-no-recursion)
 	{
 		if (size == 2)
 		{
 			switch (state)
 			{
-			case Empty:
+			case State::Empty:
 			{
 				data.emplace_back('E');
 				return;
 			}
-			case Full:
+			case State::Full:
 			{
 				data.emplace_back('F');
-				data.insert(data.end(), reinterpret_cast<char*>(subNodes[0]), reinterpret_cast<char*>(subNodes[0]) + sizeof(PhysicsVoxel));
+				const auto& voxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]);
+				data.insert(data.end(),
+				    reinterpret_cast<const char*>(voxel.get()),
+				    reinterpret_cast<const char*>(voxel.get()) + sizeof(PhysicsVoxel));
 				return;
 			}
-			case Partial:
+			case State::Partial:
 			{
 				data.emplace_back('P');
-				for (int i = 0; i < 8; ++i)
+				for (const auto& subNode : subNodes)
 				{
-					data.insert(data.end(), reinterpret_cast<char*>(subNodes[i]), reinterpret_cast<char*>(subNodes[i]) + sizeof(PhysicsVoxel));
+				    const auto& voxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNode);
+					data.insert(data.end(),
+					reinterpret_cast<const char*>(voxel.get()),
+					reinterpret_cast<const char*>(voxel.get()) + sizeof(PhysicsVoxel));
 				}
 				return;
 			}
@@ -430,44 +386,48 @@ namespace Octree
 
 		switch (state)
 		{
-		case Empty:
+		case State::Empty:
 		{
 			data.emplace_back('E');
 			return;
 		}
-		case Full:
+		case State::Full:
 		{
 			data.emplace_back('F');
-			data.insert(data.end(), reinterpret_cast<char*>(subNodes[0]), reinterpret_cast<char*>(subNodes[0]) + sizeof(PhysicsVoxel));
+			const auto& voxel = std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]);
+			data.insert(data.end(),
+			    reinterpret_cast<const char*>(voxel.get()),
+			    reinterpret_cast<const char*>(voxel.get()) + sizeof(PhysicsVoxel));
 			return;
 		}
-		case Partial:
+		case State::Partial:
 		{
 			data.emplace_back('P');
-			for (int i = 0; i < 8; ++i)
+			for (const auto& subNode : subNodes)
 			{
-				subNodes[i]->AccumulatePacked(data);
+				std::get<std::unique_ptr<CollisionNode>>(subNode)->AccumulatePacked(data);
 			}
 			return;
 		}
 		}
 	}
 
-	void CollisionNode::Unpack(const std::vector<char>& data, size_t& currentIndex)
+	void CollisionNode::Unpack(const std::vector<char>& data, size_t& currentIndex) // NOLINT(*-no-recursion)
 	{
-		const char currentStateChar = data[currentIndex];
+        // ReSharper disable once CppTooWideScopeInitStatement
+        const char currentStateChar = data[currentIndex];
 
 		if (currentStateChar == 'E')
 		{
-			state = Empty;
+			state = State::Empty;
 		}
 		else if (currentStateChar == 'F')
 		{
-			state = Full;
+			state = State::Full;
 		}
 		else if (currentStateChar == 'P')
 		{
-			state = Partial;
+			state = State::Partial;
 		}
 		else
 		{
@@ -480,26 +440,24 @@ namespace Octree
 		{
 			switch (state)
 			{
-			case Empty:
+			case State::Empty:
 			{
-				subNodes[0] = nullptr;
+				std::get<std::unique_ptr<CollisionNode>>(subNodes[0]) = nullptr;
 				return;
 			}
 
-			case Full:
+			case State::Full:
 			{
-				subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-				std::memcpy(subNodes[0], &data[currentIndex], sizeof(PhysicsVoxel));
+				subNodes[0] = std::make_unique<PhysicsVoxel>(*reinterpret_cast<const PhysicsVoxel*>(&data[currentIndex]));
 				currentIndex += sizeof(PhysicsVoxel);
 				return;
 			}
 
-			case Partial:
+			case State::Partial:
 			{
-				for (int i = 0; i < 8; ++i)
+				for (auto& subNode: subNodes)
 				{
-					subNodes[i] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-					std::memcpy(subNodes[i], &data[currentIndex], sizeof(PhysicsVoxel));
+				    subNode = std::make_unique<PhysicsVoxel>(*reinterpret_cast<const PhysicsVoxel*>(&data[currentIndex]));
 					currentIndex += sizeof(PhysicsVoxel);
 				}
 				return;
@@ -509,33 +467,31 @@ namespace Octree
 
 		switch (state)
 		{
-		case Empty:
+		case State::Empty:
 		{
-			subNodes[0] = nullptr;
+			std::get<std::unique_ptr<CollisionNode>>(subNodes[0]) = nullptr;
 			return;
 		}
 
-		case Full:
+		case State::Full:
 		{
-			subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-			std::memcpy(subNodes[0], &data[currentIndex], sizeof(PhysicsVoxel));
+		    subNodes[0]= std::make_unique<PhysicsVoxel>(*reinterpret_cast<const PhysicsVoxel*>(&data[currentIndex]));
 			currentIndex += sizeof(PhysicsVoxel);
 			return;
 		}
 
-		case Partial:
+		case State::Partial:
 		{
-			for (int i = 0; i < 8; ++i)
+			for (auto& subNode : subNodes)
 			{
-				subNodes[i] = new CollisionNode(size / 2);
-				subNodes[i]->Unpack(data, currentIndex);
+				subNode = std::make_unique<CollisionNode>(size / 2);
+				std::get<std::unique_ptr<CollisionNode>>(subNode)->Unpack(data, currentIndex);
 			}
-			return;
 		}
 		}
 	}
 
-	int CollisionNode::GetIndex(int x, int y, int z)
+	int CollisionNode::GetIndex(const int x, const int y, const int z)
 	{
 		if (x < 0)
 		{
@@ -589,28 +545,31 @@ namespace Octree
 		}
 	}
 
-	void* CollisionNode::GetAccessor(int x, int y, int z) const
+	CollisionNode::NodeVariant& CollisionNode::GetAccessor(const int x, const int y, const int z)
 	{
 		return subNodes[GetIndex(x, y, z)];
 	}
 
-	void CollisionNode::CollapseSubnodes(PhysicsVoxel* voxel)
+    const CollisionNode::NodeVariant& CollisionNode::GetAccessor(const int x, const int y, const int z) const
+    {
+		return subNodes[GetIndex(x, y, z)];
+    }
+
+    void CollisionNode::CollapseSubnodes(const PhysicsVoxel& voxel)
 	{
-		for (int i = 0; i < 8; ++i)
+		for (int i = 1; i < 8; ++i)
 		{
-			delete reinterpret_cast<CollisionNode*>(subNodes[i]);
+			std::get<std::unique_ptr<CollisionNode>>(subNodes[i]).reset();
 		}
 
-		subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel);
-		std::memcpy(subNodes[0], voxel, sizeof(PhysicsVoxel));
-		state = Full;
+		subNodes[0] = std::make_unique<PhysicsVoxel>(voxel);
+		state = State::Full;
 	}
 
 	PhysicsVoxel::PhysicsVoxel()
-	{
-	}
+	= default;
 
-	PhysicsVoxel::PhysicsVoxel(bool solid)
+	PhysicsVoxel::PhysicsVoxel(const bool solid)
 		:solid(solid)
 	{
 	}
@@ -620,7 +579,7 @@ namespace Octree
 		return solid == voxel.solid;
 	}
 
-	Cube::Cube(int x, int y, int z, unsigned int size)
+	Cube::Cube(const int x, const int y, const int z, const unsigned int size)
 		:x(x), y(y), z(z), size(size)
 	{
 	}

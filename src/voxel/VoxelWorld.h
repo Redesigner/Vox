@@ -12,11 +12,12 @@ namespace Vox
 	{
 	public:
 	    explicit VoxelWorld(World* world);
+        ~VoxelWorld();
 
         [[nodiscard]] std::optional<Voxel> GetVoxel(const glm::ivec3& position) const;
 
     private:
-        std::map<glm::ivec2, VoxelChunk> voxelChunks;
+        std::map<std::pair<int, int>, VoxelChunk> voxelChunks;
 
         /**
          * @brief Get voxel chunk position and voxel position with that chunk

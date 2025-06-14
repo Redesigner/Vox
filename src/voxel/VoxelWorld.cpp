@@ -7,10 +7,13 @@ namespace Vox
     {
     }
 
+    VoxelWorld::~VoxelWorld()
+    = default;
+
     std::optional<Voxel> VoxelWorld::GetVoxel(const glm::ivec3& position) const
     {
         auto [chunkPosition, voxelPosition] = GetChunkCoords(position);
-        auto chunkIterator = voxelChunks.find(chunkPosition);
+        const auto chunkIterator = voxelChunks.find({chunkPosition.x, chunkPosition.y});
         if (chunkIterator == voxelChunks.end())
         {
             return std::nullopt;

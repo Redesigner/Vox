@@ -16,7 +16,7 @@ namespace Vox
 		{
 		}
 
-		DynamicRef(DynamicObjectContainer<T>* container, std::pair<size_t, int> id)
+		DynamicRef(DynamicObjectContainer<T>* container, const std::pair<size_t, int> id)
 			:container(container), index(id.first), id(id.second)
 		{
 		}

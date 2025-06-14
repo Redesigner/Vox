@@ -67,7 +67,6 @@ namespace Vox
 
 		++stepCount;
 		StepCharacterControllers(fixedTimeStep);
-		UpdateSpringArms();
 		UpdateVoxelBodies();
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
@@ -90,22 +89,6 @@ namespace Vox
 	{
 	    auto result = std::make_shared<CharacterController>(radius, halfHeight, &physicsSystem);
 		characterControllers.emplace_back(result);
-		return result;
-	}
-
-	Ref<SpringArm> PhysicsServer::CreateSpringArm(const Ref<CharacterController>& id)
-	{
-		auto result = Ref(&springArms, springArms.Create());
-		result->SetOrigin(id);
-		result->SetLength(4.0f);
-		result->SetOffset({ 0.0f, 1.0f, 0.0f });
-		return result;
-	}
-
-	Ref<SpringArm> PhysicsServer::CreateSpringArm(const JPH::BodyID bodyId)
-	{
-		auto result = Ref(&springArms, springArms.Create());
-		result->SetOrigin(bodyId);
 		return result;
 	}
 
@@ -175,17 +158,6 @@ namespace Vox
 	    std::erase_if(characterControllers, [](const std::weak_ptr<CharacterController>& characterController){ return characterController.expired(); });
 	}
 
-	void PhysicsServer::UpdateSpringArms()
-	{
-		for (std::optional<SpringArm>& springArm : springArms)
-		{
-			if (springArm.has_value())
-			{
-				springArm->Update(this);
-			}
-		}
-	}
-
 	void PhysicsServer::UpdateVoxelBodies()
 	{
 		JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
@@ -232,7 +204,7 @@ namespace Vox
 
 	DynamicRef<VoxelBody> PhysicsServer::CreateVoxelBody()
 	{
-		return {&voxelBodies, voxelBodies.Create(32)};
+		return DynamicRef<VoxelBody>(&voxelBodies, voxelBodies.Create());
 	}
 
 	bool PhysicsServer::RayCast(const JPH::Vec3 origin, const JPH::Vec3 direction, RayCastResultNormal& resultOut) const
