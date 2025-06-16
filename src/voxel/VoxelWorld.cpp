@@ -34,18 +34,36 @@ namespace Vox
         {
             // If the chunk doesn't exist, allocate a new one
             // Default map can't hash ivec2, use std::pair here instead
-            auto newChunk = voxelChunks.emplace(
+            const auto [iterator, success] = voxelChunks.emplace(
                 std::pair(chunkPosition.x, chunkPosition.y),
                 VoxelChunk(chunkPosition, world->GetPhysicsServer().get(), world->GetRenderer().get())
             );
             VoxLog(Display, Game, "Allocating new voxel at coords '{}'", chunkPosition);
-            newChunk.first->second.SetVoxel({voxelPosition.x, position.y, voxelPosition.y}, voxel);
-            newChunk.first->second.FinalizeUpdate();
+            iterator->second.SetVoxel({voxelPosition.x, position.y, voxelPosition.y}, voxel);
+
+            if (std::ranges::find(modifiedChunks, iterator) == modifiedChunks.end())
+            {
+                modifiedChunks.push_back(iterator);
+            }
             return;
         }
 
         chunkIterator->second.SetVoxel({voxelPosition.x, position.y, voxelPosition.y}, voxel);
-        chunkIterator->second.FinalizeUpdate();
+
+        if (std::ranges::find(modifiedChunks, chunkIterator) == modifiedChunks.end())
+        {
+            modifiedChunks.push_back(chunkIterator);
+        }
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void VoxelWorld::FinalizeUpdate()
+    {
+        for (const auto& modifiedChunk : modifiedChunks)
+        {
+            modifiedChunk->second.FinalizeUpdate();
+        }
+        modifiedChunks.clear();
     }
 
     std::pair<glm::ivec2, glm::ivec2> VoxelWorld::GetChunkCoords(const glm::ivec3& position)

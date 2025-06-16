@@ -333,7 +333,7 @@ namespace Vox
             {
                 glBindVertexBuffer(0, voxelMesh->GetMeshId(), 0, sizeof(float) * 16);
                 voxelShader->SetModelMatrix(voxelMesh->GetTransform());
-                glDrawArrays(GL_TRIANGLES, 0, 16384);
+                glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(voxelMesh->GetVertexCount()));
             }
         }
     }
@@ -385,7 +385,7 @@ namespace Vox
         {
             if (VoxelMesh* mesh = voxelMeshes.Get(index, snd))
             {
-                mesh->Regenerate();
+                mesh->Regenerate(*GetRenderer()->GetVoxelGenerationShader());
             }
         }
         voxelMeshes.ClearDirty();

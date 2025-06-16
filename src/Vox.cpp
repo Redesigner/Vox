@@ -3,6 +3,7 @@
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include <chrono>
 #include <thread>
 
@@ -19,17 +20,12 @@
 #include <SDL3/SDL_video.h>
 
 #include "game_objects/actors/character/Character.h"
-#include "game_objects/components/MeshComponent.h"
-#include "game_objects/components/CameraComponent.h"
-#include "game_objects/components/physics/CharacterPhysicsComponent.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/math/Math.h"
+#include "core/math/Formatting.h"
 #include "core/objects/prefabs/Prefab.h"
-#include "core/objects/TestObjectChild.h"
 #include "core/objects/World.h"
-#include "core/objects/actor/TestActor.h"
-#include "core/objects/component/TestComponent.h"
 #include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
@@ -37,7 +33,6 @@
 #include "core/services/ServiceLocator.h"
 #include "editor/Editor.h"
 #include "editor/EditorViewport.h"
-#include "game_objects/components/SkeletalMeshComponent.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
 #include "rendering/camera/Camera.h"
@@ -61,27 +56,29 @@ int main()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetSwapInterval(1);
 
-    VoxConfig config = VoxConfig();
+    VoxConfig config;
     config.Load();
 
     SDL_Window* window = SDL_CreateWindow("Vox", config.windowSize.x, config.windowSize.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     SDL_SetWindowPosition(window, config.windowPosition.x, config.windowPosition.y);
-    SDL_GLContext context = SDL_GL_CreateContext(window);
+    const SDL_GLContext context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
+    SDL_GL_SetSwapInterval(1);
     if (config.windowMaximized)
     {
         SDL_MaximizeWindow(window);
     }
 
-    GLenum glewResult = glewInit();
+    /*GLenum glewResult = */ glewInit();
 
     // Initialize OpenGL debug bindings
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+    glDebugMessageCallback([](GLenum source, const GLenum type, GLuint id, const GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
         {
             std::string typeString = Vox::Renderer::GetGlDebugTypeString(type);
 
+            // ReSharper disable once CppDefaultCaseNotHandledInSwitchStatement
             switch (severity)
             {
             case GL_DEBUG_SEVERITY_NOTIFICATION:
@@ -97,7 +94,7 @@ int main()
                 VoxLog(Error, Rendering, "OpenGL Error {}: {}", typeString, message);
                 break;
             }
-        }, 0);
+        }, nullptr);
 
     // Initialize imgui
     IMGUI_CHECKVERSION();
@@ -116,17 +113,15 @@ int main()
     {
         ServiceLocator::InitServices(window);
 
-        ServiceLocator::GetInputService()->RegisterKeyboardCallback(SDL_SCANCODE_F11, [](bool pressed) {/* if (pressed) ToggleBorderlessWindowed();*/ });
-
-        std::shared_ptr<World> testWorld = std::make_shared<World>();
-        std::shared_ptr<DebugRenderer> debugRenderer = std::make_shared<DebugRenderer>();
+        auto testWorld = std::make_shared<World>();
+        auto debugRenderer = std::make_shared<DebugRenderer>();
 
 #ifdef EDITOR
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         ServiceLocator::GetRenderer()->RegisterScene(testWorld->GetRenderer());
 #endif
 
-        std::unique_ptr<VoxelWorld> voxels = std::make_unique<VoxelWorld>(testWorld.get());
+        auto voxels = std::make_unique<VoxelWorld>(testWorld.get());
 
         testWorld->GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
@@ -136,7 +131,7 @@ int main()
 
         ServiceLocator::GetEditorService()->GetEditor()->InitializeGizmos(testWorld.get());
 
-        Voxel defaultVoxel = Voxel();
+        Voxel defaultVoxel;
         defaultVoxel.materialId = 1;
         for (int x = -16; x < 16; ++x)
         {
@@ -148,17 +143,17 @@ int main()
                 }
             }
         }
-        Voxel testVoxel2 = Voxel();
-        testVoxel2.materialId = 1;
+        Voxel testVoxel2;
+        testVoxel2.materialId = 2;
 
         voxels->SetVoxel({-1, 16, -1}, testVoxel2);
         voxels->SetVoxel({0, 16, 0}, testVoxel2);
-        // voxels->FinalizeUpdate();
+        voxels->FinalizeUpdate();
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
-        std::chrono::duration frameTime = frame60(1);
-        std::atomic<bool> runPhysics = true;
-        std::thread physicsThread = std::thread([&runPhysics, frameTime, testWorld]
+        auto frameTime = frame60(1);
+        std::atomic runPhysics = true;
+        auto physicsThread = std::thread([&runPhysics, frameTime, testWorld]
             {
                 while (runPhysics)
                 {
@@ -176,14 +171,10 @@ int main()
 
         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 
-        glm::vec3 testRotation = {0.0f, 100.0f, 0.0f};
-        glm::quat testQuat = glm::radians(testRotation);
-        glm::vec3 testRotation2 = glm::degrees(eulerAngles(testQuat));
-
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         testWorld->Load(SavedWorld(ServiceLocator::GetFileIoService()->LoadFile("worlds/MainWorld.world")));
-        
-        DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxels, testWorld](int x, int y) {
+
+        const DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxels, testWorld](int x, int y) {
             float xViewport, yViewport;
             std::shared_ptr<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
             if (!camera)
@@ -193,8 +184,8 @@ int main()
 
             if (ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(xViewport, yViewport, x, y))
             {
-                glm::vec4 rayStartViewport = glm::vec4(xViewport, yViewport, -1.0f, 1.0f);
-                glm::vec4 rayEndViewport = glm::vec4(xViewport, yViewport, 1.0f, 1.0f);
+                const glm::vec4 rayStartViewport = {xViewport, yViewport, -1.0f, 1.0f};
+                const glm::vec4 rayEndViewport = {xViewport, yViewport, 1.0f, 1.0f};
                 glm::mat4x4 inverseCamera = glm::inverseTranspose(camera->GetViewProjectionMatrix());
                 glm::vec4 rayStartAffine = rayStartViewport * inverseCamera;
                 glm::vec4 rayEndAffine = rayEndViewport * inverseCamera;
@@ -204,32 +195,28 @@ int main()
                 JPH::Vec3 rayEnd = Vec3From(rayEndAffine);
 
                 debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sRed, 5.0f);
-                VoxLog(Display, Game, "Casting ray from '({}, {}, {})' to '({}, {}, {})'", rayStart.GetX(), rayStart.GetY(), rayStart.GetZ(), rayEnd.GetX(), rayEnd.GetY(), rayEnd.GetZ());
-                RayCastResultNormal raycastResult;
-                if (testWorld->GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
+                VoxLog(Display, Game, "Casting ray from '{}' to '{}'", rayStart, rayEnd);
+                if (RayCastResultNormal raycastResult; testWorld->GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
                 {
                     debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
-                    const unsigned int gridSize = 1;
+                    constexpr unsigned int gridSize = 1;
                     const JPH::Vec3 voxelEstimate = raycastResult.impactPoint - raycastResult.impactNormal / static_cast<float>(2 * gridSize);
-                    JPH::Vec3 voxelPosition = JPH::Vec3(
+                    JPH::Vec3 voxelPosition = {
                         static_cast<float>(FloorMultiple(voxelEstimate.GetX(), gridSize)),
                         static_cast<float>(FloorMultiple(voxelEstimate.GetY(), gridSize)),
                         static_cast<float>(FloorMultiple(voxelEstimate.GetZ(), gridSize))
-                    );
-                    //debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, 0.0f), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, gridSize), JPH::Color::sRed, 5.0f);
-                    //debugRenderer->DrawPersistentLine(voxelPosition + JPH::Vec3(0.0f, gridSize + 0.1f, gridSize), voxelPosition + JPH::Vec3(gridSize, gridSize + 0.1f, 0.0f), JPH::Color::sRed, 5.0f);
-                    // TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));  
-                    VoxLog(Display, Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());
+                    };
+                    VoxLog(Display, Game, "Clicked voxel at '{}'", voxelPosition);
                     voxelPosition += raycastResult.impactNormal;
                     const glm::ivec3 clickedVoxel = {voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16};
                     if (clickedVoxel.y >= 32 || clickedVoxel.y <= 0)
                     {
                         return;
                     }
-                    Voxel newVoxel = Voxel();
+                    Voxel newVoxel;
                     newVoxel.materialId = 1;
                     voxels->SetVoxel(clickedVoxel, newVoxel);
-                    // voxels->FinalizeUpdate();
+                    voxels->FinalizeUpdate();
                 }
             }
             });

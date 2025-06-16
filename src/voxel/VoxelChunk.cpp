@@ -6,7 +6,7 @@
 
 namespace Vox
 {
-	VoxelChunk::VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, SceneRenderer* renderer)
+	VoxelChunk::VoxelChunk(const glm::ivec2 chunkLocation, PhysicsServer* physicsServer, SceneRenderer* renderer)
 		:chunkLocation(chunkLocation)
 	{
 		mesh = renderer->CreateVoxelMesh(chunkLocation);
@@ -15,7 +15,7 @@ namespace Vox
 		voxels = std::make_unique<std::array<std::array<std::array<Voxel, chunkSize>, chunkSize>, chunkSize>>();
 	}
 
-	void VoxelChunk::SetVoxel(glm::uvec3 voxelPosition, Voxel voxel)
+	void VoxelChunk::SetVoxel(const glm::uvec3 voxelPosition, const Voxel voxel)
 	{
 		assert(voxelPosition.x < chunkSize && voxelPosition.y < chunkSize && voxelPosition.z < chunkSize);
 
@@ -27,18 +27,22 @@ namespace Vox
 		if (voxel.materialId == 0 && voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z].materialId != 0)
 		{
 			body->EraseVoxel(voxelPosition);
-			// body.MarkDirty();
 		}
 		else if (voxel.materialId != 0 && voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z].materialId == 0)
 		{
 			body->CreateVoxel(voxelPosition);
-			// body.MarkDirty();
 		}
+
+	    // Emplace unique
+	    if (std::ranges::find(modifiedMaterialIds, voxel.materialId) == modifiedMaterialIds.end())
+	    {
+	        modifiedMaterialIds.emplace_back(voxel.materialId);
+	    }
 
 		voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z] = voxel;
 	}
 
-	Voxel VoxelChunk::GetVoxel(glm::uvec3 voxelPosition) const
+	Voxel VoxelChunk::GetVoxel(const glm::uvec3 voxelPosition) const
 	{
 		assert(voxelPosition.x < chunkSize && voxelPosition.y < chunkSize && voxelPosition.z < chunkSize);
 		return voxels->at(voxelPosition.x)[voxelPosition.y][voxelPosition.z];
@@ -46,7 +50,8 @@ namespace Vox
 
 	void VoxelChunk::FinalizeUpdate()
 	{
-		mesh->UpdateData(voxels.get());
+		mesh->UpdateData(voxels.get(), modifiedMaterialIds);
+	    modifiedMaterialIds.clear();
 		mesh.MarkDirty();
 		body.MarkDirty();
 	}

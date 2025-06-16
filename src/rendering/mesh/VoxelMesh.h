@@ -10,6 +10,11 @@
 
 namespace Vox
 {
+    class ComputeShader;
+}
+
+namespace Vox
+{
 	class VoxelMesh
 	{
 	public:
@@ -23,19 +28,25 @@ namespace Vox
 
 		[[nodiscard]] bool NeedsRegeneration() const;
 
-		void Regenerate();
+		void Regenerate(const ComputeShader& shader);
 
-		void UpdateData(std::array<std::array<std::array<Voxel, 32>, 32>, 32>* data);
+		void UpdateData(const std::array<std::array<std::array<Voxel, 32>, 32>, 32>* data, const std::vector<int>& changedMaterialsIn);
 
-		glm::mat4x4 GetTransform();
+		[[nodiscard]] glm::mat4x4 GetTransform() const;
 
 		[[nodiscard]] unsigned int GetMeshId() const;
+
+	    [[nodiscard]] unsigned int GetVertexCount() const;
 
 	private:
 		bool dirty = false;
 
 		glm::mat4x4 transform;
 
+	    std::vector<int> changedMaterials;
+
 		unsigned int voxelDataSsbo, voxelMeshSsbo, meshCounter;
+
+	    unsigned int vertexCount;
 	};
 }

@@ -8,7 +8,6 @@
 #include "core/datatypes/DynamicRef.h"
 #include "physics/VoxelBody.h"
 #include "voxel/CollisionOctree.h"
-#include "voxel/Octree.h"
 #include "voxel/Voxel.h"
 
 namespace Vox
@@ -43,6 +42,8 @@ namespace Vox
 		DynamicRef<VoxelBody> body;
 
 		std::unique_ptr<std::array<std::array<std::array<Voxel, chunkSize>, chunkSize>, chunkSize>> voxels;
+
+	    std::vector<int> modifiedMaterialIds;
 
 		Octree::CollisionNode voxelCollisionMask = Octree::CollisionNode(chunkSize);
 	};
