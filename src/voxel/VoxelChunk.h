@@ -30,8 +30,10 @@ namespace Vox
 
 		void FinalizeUpdate();
 
-		static constexpr unsigned int chunkSize = 32;
-	    static constexpr unsigned int chunkHalfSize = chunkSize / 2;
+		static constexpr int chunkSize = 32;
+	    static constexpr int chunkHalfSize = chunkSize / 2;
+
+	    static glm::vec3 CalculatePosition(const glm::ivec2& position);
 
 	private:
 		glm::ivec2 chunkLocation;

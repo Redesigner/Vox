@@ -13,10 +13,15 @@ namespace Vox
 	class VoxelMesh
 	{
 	public:
-		VoxelMesh(glm::ivec2 position);
+		explicit VoxelMesh(glm::ivec2 position);
 		~VoxelMesh();
 
-		bool NeedsRegeneration() const;
+	    VoxelMesh(const VoxelMesh&) = delete;
+	    VoxelMesh(VoxelMesh&& other) noexcept;
+	    VoxelMesh& operator =(const VoxelMesh&) = delete;
+	    VoxelMesh& operator =(VoxelMesh&& other) noexcept;
+
+		[[nodiscard]] bool NeedsRegeneration() const;
 
 		void Regenerate();
 
@@ -24,7 +29,7 @@ namespace Vox
 
 		glm::mat4x4 GetTransform();
 
-		unsigned int GetMeshId() const;
+		[[nodiscard]] unsigned int GetMeshId() const;
 
 	private:
 		bool dirty = false;

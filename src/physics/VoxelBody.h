@@ -21,7 +21,7 @@ namespace Vox
 		friend class PhysicsServer;
 
 	public:
-		VoxelBody();
+		explicit VoxelBody();
 	    ~VoxelBody();
 
 	    VoxelBody(VoxelBody&& other) noexcept;
@@ -33,6 +33,10 @@ namespace Vox
 		void SetBodyId(JPH::BodyID bodyIdIn);
 
 		JPH::Ref<JPH::StaticCompoundShapeSettings> GetShapeSettings() const;
+
+	    const glm::ivec2& GetChunkPosition() const;
+
+	    glm::ivec2 chunkPosition;
 
 	private:
 		JPH::BodyID bodyId;

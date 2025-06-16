@@ -5,6 +5,7 @@
 namespace Vox
 {
     VoxelBody::VoxelBody()
+        :chunkPosition({0, 0})
     {
         voxelCollisionMask = std::make_unique<Octree::CollisionNode>(VoxelChunk::chunkSize);
     }
@@ -13,6 +14,7 @@ namespace Vox
     = default;
 
     VoxelBody::VoxelBody(VoxelBody&& other) noexcept
+        :chunkPosition(other.chunkPosition)
     {
         bodyId = other.bodyId;
         voxelCollisionMask = std::move(other.voxelCollisionMask);
@@ -50,5 +52,10 @@ namespace Vox
     JPH::Ref<JPH::StaticCompoundShapeSettings> VoxelBody::GetShapeSettings() const
     {
         return voxelCollisionMask->MakeCompoundShape();
+    }
+
+    const glm::ivec2& VoxelBody::GetChunkPosition() const
+    {
+        return chunkPosition;
     }
 }

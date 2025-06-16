@@ -31,6 +31,8 @@ target_sources(Vox PRIVATE
 	"src/core/logging/Logging.h"
 	"src/core/math/Math.cpp"
 	"src/core/math/Math.h"
+	"src/core/math/Formatting.cpp"
+	"src/core/math/Formatting.h"
 	"src/core/math/Strings.cpp"
 	"src/core/math/Strings.h"
 	"src/core/objects/Object.cpp"

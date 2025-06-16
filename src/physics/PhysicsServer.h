@@ -41,7 +41,7 @@ namespace Vox
 
 		JPH::BodyID CreatePlayerCapsule(float radius, float halfHeight, JPH::Vec3 position);
 
-		JPH::BodyID CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings);
+		JPH::BodyID CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings, const JPH::Vec3& position);
 
 		DynamicRef<VoxelBody> CreateVoxelBody();
 

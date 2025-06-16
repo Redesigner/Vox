@@ -11,6 +11,7 @@ namespace Vox
 	{
 		mesh = renderer->CreateVoxelMesh(chunkLocation);
 		body = physicsServer->CreateVoxelBody();
+	    body->chunkPosition = chunkLocation;
 		voxels = std::make_unique<std::array<std::array<std::array<Voxel, chunkSize>, chunkSize>, chunkSize>>();
 	}
 
@@ -49,4 +50,13 @@ namespace Vox
 		mesh.MarkDirty();
 		body.MarkDirty();
 	}
+
+    glm::vec3 VoxelChunk::CalculatePosition(const glm::ivec2& position)
+    {
+	    return {
+	        position.x * chunkSize - chunkHalfSize,
+            -chunkHalfSize,
+            position.y * chunkSize - chunkHalfSize
+	    };
+    }
 }

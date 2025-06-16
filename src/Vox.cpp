@@ -45,6 +45,7 @@
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"
 #include "voxel/VoxelChunk.h"
+#include "voxel/VoxelWorld.h"
 
 int main()
 {
@@ -125,7 +126,7 @@ int main()
         ServiceLocator::GetRenderer()->RegisterScene(testWorld->GetRenderer());
 #endif
 
-        VoxelChunk voxelChunk = VoxelChunk(glm::ivec2(0, 0), testWorld->GetPhysicsServer().get(), testWorld->GetRenderer().get());
+        std::unique_ptr<VoxelWorld> voxels = std::make_unique<VoxelWorld>(testWorld.get());
 
         testWorld->GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
@@ -143,15 +144,16 @@ int main()
             {
                 for (int z = -16; z < 16; ++z)
                 {
-                    voxelChunk.SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
+                    voxels->SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
                 }
             }
         }
         Voxel testVoxel2 = Voxel();
-        testVoxel2.materialId = 2;
+        testVoxel2.materialId = 1;
 
-        voxelChunk.SetVoxel({15, 21, 15}, testVoxel2);
-        voxelChunk.FinalizeUpdate();
+        voxels->SetVoxel({-1, 16, -1}, testVoxel2);
+        voxels->SetVoxel({0, 16, 0}, testVoxel2);
+        // voxels->FinalizeUpdate();
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         std::chrono::duration frameTime = frame60(1);
@@ -181,7 +183,7 @@ int main()
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         testWorld->Load(SavedWorld(ServiceLocator::GetFileIoService()->LoadFile("worlds/MainWorld.world")));
         
-        DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxelChunk, testWorld](int x, int y) {
+        DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxels, testWorld](int x, int y) {
             float xViewport, yViewport;
             std::shared_ptr<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
             if (!camera)
@@ -219,14 +221,15 @@ int main()
                     // TraceLog(LOG_INFO, TextFormat("Estimating voxel at (%f, %f, %f)", voxelEstimate.GetX(), voxelEstimate.GetY(), voxelEstimate.GetZ()));  
                     VoxLog(Display, Game, "Clicked voxel at ({}, {}, {})", voxelPosition.GetX(), voxelPosition.GetY(), voxelPosition.GetZ());
                     voxelPosition += raycastResult.impactNormal;
-                    glm::uvec3 clickedVoxel = glm::uvec3(voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16);
-                    if (clickedVoxel.x >= 0 && clickedVoxel.x < 32 && clickedVoxel.y >= 0 && clickedVoxel.y < 32 && clickedVoxel.z >= 0 && clickedVoxel.z < 32)
+                    const glm::ivec3 clickedVoxel = {voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16};
+                    if (clickedVoxel.y >= 32 || clickedVoxel.y <= 0)
                     {
-                        Voxel newVoxel = Voxel();
-                        newVoxel.materialId = 1;
-                        voxelChunk.SetVoxel(clickedVoxel, newVoxel);
-                        voxelChunk.FinalizeUpdate();
+                        return;
                     }
+                    Voxel newVoxel = Voxel();
+                    newVoxel.materialId = 1;
+                    voxels->SetVoxel(clickedVoxel, newVoxel);
+                    // voxels->FinalizeUpdate();
                 }
             }
             });

@@ -43,7 +43,7 @@ namespace Vox
     class SceneRenderer
     {
     public:
-        SceneRenderer(World* world);
+        explicit SceneRenderer(World* world);
         ~SceneRenderer();
 
         void Draw();
@@ -109,7 +109,7 @@ namespace Vox
 
         void ConditionalResizeFramebuffers();
 
-        [[nodiscard]] Renderer* GetRenderer() const;
+        [[nodiscard]] static Renderer* GetRenderer();
 
         std::shared_ptr<Camera> currentCamera;
         std::shared_ptr<FlyCamera> defaultCamera;

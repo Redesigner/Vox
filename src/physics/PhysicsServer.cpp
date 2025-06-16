@@ -17,6 +17,7 @@
 #include "TypeConversions.h"
 #include "core/logging/Logging.h"
 #include "rendering/DebugRenderer.h"
+#include "voxel/VoxelChunk.h"
 
 namespace Vox
 {
@@ -107,6 +108,7 @@ namespace Vox
 	void PhysicsServer::RenderDebugShapes()
 	{
 		physicsSystem.DrawConstraints(debugRenderer.get());
+	    // physicsSystem.DrawBodies(JPH::BodyManager::DrawSettings(), debugRenderer.get());
 
 		for (const auto& characterControllerWeak : characterControllers)
 		{
@@ -172,7 +174,9 @@ namespace Vox
 					bodyInterface.DestroyBody(body->GetBodyId());
 				}
 				VoxLog(Display, Physics, "Creating new voxel body.");
-				body->SetBodyId(CreateCompoundShape(body->GetShapeSettings()));
+				body->SetBodyId(CreateCompoundShape(body->GetShapeSettings(), Vec3From(
+				    VoxelChunk::CalculatePosition(body->GetChunkPosition()) + glm::vec3(VoxelChunk::chunkHalfSize, VoxelChunk::chunkHalfSize, VoxelChunk::chunkHalfSize)
+				    )));
 			}
 		}
 		voxelBodies.ClearDirty();
@@ -194,10 +198,10 @@ namespace Vox
 		return bodyId;
 	}
 
-	JPH::BodyID PhysicsServer::CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings)
+	JPH::BodyID PhysicsServer::CreateCompoundShape(const JPH::StaticCompoundShapeSettings* settings, const JPH::Vec3& position)
 	{
 		using namespace JPH;
-		const BodyCreationSettings bodyCreationSettings(settings, Vec3::sZero(), Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
+		const BodyCreationSettings bodyCreationSettings(settings, position, Quat::sIdentity(), EMotionType::Static, Physics::CollisionLayer::Static);
 		const BodyID bodyId = physicsSystem.GetBodyInterface().CreateAndAddBody(bodyCreationSettings, EActivation::Activate);
 		return bodyId;
 	}

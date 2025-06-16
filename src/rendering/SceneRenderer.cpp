@@ -53,7 +53,7 @@ namespace Vox
             defaultCamera->Tick( 1.0f / 60.0f);
         }
         ConditionalResizeFramebuffers();
-        glViewport(0, 0, viewportSize.x, viewportSize.y);
+        glViewport(0, 0, static_cast<int>(viewportSize.x), static_cast<int>(viewportSize.y));
         currentCamera->SetAspectRatio(viewportSize.y == 0 ? 1 : static_cast<float>(viewportSize.x) / static_cast<float>(viewportSize.y));
 
         DrawGBuffer();
@@ -412,8 +412,8 @@ namespace Vox
     {
         if (gBuffer->GetWidth() != viewportSize.x || gBuffer->GetHeight() != viewportSize.y)
         {
-            const int width = viewportSize.x;
-            const int height = viewportSize.y;
+            const int width = static_cast<int>(viewportSize.x);
+            const int height = static_cast<int>(viewportSize.y);
             gBuffer.reset();
             gBuffer = std::make_unique<GBuffer>(width, height);
 
@@ -434,7 +434,7 @@ namespace Vox
         }
     }
 
-    Renderer* SceneRenderer::GetRenderer() const
+    Renderer* SceneRenderer::GetRenderer()
     {
         return ServiceLocator::GetRenderer();
     }
