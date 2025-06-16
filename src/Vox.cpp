@@ -63,7 +63,7 @@ int main()
     SDL_SetWindowPosition(window, config.windowPosition.x, config.windowPosition.y);
     const SDL_GLContext context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
-    SDL_GL_SetSwapInterval(1);
+    // SDL_GL_SetSwapInterval(1);
     if (config.windowMaximized)
     {
         SDL_MaximizeWindow(window);

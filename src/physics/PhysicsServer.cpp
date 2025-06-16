@@ -61,6 +61,9 @@ namespace Vox
 
 	void PhysicsServer::Step()
 	{
+	    // This should run every step, for now
+	    UpdateVoxelBodies();
+
 	    if (!running)
 	    {
 	        return;
@@ -68,7 +71,6 @@ namespace Vox
 
 		++stepCount;
 		StepCharacterControllers(fixedTimeStep);
-		UpdateVoxelBodies();
 		physicsSystem.Update(fixedTimeStep, 1, tempAllocator.get(), jobSystem.get());
 	}
 
