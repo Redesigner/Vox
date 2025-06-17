@@ -22,7 +22,7 @@ namespace Vox
             case AssetPtr::AssetType::Mesh:
             {
                 const auto& meshList = ServiceLocator::GetRenderer()->GetMeshes();
-                for (const auto [name, mesh] : meshList)
+                for (const auto& name : meshList | std::views::keys)
                 {
                     if (ImGui::Selectable(name.c_str()))
                     {

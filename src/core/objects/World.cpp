@@ -213,6 +213,11 @@ namespace Vox
         voxels->FinalizeUpdate();
     }
 
+    VoxelWorld* World::GetVoxels() const
+    {
+        return voxels.get();
+    }
+
     World::World()
     {
         renderer = std::make_shared<SceneRenderer>(this);

@@ -9,6 +9,12 @@ namespace Vox
 {
     class World;
 
+    struct VoxelRaycastResult
+    {
+        glm::ivec3 voxel;
+        glm::ivec3 voxelNormal;
+    };
+
     class VoxelWorld
 	{
 	public:
@@ -25,6 +31,8 @@ namespace Vox
          */
         void FinalizeUpdate();
 
+        [[nodiscard]] std::optional<VoxelRaycastResult> CastScreenSpaceRay(const glm::ivec2& screenSpace) const;
+
     private:
         /**
          * @brief Get voxel chunk position and voxel position with that chunk
@@ -33,14 +41,10 @@ namespace Vox
          */
         [[nodiscard]] static std::pair<glm::ivec2, glm::ivec2> GetChunkCoords(const glm::ivec3& position);
 
-        void CastScreenSpaceRay(int x, int y);
-
         MapType voxelChunks;
 
         World* world;
 
         std::vector<MapType::iterator> modifiedChunks;
-
-        DelegateHandle<int, int> raycastClickDelegate;
 	};
 }

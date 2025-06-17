@@ -110,7 +110,7 @@ namespace Vox
 	void PhysicsServer::RenderDebugShapes()
 	{
 		physicsSystem.DrawConstraints(debugRenderer.get());
-	    // physicsSystem.DrawBodies(JPH::BodyManager::DrawSettings(), debugRenderer.get());
+	    physicsSystem.DrawBodies(JPH::BodyManager::DrawSettings(), debugRenderer.get());
 
 		for (const auto& characterControllerWeak : characterControllers)
 		{

@@ -11,6 +11,11 @@
 
 namespace Vox
 {
+    class VoxelEditorPanel;
+}
+
+namespace Vox
+{
     class ObjectClass;
     class ClassList;
 }
@@ -85,6 +90,7 @@ namespace Vox
 	    std::shared_ptr<EditorViewport> primaryViewport;
 	    std::unique_ptr<ActorEditor> actorEditor;
 	    std::unique_ptr<ClassList> classList;
+	    std::unique_ptr<VoxelEditorPanel> voxelPanel;
 	    std::unique_ptr<WorldOutline> worldOutline;
 
 	    std::weak_ptr<ObjectClass> pendingEditorClass;

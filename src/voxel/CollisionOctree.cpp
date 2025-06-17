@@ -111,14 +111,15 @@ namespace Octree
 
 			case State::Full:
 			{
-                if (const auto currentVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]); currentVoxel == voxel)
+			    const auto currentVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(subNodes[0]);
+                if (currentVoxel == voxel)
 				{
 					return;
 				}
 
 			    for (auto& node : subNodes)
 			    {
-			        node = std::make_unique<PhysicsVoxel>();
+			        node = std::make_unique<PhysicsVoxel>(currentVoxel);
 			    }
 
 				GetAccessor(x, y, z) = std::make_unique<PhysicsVoxel>(voxel);
@@ -135,8 +136,7 @@ namespace Octree
 				bool allSame = true;
 				for (const auto& subNode : subNodes)
 				{
-
-                    if (*std::get<std::unique_ptr<PhysicsVoxel>>(subNode) != voxel)
+                    if (const PhysicsVoxel nodeVoxel = *std::get<std::unique_ptr<PhysicsVoxel>>(subNode); nodeVoxel != voxel)
 					{
 						allSame = false;
 						break;
@@ -145,13 +145,24 @@ namespace Octree
 
 				if (allSame)
 				{
-					state = State::Full;
-				    //subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel(voxel));
-					for (auto& subNode : subNodes)
-					{
-						std::get<std::unique_ptr<PhysicsVoxel>>(subNode).reset();
-					}
-					subNodes[0] = std::make_unique<PhysicsVoxel>(voxel);
+				    if (voxel.solid)
+				    {
+				        state = State::Full;
+				        //subNodes[0] = reinterpret_cast<CollisionNode*>(new PhysicsVoxel(voxel));
+				        for (auto& subNode : subNodes)
+				        {
+				            std::get<std::unique_ptr<PhysicsVoxel>>(subNode).reset();
+				        }
+				        subNodes[0] = std::make_unique<PhysicsVoxel>(voxel);
+				    }
+				    else
+				    {
+				        state = State::Empty;
+				        for (auto& subNode : subNodes)
+				        {
+				            std::get<std::unique_ptr<PhysicsVoxel>>(subNode).reset();
+				        }
+				    }
 				}
 				return;
 			}
@@ -586,7 +597,12 @@ namespace Octree
 		return solid == voxel.solid;
 	}
 
-	Cube::Cube(const int x, const int y, const int z, const unsigned int size)
+    bool PhysicsVoxel::operator!=(const PhysicsVoxel& voxel) const
+    {
+        return (!solid) != (!voxel.solid);
+    }
+
+    Cube::Cube(const int x, const int y, const int z, const unsigned int size)
 		:x(x), y(y), z(z), size(size)
 	{
 	}

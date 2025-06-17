@@ -71,6 +71,8 @@ namespace Vox
 
         void InitializeVoxels();
 
+        [[nodiscard]] VoxelWorld* GetVoxels() const;
+
     private:
         void PostObjectConstruct(const std::shared_ptr<Object>& object);
 

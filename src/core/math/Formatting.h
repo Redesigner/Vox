@@ -6,6 +6,7 @@
 
 #include <fmt/format.h>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <Jolt/Jolt.h>
 #include <Jolt/Math/Vec3.h>
 
@@ -36,5 +37,20 @@ struct fmt::formatter<JPH::Vec3>
     auto format(const JPH::Vec3& value, Context& ctx) const
     {
         return format_to(ctx.out(), "({}, {}, {})", value.GetX(), value.GetY(), value.GetZ());
+    }
+};
+
+template<>
+struct fmt::formatter<glm::ivec3>
+{
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename Context>
+    auto format(const glm::ivec3& value, Context& ctx) const
+    {
+        return format_to(ctx.out(), "({}, {}, {})", value.x, value.y, value.z);
     }
 };

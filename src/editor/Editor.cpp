@@ -8,6 +8,7 @@
 
 #include "ClassList.h"
 #include "EditorViewport.h"
+#include "VoxelEditorPanel.h"
 #include "actor_editor/ActorEditor.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
@@ -55,7 +56,6 @@ namespace Vox
         {
             return objectClass->IsA<Actor>();
         });
-
         actorEditor = nullptr;
 
         const ImGuiIO& io = ImGui::GetIO();
@@ -117,11 +117,24 @@ namespace Vox
                     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
                     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
                     constexpr ImGuiChildFlags flags = ImGuiChildFlags_AlwaysUseWindowPadding;
-                    ImGui::BeginChild("MainClassList", ImVec2(100, 0), flags | ImGuiChildFlags_ResizeX);
-                    classList->Draw();
-                    ImGui::EndChild();
+                    if (ImGui::BeginChild("LeftPanel", ImVec2(100, 0), flags | ImGuiChildFlags_ResizeX))
+                    {
+                        ImGui::BeginChild("MainClassList", ImVec2(0, 100), flags | ImGuiChildFlags_ResizeY);
+                        classList->Draw();
+                        ImGui::EndChild();
 
+                        if (voxelPanel)
+                        {
+                            if (ImGui::BeginChild("VoxelEditorPanel"), ImVec2(0, 0), flags)
+                            {
+                                voxelPanel->Draw();
+                            }
+                            ImGui::EndChild();
+                        }
+                    }
+                    ImGui::EndChild();
                     ImGui::SameLine();
+
                     ImGui::BeginChild("MainViewport", ImVec2(400, 0), flags | ImGuiChildFlags_ResizeX);
                     primaryViewport->Draw(currentWorld.lock());
                     ImGui::EndChild();
@@ -217,6 +230,8 @@ namespace Vox
         constexpr glm::vec3 cameraDefaultRotation = {glm::radians(22.5f), glm::radians(-45.0f), 0.0f};
         defaultCamera->SetRotation(cameraDefaultRotation);
         defaultCamera->SetPosition(defaultCamera->GetForwardVector() * 5.0f);
+
+        voxelPanel = std::make_unique<VoxelEditorPanel>(world->GetVoxels());
     }
 
     ImFont* Editor::GetFont_GitLab14()

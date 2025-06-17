@@ -34,6 +34,7 @@ namespace Octree
 		bool solid = false;
 
 		bool operator == (const PhysicsVoxel& voxel) const;
+	    bool operator != (const PhysicsVoxel& voxel) const;
 	};
 
 	class CollisionNode

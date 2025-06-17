@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "voxel/VoxelWorld.h"
 
 namespace Vox
 {
@@ -10,10 +11,18 @@ namespace Vox
     class VoxelEditorPanel
     {
     public:
-        VoxelEditorPanel();
+        explicit VoxelEditorPanel(VoxelWorld* world);
+
+        ~VoxelEditorPanel();
+
+        void Draw();
 
     private:
+        VoxelWorld* world;
 
+        int voxelMaterialId;
+
+        DelegateHandle<int, int> raycastClickDelegate;
     };
 
 } // Vox
