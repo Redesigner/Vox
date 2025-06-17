@@ -7,6 +7,7 @@
 
 namespace Vox
 {
+    class VoxelWorld;
     class PhysicsServer;
     class Prefab;
     class SceneRenderer;
@@ -68,6 +69,8 @@ namespace Vox
 
         void Load(const SavedWorld& savedWorld);
 
+        void InitializeVoxels();
+
     private:
         void PostObjectConstruct(const std::shared_ptr<Object>& object);
 
@@ -91,6 +94,8 @@ namespace Vox
         std::shared_ptr<SceneRenderer> renderer;
 
         std::shared_ptr<PhysicsServer> physicsServer;
+
+        std::unique_ptr<VoxelWorld> voxels;
 
         //@TODO: proper heap allocator here
         std::vector<std::shared_ptr<Object>> objects;

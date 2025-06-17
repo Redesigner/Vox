@@ -3,16 +3,31 @@
 #include "core/logging/Logging.h"
 #include "core/objects/World.h"
 #include "core/math/Formatting.h"
+#include "core/math/Math.h"
+#include "core/services/EditorService.h"
+#include "core/services/InputService.h"
+#include "core/services/ServiceLocator.h"
+#include "editor/EditorViewport.h"
+#include "physics/PhysicsServer.h"
+#include "physics/TypeConversions.h"
+#include "rendering/SceneRenderer.h"
+#include "rendering/camera/Camera.h"
 
 namespace Vox
 {
     VoxelWorld::VoxelWorld(World* world)
         :world(world)
     {
+        raycastClickDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](const int x, const int y)
+            {
+                CastScreenSpaceRay(x, y);
+            });
     }
 
-    VoxelWorld::~VoxelWorld()
-    = default;
+    VoxelWorld::~VoxelWorld() // NOLINT(*-use-equals-default)
+    {
+        ServiceLocator::GetInputService()->UnregisterMouseClickCallback(raycastClickDelegate);
+    }
 
     std::optional<Voxel> VoxelWorld::GetVoxel(const glm::ivec3& position) const
     {
@@ -83,5 +98,46 @@ namespace Vox
         }
 
         return {{chunkX, chunkY}, {voxelX, voxelY}};
+    }
+
+    void VoxelWorld::CastScreenSpaceRay(int x, int y)
+    {
+            float xViewport, yViewport;
+            std::shared_ptr<Camera> camera = world->GetRenderer()->GetCurrentCamera();
+            if (!camera)
+            {
+                return;
+            }
+
+            if (ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(xViewport, yViewport, x, y))
+            {
+                const auto [start, end] = camera->GetWorldSpaceRay({xViewport, yViewport});
+                JPH::Vec3 rayStart = Vec3From(start);
+                JPH::Vec3 rayEnd = Vec3From(end);
+
+                VoxLog(Display, Game, "Casting ray from '{}' to '{}'", rayStart, rayEnd);
+                if (RayCastResultNormal raycastResult; world->GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
+                {
+                    // debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
+                    constexpr unsigned int gridSize = 1;
+                    const JPH::Vec3 voxelEstimate = raycastResult.impactPoint - raycastResult.impactNormal / static_cast<float>(2 * gridSize);
+                    JPH::Vec3 voxelPosition = {
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetX(), gridSize)),
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetY(), gridSize)),
+                        static_cast<float>(FloorMultiple(voxelEstimate.GetZ(), gridSize))
+                    };
+                    VoxLog(Display, Game, "Clicked voxel at '{}'", voxelPosition);
+                    voxelPosition += raycastResult.impactNormal;
+                    const glm::ivec3 clickedVoxel = {voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16};
+                    if (clickedVoxel.y >= 32 || clickedVoxel.y <= 0)
+                    {
+                        return;
+                    }
+                    Voxel newVoxel;
+                    newVoxel.materialId = 1;
+                    SetVoxel(clickedVoxel, newVoxel);
+                    FinalizeUpdate();
+                }
+            }
     }
 }

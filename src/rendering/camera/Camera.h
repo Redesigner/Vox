@@ -2,6 +2,7 @@
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
+#include <utility>
 
 namespace Vox
 {
@@ -34,6 +35,8 @@ namespace Vox
 		[[nodiscard]] glm::mat4x4 GetInverseMatrix() const;
 
 		void SetTarget(glm::vec3 targetPosition);
+
+	    std::pair<glm::vec4, glm::vec4> GetWorldSpaceRay(const glm::vec2& screenspace) const;
 
 	private:
 		void UpdatePositionMatrix();

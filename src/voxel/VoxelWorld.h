@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 
+#include "core/datatypes/DelegateHandle.h"
 #include "voxel/Voxel.h"
 #include "voxel/VoxelChunk.h"
 
@@ -32,10 +33,14 @@ namespace Vox
          */
         [[nodiscard]] static std::pair<glm::ivec2, glm::ivec2> GetChunkCoords(const glm::ivec3& position);
 
+        void CastScreenSpaceRay(int x, int y);
+
         MapType voxelChunks;
 
         World* world;
 
         std::vector<MapType::iterator> modifiedChunks;
+
+        DelegateHandle<int, int> raycastClickDelegate;
 	};
 }

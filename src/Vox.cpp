@@ -114,14 +114,13 @@ int main()
         ServiceLocator::InitServices(window);
 
         auto testWorld = std::make_shared<World>();
+        testWorld->InitializeVoxels();
         auto debugRenderer = std::make_shared<DebugRenderer>();
 
 #ifdef EDITOR
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         ServiceLocator::GetRenderer()->RegisterScene(testWorld->GetRenderer());
 #endif
-
-        auto voxels = std::make_unique<VoxelWorld>(testWorld.get());
 
         testWorld->GetPhysicsServer()->SetDebugRenderer(debugRenderer);
 
@@ -130,25 +129,6 @@ int main()
         //ServiceLocator::GetRenderer()->UploadSkeletalModel("cube", "../../../assets/models/animatedCube.glb");
 
         ServiceLocator::GetEditorService()->GetEditor()->InitializeGizmos(testWorld.get());
-
-        Voxel defaultVoxel;
-        defaultVoxel.materialId = 1;
-        for (int x = -16; x < 16; ++x)
-        {
-            for (int y = -16; y < 0; ++y)
-            {
-                for (int z = -16; z < 16; ++z)
-                {
-                    voxels->SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
-                }
-            }
-        }
-        Voxel testVoxel2;
-        testVoxel2.materialId = 2;
-
-        voxels->SetVoxel({-1, 16, -1}, testVoxel2);
-        voxels->SetVoxel({0, 16, 0}, testVoxel2);
-        voxels->FinalizeUpdate();
 
         using frame60 = std::chrono::duration<double, std::ratio<1, 60>>;
         auto frameTime = frame60(1);
@@ -174,60 +154,12 @@ int main()
         ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         testWorld->Load(SavedWorld(ServiceLocator::GetFileIoService()->LoadFile("worlds/MainWorld.world")));
 
-        const DelegateHandle raycastDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([debugRenderer, &voxels, testWorld](int x, int y) {
-            float xViewport, yViewport;
-            std::shared_ptr<Camera> camera = testWorld->GetRenderer()->GetCurrentCamera();
-            if (!camera)
-            {
-                return;
-            }
-
-            if (ServiceLocator::GetEditorService()->GetEditor()->GetViewport()->GetClickViewportSpace(xViewport, yViewport, x, y))
-            {
-                const glm::vec4 rayStartViewport = {xViewport, yViewport, -1.0f, 1.0f};
-                const glm::vec4 rayEndViewport = {xViewport, yViewport, 1.0f, 1.0f};
-                glm::mat4x4 inverseCamera = glm::inverseTranspose(camera->GetViewProjectionMatrix());
-                glm::vec4 rayStartAffine = rayStartViewport * inverseCamera;
-                glm::vec4 rayEndAffine = rayEndViewport * inverseCamera;
-                rayStartAffine /= rayStartAffine.w;
-                rayEndAffine /= rayEndAffine.w;
-                JPH::Vec3 rayStart = Vec3From(rayStartAffine);
-                JPH::Vec3 rayEnd = Vec3From(rayEndAffine);
-
-                debugRenderer->DrawPersistentLine(rayStart, rayEnd, JPH::Color::sRed, 5.0f);
-                VoxLog(Display, Game, "Casting ray from '{}' to '{}'", rayStart, rayEnd);
-                if (RayCastResultNormal raycastResult; testWorld->GetPhysicsServer()->RayCast(rayStart, rayEnd - rayStart, raycastResult))
-                {
-                    debugRenderer->DrawPersistentLine(raycastResult.impactPoint, raycastResult.impactPoint + raycastResult.impactNormal, JPH::Color::sBlue, 5.0f);
-                    constexpr unsigned int gridSize = 1;
-                    const JPH::Vec3 voxelEstimate = raycastResult.impactPoint - raycastResult.impactNormal / static_cast<float>(2 * gridSize);
-                    JPH::Vec3 voxelPosition = {
-                        static_cast<float>(FloorMultiple(voxelEstimate.GetX(), gridSize)),
-                        static_cast<float>(FloorMultiple(voxelEstimate.GetY(), gridSize)),
-                        static_cast<float>(FloorMultiple(voxelEstimate.GetZ(), gridSize))
-                    };
-                    VoxLog(Display, Game, "Clicked voxel at '{}'", voxelPosition);
-                    voxelPosition += raycastResult.impactNormal;
-                    const glm::ivec3 clickedVoxel = {voxelPosition.GetX() + 16, voxelPosition.GetY() + 16, voxelPosition.GetZ() + 16};
-                    if (clickedVoxel.y >= 32 || clickedVoxel.y <= 0)
-                    {
-                        return;
-                    }
-                    Voxel newVoxel;
-                    newVoxel.materialId = 1;
-                    voxels->SetVoxel(clickedVoxel, newVoxel);
-                    voxels->FinalizeUpdate();
-                }
-            }
-            });
-
         while (!ServiceLocator::GetInputService()->ShouldCloseWindow())
         {
             ServiceLocator::GetInputService()->PollEvents();
             testWorld->Tick(1 / 60.0f);
             ServiceLocator::GetRenderer()->Render(ServiceLocator::GetEditorService()->GetEditor());
         }
-        ServiceLocator::GetInputService()->UnregisterMouseClickCallback(raycastDelegate);
         runPhysics = false;
         physicsThread.join();
     }

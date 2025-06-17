@@ -90,6 +90,8 @@ target_sources(Vox PRIVATE
 	"src/editor/PlayButton.h"
 	"src/editor/WorldOutline.cpp"
 	"src/editor/WorldOutline.h"
+	"src/editor/VoxelEditorPanel.cpp"
+	"src/editor/VoxelEditorPanel.h"
 	"src/editor/detail_panel/DetailPanel.cpp"
 	"src/editor/detail_panel/DetailPanel.h"
 	"src/editor/detail_panel/AssetPtrDetailPanel.cpp"

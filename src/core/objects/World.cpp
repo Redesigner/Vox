@@ -11,6 +11,7 @@
 #include "core/services/ServiceLocator.h"
 #include "physics/PhysicsServer.h"
 #include "rendering/SceneRenderer.h"
+#include "voxel/VoxelWorld.h"
 
 namespace Vox
 {
@@ -186,6 +187,30 @@ namespace Vox
             child->PostConstruct();
             PostObjectConstruct(child);
         }
+    }
+
+    void World::InitializeVoxels()
+    {
+        voxels = std::make_unique<VoxelWorld>(this);
+
+        Voxel defaultVoxel;
+        defaultVoxel.materialId = 1;
+        for (int x = -16; x < 16; ++x)
+        {
+            for (int y = -16; y < 0; ++y)
+            {
+                for (int z = -16; z < 16; ++z)
+                {
+                    voxels->SetVoxel(glm::uvec3(x + 16, y + 16, z + 16), defaultVoxel);
+                }
+            }
+        }
+        Voxel testVoxel2;
+        testVoxel2.materialId = 2;
+
+        voxels->SetVoxel({-1, 16, -1}, testVoxel2);
+        voxels->SetVoxel({0, 16, 0}, testVoxel2);
+        voxels->FinalizeUpdate();
     }
 
     World::World()
