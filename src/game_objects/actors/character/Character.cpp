@@ -77,6 +77,11 @@ namespace Vox
             mesh->SetRotation({0.0f, characterDirection + glm::pi<float>() / 2.0f, 0.0f});
         }
 
+        if (GetTransform().position.y < -32.0f)
+        {
+            characterController->SetDirectPosition({0.0f, 5.0f, 0.0f});
+        }
+
 	    Actor::Tick(deltaTime);
 	}
 

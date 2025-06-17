@@ -15,8 +15,7 @@ namespace Vox
     {
         raycastClickDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](const int x, const int y)
         {
-            const std::optional<VoxelRaycastResult> result = this->world->CastScreenSpaceRay({x, y});
-            if (result.has_value())
+            if (const std::optional<VoxelRaycastResult> result = this->world->CastScreenSpaceRay({x, y}); result.has_value())
             {
                 const glm::ivec3 clickedVoxel = voxelMaterialId ? result.value().voxel + result.value().voxelNormal : result.value().voxel;
                 if (clickedVoxel.y <= 0 || clickedVoxel.y >= 32)

@@ -53,6 +53,12 @@ namespace Vox
         return characterController ? Vector3From(characterController->GetVelocity()) : glm::vec3(0.0f, 0.0f, 0.0f);
     }
 
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void CharacterPhysicsComponent::SetDirectPosition(const glm::vec3& position)
+    {
+        characterController->SetPosition(Vec3From(position));
+    }
+
     void CharacterPhysicsComponent::BuildProperties(std::vector<Property>& propertiesInOut)
     {
         SceneComponent::BuildProperties(propertiesInOut);

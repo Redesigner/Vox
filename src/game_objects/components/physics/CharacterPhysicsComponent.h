@@ -25,6 +25,8 @@ namespace Vox
 
         [[nodiscard]] glm::vec3 GetRequestedVelocity() const;
 
+        void SetDirectPosition(const glm::vec3& position);
+
     protected:
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
