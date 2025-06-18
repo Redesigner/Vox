@@ -45,9 +45,14 @@ namespace Vox
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
         voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
+        voxelTextures->LoadTexture("assets/textures/leaf.png", 2);
+        voxelTextures->LoadTexture("assets/textures/tree_top.png", 3);
+        voxelTextures->LoadTexture("assets/textures/tree_side.png", 4);
 
         voxelMaterials.emplace_back(0);
         voxelMaterials.emplace_back(1);
+        voxelMaterials.emplace_back(2);
+        voxelMaterials.emplace_back(3, 3, 4);
     }
 
     Renderer::~Renderer()
