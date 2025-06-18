@@ -73,7 +73,7 @@ namespace Vox
 	    const Renderer* renderer = ServiceLocator::GetRenderer();
 	    //@TODO: cache what materials are contained in this chunk so we don't run the shader for every voxel and material
 	    // for (const int materialId : changedMaterials)
-	    for (int materialId = 1; materialId < 3; ++materialId)
+	    for (int materialId = 1; materialId < 5; ++materialId)
 	    {
             if (const VoxelMaterial* voxelMaterial = renderer->GetVoxelMaterial(materialId))
 	        {
