@@ -6,22 +6,16 @@
 
 #include "Vox.h"
 #include "core/datatypes/DynamicObjectContainer.h"
-#include "core/datatypes/DynamicRef.h"
 #include "rendering/Light.h"
 #include "rendering/mesh/MeshInstanceContainer.h"
 #include "rendering/mesh/VoxelMesh.h"
-#include "rendering/shaders/ComputeShader.h"
 #include "rendering/shaders/pixel_shaders/PixelShader.h"
 #include "rendering/skeletal_mesh/SkeletalModel.h"
 #include "shaders/pixel_shaders/mesh_shaders/MaterialShader.h"
-#include "skeletal_mesh/SkeletalMeshInstanceContainer.h"
-
-namespace Vox
-{
-    class SceneRenderer;
-}
+#include "voxel/VoxelMaterial.h"
 
 struct SDL_Window;
+
 namespace Vox
 {
     class SkyShader;
@@ -43,9 +37,11 @@ namespace Vox
     class OutlineShader;
     class OutlineShaderDistance;
     class OutlineShaderJump;
+    class SceneRenderer;
     class StencilBuffer;
     class StencilShader;
     class UVec2Buffer;
+    class VoxelGenerationShader;
 
 	class Renderer
 	{
@@ -70,24 +66,35 @@ namespace Vox
 #endif
 		/**
 		 * @brief Uploads a glTF model to the GPU
-		 * @param alias the name to identify the model by
+		 * @param alias name to identify the model by
 		 * @param relativeFilePath file path of the model, relative to 'assets'
 		 * @return true if the model was loaded successfully, false otherwise
 		 */
 		bool UploadModel(std::string alias, const std::string& relativeFilePath);
 
-		bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
+        /**
+         * @brief Uploads a skeletal model (glTF) to the GPU
+         * @param alias name key to be used
+         * @param relativeFilePath file path of the model, relative to 'assets' folder
+         * @return true if the model was loaded successfully, false otherwise
+         */
+        bool UploadSkeletalModel(std::string alias, const std::string& relativeFilePath);
 
-		static std::string GetGlDebugTypeString(unsigned int errorCode);
+        /**
+         * @brief Convert GL error code into human-readable string
+         * @param errorCode error code returned by OpenGL
+         * @return human-readable string
+         */
+        static std::string GetGlDebugTypeString(unsigned int errorCode);
 
 		[[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<Model>>& GetMeshes() const;
 
 		[[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<SkeletalModel>>& GetSkeletalMeshes() const;
 
-
+        // INSTANCES
 	    [[nodiscard]] std::shared_ptr<Model> GetMesh(const std::string& name) const;
-
 	    [[nodiscard]] std::shared_ptr<SkeletalModel> GetSkeletalMesh(const std::string& name) const;
+	    [[nodiscard]] const VoxelMaterial* GetVoxelMaterial(unsigned int materialIndex) const;
 
 	    // SCENE RENDERER NECESSARY METHODS
 	    [[nodiscard]] MaterialShader* GetGBufferShader() const;
@@ -102,7 +109,7 @@ namespace Vox
 	    [[nodiscard]] SkyShader* GetSkyShader() const;
 
 	    [[nodiscard]] VoxelShader* GetVoxelMeshShader() const;
-	    [[nodiscard]] const ComputeShader* GetVoxelGenerationShader() const;
+	    [[nodiscard]] VoxelGenerationShader* GetVoxelGenerationShader() const;
 	    [[nodiscard]] ArrayTexture* GetVoxelTextures() const;
 	    void BindVoxelMeshVao() const;
 
@@ -139,7 +146,7 @@ namespace Vox
 		std::unique_ptr<MaterialShader> gBufferShader, gBufferShaderSkeleton;
 
 		std::unique_ptr<VoxelShader> voxelShader;
-		ComputeShader voxelGenerationShader;
+		std::unique_ptr<VoxelGenerationShader> voxelGenerationShader;
 
 		std::unique_ptr<SkyShader> skyShader;
 	    std::unique_ptr<DebugShader> debugLineShader, debugTriangleShader;
@@ -162,6 +169,7 @@ namespace Vox
 		// INSTANCES
 		std::unordered_map<std::string, std::shared_ptr<Model>> uploadedMeshes;
 		std::unordered_map<std::string, std::shared_ptr<SkeletalModel>> uploadedSkeletalMeshes;
+	    std::vector<VoxelMaterial> voxelMaterials;
 
 		SDL_Window* mainWindow;
 

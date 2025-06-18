@@ -9,7 +9,7 @@
 
 namespace Vox
 {
-    ArrayTexture::ArrayTexture(unsigned int width, unsigned int height, unsigned int layerCount, unsigned int mipLevels)
+    ArrayTexture::ArrayTexture(const unsigned int width, const unsigned int height, const unsigned int layerCount, const unsigned int mipLevels)
         : width(width), height(height), layerCount(layerCount)
     {
         glGenTextures(1, &textureId);
@@ -27,12 +27,13 @@ namespace Vox
         glDeleteTextures(1, &textureId);
     }
 
-    void ArrayTexture::LoadTexture(std::string textureName, unsigned int index)
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void ArrayTexture::LoadTexture(std::string textureName, const unsigned int index)
     {
         textureName = "../../../" + textureName;
         if (index >= layerCount)
         {
-            VoxLog(Error, Rendering, "ArrayTexture: attempted to loadtexture outside of ArrayTexture range.");
+            VoxLog(Error, Rendering, "ArrayTexture: attempted to load texture outside of ArrayTexture range.");
             return;
         }
 

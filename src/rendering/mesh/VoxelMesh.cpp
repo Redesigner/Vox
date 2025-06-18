@@ -3,7 +3,9 @@
 #include <GL/glew.h>
 #include <glm/ext/matrix_transform.hpp>
 
-#include "rendering/shaders/ComputeShader.h"
+#include "core/services/ServiceLocator.h"
+#include "rendering/Renderer.h"
+#include "rendering/shaders/compute_shaders/VoxelGenerationShader.h"
 #include "voxel/VoxelChunk.h"
 
 namespace Vox
@@ -58,7 +60,7 @@ namespace Vox
 		return dirty;
 	}
 
-	void VoxelMesh::Regenerate(const ComputeShader& shader)
+	void VoxelMesh::Regenerate(VoxelGenerationShader& shader)
 	{
         constexpr unsigned int counterStart = 0;
 		//glNamedBufferData(meshCounter, sizeof(unsigned int), &counterStart, GL_STREAM_READ);
@@ -67,14 +69,17 @@ namespace Vox
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, voxelMeshSsbo);
 		glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, meshCounter);
 
-	    const int materialIdLocation = glGetUniformLocation(shader.GetId(), "materialId");
 
+	    const Renderer* renderer = ServiceLocator::GetRenderer();
 	    //@TODO: cache what materials are contained in this chunk so we don't run the shader for every voxel and material
 	    // for (const int materialId : changedMaterials)
 	    for (int materialId = 1; materialId < 3; ++materialId)
 	    {
-	        Shader::SetUniformInt(materialIdLocation, materialId);
-		    glDispatchCompute(1, 1, 1);
+            if (const VoxelMaterial* voxelMaterial = renderer->GetVoxelMaterial(materialId))
+	        {
+	            shader.SetVoxelMaterial(materialId, *voxelMaterial);
+		        glDispatchCompute(1, 1, 1);
+	        }
 	    }
 		dirty = false;
 

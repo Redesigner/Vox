@@ -19,6 +19,7 @@
 #include "rendering/buffers/frame_buffers/UVec2Buffer.h"
 #include "rendering/mesh/VoxelMesh.h"
 #include "rendering/skeletal_mesh/SkeletalMeshInstanceContainer.h"
+#include "shaders/compute_shaders/VoxelGenerationShader.h"
 #include "shaders/pixel_shaders/DebugShader.h"
 #include "shaders/pixel_shaders/DeferredShader.h"
 #include "shaders/pixel_shaders/SkyShader.h"

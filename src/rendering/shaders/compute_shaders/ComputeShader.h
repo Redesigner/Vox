@@ -9,9 +9,6 @@ namespace Vox
 	class ComputeShader : public Shader
 	{
 	public:
-		bool Load(std::string shaderFilePath);
-
-	private:
-		unsigned int computeShader;
+        explicit ComputeShader(const std::string& shaderFilePath);
 	};
 }

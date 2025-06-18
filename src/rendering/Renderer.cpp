@@ -1,7 +1,6 @@
 ﻿#include "Renderer.h"
 
 #include <GL/glew.h>
-#include <SDL3/SDL_filesystem.h>
 #include <SDL3/SDL_video.h>
 #include <ranges>
 #include <utility>
@@ -19,6 +18,7 @@
 #include "rendering/buffers/RenderTexture.h"
 #include "rendering/shaders/pixel_shaders/DeferredShader.h"
 #include "rendering/shaders/pixel_shaders/mesh_shaders/VoxelShader.h"
+#include "shaders/compute_shaders/VoxelGenerationShader.h"
 #include "shaders/pixel_shaders/DebugShader.h"
 #include "shaders/pixel_shaders/SkyShader.h"
 #include "shaders/pixel_shaders/mesh_shaders/PickShader.h"
@@ -33,11 +33,6 @@ namespace Vox
     {
         glEnable(GL_CULL_FACE);
         mainWindow = window;
-        // This is relative to the build location -- I'll have to fix this later
-        // ChangeDirectory("../../../");
-
-        VoxLog(Display, Rendering, "Set current working directory to {}", SDL_GetBasePath());
-
         quad = std::make_unique<FullscreenQuad>();
 
         CreateMeshVao();
@@ -49,7 +44,11 @@ namespace Vox
 
         voxelTextures = std::make_unique<ArrayTexture>(64, 64, 5, 1);
         voxelTextures->LoadTexture("assets/textures/voxel0.png", 0);
-        voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);}
+        voxelTextures->LoadTexture("assets/textures/voxel1.png", 1);
+
+        voxelMaterials.emplace_back(0);
+        voxelMaterials.emplace_back(1);
+    }
 
     Renderer::~Renderer()
     {
@@ -164,7 +163,7 @@ namespace Vox
         debugTriangleShader = std::make_unique<DebugShader>("assets/shaders/debugTriangle.vert", "assets/shaders/debugTriangle.frag");
         debugLineShader = std::make_unique<DebugShader>("assets/shaders/debugLine.vert", "assets/shaders/debugLine.frag");
 
-        voxelGenerationShader.Load("assets/shaders/voxelGeneration.comp");
+        voxelGenerationShader = std::make_unique<VoxelGenerationShader>();
 
 #ifdef EDITOR
         overlayShader = std::make_unique<MaterialShader>("assets/shaders/forwardMaterial.vert", "assets/shaders/forwardMaterial.frag");
@@ -279,6 +278,16 @@ namespace Vox
         return result->second;
     }
 
+    const VoxelMaterial* Renderer::GetVoxelMaterial(const unsigned int materialIndex) const
+    {
+        if (materialIndex > voxelMaterials.size() || materialIndex == 0)
+        {
+            return nullptr;
+        }
+
+        return &voxelMaterials.at(materialIndex - 1);
+    }
+
     MaterialShader* Renderer::GetGBufferShader() const
     {
         return gBufferShader.get();
@@ -319,9 +328,9 @@ namespace Vox
         return voxelShader.get();
     }
 
-    const ComputeShader* Renderer::GetVoxelGenerationShader() const
+    VoxelGenerationShader* Renderer::GetVoxelGenerationShader() const
     {
-        return &voxelGenerationShader;
+        return voxelGenerationShader.get();
     }
 
     ArrayTexture* Renderer::GetVoxelTextures() const

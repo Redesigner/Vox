@@ -11,10 +11,8 @@
 namespace Vox
 {
     class ComputeShader;
-}
+    class VoxelGenerationShader;
 
-namespace Vox
-{
 	class VoxelMesh
 	{
 	public:
@@ -28,7 +26,7 @@ namespace Vox
 
 		[[nodiscard]] bool NeedsRegeneration() const;
 
-		void Regenerate(const ComputeShader& shader);
+		void Regenerate(VoxelGenerationShader& shader);
 
 		void UpdateData(const std::array<std::array<std::array<Voxel, 32>, 32>, 32>* data, const std::vector<int>& changedMaterialsIn);
 
