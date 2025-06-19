@@ -126,6 +126,11 @@ namespace Vox
         }
 
         ServiceLocator::GetFileIoService()->WriteToFile("worlds/" + filename + ".world", Save().Serialize().dump(4));
+
+        if (voxels)
+        {
+            voxels->SaveToFile();
+        }
     }
 
     void World::Reload()

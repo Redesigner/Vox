@@ -1,7 +1,9 @@
 #pragma once
+
 #include <map>
 
-#include "core/datatypes/DelegateHandle.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "core/math/Comparators.h"
 #include "voxel/Voxel.h"
 #include "voxel/VoxelChunk.h"
 
@@ -18,7 +20,7 @@ namespace Vox
     class VoxelWorld
 	{
 	public:
-        using MapType = std::map<std::pair<int, int>, VoxelChunk>;
+        using MapType = std::map<glm::ivec2, VoxelChunk>;
 	    explicit VoxelWorld(World* world);
         ~VoxelWorld();
 
@@ -31,6 +33,8 @@ namespace Vox
          */
         void FinalizeUpdate();
 
+        void SaveToFile() const;
+
         [[nodiscard]] std::optional<VoxelRaycastResult> CastScreenSpaceRay(const glm::ivec2& screenSpace) const;
 
     private:
@@ -40,6 +44,8 @@ namespace Vox
          * @return A pair of integer vec2's
          */
         [[nodiscard]] static std::pair<glm::ivec2, glm::ivec2> GetChunkCoords(const glm::ivec3& position);
+
+        [[nodiscard]] std::string WriteString() const;
 
         MapType voxelChunks;
 

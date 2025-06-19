@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "core/datatypes/DelegateHandle.h"
 #include "voxel/VoxelWorld.h"
 
 namespace Vox

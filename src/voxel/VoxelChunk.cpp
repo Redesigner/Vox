@@ -1,5 +1,9 @@
 #include "VoxelChunk.h"
 
+#include <fmt/format.h>
+
+#include "core/math/Formatting.h"
+#include "voxel/Octree.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"
 #include "rendering/SceneRenderer.h"
@@ -63,5 +67,23 @@ namespace Vox
             -chunkHalfSize,
             position.y * chunkSize - chunkHalfSize
 	    };
+    }
+
+    std::string VoxelChunk::WriteString() const
+    {
+        Octree::Node octree(chunkSize);
+	    for (int x = 0 ; x < chunkSize; ++x)
+	    {
+	        for (int y = 0; y < chunkSize; ++y)
+	        {
+	            for (int z = 0; z < chunkSize; ++z)
+	            {
+	                octree.SetVoxel(x, y, z, &voxels->at(x).at(y).at(z));
+	            }
+	        }
+	    }
+	    const std::vector data = octree.GetPacked();
+	    const std::string chunk = {data.begin(), data.end()};
+	    return fmt::format("{}, {}:{}", chunkLocation, chunk.size(), chunk);
     }
 }

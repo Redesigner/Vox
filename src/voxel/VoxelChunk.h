@@ -34,6 +34,8 @@ namespace Vox
 
 	    static glm::vec3 CalculatePosition(const glm::ivec2& position);
 
+	    std::string WriteString() const;
+
 	private:
 		glm::ivec2 chunkLocation;
 

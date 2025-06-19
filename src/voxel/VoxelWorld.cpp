@@ -1,10 +1,12 @@
 #include "VoxelWorld.h"
 
+#include "Octree.h"
 #include "core/logging/Logging.h"
-#include "core/objects/World.h"
 #include "core/math/Formatting.h"
 #include "core/math/Math.h"
+#include "core/objects/World.h"
 #include "core/services/EditorService.h"
+#include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
@@ -42,9 +44,8 @@ namespace Vox
         if (chunkIterator == voxelChunks.end())
         {
             // If the chunk doesn't exist, allocate a new one
-            // Default map can't hash ivec2, use std::pair here instead
             const auto [iterator, success] = voxelChunks.emplace(
-                std::pair(chunkPosition.x, chunkPosition.y),
+                chunkPosition,
                 VoxelChunk(chunkPosition, world->GetPhysicsServer().get(), world->GetRenderer().get())
             );
             VoxLog(Display, Game, "Allocating new voxel at coords '{}'", chunkPosition);
@@ -73,6 +74,11 @@ namespace Vox
             modifiedChunk->second.FinalizeUpdate();
         }
         modifiedChunks.clear();
+    }
+
+    void VoxelWorld::SaveToFile() const
+    {
+        ServiceLocator::GetFileIoService()->WriteToFile("voxels/World.vox", WriteString());
     }
 
     std::optional<VoxelRaycastResult> VoxelWorld::CastScreenSpaceRay(const glm::ivec2& screenSpace) const
@@ -137,5 +143,16 @@ namespace Vox
         }
 
         return {{chunkX, chunkY}, {voxelX, voxelY}};
+    }
+
+    std::string VoxelWorld::WriteString() const
+    {
+        std::string result;
+        for (const auto& chunk : voxelChunks | std::views::values)
+        {
+            result.append(chunk.WriteString());
+            result += "\n";
+        }
+        return result;
     }
 }
