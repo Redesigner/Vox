@@ -11,6 +11,12 @@ namespace Vox
     {
         return std::floorf(x / static_cast<float>(multiple)) * multiple;
     }
+
+    bool IsPowerOfTwo(const unsigned int number)
+    {
+        return (number & (number - 1)) == 0;
+    }
+
     unsigned int NextPowerOfTwo(unsigned int value)
     {
         value |= value >> 1;

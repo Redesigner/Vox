@@ -25,6 +25,8 @@ namespace Vox
 
 	int FloorMultiple(float x, unsigned int multiple);
 
+    bool IsPowerOfTwo(unsigned int number);
+
     unsigned int NextPowerOfTwo(unsigned int value);
 
     glm::vec3 ClosestPoint(const glm::vec3& originA, const glm::vec3& directionA,
