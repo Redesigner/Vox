@@ -31,6 +31,9 @@ namespace Vox
         World();
         ~World();
 
+        World(const World&&) = delete;
+        World& operator=(World&&) = delete;
+
         [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetObjects() const;
 
         template <typename T, class... Args>
@@ -68,6 +71,8 @@ namespace Vox
         [[nodiscard]] SavedWorld Save() const;
 
         void Load(const SavedWorld& savedWorld);
+
+        void LoadVoxels(const std::string& filename);
 
         void InitializeVoxels();
 

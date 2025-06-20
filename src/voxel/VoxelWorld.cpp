@@ -17,13 +17,28 @@
 
 namespace Vox
 {
-    VoxelWorld::VoxelWorld(World* world)
+    VoxelWorld::VoxelWorld(const World* world)
         :world(world)
     {
     }
 
+    VoxelWorld::VoxelWorld(const World* world, const std::string& filename)
+        :VoxelWorld(world)
+    {
+        const std::string data = ServiceLocator::GetFileIoService()->LoadFile(fmt::format("worlds/{}.vox", filename));
+
+        size_t cursorPosition = data.find('\n');
+        while (cursorPosition != std::string::npos)
+        {
+            VoxelChunk newChunk(data.substr(0, data.find('\n')), world);
+            voxelChunks.emplace(newChunk.GetChunkLocation(), std::move(newChunk));
+            cursorPosition = data.find('\n', cursorPosition + 1);
+        }
+    }
+
     VoxelWorld::~VoxelWorld()
-     = default;
+    {
+    }
 
     std::optional<Voxel> VoxelWorld::GetVoxel(const glm::ivec3& position) const
     {
@@ -46,7 +61,7 @@ namespace Vox
             // If the chunk doesn't exist, allocate a new one
             const auto [iterator, success] = voxelChunks.emplace(
                 chunkPosition,
-                VoxelChunk(chunkPosition, world->GetPhysicsServer().get(), world->GetRenderer().get())
+                VoxelChunk(chunkPosition, world)
             );
             VoxLog(Display, Game, "Allocating new voxel at coords '{}'", chunkPosition);
             iterator->second.SetVoxel({voxelPosition.x, position.y, voxelPosition.y}, voxel);
@@ -76,9 +91,9 @@ namespace Vox
         modifiedChunks.clear();
     }
 
-    void VoxelWorld::SaveToFile() const
+    void VoxelWorld::SaveToFile(const std::string& filename) const
     {
-        ServiceLocator::GetFileIoService()->WriteToFile("voxels/World.vox", WriteString());
+        ServiceLocator::GetFileIoService()->WriteToFile(fmt::format("worlds/{}.vox", filename), WriteString());
     }
 
     std::optional<VoxelRaycastResult> VoxelWorld::CastScreenSpaceRay(const glm::ivec2& screenSpace) const

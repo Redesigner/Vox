@@ -151,8 +151,8 @@ int main()
 
         ServiceLocator::GetObjectService()->RegisterPrefab("test.json");
 
-        ServiceLocator::GetEditorService()->GetEditor()->SetWorld(testWorld);
         testWorld->Load(SavedWorld(ServiceLocator::GetFileIoService()->LoadFile("worlds/MainWorld.world")));
+        testWorld->LoadVoxels("MainWorld");
 
         while (!ServiceLocator::GetInputService()->ShouldCloseWindow())
         {

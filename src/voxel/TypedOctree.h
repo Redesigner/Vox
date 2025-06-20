@@ -4,6 +4,7 @@
 
 #pragma once
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -25,7 +26,10 @@ namespace Vox
             Partial
         };
 
-            using NodeVariant = std::variant<std::unique_ptr<TypedNode>, std::unique_ptr<T>>;
+        using NodeVariant = std::variant<std::unique_ptr<TypedNode>, std::unique_ptr<T>>;
+
+        using TypeToChar = std::function<char(const T&)>;
+        using CharToType = std::function<T(char)>;
 
         public:
             explicit TypedNode(unsigned int size);
@@ -42,14 +46,14 @@ namespace Vox
 
             void SetData(int x, int y, int z, const T& data);
 
-            [[nodiscard]] std::vector<char> GetPacked() const;
+            [[nodiscard]] std::string GetPacked(TypeToChar conversionFunction) const;
 
-            static std::shared_ptr<TypedNode> FromPacked(const std::vector<char>& data);
+            static std::shared_ptr<TypedNode> FromPacked(const std::string_view& data, CharToType conversionFunction);
 
         private:
-            void AccumulatePacked(std::vector<char>& data) const;
+            void AccumulatePacked(std::string& data, TypeToChar& conversionFunction) const;
 
-            void Unpack(const std::vector<char>& data, size_t& currentIndex);
+            void Unpack(const std::string_view& data, size_t& currentIndex, CharToType& conversionFunction);
 
             static int GetIndex(int x, int y, int z);
 
@@ -132,7 +136,7 @@ namespace Vox
             const int subX = x + (x < 0 ? half : -half);
             const int subY = y + (y < 0 ? half : -half);
             const int subZ = z + (z < 0 ? half : -half);
-            return std::get<std::unique_ptr<TypedNode>>(GetAccessor(x, y, z))->GetVoxel(subX, subY, subZ);
+            return std::get<std::unique_ptr<TypedNode>>(GetAccessor(x, y, z))->GetData(subX, subY, subZ);
         }
         }
 
@@ -199,7 +203,7 @@ namespace Vox
 
 				if (allSame)
 				{
-				    if (data)
+				    // if (data)
 				    {
 				        state = State::Full;
 				        for (auto& subNode : subNodes)
@@ -208,14 +212,14 @@ namespace Vox
 				        }
 				        subNodes[0] = std::make_unique<T>(data);
 				    }
-				    else
-				    {
-				        state = State::Empty;
-				        for (auto& subNode : subNodes)
-				        {
-				            std::get<std::unique_ptr<T>>(subNode).reset();
-				        }
-				    }
+				    // else
+				    // {
+				    //     state = State::Empty;
+				    //     for (auto& subNode : subNodes)
+				    //     {
+				    //         std::get<std::unique_ptr<T>>(subNode).reset();
+				    //     }
+				    // }
 				}
 				return;
 			}
@@ -307,20 +311,18 @@ namespace Vox
 	}
 
     template <typename T>
-    std::vector<char> TypedNode<T>::GetPacked() const
+    std::string TypedNode<T>::GetPacked(std::function<char(const T&)> conversionFunction) const
     {
-        std::vector<char> result;
-        result.insert(result.begin(), reinterpret_cast<const char*>(&size), reinterpret_cast<const char*>(&size) + sizeof(short));
-
-        AccumulatePacked(result);
-
+        std::string result = fmt::format("{},", size);
+        AccumulatePacked(result, conversionFunction);
         return result;
     }
 
     template <typename T>
-    std::shared_ptr<TypedNode<T>> TypedNode<T>::FromPacked(const std::vector<char>& data)
+    std::shared_ptr<TypedNode<T>> TypedNode<T>::FromPacked(const std::string_view& data, CharToType conversionFunction)
     {
-        unsigned short treeSize = *reinterpret_cast<const unsigned short*>(&data[0]);
+        size_t cursorPosition = data.find(',');
+        unsigned short treeSize = std::stoi(std::string(data.substr(0, cursorPosition)));
 
         if (treeSize < 2 || (treeSize & (treeSize - 1)) != 0)
         {
@@ -328,14 +330,16 @@ namespace Vox
             return nullptr;
         }
 
+        cursorPosition++;
+
+        size_t currentIndex = 0;
         auto root = std::make_shared<TypedNode>(treeSize);
-        size_t currentIndex = sizeof(unsigned short);
-        root->Unpack(data, currentIndex);
+        root->Unpack(data.substr(cursorPosition, data.size() - cursorPosition), currentIndex, conversionFunction);
         return root;
     }
 
     template <typename T>
-    void TypedNode<T>::AccumulatePacked(std::vector<char>& data) const
+    void TypedNode<T>::AccumulatePacked(std::string& data, TypeToChar& conversionFunction) const
     {
         if (size == 2)
         {
@@ -343,27 +347,23 @@ namespace Vox
             {
             case State::Empty:
             {
-                data.emplace_back('E');
+                data += 'E';
                 return;
             }
             case State::Full:
             {
-                data.emplace_back('F');
+                data += 'F';
                 const auto& voxel = std::get<std::unique_ptr<T>>(subNodes[0]);
-                data.insert(data.end(),
-                    reinterpret_cast<const char*>(voxel.get()),
-                    reinterpret_cast<const char*>(voxel.get()) + sizeof(T));
+                data.push_back(conversionFunction(*voxel));
                 return;
             }
             case State::Partial:
             {
-                data.emplace_back('P');
+                data += 'P';
                 for (const auto& subNode : subNodes)
                 {
                     const auto& voxel = std::get<std::unique_ptr<T>>(subNode);
-                    data.insert(data.end(),
-                    reinterpret_cast<const char*>(voxel.get()),
-                    reinterpret_cast<const char*>(voxel.get()) + sizeof(T));
+                    data.push_back(conversionFunction(*voxel));
                 }
                 return;
             }
@@ -374,24 +374,22 @@ namespace Vox
         {
         case State::Empty:
         {
-            data.emplace_back('E');
+            data += 'E';
             return;
         }
         case State::Full:
         {
-            data.emplace_back('F');
+            data += 'F';
             const auto& voxel = std::get<std::unique_ptr<T>>(subNodes[0]);
-            data.insert(data.end(),
-                reinterpret_cast<const char*>(voxel.get()),
-                reinterpret_cast<const char*>(voxel.get()) + sizeof(T));
+            data.push_back(conversionFunction(*voxel));
             return;
         }
         case State::Partial:
         {
-            data.emplace_back('P');
+            data += 'P';
             for (const auto& subNode : subNodes)
             {
-                std::get<std::unique_ptr<TypedNode>>(subNode)->AccumulatePacked(data);
+                std::get<std::unique_ptr<TypedNode>>(subNode)->AccumulatePacked(data, conversionFunction);
             }
             return;
         }
@@ -399,7 +397,7 @@ namespace Vox
     }
 
     template <typename T>
-    void TypedNode<T>::Unpack(const std::vector<char>& data, size_t& currentIndex)
+    void TypedNode<T>::Unpack(const std::string_view& data, size_t& currentIndex, CharToType& conversionFunction)
     {
         // ReSharper disable once CppTooWideScopeInitStatement
         const char currentStateChar = data[currentIndex];
@@ -435,8 +433,9 @@ namespace Vox
 
             case State::Full:
             {
-                subNodes[0] = std::make_unique<T>(*reinterpret_cast<const T*>(&data[currentIndex]));
-                currentIndex += sizeof(T);
+                subNodes[0] = std::make_unique<T>(conversionFunction(data[currentIndex]));
+                //currentIndex += sizeof(T);
+                currentIndex++;
                 return;
             }
 
@@ -444,8 +443,9 @@ namespace Vox
             {
                 for (auto& subNode: subNodes)
                 {
-                    subNode = std::make_unique<T>(*reinterpret_cast<const T*>(&data[currentIndex]));
-                    currentIndex += sizeof(T);
+                    subNode = std::make_unique<T>(conversionFunction(data[currentIndex]));
+                    //currentIndex += sizeof(T);
+                    currentIndex++;
                 }
                 return;
             }
@@ -462,8 +462,9 @@ namespace Vox
 
         case State::Full:
         {
-            subNodes[0]= std::make_unique<T>(*reinterpret_cast<const T*>(&data[currentIndex]));
-            currentIndex += sizeof(T);
+            subNodes[0]= std::make_unique<T>(conversionFunction(data[currentIndex]));
+            //currentIndex += sizeof(T);
+            currentIndex++;
             return;
         }
 
@@ -472,7 +473,7 @@ namespace Vox
             for (auto& subNode : subNodes)
             {
                 subNode = std::make_unique<TypedNode>(size / 2);
-                std::get<std::unique_ptr<TypedNode>>(subNode)->Unpack(data, currentIndex);
+                std::get<std::unique_ptr<TypedNode>>(subNode)->Unpack(data, currentIndex, conversionFunction);
             }
         }
         }

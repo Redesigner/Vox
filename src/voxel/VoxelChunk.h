@@ -12,6 +12,11 @@
 
 namespace Vox
 {
+    class World;
+}
+
+namespace Vox
+{
     class SceneRenderer;
     class Renderer;
 	class PhysicsServer;
@@ -20,8 +25,9 @@ namespace Vox
 	class VoxelChunk
 	{
 	public:
-		// @TODO: Change how our dependency is injected here? We need this to create our mesh, not for any other reason
-		VoxelChunk(glm::ivec2 chunkLocation, PhysicsServer* physicsServer, SceneRenderer* renderer);
+		VoxelChunk(glm::ivec2 chunkLocation, const World* world);
+
+	    VoxelChunk(const std::string_view& chunkData, const World* world);
 
 		void SetVoxel(glm::uvec3 voxelPosition, Voxel voxel);
 
@@ -34,7 +40,9 @@ namespace Vox
 
 	    static glm::vec3 CalculatePosition(const glm::ivec2& position);
 
-	    std::string WriteString() const;
+	    [[nodiscard]] glm::ivec2 GetChunkLocation() const;
+
+	    [[nodiscard]] std::string WriteString() const;
 
 	private:
 		glm::ivec2 chunkLocation;

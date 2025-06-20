@@ -21,8 +21,14 @@ namespace Vox
 	{
 	public:
         using MapType = std::map<glm::ivec2, VoxelChunk>;
-	    explicit VoxelWorld(World* world);
+	    explicit VoxelWorld(const World* world);
+        VoxelWorld(const World* world, const std::string& filename);
         ~VoxelWorld();
+
+        VoxelWorld(VoxelWorld&&) = delete;
+        VoxelWorld(const VoxelWorld&) = delete;
+        VoxelWorld& operator=(VoxelWorld&&) = delete;
+        VoxelWorld& operator=(const VoxelWorld&) = delete;
 
         [[nodiscard]] std::optional<Voxel> GetVoxel(const glm::ivec3& position) const;
 
@@ -33,7 +39,7 @@ namespace Vox
          */
         void FinalizeUpdate();
 
-        void SaveToFile() const;
+        void SaveToFile(const std::string& filename) const;
 
         [[nodiscard]] std::optional<VoxelRaycastResult> CastScreenSpaceRay(const glm::ivec2& screenSpace) const;
 
@@ -49,7 +55,7 @@ namespace Vox
 
         MapType voxelChunks;
 
-        World* world;
+        const World* world;
 
         std::vector<MapType::iterator> modifiedChunks;
 	};
