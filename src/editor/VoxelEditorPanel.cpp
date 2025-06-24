@@ -5,28 +5,32 @@
 #include "VoxelEditorPanel.h"
 
 #include "Editor.h"
+#include "core/objects/World.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 
 namespace Vox
 {
-    VoxelEditorPanel::VoxelEditorPanel(VoxelWorld* world)
+    VoxelEditorPanel::VoxelEditorPanel(const std::shared_ptr<World>& world)
         :world(world), voxelMaterialId(1)
     {
         raycastClickDelegate = ServiceLocator::GetInputService()->RegisterMouseClickCallback([this](const int x, const int y)
         {
-            if (const std::optional<VoxelRaycastResult> result = this->world->CastScreenSpaceRay({x, y}); result.has_value())
+            if (std::shared_ptr<World> worldLock = this->world.lock())
             {
-                const glm::ivec3 clickedVoxel = voxelMaterialId ? result.value().voxel + result.value().voxelNormal : result.value().voxel;
-                if (clickedVoxel.y <= 0 || clickedVoxel.y >= 32)
+                if (const std::optional<VoxelRaycastResult> result = worldLock->GetVoxels()->CastScreenSpaceRay({x, y}); result.has_value())
                 {
-                    return;
-                }
+                    const glm::ivec3 clickedVoxel = voxelMaterialId ? result.value().voxel + result.value().voxelNormal : result.value().voxel;
+                    if (clickedVoxel.y <= 0 || clickedVoxel.y >= 32)
+                    {
+                        return;
+                    }
 
-                Voxel newVoxel;
-                newVoxel.materialId = voxelMaterialId;
-                this->world->SetVoxel(clickedVoxel, newVoxel);
-                this->world->FinalizeUpdate();
+                    Voxel newVoxel;
+                    newVoxel.materialId = voxelMaterialId;
+                    worldLock->GetVoxels()->SetVoxel(clickedVoxel, newVoxel);
+                    worldLock->GetVoxels()->FinalizeUpdate();
+                }
             }
         });
     }

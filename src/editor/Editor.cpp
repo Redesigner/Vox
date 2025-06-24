@@ -8,7 +8,7 @@
 
 #include "ClassList.h"
 #include "EditorViewport.h"
-#include "VoxelEditorPanel.h"
+#include "editor/VoxelEditorPanel.h"
 #include "actor_editor/ActorEditor.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
@@ -217,11 +217,6 @@ namespace Vox
         }
     }
 
-    void Editor::BindOnGLTFOpened(std::function<void(std::string)> function)
-    {
-        // onGLTFOpened = function;
-    }
-
     void Editor::SetWorld(const std::shared_ptr<World>& world)
     {
         currentWorld = world;
@@ -231,7 +226,7 @@ namespace Vox
         defaultCamera->SetRotation(cameraDefaultRotation);
         defaultCamera->SetPosition(defaultCamera->GetForwardVector() * 5.0f);
 
-        voxelPanel = std::make_unique<VoxelEditorPanel>(world->GetVoxels());
+        voxelPanel = std::make_unique<VoxelEditorPanel>(world);
     }
 
     ImFont* Editor::GetFont_GitLab14()
@@ -281,7 +276,6 @@ namespace Vox
                 ImGui::EndMenu();
             }
             ImGui::PopStyleVar();
-            DrawImportToolbar();
             ImGui::EndMenuBar();
         }
     }
@@ -326,20 +320,6 @@ namespace Vox
         ImGui::PopStyleVar();
     }
 
-    void Editor::DrawImportToolbar()
-    {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5.0f, 5.0f));
-        if (ImGui::BeginMenu("Import"))
-        {
-            if (ImGui::MenuItem("Model (gltf)"))
-            {
-                openGLTF();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::PopStyleVar();
-    }
-
     void Editor::SaveWorldFile(const std::string& filepath)
     {
     }
@@ -353,21 +333,6 @@ namespace Vox
             const auto loadedWorld = SavedWorld(loadedWorldString);
             currentWorld.lock()->Load(loadedWorld);
         }
-    }
-
-
-    void Editor::openGLTF()
-    {
-
-        //char* fileNameRaw = tinyfd_openFileDialog(NULL, NULL, 2, gltfFilter, "GLTF (*.gltf, *.glb)", false);
-        //if (fileNameRaw)
-        //{
-        //    onGLTFOpened(fileNameRaw);
-        //}
-        //else
-        //{
-        //    VoxLog(Display, Input, "Dialog closed without selecting file.");
-        //}
     }
 
     void Editor::SelectObject(const std::weak_ptr<Object>& object) const

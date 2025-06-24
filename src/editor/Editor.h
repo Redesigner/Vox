@@ -45,8 +45,6 @@ namespace Vox
 
 		void Draw();
 		
-		void BindOnGLTFOpened(std::function<void(std::string)> function);
-		
 		void SetWorld(const std::shared_ptr<World>& world);
 
 		void SelectObject(const std::weak_ptr<Object>& object) const;
@@ -71,14 +69,9 @@ namespace Vox
 	private:
 		void DrawToolbar();
 		void DrawFileToolbar();
-		void DrawImportToolbar();
 
 	    void SaveWorldFile(const std::string& filepath);
 	    void OpenWorldFile(const std::string& filename);
-
-		void openGLTF();
-
-		std::function<void(std::string)> onGLTFOpened = [](std::string string) {};
 
 		static const char* gltfFilter[2];
 	    static SDL_DialogFileFilter worldFilter;

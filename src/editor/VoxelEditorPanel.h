@@ -12,14 +12,14 @@ namespace Vox
     class VoxelEditorPanel
     {
     public:
-        explicit VoxelEditorPanel(VoxelWorld* world);
+        explicit VoxelEditorPanel(const std::shared_ptr<World>& world);
 
         ~VoxelEditorPanel();
 
         void Draw();
 
     private:
-        VoxelWorld* world;
+        std::weak_ptr<World> world;
 
         int voxelMaterialId;
 
