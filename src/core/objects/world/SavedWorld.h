@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-#include "prefabs/Prefab.h"
+#include "../prefabs/Prefab.h"
 
 namespace Vox
 {

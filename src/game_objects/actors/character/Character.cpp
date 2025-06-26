@@ -4,7 +4,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #undef GLM_ENABLE_EXPERIMENTAL
 
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 #include "game_objects/components/CameraComponent.h"

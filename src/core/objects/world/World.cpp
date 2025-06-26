@@ -51,10 +51,7 @@ namespace Vox
             return;
         }
 
-        for (Tickable* tickable : actorsToTick)
-        {
-            tickable->Tick(deltaTime);
-        }
+        tickManager.Tick(deltaTime);
     }
 
     void World::DestroyObject(const std::shared_ptr<Object>& object)
@@ -63,14 +60,6 @@ namespace Vox
         {
            return ownedObject == object;
         });
-
-        if (auto* tickable = dynamic_cast<Tickable*>(object.get()))
-        {
-            std::erase_if(actorsToTick, [tickable](const Tickable* tickableObject)
-            {
-               return tickable == tickableObject;
-            });
-        }
     }
 
     std::shared_ptr<SceneRenderer> World::GetRenderer() const
@@ -140,6 +129,11 @@ namespace Vox
         Load(save);
     }
 
+    TickManager& World::GetTickManager()
+    {
+        return tickManager;
+    }
+
     SavedWorld World::Save() const
     {
         SavedWorld result;
@@ -155,7 +149,6 @@ namespace Vox
     void World::Load(const SavedWorld& savedWorld)
     {
         objects.clear();
-        actorsToTick.clear();
 
         for (const SavedWorldObject& object : savedWorld.savedObjects)
         {
@@ -263,17 +256,13 @@ namespace Vox
     void World::PostObjectConstruct(const std::shared_ptr<Object>& object)
     {
         CheckObjectName(object);
-        if (const auto tickable = dynamic_cast<Tickable*>(object.get()))
+        if (const auto tickable = std::dynamic_pointer_cast<Tickable>(object))
         {
-            RegisterTickable(tickable);
+            tickManager.RegisterTickable(tickable);
         }
+
         // Objects are never native to a world!
         object->native = false;
-    }
-
-    void World::RegisterTickable(Tickable* tickable)
-    {
-        actorsToTick.push_back(tickable);
     }
 
     void World::CheckObjectName(const std::shared_ptr<Object>& object) const
@@ -317,10 +306,7 @@ namespace Vox
     {
         initialState = Save();
         physicsServer->running = true;
-        for (Tickable* tickable : actorsToTick)
-        {
-            tickable->Play();
-        }
+        tickManager.Play();
     }
 
     void World::Pause()

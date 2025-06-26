@@ -4,10 +4,8 @@
 
 #include "SkeletalMeshComponent.h"
 
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/objects/actor/Actor.h"
-#include "core/services/EditorService.h"
-#include "core/services/ServiceLocator.h"
 #include "editor/EditorViewport.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"

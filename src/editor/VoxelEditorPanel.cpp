@@ -5,7 +5,7 @@
 #include "VoxelEditorPanel.h"
 
 #include "Editor.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/services/InputService.h"
 #include "core/services/ServiceLocator.h"
 

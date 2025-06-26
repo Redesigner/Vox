@@ -4,7 +4,7 @@
 #include "core/logging/Logging.h"
 #include "core/math/Formatting.h"
 #include "core/math/Math.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
@@ -37,8 +37,7 @@ namespace Vox
     }
 
     VoxelWorld::~VoxelWorld()
-    {
-    }
+    = default;
 
     std::optional<Voxel> VoxelWorld::GetVoxel(const glm::ivec3& position) const
     {

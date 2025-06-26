@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "SavedWorld.h"
+#include "core/objects/world/SavedWorld.h"
+#include "core/objects/world/TickManager.h"
 #include "core/concepts/Concepts.h"
 #include "core/datatypes/DelegateHandle.h"
 #include "core/objects/Object.h"
@@ -68,6 +69,8 @@ namespace Vox
 
         void Reload();
 
+        [[nodiscard]] TickManager& GetTickManager();
+
         [[nodiscard]] SavedWorld Save() const;
 
         void Load(const SavedWorld& savedWorld);
@@ -80,8 +83,6 @@ namespace Vox
 
     private:
         void PostObjectConstruct(const std::shared_ptr<Object>& object);
-
-        void RegisterTickable(Tickable* tickable);
 
         void CheckObjectName(const std::shared_ptr<Object>& object) const;
 
@@ -106,11 +107,12 @@ namespace Vox
 
         //@TODO: proper heap allocator here
         std::vector<std::shared_ptr<Object>> objects;
-        std::vector<Tickable*> actorsToTick;
 
         DelegateHandle<bool> toggleDebugRenderHandle;
         DelegateHandle<bool> togglePauseHandle;
 
         SavedWorld initialState;
+
+        TickManager tickManager;
     };
 }

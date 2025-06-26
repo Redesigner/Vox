@@ -4,7 +4,7 @@
 
 #include "TypedOctree.h"
 #include "core/math/Formatting.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "voxel/Octree.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsServer.h"

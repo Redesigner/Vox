@@ -4,7 +4,7 @@
 
 #include "PlayButton.h"
 
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "imgui.h"
 
 namespace Vox

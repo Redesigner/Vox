@@ -8,7 +8,7 @@
 #include "physics/PhysicsServer.h"
 #include "camera/Camera.h"
 #include "camera/FlyCamera.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "rendering/DebugRenderer.h"
 #include "rendering/PickContainer.h"
 #include "rendering/Renderer.h"

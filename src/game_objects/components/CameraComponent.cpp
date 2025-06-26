@@ -1,7 +1,7 @@
 ﻿#include "CameraComponent.h"
 
 #include "core/logging/Logging.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/objects/actor/Actor.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"

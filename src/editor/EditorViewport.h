@@ -6,7 +6,7 @@
 #include <functional>
 #include <glm/vec2.hpp>
 
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 
 namespace Vox
 {

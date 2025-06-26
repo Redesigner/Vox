@@ -6,8 +6,8 @@
 
 #include <imgui.h>
 
-#include "core/objects/World.h"
-#include "../../core/objects/prefabs/Prefab.h"
+#include "core/objects/world/World.h"
+#include "core/objects/prefabs/Prefab.h"
 #include "core/objects/actor/Actor.h"
 #include "core/objects/component/Component.h"
 #include "core/services/InputService.h"

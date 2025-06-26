@@ -25,7 +25,7 @@
 #include "core/math/Math.h"
 #include "core/math/Formatting.h"
 #include "core/objects/prefabs/Prefab.h"
-#include "core/objects/World.h"
+#include "core/objects/world/World.h"
 #include "core/services/EditorService.h"
 #include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
