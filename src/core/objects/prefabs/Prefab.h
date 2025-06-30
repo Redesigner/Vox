@@ -31,7 +31,7 @@ namespace Vox
         void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
 
         std::string className;
-        std::weak_ptr<ObjectClass> parent;
+        std::weak_ptr<ObjectClass> parentClass;
 
         std::vector<PropertyOverride> propertyOverrides;
         std::vector<AdditionalObject> additionalObjects;

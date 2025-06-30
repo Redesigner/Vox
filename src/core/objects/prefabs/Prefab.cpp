@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "core/logging/Logging.h"
+#include "core/objects/actor/Actor.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
@@ -27,7 +28,7 @@ namespace Vox
         assert(baseClass && "Base class was not found.");
 
         className = jsonObject.items().begin().key();
-        parent = baseClass;
+        parentClass = baseClass;
         CreateOverrides(root, {});
         CreateAdditionalObjects(root);
     }
@@ -35,15 +36,18 @@ namespace Vox
     PrefabContext::PrefabContext(const Object* object, const std::weak_ptr<ObjectClass>& baseClass)
     {
         className = object->GetClass()->GetName();
-        parent = object->GetClass();
-        assert(!parent.expired() && parent.lock());
+        parentClass = object->GetClass();
+        assert(!parentClass.expired() && parentClass.lock());
         propertyOverrides = object->GenerateOverrides(baseClass.lock().get());
 
-        for (const auto& childObject : object->GetChildren())
+        if (const Actor* actor = dynamic_cast<const Actor*>(object))
         {
-            if (!childObject->native)
+            for (const auto& childObject : actor->GetChildren())
             {
-                additionalObjects.emplace_back(childObject->GetClass(), childObject->GetDisplayName());
+                if (!childObject->native)
+                {
+                    additionalObjects.emplace_back(childObject->GetClass(), childObject->GetDisplayName());
+                }
             }
         }
     }
@@ -97,7 +101,7 @@ namespace Vox
 
     Prefab::Prefab(const std::shared_ptr<PrefabContext>& context)
         :ObjectClass([context](const ObjectInitializer& objectInitializer) { return Construct(objectInitializer, context.get());},
-        context->parent.lock()), context(context)
+        context->parentClass.lock()), context(context)
     {
         name = context->className;
         canBeRenamed = true;
@@ -189,28 +193,34 @@ namespace Vox
 
     std::shared_ptr<Object> Prefab::Construct(const ObjectInitializer& objectInitializer, const PrefabContext* prefabContext)
     {
-        if (prefabContext->parent.expired())
+        if (prefabContext->parentClass.expired())
         {
             return {};
         }
 
-        std::shared_ptr<Object> object = prefabContext->parent.lock()->GetConstructor()(objectInitializer);
+        std::shared_ptr<Object> object = prefabContext->parentClass.lock()->GetConstructor()(objectInitializer);
         object->localClass = ServiceLocator::GetObjectService()->GetObjectClass(prefabContext->className);
 
         ObjectInitializer childInitializer = objectInitializer;
         childInitializer.rootObject = false;
-        childInitializer.parent = object.get();
-        for (auto& child : object->GetChildren())
-        {
-            child->native = true;
-        }
 
-        for (const auto& additionalObject : prefabContext->additionalObjects)
+        // @TODO: Restrict adding children to actor prefabs only
+        if (auto actor = std::dynamic_pointer_cast<Actor>(object))
         {
-            std::shared_ptr<Object> child = additionalObject.objectClass.lock()->GetConstructor()(childInitializer);
-            child->SetName(additionalObject.objectName);
-            child->native = false;
-            object->AddChild(child);
+            childInitializer.parent = actor.get();
+
+            for (auto& child : actor->GetChildren())
+            {
+                child->native = true;
+            }
+
+            for (const auto& [objectClass, objectName] : prefabContext->additionalObjects)
+            {
+                std::shared_ptr<Component> child = std::dynamic_pointer_cast<Component>(objectClass.lock()->GetConstructor()(childInitializer));
+                child->SetName(objectName);
+                child->native = false;
+                actor->AddChild(child);
+            }
         }
 
         for (const auto& override : prefabContext->propertyOverrides)
@@ -228,7 +238,7 @@ namespace Vox
 
     void Prefab::OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride)
     {
-        std::shared_ptr<Object> currentObject = object;
+        /*std::shared_ptr<Object> currentObject = object;
         for (const auto& objectName : propertyOverride.path)
         {
             currentObject = currentObject->GetChildByName(objectName);
@@ -247,6 +257,6 @@ namespace Vox
         }
 
         property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
-        currentObject->PropertyChanged(*property);
+        currentObject->PropertyChanged(*property);*/
     }
 } // Vox

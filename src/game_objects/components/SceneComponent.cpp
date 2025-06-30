@@ -5,7 +5,7 @@
 namespace Vox
 {
     SceneComponent::SceneComponent(const ObjectInitializer& objectInitializer)
-        :Component(objectInitializer)
+        :Component(objectInitializer), parentAttachment(nullptr)
     {
     }
 
@@ -29,6 +29,12 @@ namespace Vox
             worldTransform = Transform(transform.GetMatrix() * localTransform.GetMatrix());
             OnTransformUpdated();
         }
+    }
+
+    void SceneComponent::AttachComponent(const std::shared_ptr<SceneComponent>& attachment)
+    {
+        attachedComponents.emplace_back(attachment);
+        attachment->SetParent(GetParent());
     }
 
     void SceneComponent::SetPosition(const glm::vec3 position)
@@ -91,15 +97,76 @@ namespace Vox
 
     World* SceneComponent::GetWorld() const
     {
-        return GetActor()->GetWorld();
+        return GetParent()->GetWorld();
     }
 
+    const Actor* SceneComponent::GetRoot() const
+    {
+        return nullptr;
+    }
+
+    std::vector<std::string> SceneComponent::GetRootPath() const
+    {
+        std::vector resultPath = { GetDisplayName() };
+        for (const SceneComponent* attachment = GetParentAttachment(); attachment; attachment = attachment->GetParentAttachment())
+        {
+            if (parentAttachment->GetParent())
+            {
+                resultPath.emplace_back(parentAttachment->GetDisplayName());
+            }
+        }
+        return resultPath;
+    }
+
+    std::shared_ptr<SceneComponent> SceneComponent::GetChildByPath(const std::vector<std::string>& path) const
+    {
+        if (path.empty())
+        {
+            return std::dynamic_pointer_cast<SceneComponent>(GetSharedThis());
+        }
+
+        std::shared_ptr<SceneComponent> currentObject;
+        for (auto iter = path.rbegin(); iter != path.rend(); ++iter)
+        {
+            currentObject = currentObject ? currentObject->GetAttachmentByName(*iter) : GetAttachmentByName(*iter);
+            if (!currentObject)
+            {
+                return nullptr;
+            }
+        }
+        return currentObject;
+    }
+
+    std::shared_ptr<SceneComponent> SceneComponent::GetAttachmentByName(const std::string& name) const
+    {
+        const auto& result = std::ranges::find_if(attachedComponents, [name](const std::shared_ptr<SceneComponent>& component)
+        {
+            return component->GetDisplayName() == name;
+        });
+
+        if (result == attachedComponents.end())
+        {
+            return {};
+        }
+
+        return *result;
+    }
+
+    SceneComponent* SceneComponent::GetParentAttachment() const
+    {
+        return parentAttachment;
+    }
+
+    const std::vector<std::shared_ptr<SceneComponent>>& SceneComponent::GetAttachments() const
+    {
+        return attachedComponents;
+    }
 
     void SceneComponent::UpdateTransform()
     {
-        if (const Actor* parent = GetActor())
+        if (const SceneComponent* attachment = GetParentAttachment())
         {
-            worldTransform = Transform(parent->GetTransform().GetMatrix() * localTransform.GetMatrix());
+            worldTransform = Transform(attachment->GetWorldTransform().GetMatrix() * localTransform.GetMatrix());
         }
         else
         {
@@ -107,5 +174,10 @@ namespace Vox
         }
 
         OnTransformUpdated();
+
+        for (const auto& attachment: attachedComponents)
+        {
+            attachment->UpdateParentTransform(worldTransform);
+        }
     }
 }

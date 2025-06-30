@@ -14,7 +14,7 @@ namespace Vox
     {
     }
 
-    ObjectInitializer::ObjectInitializer(Object* parent)
+    ObjectInitializer::ObjectInitializer(Actor* parent)
         :parent(parent)
     {
     }

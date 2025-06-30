@@ -26,7 +26,7 @@ namespace Vox
     class World;
 	struct MeshInstance;
 
-	class Character : public Actor
+	class Character : public Actor, Tickable
 	{
 	public:
 		Character(const ObjectInitializer& objectInitializer);

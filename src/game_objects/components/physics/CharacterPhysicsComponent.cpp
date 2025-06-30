@@ -117,8 +117,15 @@ namespace Vox
     {
         if (characterController)
         {
-            const glm::vec3 offset = GetActor()->GetTransform().position - GetWorldTransform().position;
-            GetActor()->SetPosition(Vector3From(characterController->GetPosition()) + offset);
+            if (SceneComponent* parent = GetParentAttachment())
+            {
+                const glm::vec3 offset = parent->GetWorldTransform().position - GetWorldTransform().position;
+                parent->SetPosition(Vector3From(characterController->GetPosition()) + offset);
+            }
+            else
+            {
+                SetPosition(Vector3From(characterController->GetPosition()));
+            }
         }
     }
 } // Vox

@@ -60,13 +60,13 @@ namespace Vox
 
     void MeshComponent::UpdateMeshFromPath()
     {
-        if (const Actor* parent = dynamic_cast<Actor*>(GetParent()))
+        if (const Actor* parent = GetParent())
         {
-            if (World* world = parent->GetWorld())
+            if (const World* world = parent->GetWorld())
             {
+                mesh = world->GetRenderer()->CreateMeshInstance(meshAsset.path.string());
                 if (mesh)
                 {
-                    mesh = parent->GetWorld()->GetRenderer()->CreateMeshInstance(meshAsset.path.string());
                     mesh->SetTransform(GetWorldTransform().GetMatrix());
 #ifdef EDITOR
                     RegisterClickCallback();
@@ -84,7 +84,10 @@ namespace Vox
 
     void MeshComponent::Select()
     {
-        mesh->GetMeshOwner()->GetOwner()->AddMeshOutline(mesh);
+        if (mesh)
+        {
+            mesh->GetMeshOwner()->GetOwner()->AddMeshOutline(mesh);
+        }
     }
 
     void MeshComponent::RegisterClickCallback()

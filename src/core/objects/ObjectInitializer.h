@@ -6,6 +6,7 @@
 
 namespace Vox
 {
+    class Actor;
     class Object;
     class World;
 
@@ -16,10 +17,10 @@ namespace Vox
          */
         ObjectInitializer();
         explicit ObjectInitializer(World* world);
-        explicit ObjectInitializer(Object* parent);
+        explicit ObjectInitializer(Actor* parent);
 
         World* world = nullptr;
-        Object* parent = nullptr;
+        Actor* parent = nullptr;
 
         /**
          * @brief Is this object's class the outermost class?

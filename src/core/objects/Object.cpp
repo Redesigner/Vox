@@ -8,16 +8,11 @@
 namespace Vox
 {
     Object::Object(const ObjectInitializer& objectInitializer)
-        :parent(objectInitializer.parent)
     {
     }
 
-    void Object::PostConstruct() // NOLINT(*-no-recursion)
+    void Object::PostConstruct()
     {
-        for (auto& child : children)
-        {
-            child->PostConstruct();
-        }
     }
 
     const std::vector<Property>& Object::GetProperties() const
@@ -37,24 +32,6 @@ namespace Vox
     void Object::SetName(const std::string& name)
     {
         displayName = name;
-    }
-
-    void Object::AddChild(const std::shared_ptr<Object>& child)
-    {
-        for (const auto& existingChild : children)
-        {
-            // check name collisions
-            if (existingChild->GetDisplayName() == child->GetDisplayName())
-            {
-                child->SetName(IncrementString(child->GetDisplayName()));
-            }
-        }
-        ChildAdded(children.emplace_back(child));
-    }
-
-    const std::vector<std::shared_ptr<Object>>& Object::GetChildren() const
-    {
-        return children;
     }
 
     // May need to create some kind of stack limit here
@@ -82,33 +59,12 @@ namespace Vox
             objectJson[displayName]["properties"].insert(propertyJson.begin(), propertyJson.end());
         }
 
-        if (!children.empty())
-        {
-            objectJson[displayName]["children"] = json::value_type::object();
-            for (const auto& child : children)
-            {
-                // Match children by names
-                json childJson = child->Serialize(defaultObject->GetChildByName(child->GetDisplayName()).get());
-                objectJson[displayName]["children"].insert(childJson.begin(), childJson.end());
-            }
-        }
-
-
-        if (objectJson[displayName]["children"].empty() && objectJson[displayName]["properties"].empty())
+        if (objectJson[displayName]["properties"].empty())
         {
             objectJson.erase(displayName);
             return objectJson;
         }
 
-        if (objectJson[displayName]["properties"].empty())
-        {
-            objectJson[displayName].erase("properties");
-        }
-
-        if (objectJson[displayName]["children"].empty())
-        {
-            objectJson[displayName].erase("children");
-        }
         return objectJson;
     }
 
@@ -133,123 +89,6 @@ namespace Vox
             result.emplace_back(context, property.GetName(), property.GetTypedVariant(this));
         }
 
-        if (!children.empty())
-        {
-            for (const auto& child : children)
-            {
-                std::vector<std::string> childContext = context;
-                childContext.emplace_back(child->GetDisplayName());
-                std::vector<PropertyOverride> childOverrides = child->GenerateOverrides(
-                    defaultObject->GetChildByName(child->GetDisplayName()).get(), childContext
-                );
-                result.insert(result.end(), childOverrides.begin(), childOverrides.end());
-            }
-        }
-
         return result;
-    }
-
-    Object* Object::GetParent() const
-    {
-        return parent;
-    }
-
-    const Object* Object::GetRoot() const
-    {
-        const Object* result = this;
-        for (; result->GetParent(); result = result->GetParent())
-        {
-        }
-        return result;
-    }
-
-    std::vector<std::string> Object::GetRootPath() const
-    {
-        std::vector resultPath = { GetDisplayName() };
-        for (const Object* parent = GetParent(); parent; parent = parent->GetParent())
-        {
-            if (parent->GetParent())
-            {
-                resultPath.emplace_back(parent->GetDisplayName());
-            }
-        }
-        return resultPath;
-    }
-
-    std::shared_ptr<Object> Object::GetChildByPath(const std::vector<std::string>& path) const
-    {
-        if (path.empty())
-        {
-            return GetSharedThis();
-        }
-
-        std::shared_ptr<Object> currentObject;
-        for (auto iter = path.rbegin(); iter != path.rend(); ++iter)
-        {
-            currentObject = currentObject ? currentObject->GetChildByName(*iter) : GetChildByName(*iter);
-            if (!currentObject)
-            {
-                return nullptr;
-            }
-        }
-        return currentObject;
-    }
-
-    std::shared_ptr<Object> Object::GetSharedThis() const
-    {
-        if (!parent)
-        {
-            return {};
-        }
-
-        if (auto result = parent->GetSharedChild(this))
-        {
-            return result;
-        }
-
-        assert(true && "Child object may be orphaned");
-        return {};
-    }
-
-    std::shared_ptr<Object> Object::GetSharedChild(const Object* object) const
-    {
-        auto result = std::ranges::find_if(children, [object](const std::shared_ptr<Object>& childObject)
-        {
-            return childObject.get() == object;
-        });
-
-        if (result != children.end())
-        {
-            return *result;
-        }
-
-        return {};
-    }
-
-    std::shared_ptr<Object> Object::GetChildByName(const std::string& name) const
-    {
-        for (const auto& child : children)
-        {
-            if (child->GetDisplayName() == name)
-            {
-                return child;
-            }
-        }
-
-        return {};
-    }
-
-    bool Object::RemoveChild(const Object* object)
-    {
-        bool childErased = std::erase_if(children, [object](const std::shared_ptr<Object>& child)
-        {
-            return child.get() == object;
-        });
-
-        if (childErased)
-        {
-            ChildRemoved(object);
-        }
-        return childErased;
     }
 }

@@ -11,7 +11,7 @@ namespace  Vox
     class Component;
     class World;
 
-    class Actor : public Object, public Tickable
+    class Actor : public Object
     {
     public:
         explicit Actor(const ObjectInitializer& objectInitializer);
@@ -27,8 +27,6 @@ namespace  Vox
         void SetScale(glm::vec3 scale);
         void SetTransform(const Transform& transformIn);
 
-        void Tick(float deltaTime) override;
-
         [[nodiscard]] World* GetWorld() const;
 
 #ifdef EDITOR
@@ -43,13 +41,17 @@ namespace  Vox
             ObjectInitializer objectInitializer;
             objectInitializer.world = world;
             objectInitializer.parent = this;
-            auto result = std::static_pointer_cast<T>(attachedComponents.emplace_back(Component::Create<T>(objectInitializer, std::forward<Args>(args)...)));
-            AddChild(result);
-            if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
+            auto newComponent = Component::Create<T>(objectInitializer, std::forward<Args>(args)...);
+            AddChild(newComponent);
+            if (rootComponent)
             {
-                tickableComponents.emplace_back(std::move(tickable));
+                rootComponent->AttachComponent(newComponent);
             }
-            return result;
+            else
+            {
+                rootComponent = newComponent;
+            }
+            return newComponent;
         }
 
         template <typename... Args>
@@ -60,30 +62,89 @@ namespace  Vox
             ObjectInitializer objectInitializer;
             objectInitializer.world = world;
             objectInitializer.parent = this;
-            auto result = std::dynamic_pointer_cast<SceneComponent>(attachedComponents.emplace_back(
-                std::dynamic_pointer_cast<SceneComponent>(componentClass->GetConstructor()(objectInitializer, std::forward<Args>(args)...)))
-            );
-            AddChild(result);
-            if (auto tickable = std::dynamic_pointer_cast<Tickable>(result))
+            auto newComponent = componentClass->Construct<SceneComponent>(objectInitializer);
+            AddChild(newComponent);
+            if (rootComponent)
             {
-                tickableComponents.emplace_back(std::move(tickable));
+                rootComponent->AttachComponent(newComponent);
             }
-            return result;
+            else
+            {
+                rootComponent = newComponent;
+            }
+            return newComponent;
         }
 
-    protected:
-        void ChildAdded(const std::shared_ptr<Object>& child) override;
+        /**
+         * @brief Get all children
+         * @return List of all children
+         */
+        [[nodiscard]] const std::vector<std::shared_ptr<Component>>& GetChildren() const;
 
-        void ChildRemoved(const Object* object) override;
+        /**
+         * @brief Get a shared_ptr of a child component
+         * @param component Component to get the shared_ptr of
+         * @return shared_ptr. Can be nullptr if object is not a child of this
+         */
+        [[nodiscard]] std::shared_ptr<Component> GetSharedChild(const Component* component) const;
+
+        /**
+         * @brief Lookup a child component by name
+         * @param name Name to search for
+         * @return shared_ptr. Can be nullptr if no child has this name
+         */
+        [[nodiscard]] std::shared_ptr<Component> GetChildByName(const std::string& name) const;
+
+        /**
+         * @brief Add an already constructed component to this one, as a child. Implies ownership,
+         * even though other objects may have weak_ptrs to the child. The child will be renamed
+         * if its name matches another child.
+         * @param child Child to be added
+         */
+        void AddChild(const std::shared_ptr<Component>& child);
+
+        /**
+         * @brief Remove a child object
+         * @param component component to compare raw_ptrs with
+         * @return true if the object was removed, otherwise false
+         */
+        bool RemoveChild(const Component* component);
+
+    protected:
+        /**
+         * @brief Construct and add a child to this.
+         * @tparam T Object type to construct. Must be derived from Object
+         * @param name Child object's name
+         */
+        template<typename T>
+        void CreateChild(const std::string& name) requires Derived<T, Object>
+        {
+            std::shared_ptr<T> newObject = T::template GetConstructor<T>()(ObjectInitializer(this));
+            newObject->SetName(name);
+            AddChild(newObject);
+        }
+
+        /**
+         * @brief Method called when a child is removed. Can be used for additional
+         * cleanup logic, for instance removing an attachment from an actor
+         * @param child ptr to the component that was removed. May be null
+         */
+        void ChildRemoved(const Component* child);
+
+        /**
+         * @brief Method called when a child is added to this.
+         * @param child shared_ptr to the object that was added
+         */
+        void ChildAdded(const std::shared_ptr<Component>& child);
     
     private:
         void UpdateChildTransforms() const;
-        
+
         Transform transform;
 
-        std::vector<std::shared_ptr<SceneComponent>> attachedComponents;
+        std::shared_ptr<SceneComponent> rootComponent;
 
-        std::vector<std::shared_ptr<Tickable>> tickableComponents;
+        std::vector<std::shared_ptr<Component>> children;
 
         World* world;
 

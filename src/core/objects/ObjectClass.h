@@ -22,6 +22,9 @@ namespace Vox
          */
         [[nodiscard]] Constructor GetConstructor() const;
 
+        template<typename T>
+        [[nodiscard]] std::shared_ptr<T> Construct(ObjectInitializer objectInitializer) const requires Derived<T, Object>;
+
         /**
          * @brief Get the parent class of this (e.g., Actor when called from Character class)
          * @return Parent class. Can be nullptr if the parent class is Object (Object does not have its own ObjectClass)
@@ -99,6 +102,13 @@ namespace Vox
          */
         std::shared_ptr<Object> defaultObject;
     };
+
+    template <typename T>
+    std::shared_ptr<T> ObjectClass::Construct(const ObjectInitializer objectInitializer) const requires Derived<T, Object>
+    {
+        assert(IsA<T>());
+        return std::dynamic_pointer_cast<T>(GetConstructor()(objectInitializer));
+    }
 
 
     template <>

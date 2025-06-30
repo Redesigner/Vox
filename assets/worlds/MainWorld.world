@@ -1,43 +1,7 @@
 {
     "objects": {
         "": {
-            "class": "test.json",
-            "properties": {
-                "transform": {
-                    "type": "transform",
-                    "value": [
-                        -1.5124914646148682,
-                        2.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0,
-                        1.0
-                    ]
-                }
-            },
-            "children": {
-                "Camera Component_Default": {
-                    "properties": {
-                        "localTransform": {
-                            "type": "transform",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                -1.2380002737045288,
-                                -2.6740174293518066,
-                                0.0,
-                                1.0,
-                                1.0,
-                                1.0
-                            ]
-                        }
-                    }
-                }
-            }
+            "class": "test.json"
         }
     }
 }

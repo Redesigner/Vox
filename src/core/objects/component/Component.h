@@ -12,8 +12,6 @@ namespace Vox
     public:
         explicit Component(const ObjectInitializer& objectInitializer);
 
-        [[nodiscard]] Actor* GetActor() const;
-
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
         
         template <class T, typename... Args>
@@ -23,7 +21,23 @@ namespace Vox
             return result;
         }
 
+        /**
+         * @brief Get the parent object of this
+         * @return Parent. Can be nullptr
+         */
+        [[nodiscard]] Actor* GetParent() const;
+
+        void SetParent(Actor* parentIn) const;
+
+        /**
+         * @brief Get a shared_ptr to this object from the parent
+         * @return shared_ptr to this. Can be nullptr if parent is nullptr
+         */
+        [[nodiscard]] std::shared_ptr<Component> GetSharedThis() const;
+
     private:
+        Actor* parent;
+
         IMPLEMENT_OBJECT_BASE(Component)
     };
 }

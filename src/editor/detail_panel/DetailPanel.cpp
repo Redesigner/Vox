@@ -94,7 +94,7 @@ namespace Vox
 
     void DetailPanel::ResetProperty(Object* object, const Property& property)
     {
-        const auto& root = object->GetRoot();
+        /*const auto& root = object->GetRoot();
         const auto& rootClass = root->native ? root->GetClass()->GetParentClass() : root->GetClass();
         const Object* defaultRootObject = rootClass->GetDefaultObject();
         const std::vector<std::string> objectPath = object->GetRootPath();
@@ -106,6 +106,6 @@ namespace Vox
         }
         TypedPropertyVariant defaultValue = property.GetTypedVariant(defaultObject.get());
         property.SetValue(object, property.GetType(), defaultValue.value);
-        object->PropertyChanged(property);
+        object->PropertyChanged(property);*/
     }
 }

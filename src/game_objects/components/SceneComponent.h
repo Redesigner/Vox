@@ -13,6 +13,8 @@ namespace Vox
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
         void UpdateParentTransform(const Transform& transform);
+
+        void AttachComponent(const std::shared_ptr<SceneComponent>& attachment);
         
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);
@@ -28,6 +30,23 @@ namespace Vox
 
         [[nodiscard]] World* GetWorld() const;
 
+        [[nodiscard]] const Actor* GetRoot() const;
+
+        [[nodiscard]] std::vector<std::string> GetRootPath() const;
+
+        [[nodiscard]] std::shared_ptr<SceneComponent> GetChildByPath(const std::vector<std::string>& path) const;
+
+        /**
+         * @brief Lookup a child component by name
+         * @param name Name to search for
+         * @return shared_ptr. Can be nullptr if no child has this name
+         */
+        [[nodiscard]] std::shared_ptr<SceneComponent> GetAttachmentByName(const std::string& name) const;
+
+        [[nodiscard]] SceneComponent* GetParentAttachment() const;
+
+        [[nodiscard]] const std::vector<std::shared_ptr<SceneComponent>>& GetAttachments() const;
+
 #ifdef EDITOR
         virtual void Select() {}
 #endif
@@ -37,6 +56,10 @@ namespace Vox
 
     private:
         void UpdateTransform();
+
+        std::vector<std::shared_ptr<SceneComponent>> attachedComponents;
+
+        SceneComponent* parentAttachment;
         
         Transform worldTransform;
         

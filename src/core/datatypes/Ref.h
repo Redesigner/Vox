@@ -56,19 +56,22 @@ namespace Vox
 			container = other.container;
 			index = other.index;
 			id = other.id;
-			container->IncrementRefCount({index, id});
+		    if (container)
+		    {
+			    container->IncrementRefCount({index, id});
+		    }
 			return *this;
 		}
 
 		T* operator->()
 		{
-			// assert(container);
+			assert(container);
 			return container->Get(index, id);
 		}
 
 		const T* operator->() const
 		{
-			// assert(container);
+			assert(container);
 			return container->Get(index, id);
 		}
 

@@ -55,19 +55,22 @@ namespace Vox
 
             if (auto rootActor = std::dynamic_pointer_cast<Actor>(rootObject))
             {
+                ObjectInitializer objectInitializer;
+                objectInitializer.parent = rootActor.get();
+                objectInitializer.world = rootActor->GetWorld();
+
                 if (componentClass->IsA<SceneComponent>())
                 {
                     const std::shared_ptr<SceneComponent> newComponent = rootActor->AttachComponent(componentClass.get());
                     newComponent->native = false;
+                    newComponent->PostConstruct();
                 }
                 else
                 {
-                    ObjectInitializer objectInitializer;
-                    objectInitializer.parent = rootActor.get();
-                    objectInitializer.world = rootActor->GetWorld();
-                    const std::shared_ptr<Object> newComponent = componentClass->GetConstructor()(objectInitializer);
+                    const std::shared_ptr<Component> newComponent = componentClass->Construct<Component>(objectInitializer);
                     newComponent->native = false;
                     rootActor->AddChild(newComponent);
+                    newComponent->PostConstruct();
                 }
             }
         });
@@ -99,21 +102,20 @@ namespace Vox
                 return;
             }
 
-            std::weak_ptr<Object> selected = outline->GetSelectedObject();
-            if (selected.expired())
-            {
-                return;
-            }
-
-            std::shared_ptr<Object> selectedObjectLock = selected.lock();
+            const std::shared_ptr<Object> selectedObjectLock = outline->GetSelectedObject().lock();
             if (selectedObjectLock->native)
             {
                 return;
             }
 
-            if (selectedObjectLock->GetParent()->RemoveChild(selectedObjectLock.get()))
+            std::shared_ptr<Component> selectedComponent = std::dynamic_pointer_cast<Component>(selectedObjectLock);
+
+            if (selectedComponent)
             {
-                VoxLog(Display, Game, "object deleted");
+                if (selectedComponent->GetParent()->RemoveChild(selectedComponent.get()))
+                {
+                    VoxLog(Display, Game, "object deleted");
+                }
             }
         });
     }

@@ -2,7 +2,9 @@
 #include <functional>
 #include <regex>
 #include <vector>
+// ReSharper disable once CppUnusedIncludeDirective -- Need this for the macro
 #include <fmt/format.h>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <nlohmann/adl_serializer.hpp>
 
 #include "prefabs/PropertyOverride.h"
@@ -71,7 +73,7 @@ namespace Vox
         virtual void BuildProperties(std::vector<Property>& propertiesInOut) = 0;
 
         /**
-         * @brief Called after an object is constructed, or if it belongs to a prefab, <b>after</b> the properties have been overriden.
+         * @brief Called after an object is constructed, or if it belongs to a prefab, <b>after</b> the properties have been overridden.
          * Must call Super::PostConstruct, or child objects will not have PostConstruct called.
          */
         virtual void PostConstruct();
@@ -110,20 +112,6 @@ namespace Vox
         [[nodiscard]] const std::string& GetDisplayName() const;
 
         /**
-         * @brief Get all children
-         * @return List of all children
-         */
-        [[nodiscard]] const std::vector<std::shared_ptr<Object>>& GetChildren() const;
-
-        /**
-         * @brief Add an already constructed object to this one, as a child. Implies ownership,
-         * even though other objects may have weak_ptrs to the child. The child will be renamed
-         * if its name matches another child.
-         * @param child Child to be added
-         */
-        void AddChild(const std::shared_ptr<Object>& child);
-
-        /**
          * @brief Set the display name of this object instance
          * @param name New name
          */
@@ -143,45 +131,6 @@ namespace Vox
         [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const ObjectClass* defaultClass = nullptr) const;
 
         /**
-         * @brief Get the parent object of this
-         * @return Parent. Can be nullptr
-         */
-        [[nodiscard]] Object* GetParent() const;
-
-        [[nodiscard]] const Object* GetRoot() const;
-
-        [[nodiscard]] std::vector<std::string> GetRootPath() const;
-
-        [[nodiscard]] std::shared_ptr<Object> GetChildByPath(const std::vector<std::string>& path) const;
-
-        /**
-         * @brief Get a shared_ptr to this object from the parent
-         * @return shared_ptr to this. Can be nullptr if parent is nullptr
-         */
-        [[nodiscard]] std::shared_ptr<Object> GetSharedThis() const;
-
-        /**
-         * @brief Get a shared_ptr of a child object
-         * @param object Object to get the shared_ptr of
-         * @return shared_ptr. Can be nullptr if object is not a child of this
-         */
-        [[nodiscard]] std::shared_ptr<Object> GetSharedChild(const Object* object) const;
-
-        /**
-         * @brief Lookup a child Object by name
-         * @param name Name to search for
-         * @return shared_ptr. Can be nullptr if no child has this name
-         */
-        [[nodiscard]] std::shared_ptr<Object> GetChildByName(const std::string& name) const;
-
-        /**
-         * @brief Remove a child object
-         * @param object object to compare raw_ptrs with
-         * @return true if the object was removed, otherwise false
-         */
-        bool RemoveChild(const Object* object);
-
-        /**
          * @brief true if this object was created from a .cpp file, false if the object was created from a prefab
          */
         bool native = true;
@@ -193,40 +142,10 @@ namespace Vox
         std::shared_ptr<ObjectClass> localClass;
 
     protected:
-        /**
-         * @brief Construct and add a child to this.
-         * @tparam T Object type to construct. Must be derived from Object
-         * @param name Child object's name
-         */
-        template<typename T>
-        void CreateChild(const std::string& name) requires Derived<T, Object>
-        {
-            std::shared_ptr<T> newObject = T::template GetConstructor<T>()(ObjectInitializer(this));
-            newObject->SetName(name);
-            AddChild(newObject);
-        }
-
-        /**
-         * @brief Method called when a child is removed. Can be used for additional
-         * cleanup logic, for instance removing an attachment from an actor
-         * @param object ptr to the object that was removed
-         */
-        virtual void ChildRemoved(const Object* object) {};
-
-        /**
-         * @brief Method called when a child is added to this.
-         * @param child shared_ptr to the object that was added
-         */
-        virtual void ChildAdded(const std::shared_ptr<Object>& child) {};
-
         std::string displayName;
 
     private:
         [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const Object* defaultObject, std::vector<std::string>& context) const;
 
-        // @TODO: rework this into weak ptrs?
-        Object* parent;
-
-        std::vector<std::shared_ptr<Object>> children;
     };
 }

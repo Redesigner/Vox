@@ -69,7 +69,16 @@ namespace Vox
             {
                 gizmo->SetTransform(component->GetWorldTransform());
                 gizmo->Update();
-                Transform newTransform = Transform(glm::inverse(component->GetActor()->GetTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
+
+                Transform newTransform;
+                if (const SceneComponent* parentAttachment = component->GetParentAttachment())
+                {
+                    newTransform = Transform(glm::inverse(parentAttachment->GetWorldTransform().GetMatrix()) * gizmo->GetTransform().GetMatrix());
+                }
+                else
+                {
+                    newTransform = gizmo->GetTransform();
+                }
                 component->SetTransform(newTransform);
             }
 
@@ -144,7 +153,7 @@ namespace Vox
         {
             if (const Actor* actor = dynamic_cast<Actor*>(object.get()))
             {
-                for (const std::shared_ptr<Object>& component : actor->GetChildren())
+                for (const std::shared_ptr<Component>& component : actor->GetChildren())
                 {
                     if (ImGui::Selectable(
                         fmt::format("\t{}", component->GetDisplayName()).c_str(),

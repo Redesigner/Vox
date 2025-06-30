@@ -157,7 +157,7 @@ namespace Vox
             const auto objectClass = ServiceLocator::GetObjectService()->GetObjectClass(object.className);
             const std::shared_ptr<Object> child = objects.emplace_back(objectClass->GetConstructor()(objectInitializer));
 
-            for (const auto& propertyOverride : object.worldContextOverrides)
+            /*for (const auto& propertyOverride : object.worldContextOverrides)
             {
                 std::shared_ptr<Object> currentObject = child;
                 for (const auto& objectName : propertyOverride.path)
@@ -179,7 +179,7 @@ namespace Vox
 
                 property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
                 currentObject->PropertyChanged(*property);
-            }
+            }*/
             child->SetName(object.name);
             child->native = false;
             child->PostConstruct();
