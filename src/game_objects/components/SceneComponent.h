@@ -24,7 +24,7 @@ namespace Vox
         [[nodiscard]] glm::vec3 GetLocalPosition() const;
         [[nodiscard]] glm::quat GetLocalRotation() const;
         [[nodiscard]] glm::vec3 GetLocalScale() const;
-        [[nodiscard]] Transform GetLocalTransform() const;
+        [[nodiscard]] const Transform& GetLocalTransform() const;
 
         [[nodiscard]] Transform GetWorldTransform() const;
 
@@ -44,6 +44,8 @@ namespace Vox
         [[nodiscard]] std::shared_ptr<SceneComponent> GetAttachmentByName(const std::string& name) const;
 
         [[nodiscard]] SceneComponent* GetParentAttachment() const;
+
+        void SetParentAttachment(SceneComponent* parent);
 
         [[nodiscard]] const std::vector<std::shared_ptr<SceneComponent>>& GetAttachments() const;
 

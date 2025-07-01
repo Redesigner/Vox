@@ -14,7 +14,7 @@ namespace Vox
     class CharacterPhysicsComponent : public SceneComponent, public Tickable
     {
     public:
-        CharacterPhysicsComponent(const ObjectInitializer& objectInitializer);
+        explicit CharacterPhysicsComponent(const ObjectInitializer& objectInitializer);
         CharacterPhysicsComponent(const ObjectInitializer& objectInitializer, float radius, float halfHeight);
 
         void AddImpulse(glm::vec3 impulse);

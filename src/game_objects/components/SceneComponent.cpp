@@ -34,6 +34,7 @@ namespace Vox
     void SceneComponent::AttachComponent(const std::shared_ptr<SceneComponent>& attachment)
     {
         attachedComponents.emplace_back(attachment);
+        attachment->SetParentAttachment(this);
         // attachment->SetParent(GetParent());
     }
 
@@ -85,7 +86,7 @@ namespace Vox
         return localTransform.scale;
     }
 
-    Transform SceneComponent::GetLocalTransform() const
+    const Transform& SceneComponent::GetLocalTransform() const
     {
         return localTransform;
     }
@@ -155,6 +156,11 @@ namespace Vox
     SceneComponent* SceneComponent::GetParentAttachment() const
     {
         return parentAttachment;
+    }
+
+    void SceneComponent::SetParentAttachment(SceneComponent* parent)
+    {
+        parentAttachment = parent;
     }
 
     const std::vector<std::shared_ptr<SceneComponent>>& SceneComponent::GetAttachments() const
