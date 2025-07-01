@@ -2,9 +2,9 @@
 
 #include "core/objects/TestObject.h"
 #include "core/objects/TestObjectChild.h"
-#include "core/objects/actor/Actor.h"
-#include "core/objects/actor/TestActor.h"
-#include "core/objects/component/TestComponent.h"
+#include "../../game_objects/actors/Actor.h"
+#include "../../game_objects/actors/TestActor.h"
+#include "../../game_objects/components/TestComponent.h"
 
 #include "game_objects/actors/character/Character.h"
 #include "game_objects/components/CameraComponent.h"

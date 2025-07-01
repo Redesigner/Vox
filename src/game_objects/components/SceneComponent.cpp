@@ -1,6 +1,6 @@
 ﻿#include "SceneComponent.h"
 
-#include "core/objects/actor/Actor.h"
+#include "../actors/Actor.h"
 
 namespace Vox
 {
@@ -35,7 +35,6 @@ namespace Vox
     {
         attachedComponents.emplace_back(attachment);
         attachment->SetParentAttachment(this);
-        // attachment->SetParent(GetParent());
     }
 
     void SceneComponent::SetPosition(const glm::vec3 position)

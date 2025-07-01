@@ -8,8 +8,8 @@
 
 #include "core/objects/world/World.h"
 #include "core/objects/prefabs/Prefab.h"
-#include "core/objects/actor/Actor.h"
-#include "core/objects/component/Component.h"
+#include "../../game_objects/actors/Actor.h"
+#include "../../game_objects/components/Component.h"
 #include "core/services/InputService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"

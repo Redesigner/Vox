@@ -1,7 +1,6 @@
-﻿#include "TestActor.h"
+﻿#include "game_objects/actors/TestActor.h"
 
-#include "core/objects/component/Component.h"
-#include "core/objects/component/TestComponent.h"
+#include "../components/TestComponent.h"
 #include "game_objects/components/MeshComponent.h"
 #include "game_objects/components/SkeletalMeshComponent.h"
 

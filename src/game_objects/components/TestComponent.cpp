@@ -1,4 +1,4 @@
-﻿#include "TestComponent.h"
+﻿#include "game_objects/components/TestComponent.h"
 
 namespace Vox
 {

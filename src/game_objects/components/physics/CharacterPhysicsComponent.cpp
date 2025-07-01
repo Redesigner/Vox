@@ -5,7 +5,7 @@
 #include "CharacterPhysicsComponent.h"
 
 #include "core/objects/world/World.h"
-#include "core/objects/actor/Actor.h"
+#include "../../actors/Actor.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
 

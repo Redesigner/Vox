@@ -2,7 +2,7 @@
 
 #include "core/logging/Logging.h"
 #include "core/objects/world/World.h"
-#include "core/objects/actor/Actor.h"
+#include "../actors/Actor.h"
 #include "physics/PhysicsServer.h"
 #include "physics/TypeConversions.h"
 #include "rendering/camera/Camera.h"

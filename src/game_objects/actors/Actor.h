@@ -2,7 +2,7 @@
 #include "core/objects/Tickable.h"
 #include "core/objects/Object.h"
 #include "core/objects/ObjectClass.h"
-#include "core/objects/component/Component.h"
+#include "../components/Component.h"
 #include "game_objects/components/SceneComponent.h"
 
 

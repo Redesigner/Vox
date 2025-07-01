@@ -1,7 +1,7 @@
-﻿#include "Component.h"
+﻿#include "game_objects/components/Component.h"
 
 #include "core/logging/Logging.h"
-#include "core/objects/actor/Actor.h"
+#include "game_objects/actors/Actor.h"
 
 namespace Vox
 {

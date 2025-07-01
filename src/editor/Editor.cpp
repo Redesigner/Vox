@@ -12,7 +12,7 @@
 #include "actor_editor/ActorEditor.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ServiceLocator.h"
-#include "core/objects/actor/Actor.h"
+#include "../game_objects/actors/Actor.h"
 #include "core/services/ObjectService.h"
 #include "detail_panel/DetailPanel.h"
 #include "editor/AssetDisplayWindow.h"

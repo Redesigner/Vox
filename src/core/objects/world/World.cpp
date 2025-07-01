@@ -2,7 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "core/objects/actor/Actor.h"
+#include "../../../game_objects/actors/Actor.h"
 #include "core/logging/Logging.h"
 #include "core/math/Strings.h"
 #include "core/objects/Tickable.h"

@@ -7,7 +7,7 @@
 
 #include "core/datatypes/DelegateHandle.h"
 #include "core/datatypes/Ref.h"
-#include "core/objects/actor/Actor.h"
+#include "../Actor.h"
 
 namespace Vox
 {
