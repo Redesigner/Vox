@@ -29,6 +29,8 @@ namespace  Vox
 
         [[nodiscard]] World* GetWorld() const;
 
+        [[nodiscard]] std::shared_ptr<SceneComponent> GetRootComponent() const;
+
 #ifdef EDITOR
         void Select() const;
 #endif
@@ -42,7 +44,6 @@ namespace  Vox
             objectInitializer.world = world;
             objectInitializer.parent = this;
             auto newComponent = Component::Create<T>(objectInitializer, std::forward<Args>(args)...);
-            AddChild(newComponent);
             if (rootComponent)
             {
                 rootComponent->AttachComponent(newComponent);
@@ -51,6 +52,8 @@ namespace  Vox
             {
                 rootComponent = newComponent;
             }
+            AddChild(newComponent);
+            newComponent->PostConstruct();
             return newComponent;
         }
 

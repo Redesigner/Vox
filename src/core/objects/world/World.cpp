@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "core/objects/actor/Actor.h"
 #include "core/logging/Logging.h"
 #include "core/math/Strings.h"
 #include "core/objects/Tickable.h"
@@ -15,32 +16,33 @@
 
 namespace Vox
 {
-    const std::vector<std::shared_ptr<Object>>& World::GetObjects() const
+    const std::vector<std::shared_ptr<Actor>>& World::GetActors() const
     {
-        return objects;
+        return actors;
     }
 
-    std::shared_ptr<Object> World::CreateObject(const std::string& className)
+    std::shared_ptr<Actor> World::CreateActor(const std::string& className)
     {
         if (const std::shared_ptr<ObjectClass> objectClass = ServiceLocator::GetObjectService()->GetObjectClass(className))
         {
             auto objectInitializer = ObjectInitializer(this);
             objectInitializer.rootObject = true;
             const auto& constructor = objectClass->GetConstructor();
-            auto result = objects.emplace_back(constructor(objectInitializer));
+            // @TODO: Implement actor class or other method to avoid dynamic casts here
+            auto result = actors.emplace_back(std::dynamic_pointer_cast<Actor>(constructor(objectInitializer)));
             assert(result);
-            PostObjectConstruct(result);
+            PostActorConstruct(result);
             return result;
         }
         return nullptr;
     }
 
-    std::shared_ptr<Object> World::CreateObject(const ObjectClass* objectClass)
+    std::shared_ptr<Actor> World::CreateActor(const ObjectClass* objectClass)
     {
         auto objectInitializer = ObjectInitializer(this);
         objectInitializer.rootObject = true;
-        auto result = objects.emplace_back(objectClass->GetConstructor()(objectInitializer));
-        PostObjectConstruct(result);
+        auto result = actors.emplace_back(std::dynamic_pointer_cast<Actor>(objectClass->GetConstructor()(objectInitializer)));
+        PostActorConstruct(result);
         return result;
     }
 
@@ -54,11 +56,11 @@ namespace Vox
         tickManager.Tick(deltaTime);
     }
 
-    void World::DestroyObject(const std::shared_ptr<Object>& object)
+    void World::DestroyActor(const std::shared_ptr<Actor>& actor)
     {
-        std::erase_if(objects, [object](const std::shared_ptr<Object>& ownedObject)
+        std::erase_if(actors, [actor](const std::shared_ptr<Object>& ownedObject)
         {
-           return ownedObject == object;
+           return ownedObject == actor;
         });
     }
 
@@ -138,7 +140,7 @@ namespace Vox
     {
         SavedWorld result;
 
-        for (const std::shared_ptr<Object>& child : objects)
+        for (const std::shared_ptr<Actor>& child : actors)
         {
             auto tempPrefabContext = PrefabContext(child.get(), child->GetClass());
             result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), std::move(tempPrefabContext.propertyOverrides));
@@ -148,14 +150,14 @@ namespace Vox
 
     void World::Load(const SavedWorld& savedWorld)
     {
-        objects.clear();
+        actors.clear();
 
         for (const SavedWorldObject& object : savedWorld.savedObjects)
         {
             auto objectInitializer = ObjectInitializer(this);
             objectInitializer.rootObject = true;
             const auto objectClass = ServiceLocator::GetObjectService()->GetObjectClass(object.className);
-            const std::shared_ptr<Object> child = objects.emplace_back(objectClass->GetConstructor()(objectInitializer));
+            const std::shared_ptr<Actor> child = actors.emplace_back(std::dynamic_pointer_cast<Actor>(objectClass->GetConstructor()(objectInitializer)));
 
             /*for (const auto& propertyOverride : object.worldContextOverrides)
             {
@@ -183,7 +185,7 @@ namespace Vox
             child->SetName(object.name);
             child->native = false;
             child->PostConstruct();
-            PostObjectConstruct(child);
+            PostActorConstruct(child);
         }
     }
 
@@ -253,49 +255,49 @@ namespace Vox
         ServiceLocator::GetInputService()->UnregisterKeyboardCallback(SDL_SCANCODE_PAUSE, togglePauseHandle);
     }
 
-    void World::PostObjectConstruct(const std::shared_ptr<Object>& object)
+    void World::PostActorConstruct(const std::shared_ptr<Actor>& actor)
     {
-        CheckObjectName(object);
-        if (const auto tickable = std::dynamic_pointer_cast<Tickable>(object))
+        CheckActorName(actor);
+        if (const auto tickable = std::dynamic_pointer_cast<Tickable>(actor))
         {
             tickManager.RegisterTickable(tickable);
         }
 
         // Objects are never native to a world!
-        object->native = false;
+        actor->native = false;
     }
 
-    void World::CheckObjectName(const std::shared_ptr<Object>& object) const
+    void World::CheckActorName(const std::shared_ptr<Actor>& actor) const
     {
-        std::string objectName = object->GetDisplayName();
-        while (FindObject(object, objectName))
+        std::string objectName = actor->GetDisplayName();
+        while (FindActor(actor, objectName))
         {
             objectName = IncrementString(objectName);
         }
-        object->SetName(objectName);
+        actor->SetName(objectName);
     }
 
-    std::shared_ptr<Object> World::FindObject(const std::string& name) const
+    std::shared_ptr<Actor> World::FindActor(const std::string& name) const
     {
-        auto result = std::ranges::find_if(objects, [name](const std::shared_ptr<Object>& child)
+        auto result = std::ranges::find_if(actors, [name](const std::shared_ptr<Actor>& child)
         {
             return name == child->GetDisplayName();
         });
-        if (result == objects.end())
+        if (result == actors.end())
         {
             return nullptr;
         }
         return *result;
     }
 
-    std::shared_ptr<Object> World::FindObject(const std::shared_ptr<Object>& exclude,
+    std::shared_ptr<Actor> World::FindActor(const std::shared_ptr<Actor>& exclude,
         const std::string& name) const
     {
-        auto result = std::ranges::find_if(objects, [exclude, name](const std::shared_ptr<Object>& child)
+        auto result = std::ranges::find_if(actors, [exclude, name](const std::shared_ptr<Actor>& child)
         {
             return child != exclude && name == child->GetDisplayName();
         });
-        if (result == objects.end())
+        if (result == actors.end())
         {
             return nullptr;
         }

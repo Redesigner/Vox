@@ -6,6 +6,12 @@
 
 namespace Vox
 {
+    class SceneComponent;
+}
+
+namespace Vox
+{
+    class Component;
     class Gizmo;
     class Object;
     class World;
@@ -32,6 +38,9 @@ namespace Vox
 
     private:
         void DrawObject(const std::shared_ptr<Object>& object);
+
+        void DrawComponent(const std::shared_ptr<Component>& component);
+        void DrawSceneComponent(const std::shared_ptr<SceneComponent>& sceneComponent);
 
         std::weak_ptr<Object> currentlySelectedObject;
 

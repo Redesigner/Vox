@@ -15,13 +15,13 @@ namespace Vox
 
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
+        void PostConstruct() override;
+
     protected:
         void OnTransformUpdated() override;
 
         void PropertyChanged(const Property& property) override;
 
-        void PostConstruct() override;
-        
     private:
         void UpdateMeshFromPath();
 

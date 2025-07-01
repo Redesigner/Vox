@@ -26,10 +26,10 @@ namespace Vox
     class World;
 	struct MeshInstance;
 
-	class Character : public Actor, Tickable
+	class Character : public Actor, public Tickable
 	{
 	public:
-		Character(const ObjectInitializer& objectInitializer);
+		explicit Character(const ObjectInitializer& objectInitializer);
         ~Character() override;
 
 		void Tick(float deltaTime) override;

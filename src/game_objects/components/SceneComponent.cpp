@@ -34,7 +34,7 @@ namespace Vox
     void SceneComponent::AttachComponent(const std::shared_ptr<SceneComponent>& attachment)
     {
         attachedComponents.emplace_back(attachment);
-        attachment->SetParent(GetParent());
+        // attachment->SetParent(GetParent());
     }
 
     void SceneComponent::SetPosition(const glm::vec3 position)

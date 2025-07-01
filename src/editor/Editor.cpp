@@ -40,7 +40,7 @@ namespace Vox
                 if (!currentWorld.expired())
                 {
                     const auto objectClassName = static_cast<const char*>(data);
-                    currentWorld.lock()->CreateObject(std::string(objectClassName));
+                    currentWorld.lock()->CreateActor(std::string(objectClassName));
                 }
             });
         primaryViewport->SetDragFilter("OBJECT_CLASS_NAME");

@@ -93,6 +93,11 @@ namespace Vox
         GenerateController();
     }
 
+    Tickable::TickOrder CharacterPhysicsComponent::GetTickOrder()
+    {
+        return TickOrder::Physics;
+    }
+
     void CharacterPhysicsComponent::OnTransformUpdated()
     {
         SceneComponent::OnTransformUpdated();

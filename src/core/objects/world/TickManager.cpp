@@ -52,19 +52,30 @@ namespace Vox
 
     void TickManager::Play()
     {
+        RemoveExpiredTickables();
+
         for (const auto& tickable : prePhysicsTickables)
         {
-            tickable.lock()->Play();
+            if (const auto& tickLocked = tickable.lock())
+            {
+                tickLocked->Play();
+            }
         }
 
         for (const auto& tickable : physicsTickables)
         {
-            tickable.lock()->Play();
+            if (const auto& tickLocked = tickable.lock())
+            {
+                tickLocked->Play();
+            }
         }
 
         for (const auto& tickable : gameTickables)
         {
-            tickable.lock()->Play();
+            if (const auto& tickLocked = tickable.lock())
+            {
+                tickLocked->Play();
+            }
         }
     }
 

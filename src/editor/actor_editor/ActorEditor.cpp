@@ -27,7 +27,7 @@ namespace Vox
     {
         currentPrefab = actorClass;
         world = std::make_shared<World>();
-        rootObject = world->CreateObject(actorClass);
+        rootObject = world->CreateActor(actorClass);
         rootObject->native = true;
 
         componentList = std::make_unique<ClassList>();

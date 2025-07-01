@@ -38,7 +38,7 @@ namespace Vox
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, Editor::lightBgColor);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
                 ImGui::BeginChild("WorldOutlinePanel", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding);
-                for (const auto& object : world->GetObjects())
+                for (const auto& object : world->GetActors())
                 {
                     DrawObject(object);
                 }
@@ -155,15 +155,56 @@ namespace Vox
             {
                 for (const std::shared_ptr<Component>& component : actor->GetChildren())
                 {
-                    if (ImGui::Selectable(
-                        fmt::format("\t{}", component->GetDisplayName()).c_str(),
-                        component == currentlySelectedObject.lock()))
-                    {
-                        SetSelectedObject(component);
-                    }
+                    DrawComponent(component);
                 }
+                DrawSceneComponent(actor->GetRootComponent());
             }
             ImGui::TreePop();
+        }
+    }
+
+    void WorldOutline::DrawComponent(const std::shared_ptr<Component>& component)
+    {
+        if (!component->GetClass()->IsA<SceneComponent>())
+        {
+            if (ImGui::Selectable(
+            fmt::format("\t{}", component->GetDisplayName()).c_str(),
+            component == currentlySelectedObject.lock()))
+                {
+                    SetSelectedObject(component);
+                }
+        }
+    }
+
+    void WorldOutline::DrawSceneComponent(const std::shared_ptr<SceneComponent>& sceneComponent) // NOLINT(*-no-recursion)
+    {
+        if (sceneComponent->GetAttachments().empty())
+        {
+            if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str()))
+            {
+                SetSelectedObject(std::static_pointer_cast<Object>(sceneComponent));
+            }
+        }
+        else
+        {
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+            if (sceneComponent == currentlySelectedObject.lock())
+            {
+                flags |= ImGuiTreeNodeFlags_Selected;
+            }
+            const bool itemExpanded = ImGui::TreeNodeEx(fmt::format("{} {}", sceneComponent->GetClassDisplayName(), sceneComponent->GetDisplayName()).c_str(), flags);
+            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+            {
+                SetSelectedObject(std::static_pointer_cast<Object>(sceneComponent));
+            }
+            if (itemExpanded)
+            {
+                for (const auto& attachments : sceneComponent->GetAttachments())
+                {
+                    DrawSceneComponent(attachments);
+                }
+                ImGui::TreePop();
+            }
         }
     }
 }

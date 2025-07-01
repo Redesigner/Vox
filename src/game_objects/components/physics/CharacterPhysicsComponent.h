@@ -27,12 +27,14 @@ namespace Vox
 
         void SetDirectPosition(const glm::vec3& position);
 
+        void PostConstruct() override;
+
+        TickOrder GetTickOrder() override;
+
     protected:
         void BuildProperties(std::vector<Property>& propertiesInOut) override;
 
         void PropertyChanged(const Property& property) override;
-
-        void PostConstruct() override;
 
     private:
         IMPLEMENT_OBJECT(CharacterPhysicsComponent, SceneComponent);

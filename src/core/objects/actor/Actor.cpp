@@ -1,6 +1,7 @@
 ﻿#include "Actor.h"
 
 #include "core/math/Strings.h"
+#include "core/objects/world/World.h"
 
 namespace Vox
 {
@@ -65,6 +66,11 @@ namespace Vox
         return world;
     }
 
+    std::shared_ptr<SceneComponent> Actor::GetRootComponent() const
+    {
+        return rootComponent;
+    }
+
 #ifdef EDITOR
     void Actor::Select() const
     {
@@ -121,6 +127,13 @@ namespace Vox
             if (existingChild->GetDisplayName() == child->GetDisplayName())
             {
                 child->SetName(IncrementString(child->GetDisplayName()));
+            }
+        }
+        if (world)
+        {
+            if (std::shared_ptr<Tickable> tickable = std::dynamic_pointer_cast<Tickable>(child))
+            {
+                world->GetTickManager().RegisterTickable(tickable);
             }
         }
         ChildAdded(children.emplace_back(child));
