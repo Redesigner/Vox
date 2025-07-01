@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "SceneComponent.h"
-#include "core/objects/Tickable.h"
-#include "../../rendering/camera/Camera.h"
+#include "../../../core/objects/interfaces/Tickable.h"
+#include "../../../rendering/camera/Camera.h"
 
 namespace Vox
 {

@@ -4,7 +4,7 @@
 
 #include "TickManager.h"
 
-#include "core/objects/Tickable.h"
+#include "../interfaces/Tickable.h"
 
 namespace Vox
 {

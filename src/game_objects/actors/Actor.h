@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "core/objects/Tickable.h"
+#include "../../core/objects/interfaces/Tickable.h"
 #include "core/objects/Object.h"
 #include "core/objects/ObjectClass.h"
 #include "../components/Component.h"
-#include "game_objects/components/SceneComponent.h"
+#include "../components/scene_component/SceneComponent.h"
 
 
 namespace  Vox

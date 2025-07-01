@@ -5,7 +5,7 @@
 #pragma once
 #include "SceneComponent.h"
 #include "core/datatypes/Ref.h"
-#include "core/objects/Tickable.h"
+#include "../../../core/objects/interfaces/Tickable.h"
 #include "rendering/skeletal_mesh/SkeletalMeshInstance.h"
 
 namespace Vox

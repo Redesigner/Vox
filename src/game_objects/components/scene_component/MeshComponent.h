@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "game_objects/components/SceneComponent.h"
+#include "SceneComponent.h"
 #include "core/datatypes/Ref.h"
 #include "rendering/mesh/MeshInstance.h"
 

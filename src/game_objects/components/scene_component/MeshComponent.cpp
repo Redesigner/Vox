@@ -2,7 +2,7 @@
 
 #include "core/logging/Logging.h"
 #include "core/objects/world/World.h"
-#include "../actors/Actor.h"
+#include "game_objects/actors/Actor.h"
 #include "editor/EditorViewport.h"
 #include "rendering/Renderer.h"
 #include "rendering/SceneRenderer.h"

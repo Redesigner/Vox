@@ -5,7 +5,7 @@
 #include "../../../game_objects/actors/Actor.h"
 #include "core/logging/Logging.h"
 #include "core/math/Strings.h"
-#include "core/objects/Tickable.h"
+#include "../interfaces/Tickable.h"
 #include "core/services/FileIOService.h"
 #include "core/services/InputService.h"
 #include "core/services/ObjectService.h"

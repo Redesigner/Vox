@@ -7,9 +7,9 @@
 #include "../../game_objects/components/TestComponent.h"
 
 #include "game_objects/actors/character/Character.h"
-#include "game_objects/components/CameraComponent.h"
-#include "game_objects/components/MeshComponent.h"
-#include "game_objects/components/SkeletalMeshComponent.h"
+#include "../../game_objects/components/scene_component/CameraComponent.h"
+#include "../../game_objects/components/scene_component/MeshComponent.h"
+#include "../../game_objects/components/scene_component/SkeletalMeshComponent.h"
 #include "game_objects/components/physics/CharacterPhysicsComponent.h"
 
 namespace Vox

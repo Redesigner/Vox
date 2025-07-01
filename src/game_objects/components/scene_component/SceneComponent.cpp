@@ -1,6 +1,6 @@
-﻿#include "SceneComponent.h"
+﻿#include "game_objects/components/scene_component/SceneComponent.h"
 
-#include "../actors/Actor.h"
+#include "game_objects/actors/Actor.h"
 
 namespace Vox
 {

@@ -68,13 +68,6 @@ namespace Vox
         return objectJson;
     }
 
-    std::vector<PropertyOverride> Object::GenerateOverrides(const ObjectClass* defaultClass) const
-    {
-        std::vector<std::string> context {};
-        const Object* defaultObject = defaultClass ? defaultClass->GetDefaultObject() : GetClass()->GetDefaultObject();
-        return GenerateOverrides(defaultObject, context);
-    }
-
     std::vector<PropertyOverride> Object::GenerateOverrides(const Object* defaultObject,
         std::vector<std::string>& context) const
     {

@@ -8,6 +8,7 @@
 
 #include "core/logging/Logging.h"
 #include "../../../game_objects/actors/Actor.h"
+#include "core/math/Strings.h"
 #include "core/services/FileIOService.h"
 #include "core/services/ObjectService.h"
 #include "core/services/ServiceLocator.h"
@@ -38,12 +39,19 @@ namespace Vox
         className = object->GetClass()->GetName();
         parentClass = object->GetClass();
         assert(!parentClass.expired() && parentClass.lock());
-        propertyOverrides = object->GenerateOverrides(baseClass.lock().get());
-
-        if (const Actor* actor = dynamic_cast<const Actor*>(object))
+        std::vector<std::string> context;
+        const Object* defaultObject = baseClass.lock()->GetDefaultObject();
+        propertyOverrides = object->GenerateOverrides(defaultObject, context);
+        if (const auto* actor = dynamic_cast<const Actor*>(object))
         {
+            const auto* defaultActor = dynamic_cast<const Actor*>(defaultObject);
             for (const auto& childObject : actor->GetChildren())
             {
+                std::vector childContext = {childObject->GetDisplayName()};
+                const std::vector<PropertyOverride> childOverrides = childObject->GenerateOverrides(
+                    defaultActor->GetChildByName(childObject->GetDisplayName()).get(), childContext
+                );
+                propertyOverrides.insert(propertyOverrides.end(), childOverrides.begin(), childOverrides.end());
                 if (!childObject->native)
                 {
                     additionalObjects.emplace_back(childObject->GetClass(), childObject->GetDisplayName());
@@ -52,7 +60,7 @@ namespace Vox
         }
     }
 
-    void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack) // NOLINT(*-no-recursion)
+    void PrefabContext::CreateOverrides(const nlohmann::json& context, const std::string& childName) // NOLINT(*-no-recursion)
     {
         if (context.contains("properties") && context["properties"].is_object())
         {
@@ -64,18 +72,8 @@ namespace Vox
                 {
                     break;
                 }
-                propertyOverrides.emplace_back(currentPathStack, property.key(), propertyParsed);
-            }
-        }
-
-        if (context.contains("children") && context["children"].is_object())
-        {
-            const auto& childrenObject = context["children"];
-            for (const auto& child : childrenObject.items())
-            {
-                std::vector<std::string> childPathStack = currentPathStack;
-                childPathStack.emplace_back(child.key());
-                CreateOverrides(child.value(), childPathStack);
+                std::vector path = {childName};
+                propertyOverrides.emplace_back(path, property.key(), propertyParsed);
             }
         }
     }
@@ -165,10 +163,10 @@ namespace Vox
         for (const PropertyOverride& propertyOverride : context->propertyOverrides)
         {
             Json* currentContext = &result[GetName()]["children"];
-            for (const std::string& path : propertyOverride.path)
+            if (!propertyOverride.path.empty())
             {
                 Json& propertyRootJson = *currentContext;
-                currentContext = &propertyRootJson[path];
+                currentContext = &propertyRootJson[propertyOverride.path.front()];
             }
             const Json& propertyValueJson = propertyOverride.variant.Serialize();
             Json& propertyRootJson = *currentContext;
@@ -205,7 +203,7 @@ namespace Vox
         childInitializer.rootObject = false;
 
         // @TODO: Restrict adding children to actor prefabs only
-        if (auto actor = std::dynamic_pointer_cast<Actor>(object))
+        if (const auto actor = std::dynamic_pointer_cast<Actor>(object))
         {
             childInitializer.parent = actor.get();
 
@@ -238,25 +236,26 @@ namespace Vox
 
     void Prefab::OverrideProperty(const std::shared_ptr<Object>& object, const PropertyOverride& propertyOverride)
     {
-        /*std::shared_ptr<Object> currentObject = object;
-        for (const auto& objectName : propertyOverride.path)
+        std::shared_ptr<Object> currentObject = object;
+
+        if (const auto& sceneComponent = std::dynamic_pointer_cast<Actor>(object))
         {
-            currentObject = currentObject->GetChildByName(objectName);
+            currentObject = sceneComponent->GetChildByName(propertyOverride.path.front());
             if (!currentObject)
             {
-                VoxLog(Warning, Game, "Prefab could not override property. Object '{}' was not found.", objectName);
                 return;
             }
         }
 
-        Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
+        const Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
         if (!property)
         {
-            VoxLog(Warning, Game, "Prefab could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, currentObject->GetDisplayName());
+            VoxLog(Warning, Game, "Prefab could not override property. Property '{}':'{}' was not a member of '{}'.",
+                JoinString(propertyOverride.path.begin(), propertyOverride.path.end(), '/'), propertyOverride.propertyName, currentObject->GetClassDisplayName());
             return;
         }
 
         property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
-        currentObject->PropertyChanged(*property);*/
+        currentObject->PropertyChanged(*property);
     }
 } // Vox

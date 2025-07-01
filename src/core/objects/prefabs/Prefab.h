@@ -28,7 +28,7 @@ namespace Vox
         explicit PrefabContext(const nlohmann::json& jsonObject);
         explicit PrefabContext(const Object* object, const std::weak_ptr<ObjectClass>& baseClass);
 
-        void CreateOverrides(const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
+        void CreateOverrides(const nlohmann::json& context, const std::string& childName);
 
         std::string className;
         std::weak_ptr<ObjectClass> parentClass;

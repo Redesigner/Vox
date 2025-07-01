@@ -1,8 +1,8 @@
 ﻿#include "game_objects/actors/TestActor.h"
 
 #include "../components/TestComponent.h"
-#include "game_objects/components/MeshComponent.h"
-#include "game_objects/components/SkeletalMeshComponent.h"
+#include "../components/scene_component/MeshComponent.h"
+#include "../components/scene_component/SkeletalMeshComponent.h"
 
 namespace Vox
 {

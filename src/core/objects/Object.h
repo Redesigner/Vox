@@ -128,7 +128,7 @@ namespace Vox
          * @brief Generate the differences in this object's property values and the default object's property values
          * @return Vector of PropertyOverrides describing the differences
          */
-        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const ObjectClass* defaultClass = nullptr) const;
+        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const Object* defaultObject, std::vector<std::string>& context) const;
 
         /**
          * @brief true if this object was created from a .cpp file, false if the object was created from a prefab
@@ -143,9 +143,6 @@ namespace Vox
 
     protected:
         std::string displayName;
-
-    private:
-        [[nodiscard]] std::vector<PropertyOverride> GenerateOverrides(const Object* defaultObject, std::vector<std::string>& context) const;
 
     };
 }

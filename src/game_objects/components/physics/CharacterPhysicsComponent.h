@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "core/objects/Tickable.h"
-#include "game_objects/components/SceneComponent.h"
+#include "../../../core/objects/interfaces/Tickable.h"
+#include "../scene_component/SceneComponent.h"
 #include "physics/CharacterController.h"
 
 namespace Vox
