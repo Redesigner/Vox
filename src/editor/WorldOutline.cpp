@@ -79,7 +79,7 @@ namespace Vox
                 {
                     newTransform = gizmo->GetTransform();
                 }
-                component->SetTransform(newTransform);
+                component->SetPosition(newTransform.position);
             }
 
             if (auto* actor = dynamic_cast<Actor*>(object))

@@ -105,7 +105,7 @@ namespace Vox
         SetNextItemWidth(ImMax(1.0f, CalcItemWidth()));
         if (InputText(label, buf, IM_ARRAYSIZE(buf), flags))
         {
-            valueChanged = DataTypeApplyFromText(buf, ImGuiDataType_Float, pData, "%.3f",
+            valueChanged = DataTypeApplyFromText(buf, ImGuiDataType_Float, pData, format,
                 (flags & ImGuiInputTextFlags_ParseEmptyRefVal) ? p_data_default : nullptr);
         }
         IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Inputable);

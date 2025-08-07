@@ -22,7 +22,7 @@ namespace Vox
         Gizmo(SceneRenderer* scene);
         ~Gizmo();
 
-        void SetTransform(const Transform& transform);
+        void SetTransform(const Transform& transformIn);
 
         void Update();
 

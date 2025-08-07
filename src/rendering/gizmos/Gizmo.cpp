@@ -5,6 +5,9 @@
 #include "Gizmo.h"
 
 #include <glm/gtc/matrix_inverse.inl>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
 
 #include "core/math/Math.h"
 #include "core/services/InputService.h"
@@ -154,12 +157,16 @@ namespace Vox
 
     void Gizmo::SetTransforms()
     {
-        Transform transformCopy = transform;
-        yArrowMesh->SetTransform(transformCopy.GetMatrix());
-        transformCopy.rotation = {glm::pi<float>() / 2.0f, glm::pi<float>() / 2.0f , 0.0f};
-        xArrowMesh->SetTransform(transformCopy.GetMatrix());
-        transformCopy.rotation = {glm::pi<float>() / 2.0f, 0.0f, 0.0f};
-        zArrowMesh->SetTransform(transformCopy.GetMatrix());
+        Transform yAxisTransform = transform;
+        yAxisTransform.scale = {1.0f, 1.0f, 1.0f};
+        yArrowMesh->SetTransform(yAxisTransform.GetMatrix());
+
+        xArrowMesh->SetTransform(yAxisTransform.GetMatrix() * glm::eulerAngleXYZ(0.0f, 0.0f, glm::pi<float>() / -2.0f));
+
+        Transform zAxisTransform = transform;
+        zAxisTransform.scale = {1.0f, 1.0f, 1.0f};
+        zAxisTransform.rotation.x += glm::pi<float>() / 2.0f;
+        zArrowMesh->SetTransform(zAxisTransform.GetMatrix());
     }
 
     void Gizmo::MouseReleased()
