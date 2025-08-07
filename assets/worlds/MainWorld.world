@@ -1,39 +1,7 @@
 {
     "objects": {
         "": {
-            "class": "test.json",
-            "properties": {},
-            "children": {
-                "Camera Component_Default": {
-                    "properties": {
-                        "localTransform": {
-                            "type": "transform",
-                            "value": [
-                                0.0,
-                                0.0,
-                                0.0,
-                                0.0059995511546730995,
-                                -0.33400005102157593,
-                                1.5134000719285723e-09,
-                                0.9999994039535522,
-                                1.0,
-                                0.9999998211860657
-                            ]
-                        }
-                    }
-                },
-                "Mesh Component_Default": {
-                    "properties": {
-                        "meshAsset": {
-                            "type": "assetPtr",
-                            "value": {
-                                "assetType": "Mesh",
-                                "path": "witch"
-                            }
-                        }
-                    }
-                }
-            }
+            "class": "test.json"
         }
     }
 }

@@ -142,8 +142,7 @@ namespace Vox
 
         for (const std::shared_ptr<Actor>& child : actors)
         {
-            auto tempPrefabContext = PrefabContext(child.get(), child->GetClass());
-            result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), std::move(tempPrefabContext.propertyOverrides));
+            result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), child->GenerateOverrides(child->GetClass()->GetDefaultObject()));
         }
         return result;
     }

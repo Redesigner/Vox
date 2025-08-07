@@ -30,6 +30,13 @@ namespace Vox
 
         className = jsonObject.items().begin().key();
         parentClass = baseClass;
+        if (root.contains("children") && root["children"].is_object())
+        {
+            for (auto& [name, child] : root["children"].items())
+            {
+                CreateOverrides(child, name);
+            }
+        }
         CreateOverrides(root, {});
         CreateAdditionalObjects(root);
     }
@@ -172,7 +179,7 @@ namespace Vox
             if (!propertyOverride.path.empty())
             {
                 Json& propertyRootJson = *currentContext;
-                currentContext = &propertyRootJson[propertyOverride.path.front()];
+                currentContext = &propertyRootJson[propertyOverride.path];
             }
             const Json& propertyValueJson = propertyOverride.variant.Serialize();
             Json& propertyRootJson = *currentContext;
