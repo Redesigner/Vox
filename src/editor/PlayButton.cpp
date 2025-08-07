@@ -14,7 +14,7 @@ namespace Vox
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
         constexpr auto buttonSize = ImVec2(32, 32);
-        if (worldState == Inactive)
+        if (worldState == WorldState::Inactive)
         {
             if (ImGui::Button("Play", buttonSize))
             {

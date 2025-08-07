@@ -46,9 +46,9 @@ namespace Vox
         return result;
     }
 
-    void World::Tick(float deltaTime)
+    void World::Tick(const float deltaTime)
     {
-        if (state != Playing)
+        if (state != WorldState::Playing)
         {
             return;
         }
@@ -83,20 +83,20 @@ namespace Vox
 
         switch (worldState)
         {
-        case Playing:
-            if (state == Inactive)
+        case WorldState::Playing:
+            if (state == WorldState::Inactive)
             {
                 Play();
             }
-            else if (state == Paused)
+            else if (state == WorldState::Paused)
             {
                 Unpause();
             }
             break;
-        case Paused:
+        case WorldState::Paused:
             Pause();
             break;
-        case Inactive:
+        case WorldState::Inactive:
             Restart();
             break;
         }
@@ -126,7 +126,7 @@ namespace Vox
 
     void World::Reload()
     {
-        SavedWorld save = Save();
+        const SavedWorld save = Save();
         SaveToFile("MainWorld");
         Load(save);
     }
@@ -159,29 +159,20 @@ namespace Vox
             const auto objectClass = ServiceLocator::GetObjectService()->GetObjectClass(object.className);
             const std::shared_ptr<Actor> child = actors.emplace_back(std::dynamic_pointer_cast<Actor>(objectClass->GetConstructor()(objectInitializer)));
 
-            /*for (const auto& propertyOverride : object.worldContextOverrides)
+            for (const auto& propertyOverride : object.worldContextOverrides)
             {
-                std::shared_ptr<Object> currentObject = child;
-                for (const auto& objectName : propertyOverride.path)
-                {
-                    currentObject = currentObject->GetChildByName(objectName);
-                    if (!currentObject)
-                    {
-                        VoxLog(Warning, Game, "World could not override property. Object '{}' was not found.", objectName);
-                        return;
-                    }
-                }
+                std::shared_ptr<Component> childComponent = child->GetChildByName(propertyOverride.path.front());
 
-                Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
+                Property* property = childComponent->GetClass()->GetPropertyByName(propertyOverride.propertyName);
                 if (!property)
                 {
-                    VoxLog(Warning, Game, "World could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, currentObject->GetDisplayName());
+                    VoxLog(Warning, Game, "World could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, childComponent->GetDisplayName());
                     return;
                 }
 
-                property->SetValue(currentObject.get(), propertyOverride.variant.type, propertyOverride.variant.value);
-                currentObject->PropertyChanged(*property);
-            }*/
+                property->SetValue(childComponent.get(), propertyOverride.variant.type, propertyOverride.variant.value);
+                childComponent->PropertyChanged(*property);
+            }
             child->SetName(object.name);
             child->native = false;
             child->PostConstruct();
@@ -238,13 +229,13 @@ namespace Vox
                 return;
             }
 
-            if (state == Playing)
+            if (state == WorldState::Playing)
             {
-                SetWorldState(Paused);
+                SetWorldState(WorldState::Paused);
             }
-            else if (state == Paused)
+            else if (state == WorldState::Paused)
             {
-                SetWorldState(Playing);
+                SetWorldState(WorldState::Playing);
             }
         });
     }

@@ -6,11 +6,7 @@
 
 namespace Vox
 {
-    enum WorldState : char;
-}
-
-namespace Vox
-{
+    enum class WorldState : char;
 
     class PlayButton
     {

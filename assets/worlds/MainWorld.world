@@ -4,15 +4,15 @@
             "class": "test.json",
             "properties": {},
             "children": {
-                "Controller": {
+                "Player Mesh": {
                     "properties": {
                         "localTransform": {
                             "type": "transform",
                             "value": [
                                 0.0,
-                                2.0,
+                                1.0,
                                 0.0,
-                                0.0,
+                                -0.0,
                                 0.0,
                                 0.0,
                                 1.0,

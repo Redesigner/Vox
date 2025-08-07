@@ -21,7 +21,7 @@ namespace Vox
         for (const auto& object : worldJson["objects"].items())
         {
             auto& newObject = savedObjects.emplace_back();
-            newObject.className = object.key();
+            newObject.name = object.key();
             newObject.className = object.value()["class"];
             CreateOverrides(newObject, object.value(), {});
         }

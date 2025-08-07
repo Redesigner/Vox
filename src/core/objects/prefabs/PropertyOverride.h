@@ -7,6 +7,9 @@
 
 namespace Vox
 {
+    /**
+     * @brief Holds information about property changes made by the user to a prefab
+     */
     struct PropertyOverride
     {
         std::vector<std::string> path;

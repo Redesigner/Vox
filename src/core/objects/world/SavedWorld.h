@@ -10,10 +10,18 @@
 
 namespace Vox
 {
+    /**
+     * @brief Holds information about an object in the world
+     */
     struct SavedWorldObject
     {
+        /// Name of the object, to be identified in the world outline panel
         std::string name;
+
+        /// Name of the class, used to Identify the relevant ObjectClass
         std::string className;
+
+        /// Any properties that might have been changed by the user
         std::vector<PropertyOverride> worldContextOverrides;
     };
 

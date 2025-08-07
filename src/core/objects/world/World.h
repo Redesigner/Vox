@@ -19,7 +19,7 @@ namespace Vox
     class Actor;
     class Tickable;
 
-    enum WorldState : char
+    enum class WorldState : char
     {
         Inactive,
         Playing,
