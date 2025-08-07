@@ -139,10 +139,16 @@ namespace Vox
     SavedWorld World::Save() const
     {
         SavedWorld result;
-
         for (const std::shared_ptr<Actor>& child : actors)
         {
-            result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), child->GenerateOverrides(child->GetClass()->GetDefaultObject()));
+            auto actorDefaultObject = dynamic_cast<const Actor*>(child->GetClass()->GetDefaultObject());
+            std::vector<PropertyOverride> propertyOverrides;
+            for (const auto& component : child->GetChildren())
+            {
+                auto componentOverrides = component->GenerateOverrides(actorDefaultObject->GetChildByName(component->GetDisplayName()).get());
+                propertyOverrides.insert(propertyOverrides.end(), componentOverrides.begin(), componentOverrides.end());
+            }
+            result.savedObjects.emplace_back(child->GetDisplayName(), child->GetClass()->GetName(), propertyOverrides);
         }
         return result;
     }
