@@ -26,7 +26,7 @@ namespace Vox
     ActorEditor::ActorEditor(Prefab* actorClass)
     {
         currentPrefab = actorClass;
-        world = std::make_shared<World>();
+        world = std::make_shared<World>(WorldType::Editor);
         rootObject = world->CreateActor(actorClass);
         rootObject->native = true;
 

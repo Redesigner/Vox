@@ -220,7 +220,13 @@ namespace Vox
         return voxels.get();
     }
 
-    World::World()
+    WorldType World::GetWorldType() const
+    {
+        return worldType;
+    }
+
+    World::World(WorldType worldType)
+        :worldType(worldType)
     {
         renderer = std::make_shared<SceneRenderer>(this);
         physicsServer = std::make_shared<PhysicsServer>();

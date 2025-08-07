@@ -113,7 +113,7 @@ int main()
     {
         ServiceLocator::InitServices(window);
 
-        auto testWorld = std::make_shared<World>();
+        auto testWorld = std::make_shared<World>(WorldType::World);
         testWorld->InitializeVoxels();
         auto debugRenderer = std::make_shared<DebugRenderer>();
 

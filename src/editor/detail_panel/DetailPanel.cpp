@@ -9,6 +9,7 @@
 #include "TransformDetailPanel.h"
 #include "Vec3DetailPanel.h"
 #include "core/objects/ObjectClass.h"
+#include "core/objects/world/World.h"
 #include "game_objects/actors/Actor.h"
 #include "game_objects/components/Component.h"
 
@@ -106,7 +107,7 @@ namespace Vox
 
         // If this is a native component, the default properties come from the component's built-in properties, otherwise
         // the default properties come from the parent class's default object, after all the overrides have been applied
-        if (component->native)
+        if (component->native || component->GetParent()->GetWorld()->GetWorldType() == WorldType::World)
         {
             const auto owningActorClass = component->GetParent()->GetClass();
             const auto owningActorDefaultObject = dynamic_cast<const Actor*>(owningActorClass->GetDefaultObject());

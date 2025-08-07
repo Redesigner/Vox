@@ -26,10 +26,16 @@ namespace Vox
         Paused
     };
 
+    enum class WorldType : char
+    {
+        World,
+        Editor
+    };
+
     class World
     {
     public:
-        World();
+        World(WorldType worldType);
         ~World();
 
         World(const World&&) = delete;
@@ -81,6 +87,8 @@ namespace Vox
 
         [[nodiscard]] VoxelWorld* GetVoxels() const;
 
+        [[nodiscard]] WorldType GetWorldType() const;
+
     private:
         void PostActorConstruct(const std::shared_ptr<Actor>& actor);
 
@@ -114,5 +122,6 @@ namespace Vox
         SavedWorld initialState;
 
         TickManager tickManager;
+        WorldType worldType;
     };
 }
