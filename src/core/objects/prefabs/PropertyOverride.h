@@ -12,7 +12,7 @@ namespace Vox
      */
     struct PropertyOverride
     {
-        std::vector<std::string> path;
+        std::string path;
         std::string propertyName;
         TypedPropertyVariant variant;
     };

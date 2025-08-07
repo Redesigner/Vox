@@ -37,6 +37,13 @@ namespace  Vox
 
         [[nodiscard]] const Transform& GetTransform() const;
 
+        /**
+         * @brief Construct and attach a component to this actor
+         * @tparam T Component type to construct. Must be a SceneComponent
+         * @tparam Args Optional argument types
+         * @param args Optional arguments for SceneComponent's constructor
+         * @return
+         */
         template <typename T, typename... Args>
         std::shared_ptr<T> AttachComponent(Args&&... args) requires Derived<T, SceneComponent>
         {

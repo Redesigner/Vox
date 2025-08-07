@@ -41,19 +41,25 @@ namespace Vox
         assert(!parentClass.expired() && parentClass.lock());
         std::vector<std::string> context;
         const Object* defaultObject = baseClass.lock()->GetDefaultObject();
-        propertyOverrides = object->GenerateOverrides(defaultObject, context);
+        propertyOverrides = object->GenerateOverrides(defaultObject);
         if (const auto* actor = dynamic_cast<const Actor*>(object))
         {
             const auto* defaultActor = dynamic_cast<const Actor*>(defaultObject);
             for (const auto& childObject : actor->GetChildren())
             {
-                std::vector childContext = {childObject->GetDisplayName()};
-                const std::vector<PropertyOverride> childOverrides = childObject->GenerateOverrides(
-                    defaultActor->GetChildByName(childObject->GetDisplayName()).get(), childContext
-                );
-                propertyOverrides.insert(propertyOverrides.end(), childOverrides.begin(), childOverrides.end());
-                if (!childObject->native)
+                if (childObject->native)
                 {
+                    const std::vector<PropertyOverride> childOverrides = childObject->GenerateOverrides(
+                        defaultActor->GetChildByName(childObject->GetDisplayName()).get()
+                    );
+                    propertyOverrides.insert(propertyOverrides.end(), childOverrides.begin(), childOverrides.end());
+                }
+                else
+                {
+                    const std::vector<PropertyOverride> childOverrides = childObject->GenerateOverrides(
+                        childObject->GetClass()->GetDefaultObject()
+                    );
+                    propertyOverrides.insert(propertyOverrides.end(), childOverrides.begin(), childOverrides.end());
                     additionalObjects.emplace_back(childObject->GetClass(), childObject->GetDisplayName());
                 }
             }
@@ -73,7 +79,7 @@ namespace Vox
                     break;
                 }
                 std::vector path = {childName};
-                propertyOverrides.emplace_back(path, property.key(), propertyParsed);
+                propertyOverrides.emplace_back(childName, property.key(), propertyParsed);
             }
         }
     }
@@ -214,10 +220,20 @@ namespace Vox
 
             for (const auto& [objectClass, objectName] : prefabContext->additionalObjects)
             {
-                std::shared_ptr<Component> child = std::dynamic_pointer_cast<Component>(objectClass.lock()->GetConstructor()(childInitializer));
-                child->SetName(objectName);
-                child->native = false;
-                actor->AddChild(child);
+                std::shared_ptr<ObjectClass> lockedClass = objectClass.lock();
+                if (lockedClass->IsA<SceneComponent>())
+                {
+                    const std::shared_ptr<SceneComponent> child = actor->AttachComponent(lockedClass.get());
+                    child->SetName(objectName);
+                    child->native = false;
+                }
+                else
+                {
+                    std::shared_ptr<Component> child = std::dynamic_pointer_cast<Component>(objectClass.lock()->GetConstructor()(childInitializer));
+                    child->SetName(objectName);
+                    child->native = false;
+                    actor->AddChild(child);
+                }
             }
         }
 
@@ -240,7 +256,7 @@ namespace Vox
 
         if (const auto& sceneComponent = std::dynamic_pointer_cast<Actor>(object))
         {
-            currentObject = sceneComponent->GetChildByName(propertyOverride.path.front());
+            currentObject = sceneComponent->GetChildByName(propertyOverride.path);
             if (!currentObject)
             {
                 return;
@@ -250,8 +266,7 @@ namespace Vox
         const Property* property = currentObject->GetClass()->GetPropertyByName(propertyOverride.propertyName);
         if (!property)
         {
-            VoxLog(Warning, Game, "Prefab could not override property. Property '{}':'{}' was not a member of '{}'.",
-                JoinString(propertyOverride.path.begin(), propertyOverride.path.end(), '/'), propertyOverride.propertyName, currentObject->GetClassDisplayName());
+            VoxLog(Warning, Game, "Prefab could not override property. Property '{}':'{}' was not a member of '{}'.", propertyOverride.path, propertyOverride.propertyName, currentObject->GetClassDisplayName());
             return;
         }
 

@@ -157,26 +157,32 @@ namespace Vox
             auto objectInitializer = ObjectInitializer(this);
             objectInitializer.rootObject = true;
             const auto objectClass = ServiceLocator::GetObjectService()->GetObjectClass(object.className);
-            const std::shared_ptr<Actor> child = actors.emplace_back(std::dynamic_pointer_cast<Actor>(objectClass->GetConstructor()(objectInitializer)));
+            const std::shared_ptr<Actor> newActor = actors.emplace_back(std::dynamic_pointer_cast<Actor>(objectClass->GetConstructor()(objectInitializer)));
 
             for (const auto& propertyOverride : object.worldContextOverrides)
             {
-                std::shared_ptr<Component> childComponent = child->GetChildByName(propertyOverride.path.front());
+                std::shared_ptr<Component> childComponent = newActor->GetChildByName(propertyOverride.path);
+
+                if (!childComponent)
+                {
+                    VoxLog(Warning, Game, "World could not override property. Component '{}' was not a child of '{}'.", propertyOverride.path, newActor->GetDisplayName());
+                    continue;
+                }
 
                 Property* property = childComponent->GetClass()->GetPropertyByName(propertyOverride.propertyName);
                 if (!property)
                 {
                     VoxLog(Warning, Game, "World could not override property. Property '{}' was not a member of '{}'.", propertyOverride.propertyName, childComponent->GetDisplayName());
-                    return;
+                    continue;
                 }
 
                 property->SetValue(childComponent.get(), propertyOverride.variant.type, propertyOverride.variant.value);
                 childComponent->PropertyChanged(*property);
             }
-            child->SetName(object.name);
-            child->native = false;
-            child->PostConstruct();
-            PostActorConstruct(child);
+            newActor->SetName(object.name);
+            newActor->native = false;
+            newActor->PostConstruct();
+            PostActorConstruct(newActor);
         }
     }
 

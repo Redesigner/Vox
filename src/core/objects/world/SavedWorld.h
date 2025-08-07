@@ -32,7 +32,7 @@ namespace Vox
 
         [[nodiscard]] nlohmann::ordered_json Serialize() const;
 
-        static void CreateOverrides(SavedWorldObject& object, const nlohmann::json& context, const std::vector<std::string>& currentPathStack);
+        static void CreateOverrides(SavedWorldObject& object, const nlohmann::json& context, const std::string& currentObjectName);
 
         std::vector<SavedWorldObject> savedObjects;
     };

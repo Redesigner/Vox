@@ -46,12 +46,7 @@ namespace Vox
             result["objects"][savedObject.name]["properties"] = Json::object();
             for (const auto& propertyOverride : savedObject.worldContextOverrides)
             {
-                Json* currentContext = propertyOverride.path.empty() ? &result["objects"][savedObject.name] : &result["objects"][savedObject.name]["children"];
-                for (const std::string& path : propertyOverride.path)
-                {
-                    Json& propertyRootJson = *currentContext;
-                    currentContext = &propertyRootJson[path];
-                }
+                Json* currentContext = propertyOverride.path.empty() ? &result["objects"][savedObject.name] : &result["objects"][savedObject.name]["children"][propertyOverride.path];
                 const Json& propertyValueJson = propertyOverride.variant.Serialize();
                 Json& propertyRootJson = *currentContext;
                 propertyRootJson["properties"][propertyOverride.propertyName] = Json::object();
@@ -61,7 +56,7 @@ namespace Vox
         return result;
     }
 
-    void SavedWorld::CreateOverrides(SavedWorldObject& object, const nlohmann::json& context, const std::vector<std::string>& currentPathStack) // NOLINT(*-no-recursion)
+    void SavedWorld::CreateOverrides(SavedWorldObject& object, const nlohmann::json& context, const std::string& currentObjectName) // NOLINT(*-no-recursion)
     {
         if (context.contains("properties") && context["properties"].is_object())
         {
@@ -73,7 +68,7 @@ namespace Vox
                 {
                     break;
                 }
-                object.worldContextOverrides.emplace_back(currentPathStack, property.key(), propertyParsed);
+                object.worldContextOverrides.emplace_back(currentObjectName, property.key(), propertyParsed);
             }
         }
 
@@ -82,9 +77,7 @@ namespace Vox
             const auto& childrenObject = context["children"];
             for (const auto& child : childrenObject.items())
             {
-                std::vector<std::string> childPathStack = currentPathStack;
-                childPathStack.emplace_back(child.key());
-                CreateOverrides(object, child.value(), childPathStack);
+                CreateOverrides(object, child.value(), child.key());
             }
         }
     }

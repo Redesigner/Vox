@@ -180,7 +180,7 @@ namespace Vox
     {
         if (sceneComponent->GetAttachments().empty())
         {
-            if (ImGui::Selectable(fmt::format("\t{}", sceneComponent->GetDisplayName()).c_str()))
+            if (ImGui::Selectable(fmt::format("\t{}{}", sceneComponent->native ? "(N) " : "", sceneComponent->GetDisplayName()).c_str()))
             {
                 SetSelectedObject(std::static_pointer_cast<Object>(sceneComponent));
             }
@@ -192,7 +192,12 @@ namespace Vox
             {
                 flags |= ImGuiTreeNodeFlags_Selected;
             }
-            const bool itemExpanded = ImGui::TreeNodeEx(fmt::format("{} {}", sceneComponent->GetClassDisplayName(), sceneComponent->GetDisplayName()).c_str(), flags);
+            const bool itemExpanded = ImGui::TreeNodeEx(
+                fmt::format("{}{} {}",
+                    sceneComponent->native ? "(N) " : "",
+                    sceneComponent->GetClassDisplayName(),
+                    sceneComponent->GetDisplayName()).c_str(),
+                flags);
             if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
             {
                 SetSelectedObject(std::static_pointer_cast<Object>(sceneComponent));

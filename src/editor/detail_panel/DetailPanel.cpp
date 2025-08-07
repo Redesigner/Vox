@@ -9,6 +9,8 @@
 #include "TransformDetailPanel.h"
 #include "Vec3DetailPanel.h"
 #include "core/objects/ObjectClass.h"
+#include "game_objects/actors/Actor.h"
+#include "game_objects/components/Component.h"
 
 namespace Vox
 {
@@ -94,18 +96,29 @@ namespace Vox
 
     void DetailPanel::ResetProperty(Object* object, const Property& property)
     {
-        /*const auto& root = object->GetRoot();
-        const auto& rootClass = root->native ? root->GetClass()->GetParentClass() : root->GetClass();
-        const Object* defaultRootObject = rootClass->GetDefaultObject();
-        const std::vector<std::string> objectPath = object->GetRootPath();
-        std::shared_ptr<Object> defaultObject = defaultRootObject->GetChildByPath(objectPath);
-        if (!defaultObject)
+        const auto component = dynamic_cast<Component*>(object);
+        if (!component)
         {
-            property.SetValue(object, property.GetType(), property.GetTypedVariant(object->GetClass()->GetDefaultObject()).value);
             return;
         }
-        TypedPropertyVariant defaultValue = property.GetTypedVariant(defaultObject.get());
-        property.SetValue(object, property.GetType(), defaultValue.value);
-        object->PropertyChanged(property);*/
+
+        TypedPropertyVariant defaultPropertyValue;
+
+        // If this is a native component, the default properties come from the component's built-in properties, otherwise
+        // the default properties come from the parent class's default object, after all the overrides have been applied
+        if (component->native)
+        {
+            const auto owningActorClass = component->GetParent()->GetClass();
+            const auto owningActorDefaultObject = dynamic_cast<const Actor*>(owningActorClass->GetDefaultObject());
+            auto defaultComponent = owningActorDefaultObject->GetChildByName(component->GetDisplayName());
+            defaultPropertyValue = property.GetTypedVariant(defaultComponent.get());
+        }
+        else
+        {
+            auto defaultComponent = dynamic_cast<const Component*>(component->GetClass()->GetDefaultObject());
+            defaultPropertyValue = property.GetTypedVariant(defaultComponent);
+        }
+        property.SetValue(object, property.GetType(), defaultPropertyValue.value);
+        object->PropertyChanged(property);
     }
 }

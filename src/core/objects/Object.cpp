@@ -68,8 +68,7 @@ namespace Vox
         return objectJson;
     }
 
-    std::vector<PropertyOverride> Object::GenerateOverrides(const Object* defaultObject,
-        std::vector<std::string>& context) const
+    std::vector<PropertyOverride> Object::GenerateOverrides(const Object* defaultObject) const
     {
         std::vector<PropertyOverride> result;
         for (const Property& property : GetProperties())
@@ -79,7 +78,7 @@ namespace Vox
                 continue;
             }
 
-            result.emplace_back(context, property.GetName(), property.GetTypedVariant(this));
+            result.emplace_back(defaultObject->GetDisplayName(), property.GetName(), property.GetTypedVariant(this));
         }
 
         return result;

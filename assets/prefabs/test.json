@@ -1,26 +1,114 @@
 {
     "test.json": {
         "class": "Character",
-        "children": {
-            "Player Mesh": {
+        "children": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            {
                 "properties": {
                     "localTransform": {
                         "type": "transform",
                         "value": [
+                            -1.597896933555603,
                             0.0,
-                            -1.0,
                             0.0,
                             -0.0,
                             0.0,
                             0.0,
-                            1.0,
-                            1.0,
-                            1.0
+                            0.20000000298023224,
+                            0.20000000298023224,
+                            0.20000000298023224
                         ]
+                    },
+                    "meshAsset": {
+                        "type": "assetPtr",
+                        "value": {
+                            "assetType": "Mesh",
+                            "path": "witch"
+                        }
                     }
                 }
             }
-        },
-        "additional": {}
+        ],
+        "additional": {
+            "Mesh Component_Default": {
+                "class": "Mesh Component"
+            }
+        }
     }
 }
