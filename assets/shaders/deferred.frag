@@ -12,7 +12,8 @@ uniform sampler2D gDepth;
 
 uniform vec3 viewPosition;
 
-struct Light {
+struct Light
+{
     int enabled;
     int type; // Unused in this demo.
     vec3 position;
@@ -67,7 +68,8 @@ float cookTorrance(vec3 normal, vec3 lightDirection, vec3 viewDirection, float r
     // return D * G * F;
 }
 
-void main() {
+void main()
+{
     vec3 fragPosition = texture(gPosition, texCoord).rgb;
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedo, texCoord).rgb;
@@ -77,12 +79,13 @@ void main() {
 
     vec3 ambient = albedo * vec3(0.1f);
     vec3 viewDirection = normalize(viewPosition - fragPosition);
-    // vec3 viewDirection = normalize(viewPosition);
-
 
     for(int i = 0; i < NR_LIGHTS; ++i)
     {
-        if(lights[i].enabled == 0) continue;
+        if(lights[i].enabled == 0)
+        {
+            continue;
+        }
         vec3 lightDirection;
 
         float attenuation = 1.0;

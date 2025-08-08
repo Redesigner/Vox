@@ -133,7 +133,6 @@ namespace Vox
         DynamicObjectContainer<VoxelMesh> voxelMeshes;
 
         Light testLight;
-        LightUniformLocations lightUniformLocations;
 
         World* owningWorld;
 

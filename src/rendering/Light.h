@@ -7,19 +7,6 @@ namespace Vox
 {
     class DeferredShader;
 
-    struct LightUniformLocations
-    {
-        LightUniformLocations();
-        LightUniformLocations(DeferredShader* shader);
-
-        int enabled;
-        int type;
-        int position;
-        int target;
-        int color;
-        int strength;
-    };
-
     struct Light
     {
         Light();
@@ -31,7 +18,5 @@ namespace Vox
         glm::vec3 target;
         glm::vec4 color;
         float strength;
-
-        void UpdateLightValues(DeferredShader* shader, LightUniformLocations& uniformLocations);
     };
 }

@@ -33,11 +33,10 @@
 namespace Vox
 {
     SceneRenderer::SceneRenderer(World* world)
-        :owningWorld(world), viewportSize({400, 400})
+        :viewportSize({400, 400}), owningWorld(world)
     {
         GenerateBuffers();
         testLight = Light(1, 1, glm::vec3(4.5f, 4.5f, 0.5f), glm::vec3(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), 1000.0f);
-        lightUniformLocations = LightUniformLocations(GetRenderer()->GetDeferredShader());
         defaultCamera = std::make_shared<FlyCamera>();
         defaultCamera->SetPosition(0.0f, 0.0f, 0.0f);
         defaultCamera->SetRotation(0.0f, 0.0f, 0.0f);
@@ -178,10 +177,9 @@ namespace Vox
         glDisable(GL_DEPTH_TEST);
         DeferredShader* deferredShader = GetRenderer()->GetDeferredShader();
         deferredShader->Enable();
-        // shader->SetCameraPosition(camera.position);
-        testLight.UpdateLightValues(deferredShader, lightUniformLocations);
         gBuffer->ActivateTextures(0);
         deferredShader->SetCameraPosition(currentCamera->GetPosition());
+        deferredShader->SetUniformLight(testLight, 0);
         GetRenderer()->BindQuadVao();
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->GetFramebufferId());
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, deferredFramebuffer->GetFramebufferId());
